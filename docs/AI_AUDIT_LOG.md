@@ -4,15 +4,15 @@
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
-| MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
-| Ngày bắt đầu |  |
+| Môn học |Building Cross-Platform Back-End Application With .NET  |
+| Mã môn học | PRN232 |
+| Lớp |	SE18D05  |
+| Học kỳ | 8 |
+| Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh  |
+| Tên sinh viên / Nhóm | Nhóm 6 |
+| MSSV / Danh sách MSSV | DE180071,DE180096,DE180088,DE180109,DE180104
+| Giảng viên hướng dẫn | Lê Thiện Nhật Quang |
+| Ngày bắt đầu | 17/05/2026 |
 | Ngày hoàn thành |  |
 
 ---
@@ -21,12 +21,12 @@
 
 Đánh dấu các công cụ AI đã sử dụng trong quá trình thực hiện bài tập/project.
 
-- [ ] ChatGPT
-- [ ] Gemini
-- [ ] Claude
+- [x] ChatGPT
+- [x] Gemini
+- [x] Claude
 - [ ] GitHub Copilot
 - [ ] Cursor
-- [ ] Antigravity
+- [x] Antigravity
 - [ ] Perplexity
 - [ ] Microsoft Copilot
 - [ ] Công cụ khác: ....................................
@@ -54,8 +54,7 @@ Ví dụ:
 
 ### Mô tả mục tiêu sử dụng AI
 
-```text
-Viết tại đây...
+Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNova nhằm tối ưu hóa thời gian nghiên cứu công nghệ, xây dựng nhanh các module lõi có yếu tố thông minh (AI/ML) như tối ưu tuyến đường giao hàng, nhận diện hóa đơn và dự báo tài chính. Đồng thời, AI hỗ trợ kiểm tra tính đúng đắn của mã nguồn, phát hiện lỗ hổng logic trong khâu đối soát tài chính COD và dịch thuật/chuẩn hóa các thuật ngữ chuyên ngành Logistics.
 
 ## 4. Nhật ký sử dụng AI chi tiết
 
