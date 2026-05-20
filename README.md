@@ -4,11 +4,11 @@
 
 | Item | Description |
 |---|---|
-| Course |  |
-| Class |  |
+| Course | PRN232 |
+| Class | SE18D05 |
 | Semester | SU26 |
-| Group |  |
-| Topic |  |
+| Group | 6 |
+| Topic | FeetNova - Hệ thống quản trị logistics thông minh |
 | Repository |  |
 
 ---
@@ -17,11 +17,11 @@
 
 | No | Student ID | Full Name | GitHub Username | Role | Main Responsibility |
 |---:|---|---|---|---|---|
-| 1 |  |  |  | Leader |  |
-| 2 |  |  |  | Member |  |
-| 3 |  |  |  | Member |  |
-| 4 |  |  |  | Member |  |
-| 5 |  |  |  | Member |  |
+| 1 |DE180104  | Vũ Lê Duy  | duylee292 | Leader |  |
+| 2 |DE180109  | Trần Văn Tùng | VanTung222 | Member |  |
+| 3 |DE180096  | Lê Quốc Hùng | kunzxn | Member |  |
+| 4 |DE180088  | Phan Nguyễn Gia Huy | HuyPhan  | Member |  |
+| 5 |DE180071  | Hoàng Hải Quân |  |  | Member |  |
 
 ---
 
