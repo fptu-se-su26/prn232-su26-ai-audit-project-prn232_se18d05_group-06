@@ -14,24 +14,26 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
-    # 1. BƯỚC CHẠY TEST (Đã bỏ các dấu # để kích hoạt)
-    - name: Run tests
-      uses: classroom-resources/autograding-io-grader@v1
-      id: addition-test  # <-- ID này rất quan trọng
-      with:
-        test-name: Addition Test
-        command: "./bin/add.sh"  # <-- Thay thế bằng lệnh chạy file code của bạn (VD: python main.py, node index.js...)
-        input: 1 2
-        expected-output: 3
-        comparison-method: exact
-        timeout: 10
-        
-    # 2. BƯỚC BÁO CÁO KẾT QUẢ (Đã thêm env và runners)
+      # This is where you place your autograding tests
+      # For more information on this runner, see the documentation at: https://github.com/classroom-resources/autograding-io-grader
+      #
+      # For example, you could run a test suite like this:
+      # - name: Run tests
+      #   uses: classroom-resources/autograding-io-grader@v1
+      #     with:
+      #       test-name: Addition Test
+      #       id: addition-test
+      #       command: "./bin/add.sh"
+      #       input: 1 2
+      #       expected-output: 3
+      #       comparison-method: exact
+      #       timeout: 10
     - name: Autograding Reporter
       uses: classroom-resources/autograding-grading-reporter@v1
-      env:
-        # Cấu trúc: [ID_VIẾT_HOA]_RESULTS
-        ADDITION-TEST_RESULTS: "${{ steps.addition-test.outputs.result }}"
-      with:
-        runners: addition-test # <-- Khai báo runners bằng chuỗi string khớp với ID ở bước trên
+      # For more information on this runner, see the documentation at https://github.com/classroom-resources/autograding-grading-reporter
+      # To output the results of the tests, you can use the
+      # autograding-grading-reporter action like this:
+      # env:
+      # ADDITION-TEST_RESULTS: "${{ steps.addition - test.outputs.result }}"
+      #     with:
+      #         runners: addition-test
