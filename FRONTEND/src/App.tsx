@@ -1,21 +1,35 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import WarehouseDashboard from './features/warehouse/WarehouseDashboard'
+import ExportGoods from './features/warehouse/ExportGoods'
+import ImportGoods from './features/warehouse/ImportGoods'
+import Inventory from './features/warehouse/Inventory'
+import AIOCRScan from './features/warehouse/AIOCRScan'
+import InventoryAudit from './features/warehouse/InventoryAudit'
+import WarehouseTransfer from './features/warehouse/WarehouseTransfer'
+import StockAlerts from './features/warehouse/StockAlerts'
+import Notifications from './features/warehouse/Notifications'
+import Reports from './features/warehouse/Reports'
+import Settings from './features/warehouse/Settings'
 import './App.css'
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            FleetNova - Fleet Management System
-          </h1>
-        </div>
-      </header>
-      <main>
-        <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-          <p className="text-gray-600">Welcome to FleetNova. The project structure is ready to use!</p>
-        </div>
-      </main>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<WarehouseDashboard />} />
+        <Route path="/import-goods" element={<ImportGoods />} />
+        <Route path="/export-goods" element={<ExportGoods />} />
+        <Route path="/ocr-scan" element={<AIOCRScan />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/inventory-audit" element={<InventoryAudit />} />
+        <Route path="/warehouse-transfer" element={<WarehouseTransfer />} />
+        <Route path="/stock-alerts" element={<StockAlerts />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   )
 }
 

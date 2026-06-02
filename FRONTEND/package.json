@@ -23,7 +23,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "tailwind-merge": "^2.2.0",
-    "@radix-ui/react-slot": "^2.0.2",
+    "@radix-ui/react-slot": "^1.2.4",
     "recharts": "^2.10.0"
   },
   "devDependencies": {
