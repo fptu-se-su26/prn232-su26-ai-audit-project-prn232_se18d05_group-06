@@ -122,6 +122,7 @@ Trong tuần cuối cùng, nhóm tập trung hoàn thiện các tính năng nân
 
 Nhóm cũng nhận ra rằng khi project càng lớn, việc kiểm soát code do AI sinh ra càng quan trọng. Chúng tôi đã dành nhiều thời gian để refactor lại code, chia nhỏ components và đảm bảo các trang như VoucherCenter, SupportChat hoạt động đồng bộ với theme chung của FleetNova.
 
+
 ---
 
 ## 6. AI có giúp em/nhóm học tốt hơn không?

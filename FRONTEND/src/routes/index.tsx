@@ -16,3 +16,7 @@ export const ROUTE_PATHS = {
   COMPLAINTS: '/complaints',
   VOUCHER_CENTER: '/voucher-center',
 };
+// Routes configuration
+// Define your application routes here using React Router
+
+export {};

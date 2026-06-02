@@ -139,6 +139,44 @@ Author: Trần Văn Tùng (DE180109)
 
 ### AI-assisted
 - Sử dụng Gemini để gợi ý bố cục Grid linh hoạt cho danh sách voucher và khung chat responsive.
+=======
+
+---
+
+## [2026-05-24]
+Author: Vũ Duy Lê (DE180071)
+
+### Added
+- Khởi tạo khung dự án Frontend sử dụng thư viện React và Vite.
+- Xây dựng bố cục giao diện chính với tệp DispatcherLayout.tsx và các Tab menu điều phối.
+
+### Changed
+- Cập nhật cấu hình tệp tailwind.config.js để định nghĩa các dải màu, khoảng cách đặc trưng cho FleetNova.
+
+### Fixed
+- Sửa lỗi tràn khung hiển thị trên các màn hình có độ phân giải nhỏ và trung bình bằng các thuộc tính scroll linh hoạt.
+
+### AI-assisted
+- Sử dụng ChatGPT để gợi ý các class CSS Flexbox dựng thanh Sidebar cố định.
+- Mã nguồn mẫu được nhóm rà soát, kiểm tra khả năng đáp ứng thiết bị trước khi đưa vào ứng dụng.
+
+---
+
+## [2026-05-25]
+Author: Vũ Duy Lê (DE180071)
+
+### Added
+- Thiết lập tệp định tuyến chính App.tsx kết nối trang điều hành và trang tài xế.
+
+### Changed
+- Cấu hình lại các tệp import đường dẫn trong App.tsx để định vị chính xác vị trí các components.
+
+### Fixed
+- Sửa lỗi catch-all route để chuyển hướng an toàn về trang chủ điều hành khi người dùng nhập sai địa chỉ URL.
+
+### AI-assisted
+- Sử dụng Gemini để tham khảo cấu trúc định tuyến của react-router-dom v6.
+- Nhóm đã phát hiện AI đề xuất phiên bản cũ và chủ động viết lại theo cú pháp thẻ Route mới nhất.
 
 ---
 

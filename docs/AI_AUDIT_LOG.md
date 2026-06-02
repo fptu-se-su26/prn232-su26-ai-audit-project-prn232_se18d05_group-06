@@ -164,6 +164,7 @@ Nhóm chạy thử chương trình trên môi trường phát triển cục bộ
 | Nguyễn Văn B | DE180096 | Thiết lập các trang hiển thị Driver | Có | Các tab driver |
 | Trần Thị C | DE180088 | Xây dựng CSS và HSL theme | Có | [index.css](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/index.css) |
 | Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
+| Phạm Văn D | DE180109 | Thiết lập layout, Sidebar, Header | Có | Các components layout |
 | Hoàng Thị E | DE180104 | Viết tài liệu dự án, kiểm thử thủ công | Có | File tài liệu |
 
 ---
