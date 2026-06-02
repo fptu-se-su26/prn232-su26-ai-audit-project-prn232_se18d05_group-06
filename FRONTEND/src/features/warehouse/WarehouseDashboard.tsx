@@ -1,10 +1,10 @@
-import Sidebar from './components/Sidebar'
-import Topbar from './components/Topbar'
-import KpiCards from './components/KpiCards'
-import WarehouseMap from './components/WarehouseMap'
-import RecentOrders from './components/RecentOrders'
-import RightPanel from './components/RightPanel'
-import FloatingActionButton from './components/FloatingActionButton'
+import Sidebar from '../../components/Sidebar'
+import Topbar from '../../components/Topbar'
+import KpiCards from '../../components/KpiCards'
+import WarehouseMap from '../../components/WarehouseMap'
+import RecentOrders from '../../components/RecentOrders'
+import RightPanel from '../../components/RightPanel'
+import FloatingActionButton from '../../components/FloatingActionButton'
 import { activityData, orderData } from './data'
 
 const WarehouseDashboard = () => {

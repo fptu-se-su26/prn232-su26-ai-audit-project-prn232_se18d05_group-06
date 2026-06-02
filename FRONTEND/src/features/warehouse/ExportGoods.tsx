@@ -1,12 +1,12 @@
-import Sidebar from './components/Sidebar'
-import ExportHeader from './components/ExportHeader'
-import ExportOrderSummary from './components/ExportOrderSummary'
-import ExportRoutePanel from './components/ExportRoutePanel'
-import ShippingLabelPreview from './components/ShippingLabelPreview'
-import ExportPickingQueue from './components/ExportPickingQueue'
-import ExportAssistantCard from './components/ExportAssistantCard'
-import ExportPageActions from './components/ExportPageActions'
-import ExportBottomWidget from './components/ExportBottomWidget'
+import Sidebar from '../../components/Sidebar'
+import ExportHeader from '../../components/ExportHeader'
+import ExportOrderSummary from '../../components/ExportOrderSummary'
+import ExportRoutePanel from '../../components/ExportRoutePanel'
+import ShippingLabelPreview from '../../components/ShippingLabelPreview'
+import ExportPickingQueue from '../../components/ExportPickingQueue'
+import ExportAssistantCard from '../../components/ExportAssistantCard'
+import ExportPageActions from '../../components/ExportPageActions'
+import ExportBottomWidget from '../../components/ExportBottomWidget'
 
 const ExportGoods = () => {
   return (

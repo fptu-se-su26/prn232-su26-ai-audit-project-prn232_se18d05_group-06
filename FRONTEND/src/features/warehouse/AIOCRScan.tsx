@@ -1,6 +1,6 @@
-import Sidebar from './components/Sidebar'
-import OcrDropzone from './components/OcrDropzone'
-import OcrExtractedTable from './components/OcrExtractedTable'
+import Sidebar from '../../components/Sidebar'
+import OcrDropzone from '../../components/OcrDropzone'
+import OcrExtractedTable from '../../components/OcrExtractedTable'
 
 const AIOCRScan = () => {
   return (

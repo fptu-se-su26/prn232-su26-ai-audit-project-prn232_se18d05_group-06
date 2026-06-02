@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Sidebar from './components/Sidebar'
+import Sidebar from '../../components/Sidebar'
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<'pref' | 'notif' | 'theme'>('pref')

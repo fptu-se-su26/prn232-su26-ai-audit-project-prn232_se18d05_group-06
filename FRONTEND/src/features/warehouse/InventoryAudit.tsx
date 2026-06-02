@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import Sidebar from './components/Sidebar'
-import InventoryAuditHeader from './components/InventoryAuditHeader'
-import AuditOverviewCard from './components/AuditOverviewCard'
-import InventoryComparisonTable from './components/InventoryComparisonTable'
-import AuditSidebarPanel from './components/AuditSidebarPanel'
-import ScannerModal from './components/ScannerModal'
+import Sidebar from '../../components/Sidebar'
+import InventoryAuditHeader from '../../components/InventoryAuditHeader'
+import AuditOverviewCard from '../../components/AuditOverviewCard'
+import InventoryComparisonTable from '../../components/InventoryComparisonTable'
+import AuditSidebarPanel from '../../components/AuditSidebarPanel'
+import ScannerModal from '../../components/ScannerModal'
 import type { AuditRow, AuditStats } from './InventoryAudit.types'
 
 const initialRows: AuditRow[] = [

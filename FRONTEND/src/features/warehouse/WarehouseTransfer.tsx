@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Sidebar from './components/Sidebar'
+import Sidebar from '../../components/Sidebar'
 
 const WarehouseTransfer = () => {
   const [progress] = useState(65)
