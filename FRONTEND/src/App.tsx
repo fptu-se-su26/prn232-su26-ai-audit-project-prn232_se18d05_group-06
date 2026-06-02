@@ -1,6 +1,26 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import CustomerLandingPage from './features/customer/CustomerLandingPage';
+import AuthPage from './features/auth/AuthPage';
+import CreateOrder from './features/customer/CreateOrder';
+import ShippingQuotation from './features/customer/ShippingQuotation';
+import OrderSuccess from './features/customer/OrderSuccess';
+import OrderTracking from './features/customer/OrderTracking';
+import OrderHistory from './features/customer/OrderHistory';
+import CustomerProfile from './features/customer/CustomerProfile';
+import Settings from './features/customer/Settings';
+import PaymentHistory from './features/customer/PaymentHistory';
+import SupportChat from './features/support/SupportChat';
+import SupportPage from './features/support/SupportPage';
+import ComplaintCenter from './features/customer/ComplaintCenter';
+import VoucherCenter from './features/voucher/VoucherCenter';
+import OrderDetails from './features/customer/OrderDetails';
+import OrderTrackingMap from './features/customer/OrderTrackingMap';
+import AboutPage from './features/customer/AboutPage';
+import PaymentPage from './features/customer/PaymentPage';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DispatcherDashboard from '@features/dispatcher/pages/DispatcherDashboard';
 import DriverDashboard from './features/driver/pages/DriverDashboard';
+
 
 // Import Admin Components
 import AdminDashboard from '@features/admin/Dashboard';
@@ -35,6 +55,43 @@ const TestCenterHome: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<CustomerLandingPage />} />
+
+        {/* Auth */}
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
+
+        {/* Create Shipment Flow (Purple) */}
+        <Route path="/create-shipment" element={<CreateOrder />} />
+        <Route path="/shipping-quotation" element={<ShippingQuotation />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/payment" element={<PaymentPage />} />
+
+        {/* Tracking Flow (Yellow) */}
+        <Route path="/tracking" element={<OrderTracking />} />
+        <Route path="/order-details" element={<OrderDetails />} />
+        <Route path="/tracking-map" element={<OrderTrackingMap />} />
+
+        {/* Complaints (Coral) */}
+        <Route path="/complaints" element={<ComplaintCenter />} />
+
+        {/* Profile & CRM (Pink) */}
+        <Route path="/profile" element={<CustomerProfile />} />
+        <Route path="/order-history" element={<OrderHistory />} />
+        <Route path="/voucher-center" element={<VoucherCenter />} />
+
+        {/* Settings (Gray) */}
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/payment-history" element={<PaymentHistory />} />
+
+        {/* Support */}
+        <Route path="/support" element={<SupportPage />} />
+        <Route path="/support-chat" element={<SupportChat />} />
+
+        {/* Others */}
+        <Route path="/about" element={<AboutPage />} />
         {/* Route for Dispatcher Control Room */}
         <Route path="/" element={<DispatcherDashboard />} />
         <Route path="/dispatcher" element={<DispatcherDashboard />} />
@@ -50,4 +107,3 @@ const TestCenterHome: React.FC = () => {
 }
 
 export default App;
-
