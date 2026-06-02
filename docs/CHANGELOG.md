@@ -5,7 +5,6 @@
 File này dùng để ghi lại các thay đổi quan trọng trong quá trình thực hiện bài tập, lab, assignment hoặc project.
 
 Nguyên tắc ghi changelog:
-
 - Chỉ ghi những gì đã hoàn thành thật sự.
 - Không ghi kế hoạch nếu chưa thực hiện.
 - Mỗi thay đổi nên có ngày, nội dung, người thực hiện và minh chứng.
@@ -19,16 +18,16 @@ Nguyên tắc ghi changelog:
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
-| MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
+| Môn học | Building Cross-Platform Back-End Application With .NET |
+| Mã môn học | PRN232 |
+| Lớp | SE18D05 |
+| Học kỳ | 8 |
+| Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
+| Tên sinh viên / Nhóm | Nhóm 6 |
+| MSSV / Danh sách MSSV | DE180071,DE180096,DE180088,DE180109,DE180104 |
+| Giảng viên hướng dẫn | Lê Thiện Nhật Quang |
 | Repository URL |  |
-| Ngày bắt đầu |  |
+| Ngày bắt đầu | 17/05/2026 |
 | Ngày hoàn thành |  |
 
 ---
@@ -37,414 +36,108 @@ Nguyên tắc ghi changelog:
 
 | Phiên bản/Giai đoạn | Thời gian | Nội dung chính | Trạng thái |
 |---|---|---|---|
-| Phase 01 |  | Khởi tạo project | Not Started / In Progress / Completed |
-| Phase 02 |  | Phân tích yêu cầu | Not Started / In Progress / Completed |
-| Phase 03 |  | Thiết kế hệ thống | Not Started / In Progress / Completed |
-| Phase 04 |  | Implementation | Not Started / In Progress / Completed |
-| Phase 05 |  | Testing & Debug | Not Started / In Progress / Completed |
-| Phase 06 |  | Hoàn thiện báo cáo và demo | Not Started / In Progress / Completed |
+| Phase 01 | 17/05/2026 - 19/05/2026 | Khởi tạo project và cấu trúc thư mục | Completed |
+| Phase 02 | 20/05/2026 - 22/05/2026 | Phân tích yêu cầu và phân vai người dùng | Completed |
+| Phase 03 | 23/05/2026 - 25/05/2026 | Thiết kế giao diện cơ bản | Completed |
+| Phase 04 | 26/05/2026 - 29/05/2026 | Implementation (Lập trình giao diện Frontend) | Completed |
+| Phase 05 | 30/05/2026 - 31/05/2026 | Testing & Sửa lỗi giao diện | Completed |
+| Phase 06 | 01/06/2026 - 02/06/2026 | Hoàn thiện báo cáo và tài liệu | Completed |
 
 ---
 
-# [Phase 01] Khởi tạo project
+## [2026-05-24]
+Author: Vũ Duy Lê (DE180071)
 
-## Ngày thực hiện
+### Added
+- Khởi tạo khung dự án Frontend sử dụng thư viện React và Vite.
+- Xây dựng bố cục giao diện chính với tệp DispatcherLayout.tsx và các Tab menu điều phối.
 
-```text
-DD/MM/YYYY
-```
+### Changed
+- Cập nhật cấu hình tệp tailwind.config.js để định nghĩa các dải màu, khoảng cách đặc trưng cho FleetNova.
 
-## Đã hoàn thành
+### Fixed
+- Sửa lỗi tràn khung hiển thị trên các màn hình có độ phân giải nhỏ và trung bình bằng các thuộc tính scroll linh hoạt.
 
-- [ ] Tạo repository
-- [ ] Tạo cấu trúc thư mục project
-- [ ] Tạo file README.md
-- [ ] Tạo thư mục `docs/`
-- [ ] Tạo file `AI_AUDIT_LOG.md`
-- [ ] Tạo file `PROMPTS.md`
-- [ ] Tạo file `REFLECTION.md`
-- [ ] Tạo file `CHANGELOG.md`
-- [ ] Khởi tạo source code ban đầu
-- [ ] Cài đặt thư viện/công cụ cần thiết
-- [ ] Cấu hình môi trường chạy project
-
-## Thay đổi chi tiết
-
-| STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
-|---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-
-## AI có hỗ trợ không?
-
-- [ ] Có
-- [ ] Không
-
-Nếu có, mô tả AI đã hỗ trợ phần nào:
-
-```text
-Viết tại đây...
-```
-
-## Commit/Screenshot minh chứng
-
-```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
-```
-
-## Ghi chú
-
-```text
-Viết tại đây...
-```
+### AI-assisted
+- Sử dụng ChatGPT để gợi ý các class CSS Flexbox dựng thanh Sidebar cố định.
+- Mã nguồn mẫu được nhóm rà soát, kiểm tra khả năng đáp ứng thiết bị trước khi đưa vào ứng dụng.
 
 ---
 
-# [Phase 02] Phân tích yêu cầu
+## [2026-05-25]
+Author: Vũ Duy Lê (DE180071)
 
-## Ngày thực hiện
+### Added
+- Thiết lập tệp định tuyến chính App.tsx kết nối trang điều hành và trang tài xế.
 
-```text
-DD/MM/YYYY
-```
+### Changed
+- Cấu hình lại các tệp import đường dẫn trong App.tsx để định vị chính xác vị trí các components.
 
-## Đã hoàn thành
+### Fixed
+- Sửa lỗi catch-all route để chuyển hướng an toàn về trang chủ điều hành khi người dùng nhập sai địa chỉ URL.
 
-- [ ] Xác định problem statement
-- [ ] Xác định user roles
-- [ ] Viết user stories
-- [ ] Viết use cases
-- [ ] Xác định functional requirements
-- [ ] Xác định non-functional requirements
-- [ ] Xác định business rules
-- [ ] Xác định acceptance criteria
-- [ ] Review yêu cầu với giảng viên/nhóm
-- [ ] Chỉnh sửa yêu cầu sau feedback
-
-## Thay đổi chi tiết
-
-| STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
-|---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-
-## AI có hỗ trợ không?
-
-- [ ] Có
-- [ ] Không
-
-Nếu có, mô tả AI đã hỗ trợ phần nào:
-
-```text
-Viết tại đây...
-```
-
-## Commit/Screenshot minh chứng
-
-```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
-```
-
-## Ghi chú
-
-```text
-Viết tại đây...
-```
+### AI-assisted
+- Sử dụng Gemini để tham khảo cấu trúc định tuyến của react-router-dom v6.
+- Nhóm đã phát hiện AI đề xuất phiên bản cũ và chủ động viết lại theo cú pháp thẻ Route mới nhất.
 
 ---
 
-# [Phase 03] Thiết kế hệ thống
+## 4. Tổng kết thay đổi cuối project
 
-## Ngày thực hiện
-
-```text
-DD/MM/YYYY
-```
-
-## Đã hoàn thành
-
-- [ ] Thiết kế kiến trúc tổng quan
-- [ ] Thiết kế database/ERD
-- [ ] Thiết kế API
-- [ ] Thiết kế giao diện/wireframe
-- [ ] Thiết kế flow xử lý
-- [ ] Thiết kế class diagram
-- [ ] Thiết kế sequence diagram
-- [ ] Thiết kế security/authorization flow
-- [ ] Review thiết kế
-- [ ] Chỉnh sửa thiết kế sau feedback
-
-## Thay đổi chi tiết
-
-| STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
-|---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-
-## AI có hỗ trợ không?
-
-- [ ] Có
-- [ ] Không
-
-Nếu có, mô tả AI đã hỗ trợ phần nào:
-
-```text
-Viết tại đây...
-```
-
-## Commit/Screenshot minh chứng
-
-```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
-```
-
-## Ghi chú
-
-```text
-Viết tại đây...
-```
-
----
-
-# [Phase 04] Implementation
-
-## Ngày thực hiện
-
-```text
-DD/MM/YYYY
-```
-
-## Đã hoàn thành
-
-- [ ] Tạo project structure
-- [ ] Cài đặt database connection
-- [ ] Xây dựng backend
-- [ ] Xây dựng frontend
-- [ ] Xây dựng authentication/authorization
-- [ ] Xử lý CRUD
-- [ ] Xử lý validation
-- [ ] Tích hợp API
-- [ ] Xử lý upload/download file
-- [ ] Xử lý lỗi
-- [ ] Tối ưu giao diện
-- [ ] Cập nhật README hướng dẫn chạy
-
-## Thay đổi chi tiết
-
-| STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
-|---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
-
-## AI có hỗ trợ không?
-
-- [ ] Có
-- [ ] Không
-
-Nếu có, mô tả AI đã hỗ trợ phần nào:
-
-```text
-Viết tại đây...
-```
-
-## Commit/Screenshot minh chứng
-
-```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
-```
-
-## Ghi chú
-
-```text
-Viết tại đây...
-```
-
----
-
-# [Phase 05] Testing & Debug
-
-## Ngày thực hiện
-
-```text
-DD/MM/YYYY
-```
-
-## Đã hoàn thành
-
-- [ ] Viết test case
-- [ ] Chạy test chức năng chính
-- [ ] Kiểm tra output
-- [ ] Kiểm tra validation
-- [ ] Kiểm tra lỗi giao diện
-- [ ] Kiểm tra lỗi database
-- [ ] Kiểm tra phân quyền
-- [ ] Kiểm tra bảo mật cơ bản
-- [ ] Fix bug
-- [ ] Chạy lại sau khi fix bug
-- [ ] Ghi nhận kết quả test
-
-## Danh sách lỗi đã xử lý
-
-| STT | Lỗi phát hiện | Nguyên nhân | Cách xử lý | Trạng thái |
-|---:|---|---|---|---|
-| 1 |  |  |  | Open / Fixed / Pending |
-| 2 |  |  |  | Open / Fixed / Pending |
-| 3 |  |  |  | Open / Fixed / Pending |
-| 4 |  |  |  | Open / Fixed / Pending |
-| 5 |  |  |  | Open / Fixed / Pending |
-
-## Thay đổi chi tiết
-
-| STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
-|---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-
-## AI có hỗ trợ không?
-
-- [ ] Có
-- [ ] Không
-
-Nếu có, mô tả AI đã hỗ trợ phần nào:
-
-```text
-Viết tại đây...
-```
-
-## Commit/Screenshot minh chứng
-
-```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
-```
-
-## Ghi chú
-
-```text
-Viết tại đây...
-```
-
----
-
-# [Phase 06] Hoàn thiện báo cáo và demo
-
-## Ngày thực hiện
-
-```text
-DD/MM/YYYY
-```
-
-## Đã hoàn thành
-
-- [ ] Hoàn thiện source code
-- [ ] Hoàn thiện README.md
-- [ ] Hoàn thiện report
-- [ ] Hoàn thiện slide
-- [ ] Hoàn thiện video demo
-- [ ] Kiểm tra lại `AI_AUDIT_LOG.md`
-- [ ] Kiểm tra lại `PROMPTS.md`
-- [ ] Hoàn thiện `REFLECTION.md`
-- [ ] Kiểm tra lại `CHANGELOG.md`
-- [ ] Đóng gói bài nộp
-
-## Thay đổi chi tiết
-
-| STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
-|---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-
-## AI có hỗ trợ không?
-
-- [ ] Có
-- [ ] Không
-
-Nếu có, mô tả AI đã hỗ trợ phần nào:
-
-```text
-Viết tại đây...
-```
-
-## Commit/Screenshot minh chứng
-
-```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
-```
-
-## Ghi chú
-
-```text
-Viết tại đây...
-```
-
----
-
-# 4. Tổng kết thay đổi cuối project
-
-## 4.1. Các chức năng đã hoàn thành
+### 4.1. Các chức năng đã hoàn thành
 
 | STT | Chức năng | Trạng thái | Minh chứng | Ghi chú |
 |---:|---|---|---|---|
-| 1 |  | Completed / Partial / Not Completed |  |  |
-| 2 |  | Completed / Partial / Not Completed |  |  |
-| 3 |  | Completed / Partial / Not Completed |  |  |
-| 4 |  | Completed / Partial / Not Completed |  |  |
-| 5 |  | Completed / Partial / Not Completed |  |  |
+| 1 | Giao diện Phòng điều phối | Completed | DispatcherDashboard | Giao diện tĩnh |
+| 2 | Giao diện màn hình Tài xế | Completed | DriverDashboard | Giao diện tĩnh |
+| 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
+| 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
 
 ---
 
-## 4.2. Các chức năng chưa hoàn thành
+### 4.2. Các chức năng chưa hoàn thành
 
 | STT | Chức năng | Lý do chưa hoàn thành | Hướng cải thiện |
 |---:|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
+| 1 | Xử lý Backend và database thực tế | Giới hạn thời gian làm giao diện | Kết nối API thật ở phase sau |
 
 ---
 
-## 4.3. Tổng hợp AI hỗ trợ trong project
+### 4.3. Tổng hợp AI hỗ trợ trong project
 
 | Hạng mục | AI có hỗ trợ không? | Mức độ hỗ trợ | Ghi chú |
 |---|---|---|---|
-| Requirement | Có / Không | Ít / Trung bình / Nhiều |  |
-| Design | Có / Không | Ít / Trung bình / Nhiều |  |
-| Database | Có / Không | Ít / Trung bình / Nhiều |  |
-| Coding | Có / Không | Ít / Trung bình / Nhiều |  |
-| Debug | Có / Không | Ít / Trung bình / Nhiều |  |
-| Testing | Có / Không | Ít / Trung bình / Nhiều |  |
-| Report | Có / Không | Ít / Trung bình / Nhiều |  |
-| Presentation | Có / Không | Ít / Trung bình / Nhiều |  |
+| Requirement | Có | Ít | Tìm hiểu khái niệm |
+| Design | Có | Ít | Gợi ý bố cục |
+| Database | Không | Ít | Không dùng |
+| Coding | Có | Ít | Tra cứu cú pháp |
+| Debug | Có | Ít | Sửa lỗi CSS nhỏ |
+| Testing | Không | Ít | Tự test tay |
+| Report | Có | Ít | Định dạng văn bản |
+| Presentation | Không | Ít | Không dùng |
 
 ---
 
-## 4.4. Bài học rút ra
+### 4.4. Bài học rút ra
 
 ```text
-Viết tại đây...
+Nhóm đã hiểu rõ hơn cách tổ chức một ứng dụng React chia theo component nhỏ và cách sử dụng CSS Tailwind để lập trình giao diện nhanh chóng.
 ```
 
 ---
 
-## 4.5. Hướng cải thiện tiếp theo
+### 4.5. Hướng cải thiện tiếp theo
 
 ```text
-Viết tại đây...
+Lập trình phần Backend bằng .NET Core để kết nối cơ sở dữ liệu SQL Server, hoàn thiện chức năng đăng nhập và lưu trữ đơn hàng thực tế.
 ```
 
 ---
 
-# 5. Cam kết cập nhật Changelog
+## 5. Cam kết cập nhật Changelog
 
 Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các thay đổi đã thực hiện trong quá trình làm bài tập/project.
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-|  |  |
+| Nhóm trưởng | 02/06/2026 |
