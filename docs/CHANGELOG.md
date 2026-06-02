@@ -19,21 +19,21 @@ Nguyên tắc ghi changelog:
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
-| MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
-| Repository URL |  |
-| Ngày bắt đầu |  |
-| Ngày hoàn thành |  |
+| Môn học | Building Cross-Platform Back-End Application With .NET |
+| Mã môn học | PRN232 |
+| Lớp | SE18D05 |
+| Học kỳ | 8 |
+| Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
+| Tên sinh viên / Nhóm | Nhóm 6 |
+| MSSV / Danh sách MSSV | DE180071, DE180096, DE180088, DE180109, DE180104 |
+| Giảng viên hướng dẫn | Lê Thiện Nhật Quang |
+| Repository URL | (chèn URL repository) |
+| Ngày bắt đầu | 17/05/2026 |
+| Ngày hoàn thành | 02/06/2026 |
 
 ---
 
-## 3. Tổng quan các phiên bản/giai đoạn
+## 3. Tổng quan các phiên bản/giai đoạn 
 
 | Phiên bản/Giai đoạn | Thời gian | Nội dung chính | Trạng thái |
 |---|---|---|---|
@@ -72,31 +72,30 @@ DD/MM/YYYY
 
 | STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
 |---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
+| 1 | Khởi tạo frontend bằng Vite + React; thêm cấu trúc ban đầu | Nhóm 6 | FRONTEND/ | package.json, terminal output
+| 2 | Triển khai tính năng OCR frontend: `OcrDropzone`, `OcrExtractedTable`, tích hợp service OCR | Phan Nguyên Gia Huy (DE180088) | FRONTEND/src/features/warehouse/ | commit frontend
+| 3 | Cập nhật cấu hình dev (Vite, tsconfig) và khởi chạy dev server | Phan Nguyên Gia Huy (DE180088) | FRONTEND/ | terminal output
 
 ## AI có hỗ trợ không?
-
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+AI hỗ trợ cấu hình Vite + TypeScript (guide, fix alias), và tối ưu pipeline tiền xử lý ảnh cho OCR trên frontend (grayscale, threshold, deskew, crop, regex ví dụ). Phan (DE180088) áp dụng các hướng dẫn này để khởi tạo frontend và tích hợp OCR.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+Minh chứng frontend: terminal output khi chạy `npm run dev` (VITE v5.4.21 ready - http://localhost:3000/); files: FRONTEND/src/features/warehouse/OcrDropzone.tsx, OcrExtractedTable.tsx, FRONTEND/package.json, vite.config.ts. Commit: (chèn link commit frontend khi có).
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Ghi chú: Phan đảm nhiệm khởi tạo frontend bằng Vite, cấu hình TS, và phần tích hợp OCR. Một số minh chứng (commit URLs, screenshots) cần được cập nhật sau khi commit lên repository.
 ```
 
 ---
@@ -132,25 +131,25 @@ DD/MM/YYYY
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+Frontend: AI hỗ trợ chọn cấu trúc workflow OCR và xác nhận các bước tiền xử lý ảnh để giảm lỗi trên client-side.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+Minh chứng: cập nhật docs/PROMPTS.md, AI_AUDIT_LOG.md, và FRONTEND/src/features/warehouse/OcrDropzone.tsx.
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Phan DE180088 chịu trách nhiệm frontend; cần bổ sung commit link repo sau khi push.
 ```
 
 ---
@@ -186,25 +185,25 @@ DD/MM/YYYY
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+AI giúp review cấu hình frontend và xác nhận thiết kế interface OCR trước khi triển khai.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+Minh chứng: notes thiết kế frontend, prompt docs, và terminal output khi chạy dev server.
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Nội dung frontend thiết kế và AI review đã được ghi nhận; cần hoàn thiện link minh chứng commit.
 ```
 
 ---
@@ -236,11 +235,11 @@ DD/MM/YYYY
 
 | STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
 |---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Khởi tạo frontend bằng Vite + React + TypeScript | Phan Nguyên Gia Huy (DE180088) | FRONTEND/ | package.json, terminal output
+| 2 | Thêm tính năng OCR frontend: `OcrDropzone`, `OcrExtractedTable`, logic tiền xử lý ảnh | Phan Nguyên Gia Huy (DE180088) | FRONTEND/src/features/warehouse/ | code files
+| 3 | Cập nhật cấu hình dev (vite, tsconfig) và thêm script `type-check` | Phan Nguyên Gia Huy (DE180088) | FRONTEND/ | commit / terminal output
+| 4 | Kiểm thử OCR trên ~30 ảnh mẫu, điều chỉnh regex và xử lý ảnh | Phan Nguyên Gia Huy (DE180088) | FRONTEND/tests or local samples | test notes
+| 5 | Ghi nhận và lưu prompt + log AI liên quan cấu hình và OCR | Phan Nguyên Gia Huy (DE180088) | docs/PROMPTS.md, docs/AI_AUDIT_LOG.md | docs updates
 
 ## AI có hỗ trợ không?
 
@@ -250,19 +249,19 @@ DD/MM/YYYY
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+Frontend: Có — Vite config guide, OCR preprocessing pipeline, regex examples.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+Minh chứng: terminal output, FRONTEND/src/features/warehouse/OcrDropzone.tsx, OcrExtractedTable.tsx. (Chèn link commit sau khi push.)
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Ghi chú: Nội dung liên quan frontend đã được thực hiện bởi Phan; các link commit cần cập nhật sau khi push.
 ```
 
 ---
@@ -315,19 +314,19 @@ DD/MM/YYYY
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+Frontend testing: Có — AI gợi ý metrics và test pipeline; Phan dùng để lên danh sách ảnh thử nghiệm và phương pháp kiểm chứng.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+Minh chứng testing frontend: notes về ~30 ảnh mẫu đã thử nghiệm, log kiểm tra kết quả OCR, và screenshot bảng `OcrExtractedTable` khi review.
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Ghi chú: Một số lỗi liên quan đến regex và tiền xử lý ảnh đã được sửa thủ công; cần lưu kết quả test chi tiết trước khi nộp.
 ```
 
 ---
@@ -369,19 +368,19 @@ DD/MM/YYYY
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+Có — AI hỗ trợ soạn nội dung docs, tóm tắt prompt và gợi ý reflection.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+Minh chứng: cập nhật docs/PROMPTS.md, AI_AUDIT_LOG.md, REFLECTION.md (các thay đổi do Phan); chèn link commit khi available.
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+Ghi chú: Sau khi hoàn tất, nhóm cần commit và cập nhật link minh chứng trong changelog.
 ```
 
 ---
@@ -428,7 +427,7 @@ Viết tại đây...
 ## 4.4. Bài học rút ra
 
 ```text
-Viết tại đây...
+Frontend lessons: học được cách cấu hình Vite+TS, hiểu các bước tiền xử lý ảnh cơ bản cho OCR, và tầm quan trọng của kiểm chứng kết quả AI bằng dữ liệu thực tế.
 ```
 
 ---
@@ -436,7 +435,7 @@ Viết tại đây...
 ## 4.5. Hướng cải thiện tiếp theo
 
 ```text
-Viết tại đây...
+Hướng cải thiện: Tối ưu pipeline tiền xử lý bằng benchmark trên nhiều ảnh, tự động hóa test OCR, ghi commit và screenshots làm minh chứng, và cải thiện UX cho kiểm duyệt kết quả OCR.
 ```
 
 ---
