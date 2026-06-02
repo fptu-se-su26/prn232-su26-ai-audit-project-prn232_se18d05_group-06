@@ -10,13 +10,7 @@ import CustomerProfile from './features/customer/CustomerProfile';
 import Settings from './features/customer/Settings';
 import PaymentHistory from './features/customer/PaymentHistory';
 import SupportChat from './features/support/SupportChat';
-import SupportPage from './features/support/SupportPage';
-import ComplaintCenter from './features/customer/ComplaintCenter';
 import VoucherCenter from './features/voucher/VoucherCenter';
-import OrderDetails from './features/customer/OrderDetails';
-import OrderTrackingMap from './features/customer/OrderTrackingMap';
-import AboutPage from './features/customer/AboutPage';
-import PaymentPage from './features/customer/PaymentPage';
 
 function App() {
   return (
@@ -30,35 +24,26 @@ function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
 
-        {/* Create Shipment Flow (Purple) */}
+        {/* Create Shipment Flow */}
         <Route path="/create-shipment" element={<CreateOrder />} />
         <Route path="/shipping-quotation" element={<ShippingQuotation />} />
         <Route path="/order-success" element={<OrderSuccess />} />
-        <Route path="/payment" element={<PaymentPage />} />
 
-        {/* Tracking Flow (Yellow) */}
+        {/* Tracking */}
         <Route path="/tracking" element={<OrderTracking />} />
-        <Route path="/order-details" element={<OrderDetails />} />
-        <Route path="/tracking-map" element={<OrderTrackingMap />} />
 
-        {/* Complaints (Coral) */}
-        <Route path="/complaints" element={<ComplaintCenter />} />
-
-        {/* Profile & CRM (Pink) */}
-        <Route path="/profile" element={<CustomerProfile />} />
+        {/* Customer Account */}
         <Route path="/order-history" element={<OrderHistory />} />
-        <Route path="/voucher-center" element={<VoucherCenter />} />
-
-        {/* Settings (Gray) */}
+        <Route path="/profile" element={<CustomerProfile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/payment-history" element={<PaymentHistory />} />
 
         {/* Support */}
-        <Route path="/support" element={<SupportPage />} />
+        <Route path="/support" element={<SupportChat />} />
         <Route path="/support-chat" element={<SupportChat />} />
 
-        {/* Others */}
-        <Route path="/about" element={<AboutPage />} />
+        {/* Voucher */}
+        <Route path="/voucher-center" element={<VoucherCenter />} />
       </Routes>
     </Router>
   );
