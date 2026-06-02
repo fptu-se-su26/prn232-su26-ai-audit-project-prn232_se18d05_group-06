@@ -2,10 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: 212 75% 8%; /* #051424 */
+    --foreground: 214 90% 90%; /* #d4e4fa */
+    --border: 215 15% 25%;
+    --radius: 0.5rem;
+  }
+}
+
 * {
-  @apply border-border;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 body {
-  @apply bg-background text-foreground;
+  @apply bg-background text-[#d4e4fa] antialiased overflow-hidden;
+}
+
+/* Glassmorphism panel styles */
+.glass-panel {
+  background: rgba(5, 20, 36, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glow-active {
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+}
+
+.glow-alert {
+  box-shadow: 0 0 15px rgba(255, 180, 171, 0.4);
+}
+
+.pulse-marker {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: .5;
+    transform: scale(1.5);
+  }
+}
+
+/* Custom overlay scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.neon-glow {
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
+}
+
+.text-glow {
+  text-shadow: 0 0 8px currentColor;
+}
+
+.ai-match-glow {
+  box-shadow: 0 0 15px rgba(76, 215, 246, 0.3);
+  border-color: rgba(76, 215, 246, 0.6);
+}
+
+.path-line {
+  stroke-dasharray: 10;
+  animation: dash 20s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+.ping-animation {
+  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+.marker-pulse::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: radar-pulse 2s infinite;
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
 }
