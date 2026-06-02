@@ -53,6 +53,10 @@ Sinh viên/nhóm cần ghi lại:
 |---:|---|---|---|---|---|---|---|
 | 1 | 24/05/2026 | ChatGPT | Thiết kế layout | Căn chỉnh sidebar | Gợi ý dùng CSS flexbox | Có | DispatcherLayout |
 | 2 | 25/05/2026 | Gemini | Định tuyến | Định tuyến router | Cấu trúc Route v6 | Có | App.tsx |
+| 3 | 27/05/2026 | Antigravity | UI/UX | Hiệu ứng Glassmorphism | CSS backdrop-blur | Có | AuthPage, Profile |
+| 4 | 29/05/2026 | ChatGPT | Implementation | Render danh sách động | Sử dụng .map() | Có | OrderHistory |
+| 5 | 31/05/2026 | Antigravity | Animation | Animation xe tải | SVG & CSS Animation | Có | TrackingMap |
+| 6 | 01/06/2026 | Gemini | UI/UX | Layout Grid & Chat | Grid & Flexbox layout | Có | VoucherCenter |
 
 ---
 
@@ -93,6 +97,83 @@ Cách sử dụng React Router v6 để chuyển trang giữa /dispatcher và /d
 
 ### Evaluation
 Gợi ý ban đầu của Gemini bị lỗi thiếu các import cần thiết và sử dụng nhầm một số thuộc tính v5. Sau khi tự đối chiếu với tài liệu chính thống của Router v6, nhóm đã sửa lại cú pháp `element` thay cho `component` thành công.
+
+---
+
+## Prompt #03
+
+- Date: 2026-05-27
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Thiết kế hiệu ứng kính mờ (Glassmorphism) cho giao diện hiện đại
+
+### Prompt
+Làm thế nào để tạo hiệu ứng Glassmorphism cho một thẻ Card trong Tailwind CSS? Tôi muốn nó có độ mờ hậu cảnh và viền mỏng semi-transparent.
+
+### Expected Output
+- Các class Tailwind như `bg-white/10`, `backdrop-blur-md`, `border-white/20`.
+- Ví dụ code JSX áp dụng các class này.
+
+### Evaluation
+Antigravity gợi ý rất chính xác. Nhóm đã áp dụng và tùy chỉnh thêm độ bóng (`shadow`) để các thẻ Card trông nổi bật hơn trên nền tối của ứng dụng.
+
+---
+
+## Prompt #04
+
+- Date: 2026-05-29
+- AI Tool: ChatGPT
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Hiển thị danh sách đơn hàng từ mảng dữ liệu
+
+### Prompt
+Trong React, làm thế nào để render một danh sách các đối tượng từ mảng `orders` thành các thẻ Card, kèm theo logic hiển thị màu sắc khác nhau cho từng trạng thái (Status)?
+
+### Expected Output
+- Sử dụng hàm `.map()`.
+- Logic render có điều kiện (conditional rendering) cho class CSS dựa trên thuộc tính status.
+
+### Evaluation
+Gợi ý của ChatGPT giúp xử lý nhanh phần hiển thị. Nhóm đã tự viết thêm các hàm helper để chuyển đổi mã trạng thái sang tiếng Việt tương ứng.
+
+---
+
+## Prompt #05
+
+- Date: 2026-05-31
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Tạo hiệu ứng xe tải di chuyển trên bản đồ theo dõi đơn hàng
+
+### Prompt
+Viết mã CSS để tạo animation cho một icon SVG di chuyển dọc theo một đường kẻ (path) giả định trong trang web theo dõi đơn hàng.
+
+### Expected Output
+- Keyframes animation định nghĩa chuyển động từ điểm A đến điểm B.
+- Cách áp dụng animation vào thẻ SVG.
+
+### Evaluation
+Antigravity cung cấp đoạn mã CSS animation rất mượt. Nhóm đã thay thế path giả định bằng tọa độ thực tế trên bản đồ mockup để tăng tính chân thực.
+
+---
+
+## Prompt #06
+
+- Date: 2026-06-01
+- AI Tool: Gemini
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Thiết kế layout lưới cho Voucher Center
+
+### Prompt
+Gợi ý layout tối ưu cho trang hiển thị danh sách Voucher sao cho hiển thị tốt trên cả mobile và desktop bằng Tailwind CSS Grid.
+
+### Expected Output
+- Sử dụng `grid-cols-1`, `md:grid-cols-2`, `lg:grid-cols-3`.
+- Các class căn chỉnh khoảng cách (`gap`) và padding.
+
+### Evaluation
+Gemini gợi ý layout chuẩn responsive. Nhóm đã thêm các hiệu ứng nhấn (`active:scale-95`) khi người dùng click vào voucher để nhận mã.
+
 
 ---
 

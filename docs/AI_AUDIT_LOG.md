@@ -65,6 +65,50 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: FRONTEND/src/App.tsx
 - Verification: Click chuyển trang giữa /dispatcher và /driver thành công.
 
+## Log #03
+- Date: 2026-05-27
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Tích hợp thiết kế Glassmorphism cho AuthPage và Profile
+- Prompt Reference: PROMPTS.md#prompt-03
+- AI Output Summary: Gợi ý các class `backdrop-blur-md` và `bg-white/10` cho card UI.
+- Human Decision: Tinh chỉnh độ mờ của card và màu border để nổi bật trên nền tối (navy).
+- Applied To: FRONTEND/src/features/auth/AuthPage.tsx, FRONTEND/src/features/customer/CustomerProfile.tsx
+- Verification: Kiểm tra hiển thị trên trình duyệt, đảm bảo chữ rõ ràng trên nền mờ.
+
+## Log #04
+- Date: 2026-05-29
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: ChatGPT
+- Purpose: Xử lý hiển thị danh sách đơn hàng động
+- Prompt Reference: PROMPTS.md#prompt-04
+- AI Output Summary: Gợi ý dùng `.map()` để render danh sách thẻ đơn hàng từ mảng dữ liệu.
+- Human Decision: Thêm logic phân loại trạng thái đơn hàng (Đang giao, Hoàn thành) bằng màu sắc badge riêng biệt.
+- Applied To: FRONTEND/src/features/customer/OrderHistory.tsx, FRONTEND/src/features/customer/CustomerDashboard.tsx
+- Verification: Thêm dữ liệu giả vào mảng và xem danh sách có hiển thị đúng và đồng nhất không.
+
+## Log #05
+- Date: 2026-05-31
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Vẽ lộ trình trên bản đồ theo dõi (OrderTrackingMap)
+- Prompt Reference: PROMPTS.md#prompt-05
+- AI Output Summary: Gợi ý cấu trúc SVG và các animation CSS cho icon xe tải di chuyển theo đường kẻ.
+- Human Decision: Thay đổi icon xe tải sang SVG cao cấp hơn và chỉnh lại tốc độ animation cho mượt mà.
+- Applied To: FRONTEND/src/features/customer/OrderTrackingMap.tsx
+- Verification: Quan sát xe tải di chuyển trên lộ trình khi load trang trên Chrome.
+
+## Log #06
+- Date: 2026-06-01
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Gemini
+- Purpose: Thiết kế Voucher Center và Support Chat
+- Prompt Reference: PROMPTS.md#prompt-06
+- AI Output Summary: Gợi ý layout lưới (Grid) cho các thẻ khuyến mãi và cấu trúc khung chat box.
+- Human Decision: Tùy chỉnh hiệu ứng hover cho voucher và phối hợp màu sắc tin nhắn chat theo theme chung.
+- Applied To: FRONTEND/src/features/voucher/VoucherCenter.tsx, FRONTEND/src/features/support/SupportChat.tsx
+- Verification: Kiểm tra tương tác hover voucher và nhập tin nhắn vào khung chat thành công.
+
 ---
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
@@ -119,6 +163,7 @@ Nhóm chạy thử chương trình trên môi trường phát triển cục bộ
 | Vũ Duy Lê | DE180071 | Cấu trúc dự án, điều hướng Router chính | Có | [App.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
 | Nguyễn Văn B | DE180096 | Thiết lập các trang hiển thị Driver | Có | Các tab driver |
 | Trần Thị C | DE180088 | Xây dựng CSS và HSL theme | Có | [index.css](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/index.css) |
+| Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
 | Phạm Văn D | DE180109 | Thiết lập layout, Sidebar, Header | Có | Các components layout |
 | Hoàng Thị E | DE180104 | Viết tài liệu dự án, kiểm thử thủ công | Có | File tài liệu |
 
