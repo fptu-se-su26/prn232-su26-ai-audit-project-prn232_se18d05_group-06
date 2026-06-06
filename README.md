@@ -21,7 +21,7 @@
 | 2 |DE180109  | Trần Văn Tùng | VanTung222 | Member |  |
 | 3 |DE180096  | Lê Quốc Hùng | kunzxn | Member |  |
 | 4 |DE180088  | Phan Nguyễn Gia Huy | HuyPhan  | Member |  |
-| 5 |DE180071  | Hoàng Hải Quân |    | Member |  |
+| 5 |DE180071  | Hoàng Hải Quân | hhqan   | Member |  |
 
 ---
 
