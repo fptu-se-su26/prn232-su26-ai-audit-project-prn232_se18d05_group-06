@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CustomerLandingPage from './features/customer/CustomerLandingPage';
 import AuthPage from './features/auth/AuthPage';
 import CreateOrder from './features/customer/CreateOrder';
@@ -17,7 +17,6 @@ import OrderDetails from './features/customer/OrderDetails';
 import OrderTrackingMap from './features/customer/OrderTrackingMap';
 import AboutPage from './features/customer/AboutPage';
 import PaymentPage from './features/customer/PaymentPage';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DispatcherDashboard from '@features/dispatcher/pages/DispatcherDashboard';
 import DriverDashboard from './features/driver/pages/DriverDashboard';
 
@@ -51,7 +50,7 @@ const modules = [
   { path: '/admin/settings', name: 'Settings', desc: 'General config, Branding, Engine config', icon: 'settings', color: 'from-gray-500 to-slate-600' },
 ];
 
-const TestCenterHome: React.FC = () => {
+const App: React.FC = () => {
   return (
     <Router>
       <Routes>
