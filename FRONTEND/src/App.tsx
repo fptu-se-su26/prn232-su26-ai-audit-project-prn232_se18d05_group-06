@@ -89,6 +89,20 @@ const App: React.FC = () => {
         <Route path="/support" element={<SupportPage />} />
         <Route path="/support-chat" element={<SupportChat />} />
 
+        {/* Admin Dashboard & Management */}
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        <Route path="/admin/finance" element={<AdminFinance />} />
+        <Route path="/admin/audit-log" element={<AdminAuditLog />} />
+        <Route path="/admin/notifications" element={<AdminNotifications />} />
+        <Route path="/admin/fleet-map" element={<AdminFleetMap />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/user-management" element={<AdminUserManagement />} />
+        <Route path="/admin/role-permission" element={<AdminRolePermission />} />
+        <Route path="/admin/smart-log-ai" element={<AdminSmartLogAI />} />
+        <Route path="/admin/warehouses" element={<AdminWarehouses />} />
+        <Route path="/admin/settings" element={<AdminSettings />} />
+
         {/* Others */}
         <Route path="/about" element={<AboutPage />} />
         {/* Route for Dispatcher Control Room */}
