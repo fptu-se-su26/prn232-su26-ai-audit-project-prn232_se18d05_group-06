@@ -1,5 +1,21 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import AdminSidebar from '@components/AdminSidebar';
+
+interface PickingListItem {
+  productSku: string;
+  productName: string;
+  quantityToPick: number;
+  zoneName: string;
+  binName: string;
+}
+
+interface OutboundResponse {
+  waybillCode: string;
+  qrCodeBase64: string; // Chuỗi Base64 của ảnh QR từ Backend
+  pickingList: PickingListItem[];
+  createdAt: string;
+}
 
 // UC004 - Picking list data per order
 const orderPickingItems: Record<string, { id: string; sku: string; name: string; qty: number; location: string }[]> = {
@@ -120,6 +136,10 @@ const AdminOrders: React.FC = () => {
     Object.fromEntries(orders.map(o => [o.id, o.status]))
   );
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  
+  // Real API integration states
+  const [outboundLoading, setOutboundLoading] = useState<boolean>(false);
+  const [outboundResult, setOutboundResult] = useState<OutboundResponse | null>(null);
 
   const selectedOrder = orders[selectedOrderIndex];
 
@@ -127,6 +147,7 @@ const AdminOrders: React.FC = () => {
     setSelectedOrderIndex(index);
     setDrawerTab('tracking');
     setPickedItems(new Set());
+    setOutboundResult(null); // Reset real results when opening drawer for another order
     setIsDrawerOpen(true);
   };
 
@@ -146,11 +167,38 @@ const AdminOrders: React.FC = () => {
     }, 1800);
   };
 
+  const handleCreateOutbound = async (orderIdStr: string) => {
+    const orderId = parseInt(orderIdStr.replace(/\D/g, ''), 10);
+    if (isNaN(orderId)) {
+      showToast('❌ Invalid Order ID.');
+      return;
+    }
+
+    setOutboundLoading(true);
+    try {
+      const response = await axios.post<OutboundResponse>('http://localhost:5184/api/outbound/create', {
+        orderId: orderId
+      });
+
+      setOutboundResult(response.data);
+      setOrderStatuses(prev => ({ ...prev, [orderIdStr]: 'In Transit' }));
+      showToast(`🚚 Outbound successful! Order ${orderIdStr} status updated → In Transit`);
+    } catch (error: any) {
+      console.error('Error creating outbound order:', error);
+      const errMsg = error.response?.data?.message || error.message || 'Unknown error occurred.';
+      showToast(`❌ Outbound failed: ${errMsg}`);
+    } finally {
+      setOutboundLoading(false);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   const handleConfirmExport = () => {
     if (!selectedOrder) return;
-    setOrderStatuses(prev => ({ ...prev, [selectedOrder.id]: 'In Transit' }));
-    showToast(`🚚 Outbound successful! Order ${selectedOrder.id} status updated → In Transit`);
-    setIsDrawerOpen(false);
+    handleCreateOutbound(selectedOrder.id);
   };
 
   const showToast = (msg: string) => {
@@ -270,7 +318,7 @@ const AdminOrders: React.FC = () => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Table List */}
               <div className="p-4 flex-1 overflow-auto bg-surface-container-lowest/30">
                 <div className="grid grid-cols-[40px_100px_1.5fr_1fr_1.5fr_120px_100px_80px_40px] gap-4 px-4 py-2 mb-2 font-label-md text-label-md text-secondary uppercase tracking-wider">
@@ -329,16 +377,14 @@ const AdminOrders: React.FC = () => {
               <div>
                 <div className="flex items-center gap-3 mb-1">
                   <h2 className="font-headline-md text-headline-md text-on-surface font-bold text-xl">{selectedOrder.id}</h2>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    (orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'
                       ? 'text-green-700 bg-green-50 border border-green-200'
                       : 'text-amber-700 bg-amber-50 border border-amber-200'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      (orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'
+                    }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'
                         ? 'bg-green-500'
                         : 'bg-amber-500'
-                    }`}></span>
+                      }`}></span>
                     {orderStatuses[selectedOrder.id] || selectedOrder.status}
                   </span>
                 </div>
@@ -353,22 +399,20 @@ const AdminOrders: React.FC = () => {
             <div className="flex border-b border-outline-variant/10 px-6 bg-slate-50/50">
               <button
                 onClick={() => setDrawerTab('tracking')}
-                className={`flex-1 py-3 text-center font-medium text-xs border-b-2 transition-all flex items-center justify-center gap-1.5 ${
-                  drawerTab === 'tracking'
+                className={`flex-1 py-3 text-center font-medium text-xs border-b-2 transition-all flex items-center justify-center gap-1.5 ${drawerTab === 'tracking'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-secondary hover:text-on-surface'
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-sm">map</span>
                 Tracking &amp; Logistics
               </button>
               <button
                 onClick={() => setDrawerTab('outbound')}
-                className={`flex-1 py-3 text-center font-medium text-xs border-b-2 transition-all flex items-center justify-center gap-1.5 ${
-                  drawerTab === 'outbound'
+                className={`flex-1 py-3 text-center font-medium text-xs border-b-2 transition-all flex items-center justify-center gap-1.5 ${drawerTab === 'outbound'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-secondary hover:text-on-surface'
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-sm">warehouse</span>
                 Outbound &amp; Waybill (UC004)
@@ -404,11 +448,10 @@ const AdminOrders: React.FC = () => {
                     </h3>
                     <div className="relative border-l-2 border-outline-variant/30 ml-3 space-y-4">
                       <div className="relative pl-6">
-                        <span className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-surface ${
-                          (orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'
+                        <span className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-surface ${(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'
                             ? 'bg-green-500 shadow-[0_0_10px_#22c55e]'
                             : 'bg-amber-500 shadow-[0_0_10px_#f59e0b]'
-                        }`}></span>
+                          }`}></span>
                         <p className="font-label-md text-label-md text-secondary mb-0.5 text-xs">Current</p>
                         <p className="font-body-sm text-body-sm text-on-surface font-semibold text-xs">
                           {(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit' ? 'In Transit' : 'Processing / Packing at Warehouse'}
@@ -439,125 +482,208 @@ const AdminOrders: React.FC = () => {
               ) : (
                 /* Tab 2: Outbound, Picking List, Waybill (UC004 Flow) */
                 <div className="space-y-6">
-                  {/* Picking List Checklist */}
-                  <div className="bg-white border border-outline-variant/30 rounded-xl p-4 shadow-sm">
-                    <div className="flex items-center gap-2 border-b border-gray-100 pb-3 mb-3">
-                      <span className="material-symbols-outlined text-blue-600 text-lg">inventory_2</span>
-                      <h4 className="font-bold text-sm text-on-surface">Picking List</h4>
-                    </div>
-                    <p className="text-xs text-secondary mb-3">Please pick items according to the optimized shelf locations below:</p>
-                    
-                    <div className="space-y-2.5">
-                      {orderPickingItems[selectedOrder.id]?.map((item) => {
-                        const isPicked = pickedItems.has(item.id);
-                        return (
-                          <div
-                            key={item.id}
-                            onClick={() => handleTogglePick(item.id)}
-                            className={`flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer ${
-                              isPicked ? 'bg-blue-50/40 border-blue-200' : 'bg-slate-50 border-slate-100 hover:border-slate-200'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isPicked}
-                              onChange={() => {}} // handled by div onClick
-                              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 mt-0.5"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex justify-between items-start gap-2">
-                                <p className={`font-semibold text-xs truncate ${isPicked ? 'text-blue-900 line-through' : 'text-slate-900'}`}>{item.name}</p>
-                                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">Qty: {item.qty}</span>
-                              </div>
-                              <div className="flex justify-between items-center mt-1 text-[11px] text-secondary">
-                                <span>SKU: {item.sku}</span>
-                                <span className="font-medium text-blue-700 bg-blue-50/50 px-1 rounded flex items-center gap-0.5">
-                                  <span className="material-symbols-outlined text-[10px]">location_on</span>
-                                  {item.location}
-                                </span>
-                              </div>
+                  {/* Dynamic Print Style */}
+                  <style>{`
+                    @media print {
+                      body * {
+                        visibility: hidden !important;
+                      }
+                      #print-section, #print-section * {
+                        visibility: visible !important;
+                      }
+                      #print-section {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                        background: white !important;
+                        color: black !important;
+                        padding: 20px;
+                        box-shadow: none !important;
+                      }
+                      .no-print {
+                        display: none !important;
+                      }
+                    }
+                  `}</style>
+
+                  {outboundResult ? (
+                    /* Real Result from Backend */
+                    <div id="print-section" className="space-y-6">
+                      {/* Waybill Print Card */}
+                      <div className="bg-white border-2 border-slate-900 rounded-xl p-5 shadow-sm relative overflow-hidden text-black">
+                        <div className="flex justify-between items-start border-b border-slate-200 pb-3 mb-3">
+                          <div>
+                            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">SmartLog Waybill</span>
+                            <h4 className="font-bold text-sm mt-1 font-mono text-slate-900">{outboundResult.waybillCode}</h4>
+                            <p className="text-[10px] text-slate-500 mt-0.5">Created: {new Date(outboundResult.createdAt).toLocaleString()}</p>
+                          </div>
+                          {outboundResult.qrCodeBase64 && (
+                            <img src={outboundResult.qrCodeBase64} alt="Waybill QR Code" className="w-20 h-20 border border-slate-100 p-1 bg-white" />
+                          )}
+                        </div>
+
+                        <div className="space-y-2.5 text-xs">
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sender:</span>
+                            <p className="font-medium text-slate-800 text-[11px]">SmartLog Hub A - District 9, HCMC</p>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Receiver:</span>
+                            <p className="font-bold text-slate-900 text-[11px]">{selectedOrder.customerName}</p>
+                            <p className="text-slate-600 text-[11px] leading-tight mt-0.5">{selectedOrder.destination}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-2 text-[11px]">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Weight:</span>
+                              <p className="font-semibold text-slate-800">45 kg</p>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Final Cost:</span>
+                              <p className="font-semibold text-slate-800">{selectedOrder.cost}</p>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Waybill Print Preview Card */}
-                  <div className="bg-white border-2 border-dashed border-slate-300 rounded-xl p-5 shadow-inner relative overflow-hidden">
-                    <div className="absolute top-0 right-0 bg-slate-100 text-slate-500 px-3 py-1 rounded-bl-lg text-[9px] font-bold tracking-wider uppercase border-l border-b border-slate-200">Waybill Preview</div>
-                    
-                    {/* Barcode mockup */}
-                    <div className="flex flex-col items-center mb-4 mt-2">
-                      <div className="flex justify-center items-center gap-[2px] h-10 w-full bg-white p-1 border border-gray-100 rounded">
-                        <div className="w-[3px] h-8 bg-black"></div>
-                        <div className="w-[1px] h-8 bg-black"></div>
-                        <div className="w-[4px] h-8 bg-black"></div>
-                        <div className="w-[2px] h-8 bg-black"></div>
-                        <div className="w-[1px] h-8 bg-black"></div>
-                        <div className="w-[3px] h-8 bg-black"></div>
-                        <div className="w-[1px] h-8 bg-black"></div>
-                        <div className="w-[5px] h-8 bg-black"></div>
-                        <div className="w-[2px] h-8 bg-black"></div>
-                        <div className="w-[1px] h-8 bg-black"></div>
-                        <div className="w-[3px] h-8 bg-black"></div>
-                        <div className="w-[1px] h-8 bg-black"></div>
-                        <div className="w-[4px] h-8 bg-black"></div>
-                        <div className="w-[2px] h-8 bg-black"></div>
-                      </div>
-                      <span className="text-[10px] font-mono tracking-widest text-slate-700 mt-1 font-bold">*{selectedOrder.id.replace('#', 'WB')}*</span>
-                    </div>
-
-                    <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
-                      <div>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sender:</span>
-                        <p className="font-medium text-slate-800 text-[11px]">SmartLog Hub A - District 9, HCMC</p>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Receiver:</span>
-                        <p className="font-bold text-slate-900 text-[11px]">{selectedOrder.customerName}</p>
-                        <p className="text-slate-600 text-[11px] leading-tight mt-0.5">{selectedOrder.destination}</p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-2 text-[11px]">
-                        <div>
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Weight:</span>
-                          <p className="font-semibold text-slate-800">45 kg (Est.)</p>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cost:</span>
-                          <p className="font-semibold text-slate-800">{selectedOrder.cost}</p>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Print Actions */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => handleSimulatePrint('Waybill')}
-                      disabled={isPrintLoading !== null}
-                      className="py-2.5 rounded-lg border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition flex items-center justify-center gap-1.5 disabled:opacity-50"
-                    >
-                      {isPrintLoading === 'Waybill' ? (
-                        <span className="material-symbols-outlined text-sm animate-spin">sync</span>
-                      ) : (
-                        <span className="material-symbols-outlined text-sm">print</span>
-                      )}
-                      Print Waybill
-                    </button>
-                    <button
-                      onClick={() => handleSimulatePrint('Picking List')}
-                      disabled={isPrintLoading !== null}
-                      className="py-2.5 rounded-lg border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition flex items-center justify-center gap-1.5 disabled:opacity-50"
-                    >
-                      {isPrintLoading === 'Picking List' ? (
-                        <span className="material-symbols-outlined text-sm animate-spin">sync</span>
-                      ) : (
-                        <span className="material-symbols-outlined text-sm">receipt_long</span>
-                      )}
-                      Print Picking List
-                    </button>
-                  </div>
+                      {/* Picking List table */}
+                      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-black">
+                        <div className="flex items-center gap-2 border-b border-gray-100 pb-3 mb-3">
+                          <span className="material-symbols-outlined text-blue-600 text-lg">receipt_long</span>
+                          <h4 className="font-bold text-sm text-on-surface">Optimized Picking Path</h4>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs text-left">
+                            <thead>
+                              <tr className="border-b border-slate-100 text-slate-400 font-semibold uppercase text-[10px]">
+                                <th className="py-2">SKU</th>
+                                <th className="py-2">Product</th>
+                                <th className="py-2 text-center">Qty</th>
+                                <th className="py-2 text-right">Location</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {outboundResult.pickingList.map((item, idx) => (
+                                <tr key={idx} className="border-b border-slate-100 last:border-0">
+                                  <td className="py-2 font-mono text-slate-600">{item.productSku}</td>
+                                  <td className="py-2 font-medium text-slate-900 truncate max-w-[120px]">{item.productName}</td>
+                                  <td className="py-2 text-center font-bold text-blue-600">{item.quantityToPick}</td>
+                                  <td className="py-2 text-right font-semibold text-slate-700">
+                                    {item.zoneName} - {item.binName}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* Print Actions (Visible only on screen) */}
+                      <div className="grid grid-cols-1 gap-3 no-print">
+                        <button
+                          onClick={handlePrint}
+                          className="py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-green-500/20"
+                        >
+                          <span className="material-symbols-outlined text-sm">print</span>
+                          Print Documents (Waybill &amp; Picking List)
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Preview mockup when not processed */
+                    <>
+                      {/* Picking List Checklist */}
+                      <div className="bg-white border border-outline-variant/30 rounded-xl p-4 shadow-sm">
+                        <div className="flex items-center gap-2 border-b border-gray-100 pb-3 mb-3">
+                          <span className="material-symbols-outlined text-blue-600 text-lg">inventory_2</span>
+                          <h4 className="font-bold text-sm text-on-surface">Picking List Preview</h4>
+                        </div>
+                        <p className="text-xs text-secondary mb-3">Please pick items according to the optimized shelf locations below:</p>
+
+                        <div className="space-y-2.5">
+                          {orderPickingItems[selectedOrder.id]?.map((item) => {
+                            const isPicked = pickedItems.has(item.id);
+                            return (
+                              <div
+                                key={item.id}
+                                onClick={() => handleTogglePick(item.id)}
+                                className={`flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer ${isPicked ? 'bg-blue-50/40 border-blue-200' : 'bg-slate-50 border-slate-100 hover:border-slate-200'
+                                  }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isPicked}
+                                  onChange={() => { }} // handled by div onClick
+                                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 mt-0.5"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex justify-between items-start gap-2">
+                                    <p className={`font-semibold text-xs truncate ${isPicked ? 'text-blue-900 line-through' : 'text-slate-900'}`}>{item.name}</p>
+                                    <span className="text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">Qty: {item.qty}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center mt-1 text-[11px] text-secondary">
+                                    <span>SKU: {item.sku}</span>
+                                    <span className="font-medium text-blue-700 bg-blue-50/50 px-1 rounded flex items-center gap-0.5">
+                                      <span className="material-symbols-outlined text-[10px]">location_on</span>
+                                      {item.location}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Waybill Print Preview Card */}
+                      <div className="bg-white border-2 border-dashed border-slate-300 rounded-xl p-5 shadow-inner relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-slate-100 text-slate-500 px-3 py-1 rounded-bl-lg text-[9px] font-bold tracking-wider uppercase border-l border-b border-slate-200">Waybill Preview</div>
+
+                        {/* Barcode mockup */}
+                        <div className="flex flex-col items-center mb-4 mt-2">
+                          <div className="flex justify-center items-center gap-[2px] h-10 w-full bg-white p-1 border border-gray-100 rounded">
+                            <div className="w-[3px] h-8 bg-black"></div>
+                            <div className="w-[1px] h-8 bg-black"></div>
+                            <div className="w-[4px] h-8 bg-black"></div>
+                            <div className="w-[2px] h-8 bg-black"></div>
+                            <div className="w-[1px] h-8 bg-black"></div>
+                            <div className="w-[3px] h-8 bg-black"></div>
+                            <div className="w-[1px] h-8 bg-black"></div>
+                            <div className="w-[5px] h-8 bg-black"></div>
+                            <div className="w-[2px] h-8 bg-black"></div>
+                            <div className="w-[1px] h-8 bg-black"></div>
+                            <div className="w-[3px] h-8 bg-black"></div>
+                            <div className="w-[1px] h-8 bg-black"></div>
+                            <div className="w-[4px] h-8 bg-black"></div>
+                            <div className="w-[2px] h-8 bg-black"></div>
+                          </div>
+                          <span className="text-[10px] font-mono tracking-widest text-slate-700 mt-1 font-bold">*{selectedOrder.id.replace('#', 'WB')}*</span>
+                        </div>
+
+                        <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sender:</span>
+                            <p className="font-medium text-slate-800 text-[11px]">SmartLog Hub A - District 9, HCMC</p>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Receiver:</span>
+                            <p className="font-bold text-slate-900 text-[11px]">{selectedOrder.customerName}</p>
+                            <p className="text-slate-600 text-[11px] leading-tight mt-0.5">{selectedOrder.destination}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-2 text-[11px]">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Weight:</span>
+                              <p className="font-semibold text-slate-800">45 kg (Est.)</p>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cost:</span>
+                              <p className="font-semibold text-slate-800">{selectedOrder.cost}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -565,14 +691,32 @@ const AdminOrders: React.FC = () => {
             {/* Drawer Footer actions */}
             <div className="p-6 border-t border-outline-variant/20 flex gap-3 bg-surface/50 backdrop-blur-md">
               {drawerTab === 'outbound' ? (
-                <button
-                  onClick={handleConfirmExport}
-                  disabled={(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'}
-                  className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none"
-                >
-                  <span className="material-symbols-outlined text-sm">local_shipping</span>
-                  Confirm Outbound &amp; Dispatch Driver
-                </button>
+                outboundResult ? (
+                  <button
+                    onClick={handlePrint}
+                    className="w-full py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-xs transition shadow-md shadow-green-500/20 flex items-center justify-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-sm">print</span>
+                    Print Waybill &amp; Picking List
+                  </button>
+                ) : outboundLoading ? (
+                  <button
+                    disabled
+                    className="w-full py-2.5 rounded-lg bg-blue-400 text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
+                  >
+                    <span className="material-symbols-outlined text-sm animate-spin">sync</span>
+                    Processing Outbound...
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleConfirmExport}
+                    disabled={(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'}
+                    className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none"
+                  >
+                    <span className="material-symbols-outlined text-sm">local_shipping</span>
+                    Confirm Outbound &amp; Dispatch Driver
+                  </button>
+                )
               ) : (
                 <>
                   <button className="flex-1 py-2.5 rounded-lg border border-outline text-on-surface font-label-md text-label-md hover:bg-surface-variant transition">Contact Driver</button>
