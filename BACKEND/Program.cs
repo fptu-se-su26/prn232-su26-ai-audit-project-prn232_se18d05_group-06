@@ -20,6 +20,8 @@ builder.Services.AddDbContext<SmartLogDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IOutboundService, OutboundService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddHostedService<VehicleCleanupWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

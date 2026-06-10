@@ -14,10 +14,25 @@ namespace BACKEND.Models
         public DbSet<WarehouseStock> WarehouseStocks { get; set; }
         public DbSet<WarehouseLocation> WarehouseLocations { get; set; }
         public DbSet<Waybill> Waybills { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Configure Vehicle
+            modelBuilder.Entity<Vehicle>(entity =>
+            {
+                entity.ToTable("Vehicles");
+                entity.HasKey(e => e.VehicleId);
+                entity.HasIndex(e => e.LicensePlate).IsUnique();
+                entity.Property(e => e.LicensePlate).HasMaxLength(20).IsUnicode(false);
+                entity.Property(e => e.VehicleModel).HasMaxLength(50).IsUnicode(true);
+                entity.Property(e => e.PayloadKg).HasColumnType("decimal(10,2)");
+                entity.Property(e => e.VolumeCbm).HasColumnType("decimal(10,2)");
+                entity.Property(e => e.FuelConsumptionRate).HasColumnType("decimal(5,2)");
+                entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValue("AVAILABLE");
+            });
 
             // Configure Order
             modelBuilder.Entity<Order>(entity =>

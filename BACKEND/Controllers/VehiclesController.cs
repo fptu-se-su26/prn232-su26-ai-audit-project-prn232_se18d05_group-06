@@ -1,0 +1,105 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using BACKEND.Services;
+using BACKEND.DTOs;
+
+namespace BACKEND.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class VehiclesController : ControllerBase
+    {
+        private readonly IVehicleService _vehicleService;
+
+        public VehiclesController(IVehicleService vehicleService)
+        {
+            _vehicleService = vehicleService;
+        }
+
+        // POST: api/vehicles/detect
+        [HttpPost("detect")]
+        public async Task<ActionResult<VehicleDto>> DetectVehicle([FromBody] DetectVehicleRequestDto request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.LicensePlate))
+            {
+                return BadRequest("License plate is required.");
+            }
+
+            try
+            {
+                var vehicle = await _vehicleService.DetectStrangeVehicleAsync(request.LicensePlate);
+                return Ok(vehicle);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/vehicles/pending
+        [HttpGet("pending")]
+        public async Task<ActionResult<List<VehicleDto>>> GetPendingVehicles()
+        {
+            try
+            {
+                var pendingList = await _vehicleService.GetPendingVehiclesAsync();
+                return Ok(pendingList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/vehicles/approve/{id}
+        // Note: Using POST instead of PUT as strictly specified to align with Frontend Axios configuration
+        [HttpPost("approve/{id}")]
+        public async Task<ActionResult<VehicleDto>> ApproveVehicle(int id, [FromBody] ApproveVehicleRequestDto request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Approval details are required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.VehicleModel))
+            {
+                return BadRequest("Vehicle model is required.");
+            }
+
+            try
+            {
+                var approved = await _vehicleService.ApproveVehicleAsync(id, request);
+                return Ok(approved);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // DELETE: api/vehicles/reject/{id}
+        [HttpDelete("reject/{id}")]
+        public async Task<IActionResult> RejectVehicle(int id)
+        {
+            try
+            {
+                await _vehicleService.RejectVehicleAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+    }
+}

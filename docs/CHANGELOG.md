@@ -139,6 +139,25 @@ Author: Trần Văn Tùng (DE180109)
 
 ### AI-assisted
 - Sử dụng Gemini để gợi ý bố cục Grid linh hoạt cho danh sách voucher và khung chat responsive.
+
+---
+
+## [2026-06-10]
+Author: Lập Quốc Hùng (DE180096)
+
+### Added
+- Feature: Full-stack integration of UC015 - Automatically create new vehicle profile from AI ALPR detection.
+- Backend Changes: Formulated Vehicle entity, mapped rules in SmartLogDbContext.cs conforming to SmartLogAIDb.sql. Coded 4 REST endpoints in VehiclesController.cs and business logic in VehicleService.cs using the data-bypass model (dummy 0.0m for technical constraints).
+- Background Worker: Added VehicleCleanupWorker.cs to run every 1 hour and automatically purge expired records using a SQL condition (InsuranceExpiry < DateTime.UtcNow).
+- Frontend Changes: Modified VehiclesTab.tsx to include the 'Pending' status filter, dynamic countdown timer rendering, Axios API integration, and locking down the License Plate input within the approval modal drawer.
+
+### Fixed
+- Resolved Permission denied during staging phase by bypassing the IDE's locked system directory (BACKEND/.vs/) and targeting explicit codebase paths instead.
+
+### AI-assisted
+- Scaffolded service structures, calculated frontend countdown tickers, and diagnosed Git caching permissions.
+- Commit Message: [DE180096] feat(uc015): complete full-stack integration with API endpoints and auto-delete worker
+
 =======
 
 ---
