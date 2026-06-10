@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CustomerLandingPage from './features/customer/CustomerLandingPage';
 import AuthPage from './features/auth/AuthPage';
 import CreateOrder from './features/customer/CreateOrder';
@@ -17,7 +17,6 @@ import OrderDetails from './features/customer/OrderDetails';
 import OrderTrackingMap from './features/customer/OrderTrackingMap';
 import AboutPage from './features/customer/AboutPage';
 import PaymentPage from './features/customer/PaymentPage';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DispatcherDashboard from '@features/dispatcher/pages/DispatcherDashboard';
 import DriverDashboard from './features/driver/pages/DriverDashboard';
 
@@ -51,7 +50,7 @@ const modules = [
   { path: '/admin/settings', name: 'Settings', desc: 'General config, Branding, Engine config', icon: 'settings', color: 'from-gray-500 to-slate-600' },
 ];
 
-const TestCenterHome: React.FC = () => {
+const App: React.FC = () => {
   return (
     <Router>
       <Routes>
@@ -89,6 +88,20 @@ const TestCenterHome: React.FC = () => {
         {/* Support */}
         <Route path="/support" element={<SupportPage />} />
         <Route path="/support-chat" element={<SupportChat />} />
+
+        {/* Admin Dashboard & Management */}
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        <Route path="/admin/finance" element={<AdminFinance />} />
+        <Route path="/admin/audit-log" element={<AdminAuditLog />} />
+        <Route path="/admin/notifications" element={<AdminNotifications />} />
+        <Route path="/admin/fleet-map" element={<AdminFleetMap />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/user-management" element={<AdminUserManagement />} />
+        <Route path="/admin/role-permission" element={<AdminRolePermission />} />
+        <Route path="/admin/smart-log-ai" element={<AdminSmartLogAI />} />
+        <Route path="/admin/warehouses" element={<AdminWarehouses />} />
+        <Route path="/admin/settings" element={<AdminSettings />} />
 
         {/* Others */}
         <Route path="/about" element={<AboutPage />} />

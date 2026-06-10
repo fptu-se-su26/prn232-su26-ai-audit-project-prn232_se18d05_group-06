@@ -9,6 +9,7 @@ export default {
     extend: {
       colors: {
         // shadcn/ui
+        background: "hsl(var(--background))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
