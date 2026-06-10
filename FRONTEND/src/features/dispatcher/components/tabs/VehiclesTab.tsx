@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface VehicleUnit {
   id: string; // LicensePlate
+  dbVehicleId?: number; // DB Primary Key for pending vehicles
   name: string; // Display Name
   vehicleModel: string; // VehicleModel in DB
   type: string;
@@ -234,6 +236,49 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
     return `Hết hạn sau ${diffHours} giờ ${diffMins} phút`;
   };
 
+  const fetchPendingVehicles = async () => {
+    try {
+      const response = await axios.get('http://localhost:5184/api/vehicles/pending');
+      const backendPending = response.data.map((v: any) => ({
+        id: v.licensePlate,
+        dbVehicleId: v.vehicleId,
+        name: v.vehicleModel,
+        vehicleModel: v.vehicleModel,
+        type: v.payloadKg > 20000 ? 'Xe vận tải hạng nặng' : v.payloadKg > 2000 ? 'Xe tải hạng trung' : 'Xe van giao hàng',
+        status: 'Pending',
+        img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07',
+        capacityPercent: 0,
+        capacityText: '0%',
+        fuelPercent: 0,
+        maintText: 'Chờ phê duyệt',
+        maintStatus: 'warning',
+        engineTemp: 0,
+        oilPressure: 0,
+        batteryVoltage: 0,
+        dpfLevel: 0,
+        lat: 21.0285,
+        lon: 105.8542,
+        speed: 0,
+        payloadKg: v.payloadKg,
+        volumeCbm: v.volumeCbm,
+        fuelConsumptionRate: v.fuelConsumptionRate,
+        registrationExpiry: v.registrationExpiry,
+        insuranceExpiry: v.insuranceExpiry
+      }));
+
+      setVehicles((prev) => {
+        const nonPending = prev.filter(v => v.status !== 'Pending');
+        return [...nonPending, ...backendPending];
+      });
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách xe lạ từ backend:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingVehicles();
+  }, []);
+
   // Async API Hook: Approve a pending strange vehicle
   const handleApprovePendingVehicle = async (payload: {
     id: string;
@@ -261,26 +306,37 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
     try {
       setToastMessage(`Đang phê duyệt phương tiện ${payload.id}...`);
 
-      // =======================================================================
-      // TODO: Connect Axios/Fetch API call here to persist in database
-      // Example:
-      // const response = await axios.post('/api/vehicles/approve', payload);
-      // =======================================================================
+      const currentVehicle = vehicles.find(v => v.id === payload.id);
+      const vehicleId = currentVehicle?.dbVehicleId;
 
-      // Simulate API latency
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (!vehicleId) {
+        setToastMessage(`Lỗi: Không tìm thấy ID cơ sở dữ liệu cho phương tiện ${payload.id}.`);
+        return false;
+      }
+
+      const approvePayload = {
+        vehicleModel: payload.vehicleModel,
+        payloadKg: payload.payloadKg,
+        volumeCbm: payload.volumeCbm,
+        insuranceExpiry: new Date(payload.insuranceExpiry).toISOString(),
+        registrationExpiry: new Date(payload.registrationExpiry).toISOString(),
+        fuelConsumptionRate: payload.fuelConsumptionRate
+      };
+
+      await axios.post(`http://localhost:5184/api/vehicles/approve/${vehicleId}`, approvePayload);
+
+      setToastMessage(`Cập nhật Hạm đội: Mã phương tiện ${payload.id} (${payload.vehicleModel}) đã được phê duyệt vào hạm đội thành công!`);
+      
+      await fetchPendingVehicles();
 
       const newUnit: VehicleUnit = {
         ...payload,
-        name: payload.vehicleModel, // Sync display name
+        name: payload.vehicleModel,
         status: payload.status,
-        img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07', // default placeholder truck img
+        img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07',
       };
-
-      // Filter out the pending instance, insert the newly approved vehicle
       setVehicles((prev) => [newUnit, ...prev.filter((v) => v.id !== payload.id)]);
       setSelectedVehicleId(newUnit.id);
-      setToastMessage(`Cập nhật Hạm đội: Mã phương tiện ${newUnit.id} (${newUnit.vehicleModel}) đã được phê duyệt vào hạm đội thành công!`);
       return true;
     } catch (error) {
       console.error('Failed to approve vehicle', error);
@@ -294,19 +350,22 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
     try {
       setToastMessage(`Đang từ chối phương tiện ${plate}...`);
 
-      // =======================================================================
-      // TODO: Connect Axios/Fetch API call here to reject/delete from database
-      // Example:
-      // await axios.delete(`/api/vehicles/pending/${plate}`);
-      // =======================================================================
+      const currentVehicle = vehicles.find(v => v.id === plate);
+      const vehicleId = currentVehicle?.dbVehicleId;
 
-      // Simulate API latency
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (!vehicleId) {
+        setToastMessage(`Lỗi: Không tìm thấy ID cơ sở dữ liệu cho phương tiện ${plate}.`);
+        return;
+      }
 
-      setVehicles((prev) => prev.filter((v) => v.id !== plate));
+      await axios.delete(`http://localhost:5184/api/vehicles/reject/${vehicleId}`);
+
       setToastMessage(`Cập nhật Hạm đội: Đã từ chối và xóa biển số ${plate} khỏi danh sách chờ duyệt.`);
       
-      // Select the first remaining vehicle
+      await fetchPendingVehicles();
+      
+      setVehicles((prev) => prev.filter((v) => v.id !== plate));
+      
       setVehicles((latest) => {
         if (latest.length > 0) {
           setSelectedVehicleId(latest[0].id);
