@@ -32,7 +32,7 @@ jobs:
       if: always()
       uses: classroom-resources/autograding-grading-reporter@v1
       env:
-        REPORTER_RESULTS: "eyJzdGF0dXMiOiJzdWNjZXNzIn0="
+        REPORTER_RESULTS: "eyJ0ZXN0cyI6IFt7Im5hbWUiOiAiRHVtbXkgVGVzdCIsICJzdGF0dXMiOiAicGFzcyJ9XX0="
       with:
         runners: "reporter"
       # For more information on this runner, see the documentation at https://github.com/classroom-resources/autograding-grading-reporter
