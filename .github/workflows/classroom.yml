@@ -29,7 +29,10 @@ jobs:
       #       comparison-method: exact
       #       timeout: 10
     - name: Autograding Reporter
+      if: always()
       uses: classroom-resources/autograding-grading-reporter@v1
+      with:
+        runners: ""
       # For more information on this runner, see the documentation at https://github.com/classroom-resources/autograding-grading-reporter
       # To output the results of the tests, you can use the
       # autograding-grading-reporter action like this:
