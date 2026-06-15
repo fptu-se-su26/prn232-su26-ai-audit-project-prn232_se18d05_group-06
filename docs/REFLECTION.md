@@ -110,6 +110,19 @@ Tuần này, nhóm đã sử dụng Gemini để viết cấu hình Router đị
 
 Nhóm đã kiểm tra lại lỗi, tự tìm hiểu tài liệu chính thức của React Router v6 để cập nhật cú pháp từ `component` sang `element`. Bài học lớn nhất rút ra là sinh viên cần luôn tự xác minh, kiểm chứng code do AI gợi ý trước khi áp dụng vào sản phẩm thực tế, vì AI có thể đưa ra các gợi ý lỗi thời hoặc không tương thích phiên bản.
 
+## Reflection - Tuần 3
+
+Trong tuần thứ 3, Trần Văn Tùng đã sử dụng Antigravity để thử nghiệm các hiệu ứng giao diện hiện đại như Glassmorphism cho trang Auth và Profile. AI đã gợi ý các class Backdrop Blur rất ấn tượng, giúp giao diện trông cao cấp hơn hẳn so với các mẫu UI thông thường.
+
+Tuy nhiên, việc lạm dụng hiệu ứng này có thể gây khó đọc trên một số thiết bị hoặc nền hình ảnh quá sáng. Nhóm đã tự điều chỉnh lại độ mờ (opacity) và thêm các lớp phủ màu tối để đảm bảo tính khả dụng (accessibility) mà vẫn giữ được tính thẩm mỹ cao.
+
+## Reflection - Tuần 4 (Final)
+
+Trong tuần cuối cùng, nhóm tập trung hoàn thiện các tính năng nâng cao như theo dõi đơn hàng trên bản đồ và hệ thống Voucher. Việc sử dụng AI để tạo các animation SVG cho xe tải di chuyển giúp tiết kiệm rất nhiều thời gian lập trình CSS thuần.
+
+Nhóm cũng nhận ra rằng khi project càng lớn, việc kiểm soát code do AI sinh ra càng quan trọng. Chúng tôi đã dành nhiều thời gian để refactor lại code, chia nhỏ components và đảm bảo các trang như VoucherCenter, SupportChat hoạt động đồng bộ với theme chung của FleetNova.
+
+
 ---
 
 ## 6. AI có giúp em/nhóm học tốt hơn không?

@@ -13,7 +13,7 @@
 | MSSV / Danh sách MSSV | DE180071,DE180096,DE180088,DE180109,DE180104 |
 | Giảng viên hướng dẫn | Lê Thiện Nhật Quang |
 | Ngày bắt đầu | 17/05/2026 |
-| Ngày hoàn thành |  |
+| Ngày hoàn thành | 09/06/2026 |
 
 ---
 
@@ -64,6 +64,61 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Human Decision: Thay đổi import tương đối và thêm Catch-all Route
 - Applied To: FRONTEND/src/App.tsx
 - Verification: Click chuyển trang giữa /dispatcher và /driver thành công.
+
+## Log #03
+- Date: 2026-05-27
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Tích hợp thiết kế Glassmorphism cho AuthPage và Profile
+- Prompt Reference: PROMPTS.md#prompt-03
+- AI Output Summary: Gợi ý các class `backdrop-blur-md` và `bg-white/10` cho card UI.
+- Human Decision: Tinh chỉnh độ mờ của card và màu border để nổi bật trên nền tối (navy).
+- Applied To: FRONTEND/src/features/auth/AuthPage.tsx, FRONTEND/src/features/customer/CustomerProfile.tsx
+- Verification: Kiểm tra hiển thị trên trình duyệt, đảm bảo chữ rõ ràng trên nền mờ.
+
+## Log #04
+- Date: 2026-05-29
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: ChatGPT
+- Purpose: Xử lý hiển thị danh sách đơn hàng động
+- Prompt Reference: PROMPTS.md#prompt-04
+- AI Output Summary: Gợi ý dùng `.map()` để render danh sách thẻ đơn hàng từ mảng dữ liệu.
+- Human Decision: Thêm logic phân loại trạng thái đơn hàng (Đang giao, Hoàn thành) bằng màu sắc badge riêng biệt.
+- Applied To: FRONTEND/src/features/customer/OrderHistory.tsx, FRONTEND/src/features/customer/CustomerDashboard.tsx
+- Verification: Thêm dữ liệu giả vào mảng và xem danh sách có hiển thị đúng và đồng nhất không.
+
+## Log #05
+- Date: 2026-05-31
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Vẽ lộ trình trên bản đồ theo dõi (OrderTrackingMap)
+- Prompt Reference: PROMPTS.md#prompt-05
+- AI Output Summary: Gợi ý cấu trúc SVG và các animation CSS cho icon xe tải di chuyển theo đường kẻ.
+- Human Decision: Thay đổi icon xe tải sang SVG cao cấp hơn và chỉnh lại tốc độ animation cho mượt mà.
+- Applied To: FRONTEND/src/features/customer/OrderTrackingMap.tsx
+- Verification: Quan sát xe tải di chuyển trên lộ trình khi load trang trên Chrome.
+
+## Log #06
+- Date: 2026-06-01
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Gemini
+- Purpose: Thiết kế Voucher Center và Support Chat
+- Prompt Reference: PROMPTS.md#prompt-06
+- AI Output Summary: Gợi ý layout lưới (Grid) cho các thẻ khuyến mãi và cấu trúc khung chat box.
+- Human Decision: Tùy chỉnh hiệu ứng hover cho voucher và phối hợp màu sắc tin nhắn chat theo theme chung.
+- Applied To: FRONTEND/src/features/voucher/VoucherCenter.tsx, FRONTEND/src/features/support/SupportChat.tsx
+- Verification: Kiểm tra tương tác hover voucher và nhập tin nhắn vào khung chat thành công.
+
+## Log #07
+- Date: 2026-06-09
+- Author: Lập Quốc Hùng (DE180096)
+- AI Tool: Antigravity
+- Purpose: Thiết kế & Hoàn thiện UC004: Tạo lệnh xuất kho & In vận đơn (Full-stack)
+- Prompt Reference: PROMPTS.md#prompt-07
+- AI Output Summary: Thiết kế toàn bộ cấu trúc Backend (.NET 8 Web API, EF Core entity mapping, thuật toán lập Picking List sắp xếp tối ưu Aisle -> Shelf -> Row, mã hóa bảo mật HMACSHA256 kết hợp QRCoder sinh ảnh QR Base64, API Controller) và tích hợp kết nối Axios ở Frontend React, phân tích RegEx bóc tách ID số đơn hàng (ví dụ #ORD-9921 thành 9921) và nhúng CSS `@media print` ẩn sidebar/header khi gọi window.print().
+- Human Decision: Cấu hình thêm CORS policy ("AllowAll") trong Program.cs để ứng dụng React gọi API an toàn, tinh chỉnh lại kiểu cột decimal cho DbContext, và thực hiện dọn dẹp các thư mục rác `bin/` và `obj/` ra khỏi Git cache, cấu hình `.gitignore` gốc.
+- Applied To: BACKEND/DTOs/OutboundRequestDto.cs, BACKEND/DTOs/PickingListItemDto.cs, BACKEND/DTOs/OutboundResponseDto.cs, BACKEND/Models/Entities.cs, BACKEND/Models/SmartLogDbContext.cs, BACKEND/Services/IOutboundService.cs, BACKEND/Services/OutboundService.cs, BACKEND/Controllers/OutboundController.cs, BACKEND/Program.cs, FRONTEND/src/features/admin/Orders.tsx, .gitignore
+- Verification: Chạy `dotnet build` đạt 0 Errors và 0 Warnings. Chạy `npm run type-check` ở frontend đạt 0 lỗi TypeScript.
 
 ---
 
@@ -117,8 +172,9 @@ Nhóm chạy thử chương trình trên môi trường phát triển cục bộ
 | Thành viên | MSSV | Nhiệm vụ chính | Có sử dụng AI không? | Minh chứng đóng góp |
 |---|---|---|---|---|
 | Vũ Duy Lê | DE180071 | Cấu trúc dự án, điều hướng Router chính | Có | [App.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
-| Nguyễn Văn B | DE180096 | Thiết lập các trang hiển thị Driver | Có | Các tab driver |
+| Lập Quốc Hùng | DE180096 | Thiết lập các trang hiển thị Driver & Thực hiện UC004 (Full-stack) | Có | [Orders.tsx](file:///d:/Ky%208%20-%20Summer/PRN232/Project/PRN232_Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx) |
 | Trần Thị C | DE180088 | Xây dựng CSS và HSL theme | Có | [index.css](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/index.css) |
+| Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
 | Phạm Văn D | DE180109 | Thiết lập layout, Sidebar, Header | Có | Các components layout |
 | Hoàng Thị E | DE180104 | Viết tài liệu dự án, kiểm thử thủ công | Có | File tài liệu |
 

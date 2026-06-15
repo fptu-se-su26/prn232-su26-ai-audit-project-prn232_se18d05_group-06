@@ -82,6 +82,123 @@ Author: Vũ Duy Lê (DE180071)
 
 ---
 
+## [2026-05-27]
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Xây dựng giao diện AuthPage với tính năng chuyển đổi Đăng nhập/Đăng ký mượt mà.
+- Triển khai trang Profile khách hàng với bố cục khoa học và đẹp mắt.
+
+### Changed
+- Tích hợp phong cách thiết kế Glassmorphism (hiệu ứng kính mờ) cho toàn bộ card UI trong trang Auth và Profile.
+
+### AI-assisted
+- Sử dụng Antigravity để gợi ý các class Tailwind cho hiệu ứng backdrop-blur và border mờ.
+
+---
+
+## [2026-05-29]
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Phát triển trang OrderHistory và PaymentHistory hiển thị danh sách giao dịch của khách hàng.
+- Thêm các Badge trạng thái đơn hàng (Đang xử lý, Đang giao, Đã hoàn thành) với màu sắc phân biệt.
+
+### Changed
+- Refactor code hiển thị danh sách sử dụng hàm .map() để tối ưu hóa việc quản lý dữ liệu.
+
+### AI-assisted
+- Sử dụng ChatGPT để tối ưu cấu trúc vòng lặp hiển thị danh sách và xử lý logic render theo điều kiện trạng thái.
+
+---
+
+## [2026-05-31]
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Hoàn thiện trang OrderTracking với bản đồ lộ trình di chuyển (OrderTrackingMap).
+- Tích hợp animation SVG cho biểu tượng xe tải di chuyển theo thời gian thực trên bản đồ mockup.
+
+### Changed
+- Cải thiện UX cho các trang CreateOrder và CreateShipment bằng các bước nhập liệu (Steppers).
+
+### AI-assisted
+- Sử dụng Antigravity để hỗ trợ viết CSS Animation cho icon SVG xe tải di chuyển mượt mà trên lộ trình.
+
+---
+
+## [2026-06-01]
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Xây dựng trung tâm khuyến mãi VoucherCenter với giao diện thẻ quà tặng hiện đại.
+- Triển khai SupportChat và SupportPage hỗ trợ khách hàng gửi khiếu nại và chat trực tuyến.
+
+### Changed
+- Cập nhật Header và Footer đồng nhất trên toàn bộ các trang chức năng của khách hàng.
+
+### AI-assisted
+- Sử dụng Gemini để gợi ý bố cục Grid linh hoạt cho danh sách voucher và khung chat responsive.
+
+---
+
+## [2026-06-10]
+Author: Lập Quốc Hùng (DE180096)
+
+### Added
+- Feature: Full-stack integration of UC015 - Automatically create new vehicle profile from AI ALPR detection.
+- Backend Changes: Formulated Vehicle entity, mapped rules in SmartLogDbContext.cs conforming to SmartLogAIDb.sql. Coded 4 REST endpoints in VehiclesController.cs and business logic in VehicleService.cs using the data-bypass model (dummy 0.0m for technical constraints).
+- Background Worker: Added VehicleCleanupWorker.cs to run every 1 hour and automatically purge expired records using a SQL condition (InsuranceExpiry < DateTime.UtcNow).
+- Frontend Changes: Modified VehiclesTab.tsx to include the 'Pending' status filter, dynamic countdown timer rendering, Axios API integration, and locking down the License Plate input within the approval modal drawer.
+
+### Fixed
+- Resolved Permission denied during staging phase by bypassing the IDE's locked system directory (BACKEND/.vs/) and targeting explicit codebase paths instead.
+
+### AI-assisted
+- Scaffolded service structures, calculated frontend countdown tickers, and diagnosed Git caching permissions.
+- Commit Message: [DE180096] feat(uc015): complete full-stack integration with API endpoints and auto-delete worker
+
+=======
+
+---
+
+## [2026-05-24]
+Author: Vũ Duy Lê (DE180071)
+
+### Added
+- Khởi tạo khung dự án Frontend sử dụng thư viện React và Vite.
+- Xây dựng bố cục giao diện chính với tệp DispatcherLayout.tsx và các Tab menu điều phối.
+
+### Changed
+- Cập nhật cấu hình tệp tailwind.config.js để định nghĩa các dải màu, khoảng cách đặc trưng cho FleetNova.
+
+### Fixed
+- Sửa lỗi tràn khung hiển thị trên các màn hình có độ phân giải nhỏ và trung bình bằng các thuộc tính scroll linh hoạt.
+
+### AI-assisted
+- Sử dụng ChatGPT để gợi ý các class CSS Flexbox dựng thanh Sidebar cố định.
+- Mã nguồn mẫu được nhóm rà soát, kiểm tra khả năng đáp ứng thiết bị trước khi đưa vào ứng dụng.
+
+---
+
+## [2026-05-25]
+Author: Vũ Duy Lê (DE180071)
+
+### Added
+- Thiết lập tệp định tuyến chính App.tsx kết nối trang điều hành và trang tài xế.
+
+### Changed
+- Cấu hình lại các tệp import đường dẫn trong App.tsx để định vị chính xác vị trí các components.
+
+### Fixed
+- Sửa lỗi catch-all route để chuyển hướng an toàn về trang chủ điều hành khi người dùng nhập sai địa chỉ URL.
+
+### AI-assisted
+- Sử dụng Gemini để tham khảo cấu trúc định tuyến của react-router-dom v6.
+- Nhóm đã phát hiện AI đề xuất phiên bản cũ và chủ động viết lại theo cú pháp thẻ Route mới nhất.
+
+---
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
