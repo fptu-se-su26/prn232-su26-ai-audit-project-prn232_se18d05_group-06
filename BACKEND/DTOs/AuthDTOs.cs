@@ -23,4 +23,9 @@ namespace BACKEND.DTOs
         public string FullName { get; set; } = null!;
         public string Role { get; set; } = null!;
     }
+
+    public class GoogleLoginRequest
+    {
+        public string TokenId { get; set; } = null!;
+    }
 }

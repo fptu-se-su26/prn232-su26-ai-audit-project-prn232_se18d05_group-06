@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Google.Apis.Auth;
 
 namespace BACKEND.Controllers
 {
@@ -86,6 +87,76 @@ namespace BACKEND.Controllers
                 FullName = user.FullName,
                 Role = user.Role.RoleCode
             });
+        }
+
+        [HttpPost("google")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            try
+            {
+                var payload = await GoogleJsonWebSignature.ValidateAsync(request.TokenId, new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _configuration["GoogleAuth:ClientId"] }
+                });
+
+                // Check if user exists by email
+                var user = await _context.Users.Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Email == payload.Email);
+
+                if (user == null)
+                {
+                    // Create new user if they don't exist
+                    var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleCode == "CUSTOMER" || r.RoleName == "Customer");
+                    if (defaultRole == null)
+                    {
+                        defaultRole = new Role { RoleCode = "CUSTOMER", RoleName = "Customer", IsActive = true };
+                        _context.Roles.Add(defaultRole);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    user = new User
+                    {
+                        // Use email prefix as username, append random if needed, but let's keep it simple
+                        Username = payload.Email,
+                        // Dummy strong password for google users
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
+                        FullName = payload.Name,
+                        Email = payload.Email,
+                        RoleId = defaultRole.RoleId,
+                        IsActive = true,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    _context.Users.Add(user);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (user.IsActive == false)
+                {
+                    return Unauthorized(new { Message = "Account is disabled" });
+                }
+
+                var token = GenerateJwtToken(user);
+                user.LastLoginAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return Ok(new AuthResponse
+                {
+                    Token = token,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    Role = user.Role?.RoleCode ?? "CUSTOMER"
+                });
+            }
+            catch (InvalidJwtException)
+            {
+                return Unauthorized(new { Message = "Invalid Google Token" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Internal server error: " + ex.Message });
+            }
         }
 
         private string GenerateJwtToken(User user)
