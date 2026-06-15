@@ -53,7 +53,7 @@ namespace BACKEND.Services
             _logger.LogInformation("Running expired vehicles cleanup task...");
 
             using var scope = _scopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<SmartLogDbContext>();
+            var context = scope.ServiceProvider.GetRequiredService<SmartLogAiContext>();
 
             var now = DateTime.UtcNow;
 

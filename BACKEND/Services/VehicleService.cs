@@ -10,21 +10,21 @@ namespace BACKEND.Services
 {
     public class VehicleService : IVehicleService
     {
-        private readonly SmartLogDbContext _context;
+        private readonly SmartLogAiContext _context;
 
-        public VehicleService(SmartLogDbContext context)
+        public VehicleService(SmartLogAiContext context)
         {
             _context = context;
         }
 
         public async Task<VehicleDto> DetectStrangeVehicleAsync(string licensePlate)
         {
-            // Normalize license plate formatting if needed
+            // Normalize license plate formatting
             var normalizedPlate = licensePlate.Trim().ToUpper();
 
             // Check if vehicle already exists (whether active/pending)
             var existing = await _context.Vehicles
-                .FirstOrDefaultAsync(v => v.LicensePlate == normalizedPlate);
+                .FirstOrDefaultAsync(v => v.TruckPlate == normalizedPlate);
 
             if (existing != null)
             {
@@ -34,14 +34,12 @@ namespace BACKEND.Services
             // Create new pending vehicle with bypass defaults for SQL constraints
             var newVehicle = new Vehicle
             {
-                LicensePlate = normalizedPlate,
-                VehicleModel = "TEMP_ALPR",
+                TruckPlate = normalizedPlate,
+                VehicleType = "TEMP_ALPR",
                 Status = "PENDING",
-                InsuranceExpiry = DateTime.UtcNow.AddDays(7),
-                RegistrationExpiry = DateTime.UtcNow,
-                PayloadKg = 0.0m,
-                VolumeCbm = 0.0m,
-                FuelConsumptionRate = 0.0m,
+                InspectionExpiry = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+                NextServiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+                MaxWeightTon = 0.0m,
                 IsTempProfile = true,
                 TempExpiryAt = DateTime.UtcNow.AddDays(7)
             };
@@ -55,7 +53,7 @@ namespace BACKEND.Services
         public async Task<List<VehicleDto>> GetPendingVehiclesAsync()
         {
             var pendingVehicles = await _context.Vehicles
-                .Where(v => v.Status == "PENDING" && v.VehicleModel == "TEMP_ALPR")
+                .Where(v => v.Status == "PENDING" && v.VehicleType == "TEMP_ALPR")
                 .ToListAsync();
 
             return pendingVehicles.Select(MapToDto).ToList();
@@ -70,12 +68,10 @@ namespace BACKEND.Services
             }
 
             // Overwrite bypass dummy data with actual registered specifications
-            vehicle.VehicleModel = dto.VehicleModel;
-            vehicle.PayloadKg = dto.PayloadKg;
-            vehicle.VolumeCbm = dto.VolumeCbm;
-            vehicle.InsuranceExpiry = dto.InsuranceExpiry;
-            vehicle.RegistrationExpiry = dto.RegistrationExpiry;
-            vehicle.FuelConsumptionRate = dto.FuelConsumptionRate;
+            vehicle.VehicleType = dto.VehicleModel;
+            vehicle.MaxWeightTon = dto.PayloadKg;
+            vehicle.InspectionExpiry = DateOnly.FromDateTime(dto.InsuranceExpiry);
+            vehicle.NextServiceDate = DateOnly.FromDateTime(dto.RegistrationExpiry);
             vehicle.Status = "AVAILABLE"; // Fully active status
             vehicle.IsTempProfile = false;
             vehicle.TempExpiryAt = null;
@@ -104,14 +100,14 @@ namespace BACKEND.Services
             return new VehicleDto
             {
                 VehicleId = vehicle.VehicleId,
-                LicensePlate = vehicle.LicensePlate,
-                VehicleModel = vehicle.VehicleModel,
-                PayloadKg = vehicle.PayloadKg,
-                VolumeCbm = vehicle.VolumeCbm,
-                InsuranceExpiry = vehicle.InsuranceExpiry,
-                RegistrationExpiry = vehicle.RegistrationExpiry,
-                FuelConsumptionRate = vehicle.FuelConsumptionRate,
-                Status = vehicle.Status
+                LicensePlate = vehicle.TruckPlate,
+                VehicleModel = vehicle.VehicleType ?? string.Empty,
+                PayloadKg = vehicle.MaxWeightTon ?? 0.0m,
+                VolumeCbm = 0.0m,
+                InsuranceExpiry = vehicle.InspectionExpiry?.ToDateTime(TimeOnly.MinValue) ?? DateTime.UtcNow,
+                RegistrationExpiry = vehicle.NextServiceDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.UtcNow,
+                FuelConsumptionRate = 0.0m,
+                Status = vehicle.Status ?? "AVAILABLE"
             };
         }
     }

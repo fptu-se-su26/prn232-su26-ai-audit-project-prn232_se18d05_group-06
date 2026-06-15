@@ -11,10 +11,10 @@ namespace BACKEND.Services
 {
     public class BookingService : IBookingService
     {
-        private readonly SmartLogDbContext _context;
+        private readonly SmartLogAiContext _context;
         private readonly IEmailService _emailService;
 
-        public BookingService(SmartLogDbContext context, IEmailService emailService)
+        public BookingService(SmartLogAiContext context, IEmailService emailService)
         {
             _context = context;
             _emailService = emailService;
@@ -29,8 +29,8 @@ namespace BACKEND.Services
                 if (warehouses.Count == 0)
                 {
                     // Add default warehouses if none exist to prevent foreign key errors
-                    var wh1 = new Warehouse { WarehouseName = "Kho Tổng Miền Bắc (Hà Nội)", Address = "Khu Công Nghiệp Quang Minh, Mê Linh, Hà Nội", ContactNumber = "0243123456" };
-                    var wh2 = new Warehouse { WarehouseName = "Kho Trung Chuyển (HCM)", Address = "Khu Công Nghiệp Tân Bình, Tân Phú, TP. Hồ Chí Minh", ContactNumber = "0283987654" };
+                    var wh1 = new Warehouse { WarehouseCode = "WH01", WarehouseName = "Kho Tổng Miền Bắc (Hà Nội)", Address = "Khu Công Nghiệp Quang Minh, Mê Linh, Hà Nội" };
+                    var wh2 = new Warehouse { WarehouseCode = "WH02", WarehouseName = "Kho Trung Chuyển (HCM)", Address = "Khu Công Nghiệp Tân Bình, Tân Phú, TP. Hồ Chí Minh" };
                     _context.Warehouses.AddRange(wh1, wh2);
                     await _context.SaveChangesAsync();
                     warehouses = await _context.Warehouses.ToListAsync();
@@ -79,11 +79,11 @@ namespace BACKEND.Services
 
             // 1. Get all active docks for this warehouse
             var docks = await _context.Docks
-                .Where(d => d.WarehouseId == warehouseId && d.IsActive)
+                .Where(d => d.WarehouseId == warehouseId && d.IsActive == true)
                 .ToListAsync();
 
             // 2. Get all slot bookings for this warehouse on the specified date
-            var targetDate = date.Date;
+            var targetDate = DateOnly.FromDateTime(date);
             var bookings = await _context.SlotBookings
                 .Include(sb => sb.Vehicle)
                 .Where(sb => sb.WarehouseId == warehouseId && sb.ScheduledDate == targetDate && sb.Status != "CANCELLED")
@@ -111,8 +111,8 @@ namespace BACKEND.Services
 
                 foreach (var slot in predefinedSlots)
                 {
-                    var slotStart = TimeSpan.Parse(slot.Start);
-                    var slotEnd = TimeSpan.Parse(slot.End);
+                    var slotStart = TimeOnly.Parse(slot.Start);
+                    var slotEnd = TimeOnly.Parse(slot.End);
 
                     // Overlap check on same dock
                     var matchingBooking = bookings.FirstOrDefault(b =>
@@ -121,7 +121,7 @@ namespace BACKEND.Services
                         b.ScheduledEnd > slotStart);
 
                     var isAvailable = matchingBooking == null;
-                    var bookedPlate = matchingBooking?.Vehicle?.LicensePlate;
+                    var bookedPlate = matchingBooking?.Vehicle?.TruckPlate;
 
                     dockDto.Slots.Add(new SlotInfo
                     {
@@ -152,23 +152,24 @@ namespace BACKEND.Services
 
             // 2. Validate dock existence using DockCode
             var dock = await _context.Docks
-                .FirstOrDefaultAsync(d => d.WarehouseId == dto.WarehouseId && d.DockCode == dto.DockName && d.IsActive);
+                .FirstOrDefaultAsync(d => d.WarehouseId == dto.WarehouseId && d.DockCode == dto.DockName && d.IsActive == true);
             if (dock == null)
             {
                 throw new Exception($"Cửa kho '{dto.DockName}' không tồn tại hoặc không khả dụng ở kho này.");
             }
 
             // 3. Parse start and end offsets
-            var startOffset = TimeSpan.Parse(dto.StartTime);
-            var endOffset = TimeSpan.Parse(dto.EndTime);
-            var startDateTime = dto.BookingDate.Date + startOffset;
-            var endDateTime = dto.BookingDate.Date + endOffset;
+            var startOffset = TimeOnly.Parse(dto.StartTime);
+            var endOffset = TimeOnly.Parse(dto.EndTime);
+            var bookingDateOnly = DateOnly.FromDateTime(dto.BookingDate);
+            var startDateTime = dto.BookingDate.Date + startOffset.ToTimeSpan();
+            var endDateTime = dto.BookingDate.Date + endOffset.ToTimeSpan();
 
             // 4. Check for double booking (overlapping slots on the same dock)
             var conflict = await _context.SlotBookings
                 .AnyAsync(sb => sb.WarehouseId == dto.WarehouseId &&
                                 sb.DockId == dock.DockId &&
-                                sb.ScheduledDate == dto.BookingDate.Date &&
+                                sb.ScheduledDate == bookingDateOnly &&
                                 sb.Status != "CANCELLED" &&
                                 sb.ScheduledStart < endOffset &&
                                 sb.ScheduledEnd > startOffset);
@@ -179,18 +180,16 @@ namespace BACKEND.Services
             }
 
             // 5. Find or create the vehicle based on LicensePlate (maps to TruckPlate column)
-            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.LicensePlate == dto.LicensePlate);
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.TruckPlate == dto.LicensePlate);
             if (vehicle == null)
             {
                 vehicle = new Vehicle
                 {
-                    LicensePlate = dto.LicensePlate,
-                    VehicleModel = "TEMP_ALPR",
-                    PayloadKg = 0.0m,
-                    VolumeCbm = 0.0m,
-                    InsuranceExpiry = DateTime.UtcNow.AddDays(7),
-                    RegistrationExpiry = DateTime.UtcNow,
-                    FuelConsumptionRate = 0.0m,
+                    TruckPlate = dto.LicensePlate,
+                    VehicleType = "TEMP_ALPR",
+                    MaxWeightTon = 0.0m,
+                    InspectionExpiry = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+                    NextServiceDate = DateOnly.FromDateTime(DateTime.UtcNow),
                     Status = "PENDING",
                     IsTempProfile = true,
                     TempExpiryAt = DateTime.UtcNow.AddDays(7)
@@ -221,12 +220,12 @@ namespace BACKEND.Services
             var slotBooking = new SlotBooking
             {
                 BookingCode = bookingCode,
-                QRCode = qrContent, // Fits safely inside VARCHAR(500) limit
+                Qrcode = qrContent, // Fits safely inside VARCHAR(500) limit
                 VehicleId = vehicle.VehicleId,
                 WarehouseId = dto.WarehouseId,
                 DockId = dock.DockId,
                 BookingType = "INBOUND",
-                ScheduledDate = dto.BookingDate.Date,
+                ScheduledDate = bookingDateOnly,
                 ScheduledStart = startOffset,
                 ScheduledEnd = endOffset,
                 Status = "CONFIRMED",

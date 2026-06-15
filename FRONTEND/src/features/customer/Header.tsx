@@ -11,12 +11,23 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState<{name: string, email: string} | null>(null);
   const navigate = useNavigate();
 
-  // Mock: Kiểm tra localStorage
+  // Lấy data từ localStorage
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    setIsLoggedIn(!!user);
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setUserData(user);
+        setIsLoggedIn(true);
+      } catch (e) {
+        setIsLoggedIn(false);
+      }
+    } else {
+      setIsLoggedIn(false);
+    }
   }, []);
 
   const handleNavigation = (path: string) => {
@@ -26,7 +37,9 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     setIsLoggedIn(false);
+    setUserData(null);
     setUserDropdownOpen(false);
     navigate('/');
   };
@@ -96,8 +109,8 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
               {userDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
                   <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-100">
-                    <p className="font-bold text-gray-900">John Doe</p>
-                    <p className="text-xs text-gray-500">john@example.com</p>
+                    <p className="font-bold text-gray-900">{userData?.name || 'User'}</p>
+                    <p className="text-xs text-gray-500">{userData?.email || 'user@example.com'}</p>
                   </div>
                   <div className="p-2">
                     {[
