@@ -130,7 +130,7 @@ const StockAlerts = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter mt-6">
             {/* Detailed Alert Table */}
             <div className="lg:col-span-2 glass-card rounded-lg overflow-hidden flex flex-col">
               <div className="p-6 border-b border-outline-variant/30 flex justify-between items-center">
