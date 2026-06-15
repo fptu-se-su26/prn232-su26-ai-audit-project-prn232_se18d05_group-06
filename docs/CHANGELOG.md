@@ -46,7 +46,7 @@ Nguyên tắc ghi changelog:
 ---
 
 ## [2026-05-24]
-Author: Vũ Duy Lê (DE180071)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
 - Khởi tạo khung dự án Frontend sử dụng thư viện React và Vite.
@@ -65,7 +65,7 @@ Author: Vũ Duy Lê (DE180071)
 ---
 
 ## [2026-05-25]
-Author: Vũ Duy Lê (DE180071)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
 - Thiết lập tệp định tuyến chính App.tsx kết nối trang điều hành và trang tài xế.
@@ -143,7 +143,7 @@ Author: Trần Văn Tùng (DE180109)
 ---
 
 ## [2026-06-10]
-Author: Lập Quốc Hùng (DE180096)
+Author: Lê Quốc Hùng (DE180096)
 
 ### Added
 - Feature: Full-stack integration of UC015 - Automatically create new vehicle profile from AI ALPR detection.
@@ -155,15 +155,30 @@ Author: Lập Quốc Hùng (DE180096)
 - Resolved Permission denied during staging phase by bypassing the IDE's locked system directory (BACKEND/.vs/) and targeting explicit codebase paths instead.
 
 ### AI-assisted
-- Scaffolded service structures, calculated frontend countdown tickers, and diagnosed Git caching permissions.
-- Commit Message: [DE180096] feat(uc015): complete full-stack integration with API endpoints and auto-delete worker
+- Dùng AI để tra cứu cú pháp cấu hình Background Worker trong .NET và logic khóa UI React. Nhóm tự triển khai mã nguồn.
 
-=======
+---
+
+## [2026-06-15]
+Author: Vũ Lê Duy (DE180104)
+
+### Added
+- Frontend: Tích hợp nút Đăng nhập bằng Google trên trang AuthPage.
+- Backend: Mở thêm endpoint `[HttpPost("google")]` xử lý giải mã token của Google. Cấu hình cấp JWT nội bộ.
+
+### Changed
+- Cập nhật cơ chế đăng nhập, hỗ trợ lấy thông tin User Profile tự động từ Google.
+
+### Fixed
+- Xử lý lỗi Token hết hạn bằng interceptor 401 Unauthorized từ Axios.
+
+### AI-assisted
+- Dùng AI để tham khảo cách giải mã Token của thư viện Google.Apis.Auth. Toàn bộ logic lưu DB và cấp phát JWT được code bằng tay.
 
 ---
 
 ## [2026-05-24]
-Author: Vũ Duy Lê (DE180071)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
 - Khởi tạo khung dự án Frontend sử dụng thư viện React và Vite.
@@ -182,7 +197,7 @@ Author: Vũ Duy Lê (DE180071)
 ---
 
 ## [2026-05-25]
-Author: Vũ Duy Lê (DE180071)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
 - Thiết lập tệp định tuyến chính App.tsx kết nối trang điều hành và trang tài xế.
