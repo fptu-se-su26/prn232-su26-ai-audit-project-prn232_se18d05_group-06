@@ -111,7 +111,7 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 
 ## Log #07
 - Date: 2026-06-09
-- Author: Lập Quốc Hùng (DE180096)
+- Author: Lê Quốc Hùng (DE180096)
 - AI Tool: Antigravity
 - Purpose: Thiết kế & Hoàn thiện UC004: Tạo lệnh xuất kho & In vận đơn (Full-stack)
 - Prompt Reference: PROMPTS.md#prompt-07

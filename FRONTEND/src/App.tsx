@@ -19,6 +19,7 @@ import AboutPage from './features/customer/AboutPage';
 import PaymentPage from './features/customer/PaymentPage';
 import DispatcherDashboard from '@features/dispatcher/pages/DispatcherDashboard';
 import DriverDashboard from './features/driver/pages/DriverDashboard';
+import SlotBooking from './features/warehouse/SlotBooking';
 
 
 // Import Admin Components
@@ -72,6 +73,7 @@ const App: React.FC = () => {
         <Route path="/tracking" element={<OrderTracking />} />
         <Route path="/order-details" element={<OrderDetails />} />
         <Route path="/tracking-map" element={<OrderTrackingMap />} />
+        <Route path="/slot-booking" element={<SlotBooking />} />
 
         {/* Complaints (Coral) */}
         <Route path="/complaints" element={<ComplaintCenter />} />
