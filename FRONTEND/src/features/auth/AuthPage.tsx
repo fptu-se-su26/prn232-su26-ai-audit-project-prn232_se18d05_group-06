@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, ArrowRight, UserPlus, Network } from 'lucide-react';
+import api from '../../lib/api';
 
 const bgImage = "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80";
 
@@ -23,10 +24,56 @@ export default function AuthPage() {
     }
   }, [location.pathname, location.search]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('user', JSON.stringify({ name: 'User', email: 'user@example.com' }));
-    navigate('/');
+    setError(null);
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        // Login Request
+        const res = await api.post('/auth/login', {
+          username: email, // Assuming email is used as username
+          password: password
+        });
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('user', JSON.stringify({ 
+          name: res.data.fullName, 
+          email: res.data.email,
+          role: res.data.role
+        }));
+        navigate('/');
+      } else {
+        // Register Request
+        if (password !== confirmPassword) {
+          setError('Mật khẩu xác nhận không khớp');
+          setLoading(false);
+          return;
+        }
+        await api.post('/auth/register', {
+          username: email, // Using email as username
+          password: password,
+          fullName: name,
+          email: email,
+          phone: phone
+        });
+        // Auto-login or ask to login
+        setIsLogin(true);
+        setError('Đăng ký thành công, vui lòng đăng nhập!');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
   };
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -102,6 +149,12 @@ export default function AuthPage() {
                 </div>
               </div>
 
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+
               {/* Login Form */}
               {isLogin ? (
                 <form className="space-y-5" onSubmit={handleSubmit}>
@@ -110,6 +163,8 @@ export default function AuthPage() {
                       <input
                         type="email"
                         id="login-email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
                         placeholder="Email"
                         required
@@ -118,13 +173,15 @@ export default function AuthPage() {
                         htmlFor="login-email"
                         className="absolute left-4 top-2 text-[11px] text-slate-500 font-medium transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-600 cursor-text"
                       >
-                        Email
+                        Email / Tên đăng nhập
                       </label>
                     </div>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
                         id="login-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
                         placeholder="Mật khẩu"
                         required
@@ -169,10 +226,11 @@ export default function AuthPage() {
 
                   <button
                     type="submit"
-                    className="w-full h-[52px] bg-[#0050C8] text-white rounded-full font-semibold hover:bg-blue-800 shadow-[0_4px_14px_0_rgba(0,80,200,0.39)] transition-all flex items-center justify-center gap-2 group mt-2"
+                    disabled={loading}
+                    className="w-full h-[52px] bg-[#0050C8] text-white rounded-full font-semibold hover:bg-blue-800 shadow-[0_4px_14px_0_rgba(0,80,200,0.39)] transition-all flex items-center justify-center gap-2 group mt-2 disabled:opacity-70"
                   >
-                    Đăng nhập
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    {loading ? 'Đang xử lý...' : 'Đăng nhập'}
+                    {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                   </button>
 
                   <div className="relative py-3 flex items-center justify-center">
@@ -216,6 +274,8 @@ export default function AuthPage() {
                       <input
                         type="text"
                         id="reg-name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
                         placeholder="Họ và tên"
                         required
@@ -231,6 +291,8 @@ export default function AuthPage() {
                       <input
                         type="email"
                         id="reg-email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
                         placeholder="Email"
                         required
@@ -246,6 +308,8 @@ export default function AuthPage() {
                       <input
                         type="tel"
                         id="reg-phone"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
                         placeholder="Số điện thoại"
                         required
@@ -262,6 +326,8 @@ export default function AuthPage() {
                         <input
                           type={showPassword ? 'text' : 'password'}
                           id="reg-pass"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
                           className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
                           placeholder="Mật khẩu"
                           required
@@ -288,6 +354,8 @@ export default function AuthPage() {
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
                           id="reg-confirm"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
                           className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
                           placeholder="Xác nhận"
                           required
@@ -335,10 +403,11 @@ export default function AuthPage() {
 
                   <button
                     type="submit"
-                    className="w-full h-[52px] bg-[#0050C8] text-white rounded-full font-semibold hover:bg-blue-800 shadow-[0_4px_14px_0_rgba(0,80,200,0.39)] transition-all flex items-center justify-center gap-2 group mt-4"
+                    disabled={loading}
+                    className="w-full h-[52px] bg-[#0050C8] text-white rounded-full font-semibold hover:bg-blue-800 shadow-[0_4px_14px_0_rgba(0,80,200,0.39)] transition-all flex items-center justify-center gap-2 group mt-4 disabled:opacity-70"
                   >
-                    Đăng ký ngay
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    {loading ? 'Đang xử lý...' : 'Đăng ký ngay'}
+                    {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                   </button>
                 </form>
               )}

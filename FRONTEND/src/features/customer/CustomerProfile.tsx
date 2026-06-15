@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, Mail, Phone, MapPin, Edit, Save, X, Award, History, Ticket, 
   ChevronRight, ShieldCheck, Heart, Star, Zap, Crown, ArrowRight,
@@ -19,6 +19,22 @@ const CustomerProfile: React.FC = () => {
     memberTier: 'Gold',
     points: 2450,
   });
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setProfile(prev => ({
+          ...prev,
+          fullName: user.name || prev.fullName,
+          email: user.email || prev.email,
+        }));
+      } catch (e) {
+        console.error('Lỗi khi đọc thông tin user từ localStorage', e);
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FFF5F7] font-sans selection:bg-rose-100">
