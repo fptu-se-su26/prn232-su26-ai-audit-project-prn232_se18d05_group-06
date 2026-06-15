@@ -45,7 +45,7 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 
 ## Log #01
 - Date: 2026-05-24
-- Author: Vũ Duy Lê (DE180071)
+- Author: Vũ Lê Duy (DE180104)
 - AI Tool: ChatGPT
 - Purpose: Tạo layout cho Sidebar điều phối
 - Prompt Reference: PROMPTS.md#prompt-01
@@ -56,7 +56,7 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 
 ## Log #02
 - Date: 2026-05-25
-- Author: Vũ Duy Lê (DE180071)
+- Author: Vũ Lê Duy (DE180104)
 - AI Tool: Gemini
 - Purpose: Cấu hình Router định tuyến
 - Prompt Reference: PROMPTS.md#prompt-02
@@ -111,14 +111,36 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 
 ## Log #07
 - Date: 2026-06-09
-- Author: Lập Quốc Hùng (DE180096)
+- Author: Lê Quốc Hùng (DE180096)
 - AI Tool: Antigravity
-- Purpose: Thiết kế & Hoàn thiện UC004: Tạo lệnh xuất kho & In vận đơn (Full-stack)
+- Purpose: Tham khảo thiết kế DB cho In vận đơn (UC004)
 - Prompt Reference: PROMPTS.md#prompt-07
-- AI Output Summary: Thiết kế toàn bộ cấu trúc Backend (.NET 8 Web API, EF Core entity mapping, thuật toán lập Picking List sắp xếp tối ưu Aisle -> Shelf -> Row, mã hóa bảo mật HMACSHA256 kết hợp QRCoder sinh ảnh QR Base64, API Controller) và tích hợp kết nối Axios ở Frontend React, phân tích RegEx bóc tách ID số đơn hàng (ví dụ #ORD-9921 thành 9921) và nhúng CSS `@media print` ẩn sidebar/header khi gọi window.print().
-- Human Decision: Cấu hình thêm CORS policy ("AllowAll") trong Program.cs để ứng dụng React gọi API an toàn, tinh chỉnh lại kiểu cột decimal cho DbContext, và thực hiện dọn dẹp các thư mục rác `bin/` và `obj/` ra khỏi Git cache, cấu hình `.gitignore` gốc.
-- Applied To: BACKEND/DTOs/OutboundRequestDto.cs, BACKEND/DTOs/PickingListItemDto.cs, BACKEND/DTOs/OutboundResponseDto.cs, BACKEND/Models/Entities.cs, BACKEND/Models/SmartLogDbContext.cs, BACKEND/Services/IOutboundService.cs, BACKEND/Services/OutboundService.cs, BACKEND/Controllers/OutboundController.cs, BACKEND/Program.cs, FRONTEND/src/features/admin/Orders.tsx, .gitignore
-- Verification: Chạy `dotnet build` đạt 0 Errors và 0 Warnings. Chạy `npm run type-check` ở frontend đạt 0 lỗi TypeScript.
+- AI Output Summary: Gợi ý các trường dữ liệu cần thiết cho bảng Waybill và Picking List.
+- Human Decision: Nhóm tự thiết kế bảng `Waybills` thông qua Entity Framework Core, ánh xạ các trường cho phù hợp với yêu cầu thực tế của dự án và tự code các API CRUD liên quan.
+- Applied To: BACKEND/DTOs/OutboundRequestDto.cs, BACKEND/Models/Entities.cs, BACKEND/Controllers/OutboundController.cs
+- Verification: Chạy lệnh add-migration và update-database thành công.
+
+## Log #08
+- Date: 2026-06-10
+- Author: Lê Quốc Hùng (DE180096)
+- AI Tool: Antigravity
+- Purpose: Cú pháp Axios gọi API có Token
+- Prompt Reference: PROMPTS.md#prompt-08
+- AI Output Summary: Cung cấp đoạn code mẫu gọi Axios POST với Header Authorization.
+- Human Decision: Nhóm tự tích hợp vào file cấu hình API, viết thêm interceptor để bắt lỗi token hết hạn và refresh lại token tự động.
+- Applied To: FRONTEND/src/lib/api.ts, FRONTEND/src/features/auth/AuthPage.tsx
+- Verification: Đăng nhập thành công và console log trả về thông tin user chính xác.
+
+## Log #09
+- Date: 2026-06-15
+- Author: Vũ Lê Duy (DE180104)
+- AI Tool: Antigravity
+- Purpose: Tham khảo quy trình xác thực Google Login và JWT
+- Prompt Reference: PROMPTS.md#prompt-09
+- AI Output Summary: Cung cấp tài liệu cấu hình `Google.Apis.Auth` và code mẫu sinh token JWT.
+- Human Decision: Nhóm chỉ dùng code mẫu để kiểm tra token Google. Sau đó tự viết Endpoint `[HttpPost("google")]` và tự cấu hình JWT Claims để phân quyền dựa vào Database thực tế.
+- Applied To: BACKEND/Controllers/AuthController.cs, BACKEND/DTOs/AuthDTOs.cs
+- Verification: Đăng nhập bằng tài khoản Google thành công, lấy được JWT token và giải mã thấy đúng các thông tin claims.
 
 ---
 
@@ -171,12 +193,11 @@ Nhóm chạy thử chương trình trên môi trường phát triển cục bộ
 
 | Thành viên | MSSV | Nhiệm vụ chính | Có sử dụng AI không? | Minh chứng đóng góp |
 |---|---|---|---|---|
-| Vũ Duy Lê | DE180071 | Cấu trúc dự án, điều hướng Router chính | Có | [App.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
-| Lập Quốc Hùng | DE180096 | Thiết lập các trang hiển thị Driver & Thực hiện UC004 (Full-stack) | Có | [Orders.tsx](file:///d:/Ky%208%20-%20Summer/PRN232/Project/PRN232_Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx) |
-| Trần Thị C | DE180088 | Xây dựng CSS và HSL theme | Có | [index.css](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/index.css) |
-| Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](file:///d:/PRN232/Project/prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
-| Phạm Văn D | DE180109 | Thiết lập layout, Sidebar, Header | Có | Các components layout |
-| Hoàng Thị E | DE180104 | Viết tài liệu dự án, kiểm thử thủ công | Có | File tài liệu |
+| Vũ Lê Duy | DE180104 | Cấu trúc dự án, điều hướng Router chính | Có | [App.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
+| Lê Quốc Hùng | DE180096 | Thiết lập các trang hiển thị Driver & Thực hiện UC004 (Full-stack) | Có | [Orders.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx) |
+
+| Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
+
 
 ---
 
