@@ -143,7 +143,7 @@ Author: Trần Văn Tùng (DE180109)
 ---
 
 ## [2026-06-10]
-Author: Lập Quốc Hùng (DE180096)
+Author: Lê Quốc Hùng (DE180096)
 
 ### Added
 - Feature: Full-stack integration of UC015 - Automatically create new vehicle profile from AI ALPR detection.
@@ -158,46 +158,25 @@ Author: Lập Quốc Hùng (DE180096)
 - Scaffolded service structures, calculated frontend countdown tickers, and diagnosed Git caching permissions.
 - Commit Message: [DE180096] feat(uc015): complete full-stack integration with API endpoints and auto-delete worker
 
-=======
-
----
-
-## [2026-05-24]
-Author: Vũ Duy Lê (DE180071)
+## [2026-06-15]
+Author: Lê Quốc Hùng (DE180096)
 
 ### Added
-- Khởi tạo khung dự án Frontend sử dụng thư viện React và Vite.
-- Xây dựng bố cục giao diện chính với tệp DispatcherLayout.tsx và các Tab menu điều phối.
+- Feature: Triển khai toàn diện tính năng Đặt lịch cửa kho (UC016 - Slot Booking) trên database V1.0.
+- Entities & Mappings: Định nghĩa thực thể `Dock`, `SlotBooking` và ánh xạ đầy đủ thuộc tính `IsTempProfile`, `TempExpiryAt` cho `Vehicle` trong `Entities.cs` và cấu hình DbContext trong `SmartLogDbContext.cs`.
+- Business Logic: Viết `BookingService.cs` xử lý tính khả dụng của dock, kiểm tra trùng lịch (overlapping slots), tự động sinh hồ sơ xe tạm thời có thời hạn 7 ngày nếu biển số xe chưa tồn tại, sinh mã QR chứa thông tin đặt lịch gọn nhẹ dưới 500 ký tự.
+- Notification: Tích hợp gửi email xác nhận đặt lịch kèm theo QR Code cho tài xế với chế độ fallback ghi file cục bộ (`SentEmails/`).
+- Clean Up: Cấu hình `VehicleCleanupWorker.cs` chạy ngầm để định kỳ dọn dẹp các hồ sơ xe tạm thời đã hết hạn.
 
 ### Changed
-- Cập nhật cấu hình tệp tailwind.config.js để định nghĩa các dải màu, khoảng cách đặc trưng cho FleetNova.
+- Cấu hình lại chuỗi kết nối database trong `appsettings.json` trỏ sang database chuẩn `SmartLogAI`.
 
 ### Fixed
-- Sửa lỗi tràn khung hiển thị trên các màn hình có độ phân giải nhỏ và trung bình bằng các thuộc tính scroll linh hoạt.
+- Bỏ qua các cột không tồn tại ngoài cơ sở dữ liệu (`VolumeCbm`, `FuelConsumptionRate` trên `Vehicle` và `ContactNumber` trên `Warehouse`) thông qua cấu hình `entity.Ignore` trong EF Core để đảm bảo không bị lỗi ánh xạ dữ liệu khi chạy.
 
 ### AI-assisted
-- Sử dụng ChatGPT để gợi ý các class CSS Flexbox dựng thanh Sidebar cố định.
-- Mã nguồn mẫu được nhóm rà soát, kiểm tra khả năng đáp ứng thiết bị trước khi đưa vào ứng dụng.
-
----
-
-## [2026-05-25]
-Author: Vũ Duy Lê (DE180071)
-
-### Added
-- Thiết lập tệp định tuyến chính App.tsx kết nối trang điều hành và trang tài xế.
-
-### Changed
-- Cấu hình lại các tệp import đường dẫn trong App.tsx để định vị chính xác vị trí các components.
-
-### Fixed
-- Sửa lỗi catch-all route để chuyển hướng an toàn về trang chủ điều hành khi người dùng nhập sai địa chỉ URL.
-
-### AI-assisted
-- Sử dụng Gemini để tham khảo cấu trúc định tuyến của react-router-dom v6.
-- Nhóm đã phát hiện AI đề xuất phiên bản cũ và chủ động viết lại theo cú pháp thẻ Route mới nhất.
-
----
+- Phân tích thiết kế DbContext mapping, hỗ trợ xây dựng thuật toán kiểm tra trùng lịch, và tối ưu hóa nội dung mã QR Code để lưu trữ hiệu quả.
+- Commit Message: `[DE180096] feat(uc016): complete slot booking integration with conflict validation, temp vehicle auto-creation, and background worker cleanup`
 
 ## 4. Tổng kết thay đổi cuối project
 
