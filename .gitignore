@@ -1,4 +1,9 @@
 SmartLogAiDB.sql
+smartlogAI.sql
 
 **/bin/
 **/obj/
+
+BACKEND/.vs/
+BACKEND/*.user
+BACKEND/SentEmails/

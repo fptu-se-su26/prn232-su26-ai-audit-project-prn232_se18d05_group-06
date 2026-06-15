@@ -15,6 +15,10 @@ namespace BACKEND.Models
         public DbSet<WarehouseLocation> WarehouseLocations { get; set; }
         public DbSet<Waybill> Waybills { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Warehouse> Warehouses { get; set; }
+        public DbSet<ReceiptOrder> ReceiptOrders { get; set; }
+        public DbSet<Dock> Docks { get; set; }
+        public DbSet<SlotBooking> SlotBookings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,13 +29,18 @@ namespace BACKEND.Models
             {
                 entity.ToTable("Vehicles");
                 entity.HasKey(e => e.VehicleId);
+                entity.Property(e => e.VehicleId).HasColumnName("VehicleID");
                 entity.HasIndex(e => e.LicensePlate).IsUnique();
-                entity.Property(e => e.LicensePlate).HasMaxLength(20).IsUnicode(false);
-                entity.Property(e => e.VehicleModel).HasMaxLength(50).IsUnicode(true);
-                entity.Property(e => e.PayloadKg).HasColumnType("decimal(10,2)");
-                entity.Property(e => e.VolumeCbm).HasColumnType("decimal(10,2)");
-                entity.Property(e => e.FuelConsumptionRate).HasColumnType("decimal(5,2)");
-                entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValue("AVAILABLE");
+                entity.Property(e => e.LicensePlate).HasColumnName("TruckPlate").HasMaxLength(20).IsUnicode(false);
+                entity.Property(e => e.VehicleModel).HasColumnName("VehicleType").HasMaxLength(50).IsUnicode(true);
+                entity.Property(e => e.PayloadKg).HasColumnName("MaxWeightTon").HasColumnType("decimal(8,2)");
+                entity.Ignore(e => e.VolumeCbm);
+                entity.Ignore(e => e.FuelConsumptionRate);
+                entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValue("ACTIVE");
+                entity.Property(e => e.InsuranceExpiry).HasColumnName("InspectionExpiry").HasColumnType("date");
+                entity.Property(e => e.RegistrationExpiry).HasColumnName("NextServiceDate").HasColumnType("date");
+                entity.Property(e => e.IsTempProfile).HasColumnName("IsTempProfile");
+                entity.Property(e => e.TempExpiryAt).HasColumnName("TempExpiryAt");
             });
 
             // Configure Order
@@ -117,6 +126,94 @@ namespace BACKEND.Models
                     .WithMany(p => p.Waybills)
                     .HasForeignKey(d => d.OrderId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure Warehouse
+            modelBuilder.Entity<Warehouse>(entity =>
+            {
+                entity.ToTable("Warehouses");
+                entity.HasKey(e => e.WarehouseId);
+                entity.Property(e => e.WarehouseName).HasMaxLength(100).IsUnicode(true);
+                entity.Property(e => e.Address).HasMaxLength(255).IsUnicode(true);
+                entity.Ignore(e => e.ContactNumber);
+            });
+
+            // Configure ReceiptOrder
+            modelBuilder.Entity<ReceiptOrder>(entity =>
+            {
+                entity.ToTable("ReceiptOrders");
+                entity.HasKey(e => e.ReceiptId);
+                entity.Property(e => e.InvoiceNo).HasMaxLength(50).IsUnicode(false);
+                entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValue("PENDING");
+            });
+
+            // Configure Dock
+            modelBuilder.Entity<Dock>(entity =>
+            {
+                entity.ToTable("Docks");
+                entity.HasKey(e => e.DockId);
+                entity.Property(e => e.DockId).HasColumnName("DockID");
+                entity.Property(e => e.WarehouseId).HasColumnName("WarehouseID");
+                entity.Property(e => e.DockCode).HasMaxLength(20).IsUnicode(false);
+                entity.Property(e => e.DockName).HasMaxLength(100).IsUnicode(true);
+                entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValue("AVAILABLE");
+                entity.Property(e => e.MaxTruckLength).HasColumnType("decimal(5,2)");
+                entity.Property(e => e.IsActive).HasDefaultValue(true);
+
+                entity.HasOne(d => d.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(d => d.WarehouseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure SlotBooking
+            modelBuilder.Entity<SlotBooking>(entity =>
+            {
+                entity.ToTable("SlotBookings");
+                entity.HasKey(e => e.BookingId);
+                entity.Property(e => e.BookingId).HasColumnName("BookingID");
+                entity.Property(e => e.BookingCode).HasMaxLength(30).IsUnicode(false);
+                entity.Property(e => e.QRCode).HasColumnName("QRCode").HasMaxLength(500).IsUnicode(false);
+                entity.Property(e => e.VehicleId).HasColumnName("VehicleID");
+                entity.Property(e => e.WarehouseId).HasColumnName("WarehouseID");
+                entity.Property(e => e.DockId).HasColumnName("DockID");
+                entity.Property(e => e.OrderId).HasColumnName("OrderID");
+                entity.Property(e => e.DriverId).HasColumnName("DriverID");
+                entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
+                entity.Property(e => e.CreatedBy).HasColumnName("CreatedBy");
+
+                entity.Property(e => e.BookingType).HasMaxLength(20).IsUnicode(false);
+                entity.Property(e => e.ScheduledDate).HasColumnType("date");
+                entity.Property(e => e.ScheduledStart).HasColumnType("time");
+                entity.Property(e => e.ScheduledEnd).HasColumnType("time");
+                entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValue("CONFIRMED");
+                entity.Property(e => e.CheckInAt).HasColumnType("datetime2");
+                entity.Property(e => e.CheckOutAt).HasColumnType("datetime2");
+                entity.Property(e => e.OverstayAlert).HasDefaultValue(false);
+                entity.Property(e => e.AlprPlate).HasColumnName("ALPR_Plate").HasMaxLength(20).IsUnicode(false);
+                entity.Property(e => e.AlprConfidence).HasColumnName("ALPRConfidence").HasColumnType("decimal(5,2)");
+                entity.Property(e => e.PriorityScore).HasDefaultValue(0);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(d => d.Vehicle)
+                    .WithMany()
+                    .HasForeignKey(d => d.VehicleId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(d => d.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(d => d.WarehouseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Dock)
+                    .WithMany(p => p.SlotBookings)
+                    .HasForeignKey(d => d.DockId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(d => d.Order)
+                    .WithMany()
+                    .HasForeignKey(d => d.OrderId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

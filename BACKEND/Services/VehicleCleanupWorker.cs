@@ -58,18 +58,18 @@ namespace BACKEND.Services
             var now = DateTime.UtcNow;
 
             var expiredVehicles = await context.Vehicles
-                .Where(v => v.Status == "PENDING" && v.VehicleModel == "TEMP_ALPR" && v.InsuranceExpiry < now)
+                .Where(v => v.IsTempProfile == true && v.TempExpiryAt < now)
                 .ToListAsync();
 
             if (expiredVehicles.Any())
             {
                 context.Vehicles.RemoveRange(expiredVehicles);
                 await context.SaveChangesAsync();
-                _logger.LogInformation($"Successfully purged {expiredVehicles.Count} expired pending ALPR vehicles.");
+                _logger.LogInformation($"Successfully purged {expiredVehicles.Count} expired temporary vehicles.");
             }
             else
             {
-                _logger.LogInformation("No expired pending ALPR vehicles found to purge.");
+                _logger.LogInformation("No expired temporary vehicles found to purge.");
             }
         }
     }

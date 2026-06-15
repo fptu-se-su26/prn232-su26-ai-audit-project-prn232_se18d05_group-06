@@ -57,6 +57,7 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
             { label: 'Dịch vụ', path: '/create-shipment' },
             { label: 'Giá cước', path: '/shipping-quotation' },
             { label: 'Theo dõi đơn hàng', path: '/tracking' },
+            { label: 'Đặt lịch xe', path: '/slot-booking' },
             { label: 'Giới thiệu', path: '/about' },
             { label: 'Liên hệ', path: '/support' }
           ].map((item) => (
@@ -146,6 +147,7 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
           {[
             { label: 'Home', path: '/', icon: Home },
             { label: 'Create Shipment', path: '/create-shipment', icon: Package },
+            { label: 'Slot Booking', path: '/slot-booking', icon: Bookmark },
             { label: 'Pricing', path: '/shipping-quotation', icon: DollarSign },
             { label: 'Tracking', path: '/tracking', icon: MapPin },
             { label: 'Support', path: '/support', icon: HelpCircle },

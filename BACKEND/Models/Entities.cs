@@ -114,5 +114,73 @@ namespace BACKEND.Models
         public DateTime RegistrationExpiry { get; set; }
         public decimal FuelConsumptionRate { get; set; }
         public string Status { get; set; } = "AVAILABLE";
+        public bool IsTempProfile { get; set; } = false;
+        public DateTime? TempExpiryAt { get; set; }
+    }
+
+    public class Warehouse
+    {
+        public int WarehouseId { get; set; }
+        public string WarehouseName { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string? ContactNumber { get; set; }
+    }
+
+    public class ReceiptOrder
+    {
+        public int ReceiptId { get; set; }
+        public int? WarehouseId { get; set; }
+        public string? InvoiceNo { get; set; }
+        public string? OcrRawText { get; set; }
+        public DateTime ReceiptDate { get; set; }
+        public int? CreatedBy { get; set; }
+        public string Status { get; set; } = "PENDING";
+    }
+
+    public class Dock
+    {
+        public int DockId { get; set; }
+        public int WarehouseId { get; set; }
+        public string DockCode { get; set; } = string.Empty;
+        public string? DockName { get; set; }
+        public string Status { get; set; } = "AVAILABLE";
+        public decimal? MaxTruckLength { get; set; }
+        public bool IsActive { get; set; } = true;
+
+        // Navigation properties
+        public virtual Warehouse? Warehouse { get; set; }
+        public virtual ICollection<SlotBooking> SlotBookings { get; set; } = new List<SlotBooking>();
+    }
+
+    public class SlotBooking
+    {
+        public int BookingId { get; set; }
+        public string BookingCode { get; set; } = string.Empty;
+        public string? QRCode { get; set; }
+        public int? VehicleId { get; set; }
+        public int? DriverId { get; set; }
+        public int? CustomerId { get; set; }
+        public int WarehouseId { get; set; }
+        public int? DockId { get; set; }
+        public int? OrderId { get; set; }
+        public string BookingType { get; set; } = "INBOUND";
+        public DateTime ScheduledDate { get; set; }
+        public TimeSpan ScheduledStart { get; set; }
+        public TimeSpan ScheduledEnd { get; set; }
+        public string Status { get; set; } = "CONFIRMED";
+        public DateTime? CheckInAt { get; set; }
+        public DateTime? CheckOutAt { get; set; }
+        public bool? OverstayAlert { get; set; }
+        public string? AlprPlate { get; set; }
+        public decimal? AlprConfidence { get; set; }
+        public int? PriorityScore { get; set; }
+        public int? CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        public virtual Vehicle? Vehicle { get; set; }
+        public virtual Warehouse? Warehouse { get; set; }
+        public virtual Dock? Dock { get; set; }
+        public virtual Order? Order { get; set; }
     }
 }

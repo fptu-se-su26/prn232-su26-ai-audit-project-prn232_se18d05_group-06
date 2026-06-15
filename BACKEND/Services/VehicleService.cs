@@ -41,7 +41,9 @@ namespace BACKEND.Services
                 RegistrationExpiry = DateTime.UtcNow,
                 PayloadKg = 0.0m,
                 VolumeCbm = 0.0m,
-                FuelConsumptionRate = 0.0m
+                FuelConsumptionRate = 0.0m,
+                IsTempProfile = true,
+                TempExpiryAt = DateTime.UtcNow.AddDays(7)
             };
 
             _context.Vehicles.Add(newVehicle);
@@ -75,6 +77,8 @@ namespace BACKEND.Services
             vehicle.RegistrationExpiry = dto.RegistrationExpiry;
             vehicle.FuelConsumptionRate = dto.FuelConsumptionRate;
             vehicle.Status = "AVAILABLE"; // Fully active status
+            vehicle.IsTempProfile = false;
+            vehicle.TempExpiryAt = null;
 
             await _context.SaveChangesAsync();
 
