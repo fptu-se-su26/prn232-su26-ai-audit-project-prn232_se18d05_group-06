@@ -48,6 +48,8 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IOutboundService, OutboundService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddHostedService<VehicleCleanupWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
