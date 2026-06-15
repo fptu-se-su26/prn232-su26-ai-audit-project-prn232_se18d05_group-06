@@ -3,6 +3,7 @@ smartlogAI.sql
 
 **/bin/
 **/obj/
+docs/
 
 BACKEND/.vs/
 BACKEND/*.user

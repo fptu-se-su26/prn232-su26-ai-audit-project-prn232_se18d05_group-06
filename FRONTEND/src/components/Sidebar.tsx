@@ -1,17 +1,17 @@
 import { NavLink } from 'react-router-dom'
 
 const navItems = [
-  { label: 'Dashboard', icon: 'dashboard', to: '/' },
-  { label: 'Import Goods', icon: 'input', to: '/import-goods' },
-  { label: 'Export Goods', icon: 'output', to: '/export-goods' },
-  { label: 'Inventory', icon: 'inventory_2', to: '/inventory' },
-  { label: 'Reports', icon: 'assessment', to: '/reports' },
-  { label: 'QR Scanner', icon: 'qr_code_scanner', to: '/qr-scanner' },
-  { label: 'AI OCR Scan', icon: 'document_scanner', to: '/ocr-scan' },
-  { label: 'Inventory Audit', icon: 'checklist', to: '/inventory-audit' },
-  { label: 'Warehouse Transfer', icon: 'local_shipping', to: '/warehouse-transfer' },
-  { label: 'Stock Alerts', icon: 'notifications_active', to: '/stock-alerts' },
-  { label: 'Notifications', icon: 'notifications', to: '/notifications' },
+  { label: 'Dashboard', icon: 'dashboard', to: '/warehouse/dashboard' },
+  { label: 'Import Goods', icon: 'input', to: '/warehouse/import' },
+  { label: 'Export Goods', icon: 'output', to: '/warehouse/export' },
+  { label: 'Inventory', icon: 'inventory_2', to: '/warehouse/inventory' },
+  { label: 'Reports', icon: 'assessment', to: '/warehouse/reports' },
+  { label: 'QR Scanner', icon: 'qr_code_scanner', to: '/warehouse/qr-scanner' },
+  { label: 'AI OCR Scan', icon: 'document_scanner', to: '/warehouse/ai-ocr' },
+  { label: 'Inventory Audit', icon: 'checklist', to: '/warehouse/inventory-audit' },
+  { label: 'Warehouse Transfer', icon: 'local_shipping', to: '/warehouse/transfer' },
+  { label: 'Stock Alerts', icon: 'notifications_active', to: '/warehouse/stock-alerts' },
+  { label: 'Notifications', icon: 'notifications', to: '/warehouse/notifications' },
 ]
 
 const Sidebar = () => (
@@ -41,7 +41,7 @@ const Sidebar = () => (
       ))}
       <div className="pt-4 mt-4 border-t border-slate-500/20">
         <NavLink
-          to="/settings"
+          to="/warehouse/settings"
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 ${
               isActive

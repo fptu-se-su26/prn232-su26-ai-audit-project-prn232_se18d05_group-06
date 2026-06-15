@@ -35,6 +35,17 @@ import AdminRolePermission from '@features/admin/RolePermission';
 import AdminSmartLogAI from '@features/admin/SmartLogAI';
 import AdminWarehouses from '@features/admin/Warehouses';
 import AdminSettings from '@features/admin/Settings';
+import WarehouseDashboard from './features/warehouse/WarehouseDashboard';
+import WarehouseTransfer from './features/warehouse/WarehouseTransfer';
+import WarehouseInventory from './features/warehouse/Inventory';
+import WarehouseImport from './features/warehouse/ImportGoods';
+import WarehouseExport from './features/warehouse/ExportGoods';
+import WarehouseStockAlerts from './features/warehouse/StockAlerts';
+import WarehouseInventoryAudit from './features/warehouse/InventoryAudit';
+import WarehouseReports from './features/warehouse/Reports';
+import WarehouseNotifications from './features/warehouse/Notifications';
+import WarehouseSettings from './features/warehouse/Settings';
+import WarehouseAIOCR from './features/warehouse/AIOCRScan';
 
 const modules = [
   { path: '/admin/dashboard', name: 'Dashboard', desc: 'KPI Grid, AI Insights, Maps', icon: 'dashboard', color: 'from-blue-500 to-indigo-600' },
@@ -113,7 +124,20 @@ const App: React.FC = () => {
         
         {/* Route for Driver Dashboard */}
         <Route path="/driver" element={<DriverDashboard />} />
-        
+
+        {/* Warehouse Routes */}
+        <Route path="/warehouse/dashboard" element={<WarehouseDashboard />} />
+        <Route path="/warehouse/transfer" element={<WarehouseTransfer />} />
+        <Route path="/warehouse/inventory" element={<WarehouseInventory />} />
+        <Route path="/warehouse/import" element={<WarehouseImport />} />
+        <Route path="/warehouse/export" element={<WarehouseExport />} />
+        <Route path="/warehouse/stock-alerts" element={<WarehouseStockAlerts />} />
+        <Route path="/warehouse/inventory-audit" element={<WarehouseInventoryAudit />} />
+        <Route path="/warehouse/reports" element={<WarehouseReports />} />
+        <Route path="/warehouse/notifications" element={<WarehouseNotifications />} />
+        <Route path="/warehouse/settings" element={<WarehouseSettings />} />
+        <Route path="/warehouse/ai-ocr" element={<WarehouseAIOCR />} />
+
         {/* Catch-all redirect to Dispatcher */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
