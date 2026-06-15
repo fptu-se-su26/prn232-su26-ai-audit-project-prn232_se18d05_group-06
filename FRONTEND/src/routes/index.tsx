@@ -19,4 +19,6 @@ export const ROUTE_PATHS = {
 // Routes configuration
 // Define your application routes here using React Router
 
-export {};
+const routes: [] = []
+
+export default routes

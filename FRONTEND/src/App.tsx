@@ -116,7 +116,7 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
-  );
+  )
 }
 
 export default App;
