@@ -21,6 +21,7 @@ const MENU_ITEMS: MenuItem[] = [
   { name: 'Live Tracking', label: 'Theo dõi trực tuyến', icon: 'location_on' },
   { name: 'Drivers', label: 'Tài xế', icon: 'group' },
   { name: 'Vehicles', label: 'Phương tiện', icon: 'local_shipping' },
+  { name: 'Vehicle Tracking', label: 'Lịch sử & Chuyến xe', icon: 'history_toggle_off' },
   { name: 'Fleet Monitoring', label: 'Giám sát đội xe', icon: 'monitor_heart' },
   { name: 'Alerts Center', label: 'Trung tâm cảnh báo', icon: 'warning' },
   { name: 'Delivery Analytics', label: 'Phân tích giao hàng', icon: 'analytics' },

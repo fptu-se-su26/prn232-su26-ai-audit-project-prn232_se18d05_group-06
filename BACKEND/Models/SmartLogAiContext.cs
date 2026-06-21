@@ -123,9 +123,38 @@ public partial class SmartLogAiContext : DbContext
 
     public virtual DbSet<WarehouseZone> WarehouseZones { get; set; }
 
+    public virtual DbSet<VehicleEvent> VehicleEvents { get; set; }
+
+    public override int SaveChanges()
+    {
+        PreventVehicleEventModification();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        PreventVehicleEventModification();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void PreventVehicleEventModification()
+    {
+        var entries = ChangeTracker.Entries<VehicleEvent>()
+            .Where(e => e.State == EntityState.Modified || e.State == EntityState.Deleted);
+
+        if (entries.Any())
+        {
+            throw new InvalidOperationException("Modifying or deleting VehicleEvents is strictly forbidden to preserve the immutable audit trail.");
+        }
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-8A5CNE6\\MSSQLSERVER01;Database=SmartLogAI;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=SmartLogAI;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True");
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1734,6 +1763,26 @@ public partial class SmartLogAiContext : DbContext
                 .HasForeignKey(d => d.WarehouseId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Warehouse__Wareh__787EE5A0");
+        });
+
+        modelBuilder.Entity<VehicleEvent>(entity =>
+        {
+            entity.HasKey(e => e.EventId).HasName("PK__VehicleEvents__EventID");
+
+            entity.ToTable("VehicleEvents");
+
+            entity.Property(e => e.EventId).HasColumnName("EventID");
+            entity.Property(e => e.VehicleId).HasColumnName("VehicleID");
+            entity.Property(e => e.EventType)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.EventTime)
+                .HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Remarks).HasMaxLength(500);
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.VehicleEvents)
+                .HasForeignKey(d => d.VehicleId)
+                .HasConstraintName("FK__VehicleEvents__Vehicles");
         });
 
         OnModelCreatingPartial(modelBuilder);
