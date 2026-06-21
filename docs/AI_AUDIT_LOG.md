@@ -142,6 +142,17 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: BACKEND/Controllers/AuthController.cs, BACKEND/DTOs/AuthDTOs.cs
 - Verification: Đăng nhập bằng tài khoản Google thành công, lấy được JWT token và giải mã thấy đúng các thông tin claims.
 
+## Log #10
+- Date: 2026-06-21
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Triển khai hệ thống thông báo Email cho tồn kho và tái cấu trúc UI Stock Alerts
+- Prompt Reference: PROMPTS.md#prompt-10
+- AI Output Summary: Gợi ý cấu trúc `EmailService` dùng SMTP, logic Debounce 12h và layout Grid 75/25 cho UI.
+- Human Decision: Tinh chỉnh template Email HTML chuyên nghiệp, thêm bộ lọc (Filter) động cho bảng cảnh báo và xử lý logic chỉ cập nhật trạng thái gửi khi SMTP thực sự thành công.
+- Applied To: BACKEND/Services/StockAlertService.cs, BACKEND/Services/EmailService.cs, FRONTEND/src/features/warehouse/StockAlerts.tsx
+- Verification: Nhấn "Quét ngay" trên UI, nhận được Email tại tvan20152@gmail.com và kiểm tra filter hoạt động mượt mà.
+
 ---
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
@@ -253,4 +264,4 @@ Sinh viên/nhóm cam kết rằng:
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-| Nhóm trưởng | 02/06/2026 |
+| Nhóm trưởng | 21/06/2026 |

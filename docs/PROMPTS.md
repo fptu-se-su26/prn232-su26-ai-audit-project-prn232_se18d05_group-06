@@ -60,6 +60,7 @@ Sinh viên/nhóm cần ghi lại:
 | 7 | 09/06/2026 | Antigravity | DB Design | Tham khảo thiết kế bảng Vận đơn | Cấu trúc bảng SQL & DTO cơ bản | Có | BACKEND/DTOs |
 | 8 | 10/06/2026 | Antigravity | Coding | Code mẫu Axios POST kèm Token | Đoạn code Axios gọi API Login | Có | FRONTEND/api.ts |
 | 9 | 15/06/2026 | Antigravity | Authentication | Tham khảo tích hợp Google Login & JWT | Cấu trúc endpoint & thư viện Google.Apis.Auth | Có | AuthController.cs |
+| 10 | 21/06/2026 | Antigravity | Notification & UI | Tích hợp Email thông báo & Cải tiến UI Stock Alerts | Cấu trúc EmailService & Layout Grid responsive | Có | StockAlertService.cs, StockAlerts.tsx |
 
 ---
 
@@ -238,6 +239,26 @@ Làm cách nào để tiếp nhận Token của Google từ Frontend React và g
 
 ### Evaluation
 Antigravity cung cấp đoạn code mẫu và tài liệu tham khảo chính xác. Nhóm đã sử dụng để làm cơ sở thiết kế `GoogleLoginRequest`, tự viết API `[HttpPost("google")]` trong `AuthController.cs`, tự code logic khởi tạo user (nếu email chưa tồn tại) và cấu hình lại các claims để phân quyền (Role) đúng với yêu cầu của đề tài.
+
+---
+
+## Prompt #10
+
+- Date: 2026-06-21
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Triển khai gửi Email thật và tái cấu trúc giao diện Dashboard cảnh báo
+
+### Prompt
+1. "Hãy viết EmailService sử dụng SmtpClient để gửi email HTML từ Gmail. Làm sao để tích hợp nó vào luồng quét tồn kho có cơ chế Debounce 12h?"
+2. "Sửa lại file StockAlerts.tsx: tăng padding, mở rộng bảng cảnh báo chiếm 75% chiều ngang, thêm bộ lọc tìm kiếm theo SKU và loại cảnh báo."
+
+### Expected Output
+- Backend: Code C# EmailService, đăng ký DI và logic kiểm tra `NextAllowedAt` trong StockAlertService.
+- Frontend: Code React/Tailwind cập nhật grid layout, thêm `filterText` state và `filteredAlerts` logic.
+
+### Evaluation
+Antigravity gợi ý cấu trúc SMTP rất chuẩn. Nhóm đã tự bổ sung thêm bước cấu hình App Password cho Gmail và viết lại template HTML sinh động hơn. Phần UI được AI hỗ trợ căn chỉnh Grid 4 cột rất mượt mà.
 
 ---
 

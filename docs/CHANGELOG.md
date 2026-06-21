@@ -214,6 +214,28 @@ Author: Vũ Lê Duy (DE180104)
 
 ---
 
+## [2026-06-21]
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Feature: Hoàn thiện hệ thống cảnh báo Email tự động cho Warehouse.
+- Backend: Triển khai `EmailService` (SMTP/Gmail), tích hợp logic Debounce 12h vào `StockAlertService`.
+- Database: Tạo script [seed_warehouse_data.sql] tổng hợp dữ liệu mẫu và kịch bản test.
+- Frontend: Nâng cấp [StockAlerts.tsx] với bộ lọc tìm kiếm SKU/Sản phẩm và Filter loại cảnh báo.
+
+### Changed
+- Refactored UI: Chuyển đổi layout sang Grid 4 cột (Bảng chiếm 3/4, AI chiếm 1/4) để tối ưu không gian hiển thị danh sách.
+- Styling: Tăng cường padding, bo góc `rounded-2xl` và hiệu ứng `shadow-2xl` cho giao diện hiện đại.
+
+### Fixed
+- Sửa lỗi text-wrapping (nhảy dòng) trong bảng cảnh báo bằng thuộc tính `whitespace-nowrap`.
+- Sửa logic Backend: Chỉ cập nhật thời gian gửi email khi SMTP client phản hồi thành công (tránh log ảo).
+
+### AI-assisted
+- Sử dụng Antigravity để tham khảo cấu trúc SMTP và gợi ý layout Grid tối ưu cho dashboard cảnh báo. Nhóm tự viết lại template HTML và bộ lọc React.
+
+---
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
