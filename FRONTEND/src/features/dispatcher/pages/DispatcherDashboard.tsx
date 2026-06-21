@@ -12,6 +12,7 @@ import { VehiclesTab } from '../components/tabs/VehiclesTab';
 import { FleetMonitoringTab } from '../components/tabs/FleetMonitoringTab';
 import { AlertsTab } from '../components/tabs/AlertsTab';
 import { ReportsTab } from '../components/tabs/ReportsTab';
+import { VehicleTrackingDashboard } from './VehicleTrackingDashboard';
 
 // --- MOCK DATABASE CONFIGURATIONS ---
 
@@ -545,6 +546,10 @@ export const DispatcherDashboard = () => {
           setToastMessage={setToastMessage}
           setActiveTab={setActiveTab}
         />
+      )}
+
+      {activeTab === 'Vehicle Tracking' && (
+        <VehicleTrackingDashboard />
       )}
 
       {/* =========================================================================

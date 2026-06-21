@@ -52,4 +52,6 @@ public partial class Vehicle
     public virtual ICollection<SlotBooking> SlotBookings { get; set; } = new List<SlotBooking>();
 
     public virtual ICollection<VehicleMaintenanceLog> VehicleMaintenanceLogs { get; set; } = new List<VehicleMaintenanceLog>();
+
+    public virtual ICollection<VehicleEvent> VehicleEvents { get; set; } = new List<VehicleEvent>();
 }

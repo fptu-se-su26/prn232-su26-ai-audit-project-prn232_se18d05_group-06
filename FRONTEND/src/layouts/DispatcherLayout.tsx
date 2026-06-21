@@ -35,6 +35,7 @@ export const DispatcherLayout: React.FC<DispatcherLayoutProps> = ({
     'Live Tracking': 'Theo dõi trực tuyến',
     'Drivers': 'Tài xế',
     'Vehicles': 'Phương tiện',
+    'Vehicle Tracking': 'Lịch sử & Chuyến xe',
     'Fleet Monitoring': 'Giám sát đội xe',
     'Alerts Center': 'Trung tâm cảnh báo',
     'Delivery Analytics': 'Phân tích giao hàng',

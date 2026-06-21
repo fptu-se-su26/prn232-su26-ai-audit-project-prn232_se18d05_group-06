@@ -48,6 +48,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IOutboundService, OutboundService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<ITrackingService, TrackingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddHostedService<VehicleCleanupWorker>();
