@@ -61,6 +61,34 @@ namespace BACKEND.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
+            // Built-in admin account configured in appsettings.json (AdminAccount section).
+            // Lets an Admin sign in without needing a seeded database record.
+            var adminSettings = _configuration.GetSection("AdminAccount");
+            var adminUsername = adminSettings["Username"];
+            var adminEmailConfig = adminSettings["Email"] ?? "admin@smartlogai.com";
+            var adminPassword = adminSettings["Password"];
+            var matchesAdminLogin = request.Username == adminUsername
+                || string.Equals(request.Username, adminEmailConfig, StringComparison.OrdinalIgnoreCase);
+            if (!string.IsNullOrEmpty(adminUsername)
+                && matchesAdminLogin
+                && request.Password == adminPassword)
+            {
+                var adminRole = adminSettings["Role"] ?? "ADMIN";
+                var adminEmail = adminEmailConfig;
+                var adminFullName = adminSettings["FullName"] ?? "System Administrator";
+
+                var adminToken = GenerateJwtToken(0, adminUsername, adminEmail, adminRole);
+
+                return Ok(new AuthResponse
+                {
+                    Token = adminToken,
+                    Username = adminUsername,
+                    Email = adminEmail,
+                    FullName = adminFullName,
+                    Role = adminRole
+                });
+            }
+
             var user = await _context.Users.Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Username == request.Username);
 
@@ -161,15 +189,20 @@ namespace BACKEND.Controllers
 
         private string GenerateJwtToken(User user)
         {
+            return GenerateJwtToken(user.UserId, user.Username, user.Email, user.Role.RoleCode);
+        }
+
+        private string GenerateJwtToken(int userId, string username, string email, string roleCode)
+        {
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var key = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? "");
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.RoleCode)
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Role, roleCode)
             };
 
             var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
