@@ -116,12 +116,17 @@ Trong tuần thứ 3, Trần Văn Tùng đã sử dụng Antigravity để thử
 
 Tuy nhiên, việc lạm dụng hiệu ứng này có thể gây khó đọc trên một số thiết bị hoặc nền hình ảnh quá sáng. Nhóm đã tự điều chỉnh lại độ mờ (opacity) và thêm các lớp phủ màu tối để đảm bảo tính khả dụng (accessibility) mà vẫn giữ được tính thẩm mỹ cao.
 
-## Reflection - Tuần 4 (Final)
+## Reflection - Tuần 4
 
-Trong tuần cuối cùng, nhóm tập trung hoàn thiện các tính năng nâng cao như theo dõi đơn hàng trên bản đồ và hệ thống Voucher. Việc sử dụng AI để tạo các animation SVG cho xe tải di chuyển giúp tiết kiệm rất nhiều thời gian lập trình CSS thuần.
+Trong tuần thứ 4, nhóm tập trung hoàn thiện các tính năng nâng cao như theo dõi đơn hàng trên bản đồ và hệ thống Voucher. Việc sử dụng AI để tạo các animation SVG cho xe tải di chuyển giúp tiết kiệm rất nhiều thời gian lập trình CSS thuần.
 
 Nhóm cũng nhận ra rằng khi project càng lớn, việc kiểm soát code do AI sinh ra càng quan trọng. Chúng tôi đã dành nhiều thời gian để refactor lại code, chia nhỏ components và đảm bảo các trang như VoucherCenter, SupportChat hoạt động đồng bộ với theme chung của FleetNova.
 
+## Reflection - Tuần 5 (Phát triển mở rộng)
+
+Tuần này nhóm thực hiện một bước nhảy vọt bằng cách đưa hệ thống Email thông báo vào hoạt động thực tế. Đây là phần công nghệ khá khó nhằn với các cấu hình SMTP và bảo mật của Google.
+
+Nhóm đã sử dụng Antigravity để hiểu về luồng xử lý `BackgroundService` kết hợp với `SmtpClient`. Bài học lớn nhất là không nên để code xử lý logic nghiệp vụ và logic gửi mail quá phụ thuộc vào nhau. Nhóm đã chủ động tách `EmailService` riêng biệt và chỉ cập nhật trạng thái Database khi việc gửi mail thật sự thành công. Về phía Frontend, việc tái cấu trúc layout Grid 75/25 và thêm bộ lọc giúp nhóm hiểu sâu hơn về quản lý `state` và `computed data` trong React để xử lý các danh sách dữ liệu lớn một cách mượt mượt mà. Giao diện giờ đây không chỉ đẹp mà còn mang tính công nghiệp và khả dụng cao.
 
 ---
 
