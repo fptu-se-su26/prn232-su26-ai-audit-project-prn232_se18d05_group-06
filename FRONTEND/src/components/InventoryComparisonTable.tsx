@@ -1,4 +1,4 @@
-import type { AuditRow } from '../InventoryAudit.types'
+import type { AuditRow } from '../features/warehouse/InventoryAudit.types'
 
 type InventoryComparisonTableProps = {
   rows: AuditRow[]
