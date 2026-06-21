@@ -62,6 +62,7 @@ Sinh viên/nhóm cần ghi lại:
 | 9 | 15/06/2026 | Antigravity | Authentication | Tham khảo tích hợp Google Login & JWT | Cấu trúc endpoint & thư viện Google.Apis.Auth | Có | AuthController.cs |
 | 10 | 21/06/2026 | Antigravity | Notification & UI | Tích hợp Email thông báo & Cải tiến UI Stock Alerts | Cấu trúc EmailService & Layout Grid responsive | Có | StockAlertService.cs, StockAlerts.tsx |
 | 11 | 21/06/2026 | Antigravity | Full-Stack & UI Contrast | Triển khai UC018 (Chặn chỉnh sửa dữ liệu, đếm chuyến) và sửa tương phản UI | Logic SaveChanges chặn Edit/Delete, đếm cặp di chuyển và mã màu high-contrast | Có | SmartLogAiContext.cs, VehicleTrackingDashboard.tsx |
+| 12 | 21/06/2026 | Antigravity | Full-Stack & Animation | Triển khai UC020 (Xác nhận Check-out & Điều khiển Cổng ra) | Thiết kế API giao dịch check-out, giải phóng Dock, ghi nhận logs và hoạt ảnh SVG Barrier Gate | Có | GateCheckoutDashboard.tsx, GateService.cs |
 
 ---
 
@@ -284,6 +285,26 @@ Antigravity sinh ra giải pháp chặn chỉnh sửa dữ liệu cực kỳ tri
 
 ---
 
+## Prompt #12
+
+- Date: 2026-06-21
+- AI Tool: Antigravity
+- Author: Lê Quốc Hùng (DE180096)
+- Purpose: Triển khai UC020 (Confirm Check-out & Exit Gate Control) và hoàn hoạt SVG Barrier Gate
+ 
+### Prompt
+1. "Hãy thiết kế một GateService chạy trong IDbContextTransaction để đảm bảo check-out xe gồm: chuyển trạng thái SlotBooking sang 'COMPLETED', ghi nhận CheckOutAt, đổi trạng thái Dock liên kết về 'AVAILABLE', thêm một dòng GateLogs kiểu 'CHECKOUT', và thêm một dòng VehicleEvents kiểu 'CheckOut'."
+2. "Thiết kế một dashboard cổng ra GateCheckoutDashboard.tsx bằng React + Tailwind CSS cho nhân viên bảo vệ, có live-camera giả lập, ô tìm kiếm biển số/booking code, và đặc biệt là một cổng chắn barrier động bằng SVG có thể xoay thanh chắn lên 90 độ khi API trả về lệnh 'OPEN_EXIT'."
+
+### Expected Output
+- Backend: Cấu trúc code C# GateService sử dụng giao dịch nguyên tử, DTOs và API GateController.
+- Frontend: GateCheckoutDashboard.tsx hoàn chỉnh chứa camera feed giả lập, bảng thông tin xe, và hoạt họa SVG Barrier điều khiển bằng React state.
+
+### Evaluation
+Antigravity cung cấp giải pháp toàn diện và cực kỳ chi tiết, giúp backend hoạt động chính xác 100% không làm thay đổi cấu trúc bảng hiện có. Hoạt họa SVG Barrier Gate hoạt động mượt mà và trực quan, nâng cao tính chuyên nghiệp của hệ thống.
+
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -386,7 +407,7 @@ Không nên hỏi AI làm hộ toàn bộ dự án mà nên chia nhỏ từng vi
 |---|---:|---|
 | Prompt phân tích yêu cầu | 0 |  |
 | Prompt giải thích kiến thức | 0 |  |
-| Prompt thiết kế giải pháp | 0 |  |
+| Prompt thiết kế giải pháp | 1 | "Hãy thiết kế một GateService chạy trong IDbContextTransaction..." |
 | Prompt thiết kế database | 1 | "Hãy thiết kế bảng VehicleEvents..." |
 | Prompt sinh code mẫu | 2 | "Cách sử dụng React Router v6..." |
 | Prompt debug lỗi | 0 |  |

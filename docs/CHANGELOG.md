@@ -259,6 +259,30 @@ Author: Lê Quốc Hùng (DE180096)
 
 ---
 
+## [2026-06-21]
+Author: Lê Quốc Hùng (DE180096)
+
+### Added
+- Feature: Triển khai toàn diện "UC020: Confirm Check-out & Exit Gate Control" (Xác nhận Check-out & Điều khiển Cổng ra).
+- Backend:
+  - Xây dựng các lớp DTO (`CheckoutRequestDto`, `CheckoutResponseDto`, `ActiveBookingSummaryDto`).
+  - Triển khai `GateService` xử lý nghiệp vụ giao dịch check-out trong `IDbContextTransaction`: cập nhật trạng thái đặt chỗ sang `COMPLETED`, cập nhật thời gian check-out, giải phóng Dock đỗ về `AVAILABLE`, ghi nhận nhật ký cổng `GateLogs` (`CHECKOUT`), và thêm sự kiện lịch sử xe `VehicleEvents` (`CheckOut`).
+  - Thiết lập `GateController` cung cấp API tra cứu thông tin đặt chỗ hoạt động (`GET /api/gate/active-booking`) và API thực hiện thủ tục check-out (`POST /api/gate/checkout`).
+  - Đăng ký dịch vụ trong `Program.cs`.
+- Frontend:
+  - Phát triển dashboard điều phối cổng ra `GateCheckoutDashboard.tsx` cho nhân viên bảo vệ.
+  - Thiết kế giao diện camera ALPR mô phỏng quét biển số xe, bảng điều khiển thông tin chi tiết xe/tài xế, và bộ kiểm thử giả lập nhanh các biển số xe mẫu.
+  - Tạo mô phỏng đồ họa động SVG Barrier Arm Gate hoạt động trực quan (xoay đứng thanh chắn cổng 90 độ, đèn tín hiệu nhấp nháy xanh lá, đếm ngược tự đóng sau 8 giây).
+  - Tích hợp liên kết Sidebar điều hướng và khai báo Route trong `App.tsx`.
+
+### Changed
+- Tối ưu mã nguồn Frontend: Điều chỉnh đường dẫn import kiểu dữ liệu `InventoryAudit.types` bị sai trong hai component `AuditSidebarPanel.tsx` và `InventoryComparisonTable.tsx` để sửa triệt để lỗi biên dịch TypeScript.
+
+### AI-assisted
+- Sử dụng Antigravity để tư vấn thiết kế giao dịch ACID bằng `IDbContextTransaction` bảo vệ toàn vẹn lịch sử vết di chuyển của xe và thiết kế giao diện mô phỏng SVG Barrier Gate. Nhóm tự thực hiện kiểm thử tích hợp trên Swagger và điều chỉnh giao diện hiển thị.
+
+---
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
@@ -270,6 +294,7 @@ Author: Lê Quốc Hùng (DE180096)
 | 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
 | 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
 | 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
+| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
 
 ---
 

@@ -166,6 +166,17 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: BACKEND/Models/SmartLogAiContext.cs, BACKEND/Services/TrackingService.cs, FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx
 - Verification: Thực hiện ghi nhận chuỗi sự kiện check-in ↔ load ↔ check-out, kiểm tra số lượng chuyến xe tăng lên đúng kịch bản, cố tình gửi yêu cầu PUT cập nhật thì bị database chặn thành công.
 
+## Log #12
+- Date: 2026-06-21
+- Author: Lê Quốc Hùng (DE180096)
+- AI Tool: Antigravity
+- Purpose: Triển khai UC020 (Confirm Check-out & Exit Gate Control) và hoàn hoạt SVG Barrier Gate
+- Prompt Reference: PROMPTS.md#prompt-12
+- AI Output Summary: Gợi ý cấu trúc GateService chạy trong giao dịch ACID và code SVG/React mô phỏng Barrier Gate xoay.
+- Human Decision: Tự phát triển hoàn thiện giao diện điều hành cổng ra, thiết kế bảng điều khiển bảo vệ và tích hợp các bộ giả lập kiểm thử nhanh các biển số xe.
+- Applied To: BACKEND/Services/GateService.cs, BACKEND/Controllers/GateController.cs, FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx
+- Verification: Sử dụng Swagger thực hiện check-out thành công cho xe 51C-88888, kiểm tra DB thấy trạng thái SlotBookings đã COMPLETED, DockID 1 về AVAILABLE, GateLogs ghi nhận sự kiện, và VehicleEvents ghi nhận check-out thành công.
+
 ---
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
@@ -218,7 +229,7 @@ Nhóm chạy thử chương trình trên môi trường phát triển cục bộ
 | Thành viên | MSSV | Nhiệm vụ chính | Có sử dụng AI không? | Minh chứng đóng góp |
 |---|---|---|---|---|
 | Vũ Lê Duy | DE180104 | Cấu trúc dự án, điều hướng Router chính | Có | [App.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
-| Lê Quốc Hùng | DE180096 | Thiết lập Driver UI, Thực hiện UC004, UC015, UC018 (Full-stack) và sửa đổi độ tương phản giao diện | Có | [Orders.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx), [VehicleTrackingDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx) |
+| Lê Quốc Hùng | DE180096 | Thiết lập Driver UI, Thực hiện UC004, UC015, UC018, UC020 (Full-stack) và tối ưu độ tương phản giao diện | Có | [Orders.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx), [VehicleTrackingDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx), [GateCheckoutDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx) |
 
 | Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
 
