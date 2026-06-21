@@ -46,6 +46,7 @@ import WarehouseReports from './features/warehouse/Reports';
 import WarehouseNotifications from './features/warehouse/Notifications';
 import WarehouseSettings from './features/warehouse/Settings';
 import WarehouseAIOCR from './features/warehouse/AIOCRScan';
+import GateCheckoutDashboard from './features/warehouse/GateCheckoutDashboard';
 
 const modules = [
   { path: '/admin/dashboard', name: 'Dashboard', desc: 'KPI Grid, AI Insights, Maps', icon: 'dashboard', color: 'from-blue-500 to-indigo-600' },
@@ -137,6 +138,7 @@ const App: React.FC = () => {
         <Route path="/warehouse/notifications" element={<WarehouseNotifications />} />
         <Route path="/warehouse/settings" element={<WarehouseSettings />} />
         <Route path="/warehouse/ai-ocr" element={<WarehouseAIOCR />} />
+        <Route path="/warehouse/gate-checkout" element={<GateCheckoutDashboard />} />
 
         {/* Catch-all redirect to Dispatcher */}
         <Route path="*" element={<Navigate to="/" replace />} />

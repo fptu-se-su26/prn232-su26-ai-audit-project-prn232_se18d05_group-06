@@ -12,6 +12,7 @@ const navItems = [
   { label: 'Warehouse Transfer', icon: 'local_shipping', to: '/warehouse/transfer' },
   { label: 'Stock Alerts', icon: 'notifications_active', to: '/warehouse/stock-alerts' },
   { label: 'Notifications', icon: 'notifications', to: '/warehouse/notifications' },
+  { label: 'Gate Checkout', icon: 'sensor_door', to: '/warehouse/gate-checkout' },
 ]
 
 const Sidebar = () => (
