@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface RosterDriver {
   id: string;
+  dbDriverId?: number;
   name: string;
   avatar: string;
   cdl: string;
@@ -11,6 +13,8 @@ interface RosterDriver {
   deliveries: number;
   rating: number;
   critical?: boolean;
+  isBlacklisted?: boolean;
+  blacklistReason?: string | null;
 }
 
 const INITIAL_ROSTER_DRIVERS: RosterDriver[] = [
@@ -71,6 +75,7 @@ export const DispatchersTab: React.FC<DispatchersTabProps> = ({
   setSelectedAssignDriver,
 }) => {
   const [rosterDrivers, setRosterDrivers] = useState<RosterDriver[]>(INITIAL_ROSTER_DRIVERS);
+  const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
   const [rosterFilter, setRosterFilter] = useState<'all' | 'En Route' | 'Speeding' | 'Idle' | 'Loading'>('all');
   const [showRosterFilterDropdown, setShowRosterFilterDropdown] = useState(false);
   const [showAddDriverModal, setShowAddDriverModal] = useState(false);
@@ -79,6 +84,79 @@ export const DispatchersTab: React.FC<DispatchersTabProps> = ({
   const [newDriverCdl, setNewDriverCdl] = useState('CDL-A');
   const [newDriverExp, setNewDriverExp] = useState('3Y');
   const [newDriverStatus, setNewDriverStatus] = useState<'En Route' | 'Speeding' | 'Idle' | 'Loading'>('En Route');
+
+  const fetchDrivers = async () => {
+    try {
+      const response = await axios.get('http://localhost:5184/api/drivers');
+      const backendDrivers = response.data.map((d: any) => ({
+        id: `drv-${d.driverId}`,
+        dbDriverId: d.driverId,
+        name: d.fullName,
+        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVTZMCF_i-FkdjUgiVMM7qw878wswVgznw8W823GDbbcaqIYy3Yuntgc0kY3ZNE9ucjepJuVV9aOOI6bB6PNeCeDyCuyw8zPItkqcc2O4ynuMcSJCRPX0PpOv5LaNn4otd2N-z3_n1adFboz-Mzc597fuknTtfjySRWm2ehR_x6hc9MP3xmQZVuPPzYQI4_Zl-xxJkIZvwbMVTkwmVwkhWSmAtngsRhuO6R2yX97TopRH9KW1GZLQcG3XbL6hY83XgKowo6rPBr43o',
+        cdl: d.driverCode,
+        experience: '5Y',
+        status: d.isBlacklisted ? 'Idle' : 'Idle',
+        statusDetails: d.isBlacklisted ? `BLACKLISTED: ${d.blacklistReason}` : 'Đang rảnh / Nghỉ ngơi',
+        deliveries: 120,
+        rating: 4.8,
+        isBlacklisted: d.isBlacklisted,
+        blacklistReason: d.blacklistReason
+      }));
+
+      setRosterDrivers((prev) => {
+        const mockDrivers = prev.filter(driver => !driver.dbDriverId);
+        const filteredMock = mockDrivers.filter(mock => !backendDrivers.some((act: any) => act.name === mock.name));
+        return [...backendDrivers, ...filteredMock];
+      });
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách tài xế:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
+  const handleToggleDriverBlacklist = async (driverId: string, isChecked: boolean) => {
+    const currentDriver = rosterDrivers.find((d) => d.id === driverId);
+    if (!currentDriver) return;
+
+    const dbId = currentDriver.dbDriverId;
+    if (!dbId) {
+      setToastMessage("Không thể thay đổi blacklist cho dữ liệu giả lập (mock data).");
+      return;
+    }
+
+    let reason: string | null = null;
+    if (isChecked) {
+      reason = window.prompt("Nhập lý do chặn tài xế này:");
+      if (reason === null) {
+        return;
+      }
+      if (!reason.trim()) {
+        setToastMessage("Yêu cầu nhập lý do chặn tài xế.");
+        return;
+      }
+    }
+
+    try {
+      await axios.post(`http://localhost:5184/api/drivers/${dbId}/blacklist`, {
+        isBlacklisted: isChecked,
+        blacklistReason: reason
+      });
+
+      setToastMessage(
+        isChecked
+          ? `Đã đưa tài xế ${currentDriver.name} vào danh sách đen.`
+          : `Đã gỡ tài xế ${currentDriver.name} khỏi danh sách đen.`
+      );
+
+      await fetchDrivers();
+    } catch (err: any) {
+      console.error(err);
+      setToastMessage(`Lỗi cập nhật danh sách đen: ${err.response?.data || err.message}`);
+    }
+  };
 
   // Action: Add new driver to roster list
   const handleAddDriver = () => {
@@ -121,6 +199,8 @@ export const DispatchersTab: React.FC<DispatchersTabProps> = ({
     if (rosterFilter === 'all') return true;
     return driver.status === rosterFilter;
   });
+
+  const selectedDriver = rosterDrivers.find(d => d.id === selectedDriverId);
 
   return (
     <div className="flex flex-col gap-gutter h-full min-h-0 relative z-10 transition-all duration-300 overflow-y-auto">
@@ -297,6 +377,7 @@ export const DispatchersTab: React.FC<DispatchersTabProps> = ({
                             distance: driver.status === 'En Route' ? 'Tuyến hoạt động' : 'Đang rảnh',
                             recommended: driver.rating >= 4.9
                           });
+                          setSelectedDriverId(driver.id);
                           setToastMessage(`Đã khóa mục tiêu: Chọn định vị tài xế ${driver.name}.`);
                         }}
                       >
@@ -366,66 +447,138 @@ export const DispatchersTab: React.FC<DispatchersTabProps> = ({
           </div>
         </div>
 
-        {/* AI Evaluation Side Panel (1/3 column) */}
-        <div className="glass-panel rounded-xl flex flex-col p-5 relative overflow-hidden select-none">
-          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-            <span className="material-symbols-outlined text-[100px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              memory
-            </span>
-          </div>
-          
-          <h3 className="font-headline-sm text-headline-sm text-primary flex items-center gap-2 mb-6 font-semibold select-none">
-            <span className="material-symbols-outlined">smart_toy</span> Phân tích Hạm đội AI
-          </h3>
-
-          <div className="flex flex-col gap-6 relative z-10">
-            <div>
-              <div className="flex justify-between items-end mb-2">
-                <span className="font-label-caps text-label-caps text-on-surface-variant text-[10px]">Điểm An toàn Hạm đội Tổng thể</span>
-                <span className="font-display-lg text-display-lg text-secondary font-bold text-2xl">
-                  92<span className="text-sm text-on-surface-variant">/100</span>
+        {/* RIGHT COLUMN: Selected Driver Details & AI Panel */}
+        <div className="flex flex-col gap-6 select-none overflow-y-auto">
+          {selectedDriver && (
+            <div className="glass-panel rounded-xl p-5 flex flex-col relative overflow-hidden select-none border border-outline-variant/20 animate-fade-in text-left">
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <span className="material-symbols-outlined text-[80px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  person
                 </span>
               </div>
-              <div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
-                <div className="bg-secondary h-1.5 rounded-full shadow-[0_0_10px_rgba(76,215,246,0.5)]" style={{ width: '92%' }} />
+              <h3 className="font-headline-sm text-headline-sm text-secondary flex items-center gap-2 mb-4 font-semibold">
+                <span className="material-symbols-outlined">badge</span> Chi tiết Tài xế
+              </h3>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30">
+                  <img alt={selectedDriver.name} className="w-full h-full object-cover" src={selectedDriver.avatar} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-on-surface text-base">{selectedDriver.name}</h4>
+                  <p className="text-[10px] font-bold text-on-surface-variant/60 font-label-caps uppercase mt-0.5">
+                    Mã: {selectedDriver.cdl}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-2.5 rounded bg-surface-variant/10 border border-outline-variant/10">
+                  <span className="text-xs text-on-surface font-semibold">Đánh giá</span>
+                  <span className="text-xs text-on-surface font-bold flex items-center gap-0.5 font-data-tabular">
+                    {selectedDriver.rating.toFixed(1)}{' '}
+                    <span className="material-symbols-outlined text-[13px] text-yellow-500" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      star
+                    </span>
+                  </span>
+                </div>
+
+                {/* Blacklist Control */}
+                <div className="border-t border-outline-variant/20 pt-4">
+                  <span className="text-[10px] font-label-caps text-on-surface-variant uppercase mb-2 block font-bold tracking-wider">
+                    Kiểm soát Danh sách Đen
+                  </span>
+                  <div className="flex items-center justify-between p-3 rounded bg-surface-variant/10 border border-outline-variant/10">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-on-surface font-semibold font-bold">Chặn tài xế này</span>
+                      {selectedDriver.isBlacklisted && (
+                        <span className="text-[10px] text-error mt-0.5 max-w-[200px] break-words font-semibold">
+                          Lý do: {selectedDriver.blacklistReason || 'Không có'}
+                        </span>
+                      )}
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={selectedDriver.isBlacklisted || false}
+                        disabled={!selectedDriver.dbDriverId}
+                        onChange={(e) => handleToggleDriverBlacklist(selectedDriver.id, e.target.checked)}
+                      />
+                      <div className="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:border-outline-variant after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-error peer-checked:after:bg-white"></div>
+                    </label>
+                  </div>
+                  {!selectedDriver.dbDriverId && (
+                    <span className="text-[9px] text-on-surface-variant/50 mt-1 block italic text-center">
+                      (Không khả dụng với tài xế giả lập)
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
+          )}
 
-            <div className="space-y-4 font-body-md">
-              <h4 className="font-label-caps text-label-caps text-on-surface-variant uppercase border-b border-outline-variant/20 pb-2 text-[9px] tracking-wider font-bold">Chỉ số chính</h4>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">speed</span>
-                  <span className="font-data-tabular text-data-tabular text-on-surface text-xs font-semibold">Tuân thủ Tốc độ</span>
-                </div>
-                <span className="font-data-tabular text-data-tabular text-secondary text-sm font-bold">95%</span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">route</span>
-                  <span className="font-data-tabular text-data-tabular text-on-surface text-xs font-semibold">Bám sát Lộ trình</span>
-                </div>
-                <span className="font-data-tabular text-data-tabular text-secondary text-sm font-bold">88%</span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">timer</span>
-                  <span className="font-data-tabular text-data-tabular text-on-surface text-xs font-semibold">Tỷ lệ Đúng giờ</span>
-                </div>
-                <span className="font-data-tabular text-data-tabular text-secondary text-sm font-bold">91%</span>
-              </div>
+          {/* AI Evaluation Side Panel */}
+          <div className="glass-panel rounded-xl flex flex-col p-5 relative overflow-hidden select-none">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+              <span className="material-symbols-outlined text-[100px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                memory
+              </span>
             </div>
+            
+            <h3 className="font-headline-sm text-headline-sm text-primary flex items-center gap-2 mb-6 font-semibold select-none">
+              <span className="material-symbols-outlined">smart_toy</span> Phân tích Hạm đội AI
+            </h3>
 
-            <div className="pt-4 border-t border-outline-variant/20 mt-4">
-              <div className="bg-surface-variant/20 border border-outline-variant/25 rounded-lg p-3.5 flex gap-3 text-left">
-                <span className="material-symbols-outlined text-primary mt-0.5 text-[18px]">tips_and_updates</span>
-                <p className="font-body-md text-body-md text-on-surface-variant text-[12px] leading-snug">
-                  <span className="text-on-surface font-semibold block mb-1">Đề xuất từ AI</span>
-                  Giám sát Tuyến 4B. Phát hiện thời tiết bất thường. Đề xuất đổi lộ trình chủ động cho 3 tài xế đang hoạt động.
-                </p>
+            <div className="flex flex-col gap-6 relative z-10">
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <span className="font-label-caps text-label-caps text-on-surface-variant text-[10px]">Điểm An toàn Hạm đội Tổng thể</span>
+                  <span className="font-display-lg text-display-lg text-secondary font-bold text-2xl">
+                    92<span className="text-sm text-on-surface-variant">/100</span>
+                  </span>
+                </div>
+                <div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+                  <div className="bg-secondary h-1.5 rounded-full shadow-[0_0_10px_rgba(76,215,246,0.5)]" style={{ width: '92%' }} />
+                </div>
+              </div>
+
+              <div className="space-y-4 font-body-md">
+                <h4 className="font-label-caps text-label-caps text-on-surface-variant uppercase border-b border-outline-variant/20 pb-2 text-[9px] tracking-wider font-bold">Chỉ số chính</h4>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">speed</span>
+                    <span className="font-data-tabular text-data-tabular text-on-surface text-xs font-semibold">Tuân thủ Tốc độ</span>
+                  </div>
+                  <span className="font-data-tabular text-data-tabular text-secondary text-sm font-bold">95%</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">route</span>
+                    <span className="font-data-tabular text-data-tabular text-on-surface text-xs font-semibold">Bám sát Lộ trình</span>
+                  </div>
+                  <span className="font-data-tabular text-data-tabular text-secondary text-sm font-bold">88%</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">timer</span>
+                    <span className="font-data-tabular text-data-tabular text-on-surface text-xs font-semibold">Tỷ lệ Đúng giờ</span>
+                  </div>
+                  <span className="font-data-tabular text-data-tabular text-secondary text-sm font-bold">91%</span>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-outline-variant/20 mt-4">
+                <div className="bg-surface-variant/20 border border-outline-variant/25 rounded-lg p-3.5 flex gap-3 text-left">
+                  <span className="material-symbols-outlined text-primary mt-0.5 text-[18px]">tips_and_updates</span>
+                  <p className="font-body-md text-body-md text-on-surface-variant text-[12px] leading-snug">
+                    <span className="text-on-surface font-semibold block mb-1">Đề xuất từ AI</span>
+                    Giám sát Tuyến 4B. Phát hiện thời tiết bất thường. Đề xuất đổi lộ trình chủ động cho 3 tài xế đang hoạt động.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

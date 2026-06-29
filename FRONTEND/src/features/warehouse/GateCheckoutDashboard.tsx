@@ -56,6 +56,7 @@ const GateCheckoutDashboard: React.FC = () => {
   const [barrierOpen, setBarrierOpen] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
+  const [blacklistAlert, setBlacklistAlert] = useState<any | null>(null);
   
   // Audit logs for session
   const [sessionLogs, setSessionLogs] = useState<SessionLog[]>([]);
@@ -117,6 +118,7 @@ const GateCheckoutDashboard: React.FC = () => {
     if (!activeBooking) return;
     setIsProcessingCheckout(true);
     setErrorMsg(null);
+    setBlacklistAlert(null);
 
     try {
       const payload = {
@@ -146,7 +148,65 @@ const GateCheckoutDashboard: React.FC = () => {
       setActiveBooking(null);
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.response?.data || 'An error occurred during check-out transaction.');
+      if (err.response?.status === 403 && err.response?.data?.accessDenied) {
+        setBlacklistAlert(err.response.data);
+      } else {
+        setErrorMsg(err.response?.data?.message || err.response?.data || 'An error occurred during check-out transaction.');
+      }
+    } finally {
+      setIsProcessingCheckout(false);
+    }
+  };
+
+  // Perform checkin transaction
+  const handleConfirmCheckin = async () => {
+    if (!activeBooking) return;
+    setIsProcessingCheckout(true);
+    setErrorMsg(null);
+    setBlacklistAlert(null);
+
+    try {
+      const payload = {
+        alprPlate: activeBooking.alprPlate || activeBooking.truckPlate,
+        bookingCode: activeBooking.bookingCode
+      };
+      
+      const response = await api.post<any>('/gate/checkin', payload);
+      
+      setCheckoutResult({
+        barrierCommand: response.data.barrierCommand,
+        message: response.data.message,
+        bookingId: response.data.bookingId,
+        bookingCode: response.data.bookingCode,
+        licensePlate: response.data.licensePlate,
+        status: response.data.status,
+        checkOutAt: response.data.checkInAt
+      });
+      
+      // Trigger barrier opening animation
+      setBarrierOpen(true);
+      setCountdown(8); // keep barrier open for 8 seconds
+
+      // Log checkin to session audit trail
+      const newLog: SessionLog = {
+        id: Math.random().toString(36).substring(2, 9).toUpperCase(),
+        bookingCode: response.data.bookingCode,
+        licensePlate: response.data.licensePlate,
+        checkOutAt: new Date(response.data.checkInAt),
+        status: response.data.status,
+        barrierSignal: response.data.barrierCommand
+      };
+      setSessionLogs(prev => [newLog, ...prev]);
+      
+      // Clear current active booking card
+      setActiveBooking(null);
+    } catch (err: any) {
+      console.error(err);
+      if (err.response?.status === 403 && err.response?.data?.accessDenied) {
+        setBlacklistAlert(err.response.data);
+      } else {
+        setErrorMsg(err.response?.data?.message || err.response?.data || 'An error occurred during check-in transaction.');
+      }
     } finally {
       setIsProcessingCheckout(false);
     }
@@ -389,23 +449,43 @@ const GateCheckoutDashboard: React.FC = () => {
                   </div>
 
                   <div className="pt-6 border-t border-slate-100 mt-6">
-                    <button
-                      onClick={handleConfirmCheckout}
-                      disabled={isProcessingCheckout}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-indigo-600/30 flex items-center justify-center gap-3 active:scale-95"
-                    >
-                      {isProcessingCheckout ? (
-                        <>
-                          <span className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                          Processing Transaction...
-                        </>
-                      ) : (
-                        <>
-                          <span className="material-symbols-outlined text-xl">gate</span>
-                          CONFIRM CHECK-OUT & OPEN BARRIER
-                        </>
-                      )}
-                    </button>
+                    {activeBooking.status === 'CONFIRMED' ? (
+                      <button
+                        onClick={handleConfirmCheckin}
+                        disabled={isProcessingCheckout}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-emerald-600/35 flex items-center justify-center gap-3 active:scale-95"
+                      >
+                        {isProcessingCheckout ? (
+                          <>
+                            <span className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                            Processing Check-in...
+                          </>
+                        ) : (
+                          <>
+                            <span className="material-symbols-outlined text-xl">login</span>
+                            CONFIRM CHECK-IN & OPEN ENTRY BARRIER
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleConfirmCheckout}
+                        disabled={isProcessingCheckout}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-indigo-600/30 flex items-center justify-center gap-3 active:scale-95"
+                      >
+                        {isProcessingCheckout ? (
+                          <>
+                            <span className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                            Processing Checkout...
+                          </>
+                        ) : (
+                          <>
+                            <span className="material-symbols-outlined text-xl">logout</span>
+                            CONFIRM CHECK-OUT & OPEN EXIT BARRIER
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -556,6 +636,77 @@ const GateCheckoutDashboard: React.FC = () => {
 
         </div>
       </main>
+
+      {blacklistAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md pointer-events-auto">
+          <div className="w-full max-w-lg bg-slate-900 border-2 border-red-500 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(239,68,68,0.5)] text-left">
+            {/* Flashing red alert top bar */}
+            <div className="bg-red-600 text-white p-5 flex justify-between items-center animate-pulse">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-3xl font-black">gavel</span>
+                <div>
+                  <h3 className="font-extrabold text-lg tracking-tight uppercase">
+                    ALERT: {blacklistAlert.alertType || 'BLACKLIST DETECTED'}
+                  </h3>
+                  <p className="text-xs text-red-100 font-medium">
+                    Severity: {blacklistAlert.alarmLevel || 'CRITICAL'}
+                  </p>
+                </div>
+              </div>
+              <span className="bg-red-800/60 text-white text-[10px] font-bold px-3 py-1 rounded-full border border-red-500/30">
+                ACCESS BLOCKED
+              </span>
+            </div>
+
+            <div className="p-8 space-y-6 text-slate-300">
+              <p className="text-sm leading-relaxed text-slate-400">
+                The security validation service automatically rejected this transaction because the entity has been flag-restricted on the warehouse blacklist registry.
+              </p>
+
+              {/* Blocked Entity specs */}
+              <div className="bg-slate-950 p-5 rounded-2xl border border-red-500/20 space-y-4 font-mono text-sm">
+                <div className="flex justify-between items-center border-b border-slate-800/60 pb-3">
+                  <span className="text-slate-500 text-xs font-semibold">BLOCKED ENTITY</span>
+                  <span className="bg-red-500/10 text-red-400 text-xs px-2.5 py-0.5 rounded border border-red-500/20 font-bold uppercase">
+                    {blacklistAlert.blockedEntity}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="text-slate-500 text-[10px] block mb-0.5 uppercase">License Plate</span>
+                    <span className="font-bold text-slate-200">{blacklistAlert.licensePlate || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[10px] block mb-0.5 uppercase">Driver Name</span>
+                    <span className="font-bold text-slate-200">{blacklistAlert.driverName || 'N/A'}</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-800/60 pt-3">
+                  <span className="text-slate-500 text-[10px] block mb-0.5 uppercase">Denial Reason</span>
+                  <p className="text-xs text-red-300 bg-red-950/20 p-3 rounded-lg border border-red-900/30 font-sans leading-relaxed mt-1">
+                    {blacklistAlert.reason}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-2">
+                <button
+                  onClick={() => {
+                    setBlacklistAlert(null);
+                  }}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-red-600/30 text-center text-sm font-sans flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-sm font-bold">check_circle</span>
+                  Acknowledge Threat / Dismiss Alarm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -28,6 +28,8 @@ interface VehicleUnit {
   fuelConsumptionRate: number;
   registrationExpiry: string;
   insuranceExpiry: string;
+  isBlacklisted?: boolean;
+  blacklistReason?: string | null;
 }
 
 const INITIAL_VEHICLES: VehicleUnit[] = [
@@ -275,7 +277,92 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
     }
   };
 
+  const fetchActiveVehicles = async () => {
+    try {
+      const response = await axios.get('http://localhost:5184/api/tracking/vehicles');
+      const backendActive = response.data.map((v: any) => ({
+        id: v.licensePlate,
+        dbVehicleId: v.vehicleId,
+        name: v.licensePlate,
+        vehicleModel: v.vehicleModel,
+        type: 'Xe hạm đội',
+        status: v.isBlacklisted ? 'Alert' : 'Active',
+        img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAhRsM2TlznkPIuzMGNeTy4rkLREL28LX2vZ4mvSjn6ET-OXDdaEyiy1EhAfnZFKbUJ8sgxyc6sjsCoqlVz8Cz-9Hb267kLaNfmDX6ryhyTEQ2E852MZWO3pKwxyhtVnera6HulDcZnKnD9Q44OT_dEmmrvchLnOA3nEjFMdfqfQBIz-Fs4qzmyOiKiExkIUTTytRjVfIIUT6MuA6i74dOQzqsb8NB3aGbOFfCm4LNs3PYKUIrVEdmzQODjR6ysYTSUW4D6cr0vqDr5',
+        capacityPercent: 80,
+        capacityText: '80%',
+        fuelPercent: 90,
+        maintText: v.isBlacklisted ? `BLACKLISTED: ${v.blacklistReason}` : 'Bảo trì: TỐT',
+        maintStatus: v.isBlacklisted ? 'alert' : 'ok',
+        engineTemp: 194,
+        oilPressure: 40,
+        batteryVoltage: 13.6,
+        dpfLevel: 15,
+        lat: 21.0285,
+        lon: 105.8542,
+        speed: 0,
+        payloadKg: 5000,
+        volumeCbm: 20,
+        fuelConsumptionRate: 15.0,
+        registrationExpiry: '2026-12-31',
+        insuranceExpiry: '2026-12-31',
+        isBlacklisted: v.isBlacklisted,
+        blacklistReason: v.blacklistReason
+      }));
+
+      setVehicles((prev) => {
+        const mockVehicles = prev.filter(v => v.status !== 'Pending' && !v.dbVehicleId);
+        const filteredMock = mockVehicles.filter(mock => !backendActive.some((act: any) => act.id === mock.id));
+        return [...backendActive, ...filteredMock];
+      });
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách xe từ backend:", error);
+    }
+  };
+
+  const handleToggleVehicleBlacklist = async (licensePlate: string, isChecked: boolean) => {
+    const currentVehicle = vehicles.find((v) => v.id === licensePlate);
+    if (!currentVehicle) return;
+
+    const dbId = currentVehicle.dbVehicleId;
+    if (!dbId) {
+      setToastMessage("Không thể thay đổi blacklist cho dữ liệu giả lập (mock data).");
+      return;
+    }
+
+    let reason: string | null = null;
+    if (isChecked) {
+      reason = window.prompt("Nhập lý do chặn phương tiện này:");
+      if (reason === null) {
+        return;
+      }
+      if (!reason.trim()) {
+        setToastMessage("Yêu cầu nhập lý do chặn phương tiện.");
+        return;
+      }
+    }
+
+    try {
+      await axios.post(`http://localhost:5184/api/vehicles/${dbId}/blacklist`, {
+        isBlacklisted: isChecked,
+        blacklistReason: reason
+      });
+
+      setToastMessage(
+        isChecked
+          ? `Đã đưa phương tiện ${licensePlate} vào danh sách đen.`
+          : `Đã gỡ phương tiện ${licensePlate} khỏi danh sách đen.`
+      );
+
+      await fetchActiveVehicles();
+      await fetchPendingVehicles();
+    } catch (err: any) {
+      console.error(err);
+      setToastMessage(`Lỗi cập nhật danh sách đen: ${err.response?.data || err.message}`);
+    }
+  };
+
   useEffect(() => {
+    fetchActiveVehicles();
     fetchPendingVehicles();
   }, []);
 
@@ -829,6 +916,38 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
                     <span className="text-on-surface text-[11px] font-bold font-data-tabular">{focusedVehicle.insuranceExpiry}</span>
                   </li>
                 </ul>
+              </div>
+
+              {/* Blacklist Control */}
+              <div className="text-left border-t border-outline-variant/20 pt-4">
+                <h4 className="text-[10px] font-label-caps text-on-surface-variant uppercase mb-3 flex items-center gap-2 font-bold tracking-wider">
+                  <span className="material-symbols-outlined text-[14px]">gavel</span> Quản lý Blacklist
+                </h4>
+                <div className="flex items-center justify-between p-3 rounded bg-surface-variant/10 border border-outline-variant/10">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-on-surface font-semibold font-bold">Chặn phương tiện này</span>
+                    {focusedVehicle.isBlacklisted && (
+                      <span className="text-[10px] text-error mt-0.5 max-w-[200px] break-words font-semibold">
+                        Lý do: {focusedVehicle.blacklistReason || 'Không có'}
+                      </span>
+                    )}
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={focusedVehicle.isBlacklisted || false}
+                      disabled={!focusedVehicle.dbVehicleId}
+                      onChange={(e) => handleToggleVehicleBlacklist(focusedVehicle.id, e.target.checked)}
+                    />
+                    <div className="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:border-outline-variant after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-error peer-checked:after:bg-white"></div>
+                  </label>
+                </div>
+                {!focusedVehicle.dbVehicleId && (
+                  <span className="text-[9px] text-on-surface-variant/50 mt-1 block italic text-center">
+                    (Không khả dụng với phương tiện giả lập)
+                  </span>
+                )}
               </div>
             </>
           )}

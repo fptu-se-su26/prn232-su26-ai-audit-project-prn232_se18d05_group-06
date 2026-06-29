@@ -95,6 +95,35 @@ namespace BACKEND.Services
             return true;
         }
 
+        public async Task<VehicleDto> UpdateBlacklistStatusAsync(int id, UpdateBlacklistRequestDto dto)
+        {
+            var vehicle = await _context.Vehicles.FindAsync(id);
+            if (vehicle == null)
+            {
+                throw new KeyNotFoundException($"Vehicle with ID {id} not found.");
+            }
+
+            if (dto.IsBlacklisted)
+            {
+                if (string.IsNullOrWhiteSpace(dto.BlacklistReason))
+                {
+                    throw new ArgumentException("A reason is required when blacklisting a vehicle.");
+                }
+                vehicle.IsBlacklisted = true;
+                vehicle.BlacklistReason = dto.BlacklistReason.Trim();
+                vehicle.Status = "BLACKLISTED";
+            }
+            else
+            {
+                vehicle.IsBlacklisted = false;
+                vehicle.BlacklistReason = null;
+                vehicle.Status = "AVAILABLE";
+            }
+
+            await _context.SaveChangesAsync();
+            return MapToDto(vehicle);
+        }
+
         private static VehicleDto MapToDto(Vehicle vehicle)
         {
             return new VehicleDto
@@ -107,7 +136,9 @@ namespace BACKEND.Services
                 InsuranceExpiry = vehicle.InspectionExpiry?.ToDateTime(TimeOnly.MinValue) ?? DateTime.UtcNow,
                 RegistrationExpiry = vehicle.NextServiceDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.UtcNow,
                 FuelConsumptionRate = 0.0m,
-                Status = vehicle.Status ?? "AVAILABLE"
+                Status = vehicle.Status ?? "AVAILABLE",
+                IsBlacklisted = vehicle.IsBlacklisted ?? false,
+                BlacklistReason = vehicle.BlacklistReason
             };
         }
     }

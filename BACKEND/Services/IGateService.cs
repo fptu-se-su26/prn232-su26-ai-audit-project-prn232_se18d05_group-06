@@ -7,5 +7,6 @@ namespace BACKEND.Services
     {
         Task<ActiveBookingSummaryDto?> GetActiveBookingAsync(string search);
         Task<CheckoutResponseDto> ProcessCheckoutAsync(CheckoutRequestDto request, int? operatorId);
+        Task<object> ProcessCheckInAsync(GateCheckInRequestDto request, int? operatorId);
     }
 }

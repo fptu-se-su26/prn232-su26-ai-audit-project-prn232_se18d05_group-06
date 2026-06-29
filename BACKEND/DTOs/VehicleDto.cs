@@ -13,6 +13,8 @@ namespace BACKEND.DTOs
         public DateTime RegistrationExpiry { get; set; }
         public decimal FuelConsumptionRate { get; set; }
         public string Status { get; set; } = "AVAILABLE";
+        public bool IsBlacklisted { get; set; }
+        public string? BlacklistReason { get; set; }
     }
 
     public class DetectVehicleRequestDto

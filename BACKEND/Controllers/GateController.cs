@@ -77,5 +77,44 @@ namespace BACKEND.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        // POST: api/gate/checkin
+        [HttpPost("checkin")]
+        public async Task<ActionResult> CheckIn([FromBody] GateCheckInRequestDto request)
+        {
+            if (request == null || (string.IsNullOrWhiteSpace(request.AlprPlate) && string.IsNullOrWhiteSpace(request.BookingCode)))
+            {
+                return BadRequest("License Plate or Booking Code is required for check-in.");
+            }
+
+            try
+            {
+                int? operatorId = null;
+                var subClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                               ?? User.FindFirst("sub")?.Value 
+                               ?? User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (int.TryParse(subClaim, out int parsedId))
+                {
+                    operatorId = parsedId;
+                }
+
+                var result = await _gateService.ProcessCheckInAsync(request, operatorId);
+                if (result is GateAccessDeniedResponseDto accessDenied)
+                {
+                    return StatusCode(403, accessDenied);
+                }
+
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

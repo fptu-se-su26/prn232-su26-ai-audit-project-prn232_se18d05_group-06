@@ -10,5 +10,6 @@ namespace BACKEND.Services
         Task<List<VehicleDto>> GetPendingVehiclesAsync();
         Task<VehicleDto> ApproveVehicleAsync(int id, ApproveVehicleRequestDto dto);
         Task<bool> RejectVehicleAsync(int id);
+        Task<VehicleDto> UpdateBlacklistStatusAsync(int id, UpdateBlacklistRequestDto dto);
     }
 }
