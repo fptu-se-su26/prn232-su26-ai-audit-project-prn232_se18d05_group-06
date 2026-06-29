@@ -119,7 +119,9 @@ namespace BACKEND.Services
                     VehicleId = v.VehicleId,
                     LicensePlate = v.TruckPlate,
                     VehicleModel = v.VehicleType ?? string.Empty,
-                    Status = v.Status ?? "AVAILABLE"
+                    Status = v.Status ?? "AVAILABLE",
+                    IsBlacklisted = v.IsBlacklisted ?? false,
+                    BlacklistReason = v.BlacklistReason
                 })
                 .ToListAsync();
         }

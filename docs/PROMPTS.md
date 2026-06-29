@@ -37,7 +37,7 @@ Sinh viên/nhóm cần ghi lại:
 
 - [x] ChatGPT
 - [x] Gemini
-- [ ] Claude
+- [x] Claude
 - [ ] GitHub Copilot
 - [ ] Cursor
 - [x] Antigravity
@@ -63,6 +63,8 @@ Sinh viên/nhóm cần ghi lại:
 | 10 | 21/06/2026 | Antigravity | Notification & UI | Tích hợp Email thông báo & Cải tiến UI Stock Alerts | Cấu trúc EmailService & Layout Grid responsive | Có | StockAlertService.cs, StockAlerts.tsx |
 | 11 | 21/06/2026 | Antigravity | Full-Stack & UI Contrast | Triển khai UC018 (Chặn chỉnh sửa dữ liệu, đếm chuyến) và sửa tương phản UI | Logic SaveChanges chặn Edit/Delete, đếm cặp di chuyển và mã màu high-contrast | Có | SmartLogAiContext.cs, VehicleTrackingDashboard.tsx |
 | 12 | 21/06/2026 | Antigravity | Full-Stack & Animation | Triển khai UC020 (Xác nhận Check-out & Điều khiển Cổng ra) | Thiết kế API giao dịch check-out, giải phóng Dock, ghi nhận logs và hoạt ảnh SVG Barrier Gate | Có | GateCheckoutDashboard.tsx, GateService.cs |
+| 13 | 29/06/2026 | Antigravity (Claude Sonnet 4.6) | Security & Full-Stack | Triển khai UC021 - Quản lý Danh sách Đen Phương tiện & Tài xế | Guard clause blacklist nguyên tử, 403 Forbidden payload, toggle UI glassmorphism và Red Alarm Modal | Có | VehicleService.cs, DriverService.cs, GateController.cs, VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx |
+| 14 | 29/06/2026 | Antigravity (Claude Sonnet 4.6) | UI Fix & CSS | Sửa lỗi UI Contrast tối Dispatcher Dashboard - kéo thả sang CSS variable mapping | Phân tích trùng key Tailwind, giải pháp CSS custom properties và `.dark` class override | Có | tailwind.config.js, index.css, DispatcherLayout.tsx |
 
 ---
 
@@ -304,6 +306,45 @@ Antigravity sinh ra giải pháp chặn chỉnh sửa dữ liệu cực kỳ tri
 Antigravity cung cấp giải pháp toàn diện và cực kỳ chi tiết, giúp backend hoạt động chính xác 100% không làm thay đổi cấu trúc bảng hiện có. Hoạt họa SVG Barrier Gate hoạt động mượt mà và trực quan, nâng cao tính chuyên nghiệp của hệ thống.
 
 ---
+
+## Prompt #13
+
+- Date: 2026-06-29
+- AI Tool: Antigravity (Claude Sonnet 4.6)
+- Author: Lê Quốc Hùng (DE180096)
+- Purpose: Triển khai UC021 - Quản lý Danh sách Đen Phương tiện & Tài xế (Blacklist Management)
+
+### Prompt
+1. "Hãy phân tích các ràng buộc: UC021 chỉ dùng trường `IsBlacklisted` và `BlacklistReason` sẵn có trong Vehicles và Drivers models, không tạo migration, không thay đổi schema. Hãy viết `ToggleBlacklistAsync` trong VehicleService.cs và DriverService.cs với business validation: bắt buộc nhập lý do khi blacklist, tự động xóa lý do khi unblacklist."
+2. "Tích hợp kiểm tra blacklist vào `GateService.ProcessCheckInAsync` như guard clause đầu hàm trước mọi thay đổi trạng thái booking/dock/log. GateController trả về HTTP 403 Forbidden kèm payload BlacklistAlertDto (alertType, alarmLevel, blockedEntity, licensePlate, driverName, reason)."
+3. "Thiết kế toggle switch 'Kiểm soát Danh sách Đen' glassmorphism cho VehiclesTab.tsx và DispatchersTab.tsx. Xử lý prompt nhập lý do, chỉ gửi API khi lý do không rỗng và không có hành động nào khi người dùng cancel prompt."
+4. "Trong GateCheckoutDashboard.tsx bắt lỗi 403 Forbidden, parse payload accessDenied, hiển thị Red Critical Security Alert Modal: nền đỏ nhấp nháy, hiển thị entity bị chặn, lý do từ chối, mức độ nghiêm trọng 'CRITICAL'. Barrier không được mở khi có blacklist denial."
+
+### Expected Output
+- Backend: `ToggleBlacklistAsync` trong VehicleService.cs & DriverService.cs, guard clause trong GateService, HTTP 403 cấu trúc DTO chính xác.
+- Frontend: Toggle UI, prompt logic, 403 handler và Red Alarm Modal trong GateCheckoutDashboard.tsx.
+
+### Evaluation
+Antigravity đã thiết kế giải pháp toàn diện, nghiêm ngặt tuân thủ zero-migration policy. Guard clause blacklist được đặt chính xác trước mọi thao tác nghiệp vụ, đảm bảo khi rejection xảy ra thì: không có log thành công, không mở barrier, không chiếm dock. Nhóm tự kiểm tra 3 kịch bản end-to-end và xác nhận tất cả pass.
+
+---
+
+## Prompt #14
+
+- Date: 2026-06-29
+- AI Tool: Antigravity (Claude Sonnet 4.6)
+- Author: Lê Quốc Hùng (DE180096)
+- Purpose: Sửa lỗi UI Contrast tối toàn diện trong Dispatcher Dashboard
+
+### Prompt
+"Giao diện tab Vehicles và Dispatchers đang tối quá, nhiều thức tính và nút blacklist khó nhìn. Hãy phân tích nguyên nhân gốc rễ của vấn đề tương phản này trong cấu hình Tailwind và CSS hiện tại, rồi đề xuất giải pháp để các class `on-surface`, `on-surface-variant`, `surface-variant`, v.v. được ánh xạ đúng sang màu sáng khi đang trên nền tối của Dispatcher Dashboard."
+
+### Expected Output
+- Phân tích: Nguyên nhân trùng key trong `tailwind.config.js`.
+- Giải pháp: CSS custom properties + `.dark` class override trong `index.css` + thêm class context vào `DispatcherLayout.tsx`.
+
+### Evaluation
+Antigravity chẩn đoán chính xác nguyên nhân gốc rễ: `tailwind.config.js` khai báo cùng một key `on-surface` nhiều lần khiến giá trị cuối ghi đè giá trị trước (light theme thắng dark theme). Giải pháp CSS variable mapping rất sạch và không ảnh hưởng các trang khác. Build thành công 100% sau khi áp dụng.
 
 ## 6. Prompt quan trọng nhất
 

@@ -50,7 +50,7 @@ export const DispatcherLayout: React.FC<DispatcherLayoutProps> = ({
       : `Trung tâm Điều khiển ${tabLabels[activeTab] || activeTab}`;
 
   return (
-    <div className="bg-[#051424] text-[#d4e4fa] h-screen w-screen overflow-hidden flex font-body-md relative text-body-md">
+    <div className="dark dispatcher-dark-theme bg-[#051424] text-[#d4e4fa] h-screen w-screen overflow-hidden flex font-body-md relative text-body-md">
       {/* Side Navigation Sidebar */}
       <Sidebar
         activeTab={activeTab}

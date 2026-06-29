@@ -8,8 +8,27 @@
     --foreground: 214 90% 90%; /* #d4e4fa */
     --border: 215 15% 25%;
     --radius: 0.5rem;
+
+    /* Responsive Design System Variables (Default: Light Theme) */
+    --surface: #f7f9fb;
+    --surface-variant: #e0e3e5;
+    --on-surface: #191c1e;
+    --on-surface-variant: #434655;
+    --outline-variant: #c3c6d7;
+    --error: #ba1a1a;
   }
 }
+
+/* Dark and Dispatcher Theme Overrides */
+.dark, .dispatcher-dark-theme, .dark-theme {
+  --surface: #051424;
+  --surface-variant: #273647;
+  --on-surface: #e2e8f0;
+  --on-surface-variant: #c3c6d7;
+  --outline-variant: #434655;
+  --error: #ffb4ab;
+}
+
 
 * {
   border-color: rgba(255, 255, 255, 0.08);
