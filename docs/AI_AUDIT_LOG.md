@@ -23,7 +23,7 @@
 
 - [x] ChatGPT
 - [x] Gemini
-- [ ] Claude
+- [x] Claude
 - [ ] GitHub Copilot
 - [ ] Cursor
 - [x] Antigravity
@@ -177,6 +177,28 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: BACKEND/Services/GateService.cs, BACKEND/Controllers/GateController.cs, FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx
 - Verification: Sử dụng Swagger thực hiện check-out thành công cho xe 51C-88888, kiểm tra DB thấy trạng thái SlotBookings đã COMPLETED, DockID 1 về AVAILABLE, GateLogs ghi nhận sự kiện, và VehicleEvents ghi nhận check-out thành công.
 
+## Log #13
+- Date: 2026-06-29
+- Author: Lê Quốc Hùng (DE180096)
+- AI Tool: Antigravity (Claude Sonnet 4.6)
+- Purpose: Triển khai UC021 - Quản lý Danh sách Đen Phương tiện & Tài xế (Blacklist Management)
+- Prompt Reference: PROMPTS.md#prompt-13
+- AI Output Summary: Gợi ý thiết kế guard clause blacklist nguyên tử trong GateService trước mọi thao tác booking, cấu trúc BlacklistAlertDto để trả về HTTP 403 Forbidden, thiết kế toggle UI glassmorphism cho VehiclesTab & DispatchersTab, và Red Critical Security Alert Modal cho GateCheckoutDashboard.
+- Human Decision: Tự kiểm tra nghiêm ngặt các ràng buộc business: không tạo migration, không cho blacklist nếu thiếu lý do, không gửi API nếu người dùng hủy prompt. Tự chạy 3 kịch bản đầu cuối (blacklist xe, blacklist tài xế, unblacklist + check-in lại) để xác nhận tính đúng đắn.
+- Applied To: BACKEND/Services/VehicleService.cs, BACKEND/Services/DriverService.cs, BACKEND/Services/GateService.cs, BACKEND/Controllers/GateController.cs, FRONTEND/src/features/dispatcher/components/tabs/VehiclesTab.tsx, FRONTEND/src/features/dispatcher/components/tabs/DispatchersTab.tsx, FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx
+- Verification: Test 3 case: (1) Blacklist xe → check-in → nhận 403 + modal đỏ + barrier không mở. (2) Blacklist tài xế → check-in → nhận 403 + modal đỏ. (3) Unblacklist → check-in lại → thành công bình thường.
+
+## Log #14
+- Date: 2026-06-29
+- Author: Lê Quốc Hùng (DE180096)
+- AI Tool: Antigravity (Claude Sonnet 4.6)
+- Purpose: Sửa lỗi UI Contrast tối toàn diện trong Dispatcher Dashboard (Vehicles & Dispatchers Tabs)
+- Prompt Reference: PROMPTS.md#prompt-14
+- AI Output Summary: Phân tích nguyên nhân gốc rễ: `tailwind.config.js` định nghĩa trùng key `on-surface`, `surface-variant`, v.v. khiến màu light theme override màu dark theme. Gợi ý chuyển các token màu sang CSS custom properties và áp dụng `.dark` class override.
+- Human Decision: Áp dụng giải pháp và kiểm tra lại giao diện trên trình duyệt, xác nhận độ tương phản và khả năng đọc của text trong các panel chi tiết xe, tài xế và các điều khiển blacklist.
+- Applied To: FRONTEND/tailwind.config.js, FRONTEND/src/index.css, FRONTEND/src/layouts/DispatcherLayout.tsx
+- Verification: Chạy `npm run build` thành công (0 lỗi). Quan sát trực tiếp các text trong panel chi tiết xe/tài xế hiển thị rõ ràng, sáng đủ trên nền tối glassmorphism.
+
 ---
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
@@ -229,7 +251,7 @@ Nhóm chạy thử chương trình trên môi trường phát triển cục bộ
 | Thành viên | MSSV | Nhiệm vụ chính | Có sử dụng AI không? | Minh chứng đóng góp |
 |---|---|---|---|---|
 | Vũ Lê Duy | DE180104 | Cấu trúc dự án, điều hướng Router chính | Có | [App.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
-| Lê Quốc Hùng | DE180096 | Thiết lập Driver UI, Thực hiện UC004, UC015, UC018, UC020 (Full-stack) và tối ưu độ tương phản giao diện | Có | [Orders.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx), [VehicleTrackingDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx), [GateCheckoutDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx) |
+| Lê Quốc Hùng | DE180096 | Thiết lập Driver UI, Thực hiện UC004, UC015, UC018, UC020, UC021 (Full-stack) và tối ưu độ tương phản giao diện Dispatcher Dashboard | Có | [Orders.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx), [VehicleTrackingDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx), [GateCheckoutDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx), [VehiclesTab.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/components/tabs/VehiclesTab.tsx) |
 
 | Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
 

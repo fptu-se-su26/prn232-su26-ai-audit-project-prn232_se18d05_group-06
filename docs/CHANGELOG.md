@@ -283,7 +283,34 @@ Author: Lê Quốc Hùng (DE180096)
 
 ---
 
-## 4. Tổng kết thay đổi cuối project
+## [2026-06-29]
+Author: Lê Quốc Hùng (DE180096)
+
+### Added
+- Feature: Triển khai toàn diện "UC021: Quản lý Danh sách Đen Phương tiện & Tài xế" (Blacklist Management).
+- Backend:
+  - Tận dụng các trường `IsBlacklisted` và `BlacklistReason` sẵn có trong `Vehicles` và `Drivers` models — **Không tạo migration hay thay đổi schema database**.
+  - Bổ sung phương thức `ToggleBlacklistAsync` vào `VehicleService.cs` với kiểm tra business: bắt buộc nhập lý do khi blacklist, xóa lý do khi unblacklist.
+  - Bổ sung phương thức `ToggleBlacklistAsync` vào `DriverService.cs` với cùng quy tắc business validation.
+  - Tích hợp kiểm tra blacklist vào `GateService.ProcessCheckInAsync` như guard clause **nguyên tử** trước mọi thay đổi trạng thái booking/dock/log — đảm bảo rejection không ghi log thành công, không mở barrier, không chiếm dock.
+  - `GateController.cs` trả về HTTP 403 Forbidden kèm payload `BlacklistAlertDto` có các trường: `alertType`, `alarmLevel`, `blockedEntity`, `licensePlate`, `driverName`, `reason`.
+- Frontend:
+  - `VehiclesTab.tsx`: Tích hợp toggle switch "Kiểm soát Danh sách Đen" trong HUD panel chi tiết xe với UI glassmorphism. Hiển thị trạng thái, lý do blacklist và xử lý prompt nhập lý do.
+  - `DispatchersTab.tsx`: Tích hợp toggle switch "Kiểm soát Danh sách Đen" trong panel chi tiết tài xế. Chỉ hoạt động với driver thực từ backend (không mock).
+  - `GateCheckoutDashboard.tsx`: Thêm xử lý 403 Forbidden, parse payload `accessDenied`, và hiển thị **Red Critical Security Alert Modal** — màu đỏ nhấp nháy, hiển thị entity bị chặn, lý do từ chối, mức độ nghiêm trọng. Barrier không mở khi bị từ chối.
+
+### Fixed
+- Sửa lỗi UI Contrast toàn diện trong Dispatcher Dashboard: Tailwind `surface`, `on-surface`, `on-surface-variant`, `surface-variant`, `outline-variant`, `error` đều bị trỏ đến màu light theme (#191c1e) do trùng key trong `tailwind.config.js`.
+- Chuyển đổi các token màu này sang CSS custom properties (`var(--on-surface)`, v.v.) trong `tailwind.config.js`.
+- Định nghĩa dark overrides trong `index.css` dưới `.dark, .dispatcher-dark-theme`.
+- Thêm class `dark dispatcher-dark-theme` vào container gốc trong `DispatcherLayout.tsx`.
+
+### AI-assisted
+- Sử dụng Antigravity (Claude Sonnet 4.6) để thiết kế luồng guard clause blacklist nguyên tử trong GateService, cấu trúc 403 payload, thiết kế UI Red Alarm Modal, phân tích nguyên nhân lỗi tương phản màu sắc Tailwind CSS và đề xuất giải pháp CSS variable mapping. Nhóm tự kiểm tra toàn bộ 3 kịch bản nghiệm vụ (blacklist xe, blacklist tài xế, unblacklist rồi check-in lại) và tự tinh chỉnh giao diện.
+
+---
+
+
 
 ### 4.1. Các chức năng đã hoàn thành
 
@@ -295,6 +322,8 @@ Author: Lê Quốc Hùng (DE180096)
 | 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
 | 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
 | 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
+| 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
+
 
 ---
 
