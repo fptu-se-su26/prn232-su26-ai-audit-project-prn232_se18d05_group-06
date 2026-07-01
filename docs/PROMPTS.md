@@ -253,6 +253,118 @@ Antigravity cung cấp đoạn code mẫu và tài liệu tham khảo chính xá
 1. "Hãy viết EmailService sử dụng SmtpClient để gửi email HTML từ Gmail. Làm sao để tích hợp nó vào luồng quét tồn kho có cơ chế Debounce 12h?"
 2. "Sửa lại file StockAlerts.tsx: tăng padding, mở rộng bảng cảnh báo chiếm 75% chiều ngang, thêm bộ lọc tìm kiếm theo SKU và loại cảnh báo."
 
+---
+
+## Prompt #11 
+
+- Date: 2026-07-01
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Hoàn thiện Overstay Alert cho Dispatcher
+### Bối cảnh
+```text
+Dự án SmartLog AI cần hoàn thiện chức năng Cảnh báo xe lưu bãi quá hạn cho role Dispatcher. Backend dùng ASP.NET Core, Entity Framework Core và SQL Server. Frontend dùng React/TypeScript.
+```
+
+### Prompt đã dùng
+```text
+Hãy hoàn thành chức năng Cảnh báo xe lưu bãi quá hạn (Overstay Alert). Tự động tính toán thời gian xe đỗ tại khu vực Dock, kích hoạt cảnh báo trực quan trên màn hình điều phối nếu xe vượt quá thời gian quy định của SLA. Có thể thêm dữ liệu vào database để nó hiển thị lên UI. Lưu ý UI hiển thị Overstay Alert.
+```
+
+### Kết quả đã áp dụng
+```text
+Tạo API /api/fleet/overstay-alerts, service tính SLA, worker quét nền, schema VehicleDockSessions/OverstayAlerts và màn hình Overstay Alert trong Dispatcher.
+```
+
+### Điều chỉnh của nhóm
+```text
+Nhóm kiểm tra dữ liệu trả về từ API bằng HTTP request, tự quyết định nhãn UI là Overstay Alert và loại bỏ mã use case khỏi giao diện.
+```
+
+---
+
+## Prompt #12
+
+- Date: 2026-07-01
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Cải thiện UI/UX Dispatcher
+### Bối cảnh
+```text
+Dispatcher là màn hình điều phối logistics, cần phù hợp mô tả SmartLog AI và các use case đội xe, dock, cảnh báo SLA.
+```
+
+### Prompt đã dùng
+```text
+Hãy sửa lại toàn bộ UI/UX của Dispatcher cho đẹp hơn. Chỉ sửa UI/UX sao cho phù hợp với mô tả dự án và use case.
+```
+
+### Kết quả đã áp dụng
+```text
+Cập nhật DispatcherLayout, Sidebar, Header, DashboardTab, KPISection, ActiveOrders, AIInsights, LiveEvents, MapLayer và CSS dispatcher-shell.
+```
+
+### Điều chỉnh của nhóm
+```text
+Nhóm giữ nguyên routing và cấu trúc tab chính, chỉ đổi giao diện, nhãn hiển thị và cách tổ chức thông tin.
+```
+
+---
+
+## Prompt #13
+
+- Date: 2026-07-01
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Gộp SQL Overstay Alert
+### Bối cảnh
+```text
+Dự án đang có smartlogAI.sql là file SQL chính và setup-overstay-alert.sql là file vá riêng cho chức năng Overstay Alert.
+```
+
+### Prompt đã dùng
+```text
+Hai file SQL này hãy tối ưu thành một file.
+```
+
+### Kết quả đã áp dụng
+```text
+Gộp schema và seed Overstay Alert vào smartlogAI.sql, xóa setup-overstay-alert.sql để tránh duy trì hai nguồn dữ liệu.
+```
+
+### Điều chỉnh của nhóm
+```text
+Không chạy lại smartlogAI.sql sau khi gộp vì file chính có lệnh DROP DATABASE; chỉ rà nội dung và giữ logic seed an toàn hơn bằng cách lấy Vehicle/Dock/Booking hiện có.
+```
+
+---
+
+## Prompt #14
+
+- Date: 2026-07-01
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Xử lý log SMTP khi test backend
+### Bối cảnh
+```text
+Khi backend chạy, StockAlertWorker gửi email tồn kho và Gmail trả lỗi Authentication Required, làm console xuất hiện lỗi đỏ trong lúc test Overstay Alert.
+```
+
+### Prompt đã dùng
+```text
+Log backend báo SMTP Authentication Required trong khi Overstay Alert vẫn query được. Hãy xử lý để lỗi email không làm nhiễu console khi test Dispatcher/Overstay.
+```
+
+### Kết quả đã áp dụng
+```text
+EmailService bắt riêng SmtpException do authentication, log warning và mô phỏng email thay vì throw exception.
+```
+
+### Điều chỉnh của nhóm
+```text
+Chỉ xử lý lỗi xác thực SMTP; các lỗi gửi email khác vẫn throw để nhóm có thể phát hiện sự cố thật.
+```
+
 ### Expected Output
 - Backend: Code C# EmailService, đăng ký DI và logic kiểm tra `NextAllowedAt` trong StockAlertService.
 - Frontend: Code React/Tailwind cập nhật grid layout, thêm `filterText` state và `filteredAlerts` logic.

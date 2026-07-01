@@ -236,6 +236,37 @@ Author: Trần Văn Tùng (DE180109)
 
 ---
 
+##  [2026-07-01]
+
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Backend: Thêm luồng Overstay Alert gồm model `VehicleDockSession`, model `OverstayAlert`, DTO, controller API `/api/fleet/overstay-alerts`, service tính SLA và worker quét tự động.
+- Database: Bổ sung bảng `VehicleDockSessions` và `OverstayAlerts` trong `smartlogAI.sql`.
+- Database seed: Thêm dữ liệu mẫu xe đang ở Dock gồm trạng thái sắp quá SLA, quá SLA và khẩn cấp để UI Dispatcher có dữ liệu hiển thị.
+- Frontend: Tạo màn hình `Overstay Alert` trong Dispatcher, hiển thị xe, dock, tài xế, booking, SLA quy định, thời gian thực tế, số phút vượt SLA và hành động xử lý.
+
+### Changed
+- UI/UX: Làm mới Dispatcher thành operations console sáng, gọn, phù hợp hệ thống logistics thay vì giao diện tối/glow.
+- Navigation: Đổi tab cảnh báo trong Dispatcher thành nhãn nghiệp vụ `Overstay Alert`, không hiển thị mã use case trên UI.
+- Dashboard: Thêm bảng `Điều phối Dock & SLA`, KPI `Nguy cơ Overstay`, queue điều phối và phần nhật ký vận hành dễ đọc hơn.
+- SQL: Gộp nội dung `setup-overstay-alert.sql` vào `smartlogAI.sql`, giữ một file SQL chính duy nhất cho schema và sample data.
+
+### Fixed
+- Backend: Sửa lỗi endpoint Overstay Alert trả 500 khi database chưa có bảng bằng cách bổ sung schema và dữ liệu mẫu vào SQL chính.
+- Backend: Xử lý lỗi SMTP authentication trong `EmailService` theo hướng simulated email, tránh StockAlertWorker spam lỗi đỏ khi test chức năng khác.
+- Frontend: Loại bỏ toàn bộ chữ `UC023/UC23` khỏi giao diện Dispatcher để UI thẩm mỹ và gần nghiệp vụ hơn.
+
+### Verification
+- `GET http://localhost:5184/api/fleet/overstay-alerts` trả HTTP 200.
+- `dotnet build` backend sang thư mục kiểm tra thành công.
+- Rà text frontend xác nhận không còn `UC023/UC23` trong UI Dispatcher.
+
+### Known issues
+- Frontend type-check toàn project vẫn còn lỗi cũ ngoài phạm vi Overstay Alert: thiếu `InventoryAudit.types` ở `AuditSidebarPanel.tsx` và `InventoryComparisonTable.tsx`.
+
+---
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành

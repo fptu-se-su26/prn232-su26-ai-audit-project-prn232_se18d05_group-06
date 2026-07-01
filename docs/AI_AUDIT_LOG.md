@@ -153,6 +153,39 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: BACKEND/Services/StockAlertService.cs, BACKEND/Services/EmailService.cs, FRONTEND/src/features/warehouse/StockAlerts.tsx
 - Verification: Nhấn "Quét ngay" trên UI, nhận được Email tại tvan20152@gmail.com và kiểm tra filter hoạt động mượt mà.
 
+## Log #12
+- Date: 2026-07-01
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Cải thiện toàn bộ UI/UX Dispatcher theo hướng màn hình vận hành logistics.
+- Prompt Reference: PROMPTS.md#prompt-12
+- AI Output Summary: Gợi ý chuyển từ giao diện tối/glow sang operations console sáng, có sidebar nhóm chức năng, header tìm kiếm booking/biển số/dock, KPI Dock & SLA, queue điều phối, AI insight và nhật ký vận hành.
+- Human Decision: Nhóm giữ cấu trúc tab Dispatcher hiện có, chỉ thay đổi UI/UX và nhãn hiển thị để phù hợp mô tả dự án SmartLog AI.
+- Applied To: FRONTEND/src/layouts/DispatcherLayout.tsx, FRONTEND/src/features/dispatcher/components/Sidebar.tsx, FRONTEND/src/features/dispatcher/components/Header.tsx, FRONTEND/src/features/dispatcher/components/tabs/DashboardTab.tsx, FRONTEND/src/index.css
+- Verification: Kiểm tra route `/dispatcher`; trong màn hình Dispatcher.
+
+## Log #13
+- Date: 2026-07-01
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Gộp script SQL Overstay Alert vào file SQL chính.
+- Prompt Reference: PROMPTS.md#prompt-13
+- AI Output Summary: Đề xuất loại bỏ file setup rời, đưa schema và seed Overstay Alert vào `smartlogAI.sql` để tránh lệch dữ liệu giữa hai script.
+- Human Decision: Nhóm giữ `smartlogAI.sql` là nguồn chính cho database, dùng dữ liệu mẫu tự chọn Vehicle/Dock/Booking có sẵn thay vì hard-code phụ thuộc môi trường.
+- Applied To: smartlogAI.sql
+- Verification: Rà `rg` xác nhận chỉ còn một file SQL chính chứa `VehicleDockSessions` và `OverstayAlerts`; không chạy lại script vì có lệnh `DROP DATABASE`.
+
+## Log #14
+- Date: 2026-07-01
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Giảm lỗi console do SMTP khi StockAlertWorker chạy nền.
+- Prompt Reference: PROMPTS.md#prompt-14
+- AI Output Summary: Gợi ý bắt riêng lỗi SMTP authentication để chuyển sang simulated email thay vì throw exception gây spam log đỏ.
+- Human Decision: Nhóm chỉ thay đổi hành vi khi SMTP từ chối xác thực; các lỗi email khác vẫn giữ cơ chế log error và throw để không che lỗi thật.
+- Applied To: BACKEND/Services/EmailService.cs
+- Verification: Build backend sang thư mục kiểm tra thành công và endpoint Overstay Alert vẫn trả HTTP 200.
+
 ---
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
