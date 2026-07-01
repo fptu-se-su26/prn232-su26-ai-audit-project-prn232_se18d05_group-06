@@ -51,8 +51,10 @@ builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IS3StorageService, S3StorageService>();
 builder.Services.AddScoped<IStockAlertService, StockAlertService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
 builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();
+builder.Services.AddHostedService<OverstayAlertWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
