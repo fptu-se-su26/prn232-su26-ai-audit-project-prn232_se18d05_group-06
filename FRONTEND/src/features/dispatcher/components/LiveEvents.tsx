@@ -5,70 +5,73 @@ interface LiveEventsProps {
   events: LiveEvent[];
 }
 
+const eventTone = (type: LiveEvent['type']) => {
+  if (type === 'success') {
+    return {
+      dot: 'bg-emerald-500',
+      text: 'text-emerald-800',
+      border: 'border-emerald-200',
+      panel: 'bg-emerald-50',
+    };
+  }
+
+  if (type === 'error' || type === 'warning') {
+    return {
+      dot: 'bg-rose-500',
+      text: 'text-rose-800',
+      border: 'border-rose-200',
+      panel: 'bg-rose-50',
+    };
+  }
+
+  return {
+    dot: 'bg-cyan-500',
+    text: 'text-cyan-900',
+    border: 'border-cyan-200',
+    panel: 'bg-cyan-50',
+  };
+};
+
 export const LiveEvents: React.FC<LiveEventsProps> = ({ events }) => {
   return (
-    <div className="glass-panel rounded-lg flex flex-col flex-1 overflow-hidden transition-all duration-300">
-      <div className="p-4 border-b border-white/10 flex justify-between items-center bg-surface/40 shrink-0">
-        <h3 className="font-headline-sm text-[15px] font-semibold text-on-surface flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px] text-primary">history</span>
-          Sự kiện Trực tiếp
-        </h3>
-        <span className="text-[10px] text-on-surface-variant font-data-tabular bg-white/5 border border-white/15 px-2 py-0.5 rounded select-none">
-          {events.length} nhật ký
+    <div className="ops-panel-strong flex flex-1 flex-col overflow-hidden rounded-lg">
+      <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-3">
+        <div>
+          <h3 className="flex items-center gap-2 text-[15px] font-bold text-slate-950">
+            <span className="material-symbols-outlined text-[18px] text-[#0f6b7d]">history</span>
+            Nhật ký vận hành
+          </h3>
+          <p className="mt-0.5 text-[12px] font-semibold text-slate-500">Audit timeline trong ca</p>
+        </div>
+        <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-bold text-slate-600">
+          {events.length} dòng
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 relative min-h-0">
+      <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {events.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-8">
-            <span className="material-symbols-outlined text-[28px] text-on-surface-variant/40 mb-2">
-              event_busy
-            </span>
-            <p className="text-[12px] text-on-surface-variant">Không có sự kiện gần đây</p>
+          <div className="flex h-full flex-col items-center justify-center rounded-md border border-dashed border-slate-300 py-8 text-center">
+            <span className="material-symbols-outlined mb-2 text-[28px] text-slate-300">event_busy</span>
+            <p className="text-[13px] font-semibold text-slate-500">Chưa có sự kiện trong ca.</p>
           </div>
         ) : (
-          <>
-            <div className="absolute left-[27px] top-6 bottom-6 w-px bg-outline-variant/30" />
+          <div className="relative space-y-4">
+            <div className="absolute bottom-2 left-[5px] top-2 w-px bg-slate-200" />
+            {events.map((event, index) => {
+              const tone = eventTone(event.type);
 
-            <div className="flex flex-col gap-5 relative z-10">
-              {events.map((event, index) => {
-                let dotColor = 'bg-primary';
-                if (event.type === 'success') dotColor = 'bg-secondary';
-                if (event.type === 'error' || event.type === 'warning') dotColor = 'bg-error';
-                if (index > 2) dotColor = 'bg-outline-variant';
-
-                return (
-                  <div
-                    key={event.id}
-                    className={`flex items-start gap-4 transition-all duration-500 animate-slide-up ${
-                      index > 2 ? 'opacity-55 hover:opacity-100' : 'opacity-100'
-                    }`}
-                  >
-                    <div className="relative flex items-center justify-center mt-1.5 shrink-0">
-                      <div className={`w-[10px] h-[10px] rounded-full ${dotColor} ring-4 ring-surface z-10`} />
-                      {index === 0 && (
-                        <div className={`absolute w-4 h-4 rounded-full pulse-marker ${
-                          event.type === 'success' ? 'bg-secondary/35' : event.type === 'error' ? 'bg-error/35' : 'bg-primary/35'
-                        }`} />
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] text-on-surface font-semibold leading-snug">
-                        {event.title}
-                      </p>
-                      <p className="text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
-                        {event.description}
-                      </p>
-                      <span className="text-[10px] text-primary/70 font-data-tabular block mt-1">
-                        {event.timestamp}
-                      </span>
-                    </div>
+              return (
+                <div key={event.id} className={`relative flex gap-3 ${index > 3 ? 'opacity-70' : ''}`}>
+                  <span className={`relative z-10 mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${tone.dot}`} />
+                  <div className={`flex-1 rounded-md border ${tone.border} ${tone.panel} p-3`}>
+                    <p className={`text-[13px] font-bold ${tone.text}`}>{event.title}</p>
+                    <p className="mt-1 text-[12px] leading-snug text-slate-600">{event.description}</p>
+                    <p className="mt-2 font-data-tabular text-[11px] font-semibold text-slate-500">{event.timestamp}</p>
                   </div>
-                );
-              })}
-            </div>
-          </>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

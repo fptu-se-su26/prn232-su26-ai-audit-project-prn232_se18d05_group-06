@@ -28,29 +28,25 @@ export const DispatcherLayout: React.FC<DispatcherLayoutProps> = ({
   onAiAssistantClick,
 }) => {
   const tabLabels: Record<string, string> = {
-    'Dashboard': 'Bảng điều khiển',
-    'Orders': 'Đơn hàng',
+    Dashboard: 'Tổng quan bãi xe',
+    Orders: 'Đơn & lịch xe',
     'Route Planning': 'Lập lộ trình',
-    'Assign Driver': 'Phân công tài xế',
-    'Live Tracking': 'Theo dõi trực tuyến',
-    'Drivers': 'Tài xế',
-    'Vehicles': 'Phương tiện',
-    'Fleet Monitoring': 'Giám sát đội xe',
-    'Alerts Center': 'Trung tâm cảnh báo',
-    'Delivery Analytics': 'Phân tích giao hàng',
-    'Reports': 'Báo cáo',
-    'Notifications': 'Thông báo',
-    'Settings': 'Cài đặt',
+    'Assign Driver': 'Điều phối Dock',
+    'Live Tracking': 'Theo dõi realtime',
+    Drivers: 'Tài xế',
+    Vehicles: 'Hồ sơ xe',
+    'Fleet Monitoring': 'Sức khỏe đội xe',
+    'Alerts Center': 'Overstay Alert',
+    'Delivery Analytics': 'Hiệu suất giao hàng',
+    Reports: 'Báo cáo vận hành',
+    Notifications: 'Thông báo',
+    Settings: 'Thiết lập',
   };
 
-  const headerTitle =
-    activeTab === 'Dashboard'
-      ? 'Hoạt động Logistics Thời gian thực'
-      : `Trung tâm Điều khiển ${tabLabels[activeTab] || activeTab}`;
+  const headerTitle = tabLabels[activeTab] || activeTab;
 
   return (
-    <div className="bg-[#051424] text-[#d4e4fa] h-screen w-screen overflow-hidden flex font-body-md relative text-body-md">
-      {/* Side Navigation Sidebar */}
+    <div className="dispatcher-shell relative flex h-screen w-screen overflow-hidden font-body-md text-[15px]">
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -58,7 +54,6 @@ export const DispatcherLayout: React.FC<DispatcherLayoutProps> = ({
         setIsOpen={setSidebarOpen}
       />
 
-      {/* Top Header Navbar */}
       <Header
         title={headerTitle}
         searchQuery={searchQuery}
@@ -69,11 +64,11 @@ export const DispatcherLayout: React.FC<DispatcherLayoutProps> = ({
         onAiAssistantClick={onAiAssistantClick}
       />
 
-      {/* Main Content Layout Wrapper */}
-      <main className="flex-1 relative z-10 md:ml-[240px] mt-16 p-4 md:p-margin-desktop h-[calc(100vh-64px)] overflow-hidden flex flex-col gap-gutter">
+      <main className="relative z-10 mt-16 flex h-[calc(100vh-64px)] min-w-0 flex-1 flex-col gap-4 overflow-hidden p-4 md:ml-[264px] lg:p-5">
         {children}
       </main>
     </div>
   );
 };
+
 export default DispatcherLayout;

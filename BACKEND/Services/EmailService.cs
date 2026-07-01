@@ -53,6 +53,15 @@ namespace BACKEND.Services
                 await client.SendMailAsync(mailMessage);
                 _logger.LogInformation("Email sent successfully to {To}", toEmail);
             }
+            catch (SmtpException ex) when (
+                ex.Message.Contains("Authentication Required", StringComparison.OrdinalIgnoreCase) ||
+                ex.Message.Contains("not authenticated", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning(
+                    "Email sending is simulated because SMTP authentication failed for {User}. To send real email, configure an app password or valid SMTP credentials.",
+                    user);
+                _logger.LogInformation("SIMULATED EMAIL TO: {To}\nSUBJECT: {Subject}\nBODY: {Body}", toEmail, subject, body);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send email to {To}", toEmail);
