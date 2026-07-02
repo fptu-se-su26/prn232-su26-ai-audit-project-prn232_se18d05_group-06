@@ -374,6 +374,43 @@ Antigravity gợi ý cấu trúc SMTP rất chuẩn. Nhóm đã tự bổ sung t
 
 ---
 
+## Prompt #15
+
+- Date: 2026-07-02
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Hoan thien AI Financial Trend Forecasting cho Admin
+
+### Boi canh
+```text
+Du an SmartLog AI da co module Admin Finance nhung man hinh con la mock UI cu, chua co API forecast tai chinh, chua co schema luu forecast va log retrain model.
+```
+
+### Prompt da dung
+```text
+Hay lam UC042 Du bao tai chinh (AI Trend) doi voi role Admin. Co the sua UI/UX cua man hinh du bao tai chinh lai cho dep hon va xin hon. Su dung FRONTEND, BACKEND va cac skills da hoc de lam tot hon.
+```
+
+### Ket qua da ap dung
+```text
+Them backend API /api/finance/forecast, /generate, /retrain, /history; them DTO, model FinancialForecast, AiModelTrainingLog, service tinh forecast 3 thang; bo sung schema/seed vao smartlogAI.sql; lam lai man hinh Admin Finance thanh dashboard AI Trend co KPI, chart, cash flow, bang forecast, insight, training logs va export CSV.
+```
+
+### Dieu chinh cua nhom
+```text
+Nhom giu route /admin/finance, khong hien thi ma UC042 tren UI, dung fallback data khi API/database chua san sang va kiem tra lai bang dotnet build. Phan type-check frontend con loi cu InventoryAudit.types nen khong tinh la loi cua UC042.
+```
+
+### Expected Output
+- Backend: API forecast tai chinh, service xu ly du lieu lich su toi thieu 6 thang, generate forecast 3 thang, retrain log va history.
+- Database: Bang `FinancialForecasts`, `AiModelTrainingLogs` va seed mau trong `smartlogAI.sql`.
+- Frontend: Dashboard Admin Finance hien dai, de doc, co chart revenue/cost, cash flow forecast, bang du bao 3 thang, risk badge, confidence va AI insights.
+
+### Evaluation
+Antigravity ho tro chia nho use case thanh cac lop backend, database va UI ro rang. Nhom tu dieu chinh theo cau truc hien co cua du an, bo cac phan khong can thiet, uu tien giao dien nghiep vu gon va tranh dua ma use case len man hinh nguoi dung.
+
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.

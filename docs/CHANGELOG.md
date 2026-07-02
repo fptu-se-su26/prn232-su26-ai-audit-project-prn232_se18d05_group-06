@@ -267,6 +267,29 @@ Author: Trần Văn Tùng (DE180109)
 
 ---
 
+## [2026-07-02]
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Backend: Them AI Financial Trend Forecasting cho Admin voi controller `FinancialForecastController` va cac endpoint `/api/finance/forecast`, `/generate`, `/retrain`, `/history`.
+- Backend: Them service `FinancialForecastService` de tong hop lich su doanh thu/chi phi/dong tien, tinh forecast 3 thang, confidence score, risk level va AI insight.
+- Database: Bo sung bang `FinancialForecasts` va `AiModelTrainingLogs` vao `smartlogAI.sql`, kem seed forecast mau cho 3 thang tiep theo.
+- Frontend: Lam lai man hinh `FRONTEND/src/features/admin/Finance.tsx` thanh dashboard AI Trend gom KPI, chart revenue/cost, cash flow forecast, bang 3 thang, AI insights, training logs, Generate, Retrain va Export CSV.
+
+### Changed
+- UI/UX: Chuyen man Finance tu mock glass-card cu sang operations dashboard sang, gon, hop voi module M4 Finance & Reconciliation.
+- Navigation/UI copy: Giu route `/admin/finance`, khong hien thi chu `UC042` tren giao dien de tranh mat tham my.
+- Backend: Dang ky `IFinancialForecastService` trong DI container va map entity moi vao `SmartLogAiContext`.
+
+### Fixed
+- Backend: Dieu chinh mapping DTO de tranh loi runtime khi EF Core khong dich duoc static mapper trong LINQ query.
+- Frontend: Them fallback dashboard de man hinh khong bi trang neu API/database chua san sang.
+
+### Verification
+- `dotnet build -o .\BACKEND\bin\codex-check` thanh cong, chi con warning nullability cu cua project.
+- `npm run type-check` frontend van fail do loi cu ngoai pham vi UC042: thieu `InventoryAudit.types` trong `AuditSidebarPanel.tsx` va `InventoryComparisonTable.tsx`.
+- Thu seed SQL truc tiep bang `sqlcmd` khong thanh cong vi SQL Server `(local)` tren may hien khong ket noi duoc.
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
