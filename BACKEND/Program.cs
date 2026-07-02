@@ -52,6 +52,7 @@ builder.Services.AddScoped<IS3StorageService, S3StorageService>();
 builder.Services.AddScoped<IStockAlertService, StockAlertService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
+builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>();
 builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();
 builder.Services.AddHostedService<OverstayAlertWorker>();

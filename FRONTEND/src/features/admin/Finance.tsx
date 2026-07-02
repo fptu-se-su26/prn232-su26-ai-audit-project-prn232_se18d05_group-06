@@ -1,392 +1,545 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Area,
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import AdminSidebar from '@components/AdminSidebar';
+import api from '@lib/api';
 
-const kpiCards = [
-  {
-    title: 'Total Revenue',
-    icon: 'payments',
-    iconColor: 'text-primary',
-    iconBg: 'bg-primary/10',
-    circleBg: 'bg-primary/10',
-    value: '$2.4M',
-    trendIcon: 'trending_up',
-    trendIconColor: 'text-success',
-    trendValue: '+12.5%',
-    trendValueColor: 'text-success',
-    trendText: 'vs last month',
-  },
-  {
-    title: 'Expenses',
-    icon: 'money_off',
-    iconColor: 'text-error',
-    iconBg: 'bg-error/10',
-    circleBg: 'bg-error/5',
-    value: '$1.8M',
-    trendIcon: 'trending_up',
-    trendIconColor: 'text-error',
-    trendValue: '+4.2%',
-    trendValueColor: 'text-error',
-    trendText: 'vs last month',
-  },
-  {
-    title: 'COD Collected',
-    icon: 'local_shipping',
-    iconColor: 'text-tertiary',
-    iconBg: 'bg-tertiary/10',
-    circleBg: 'bg-tertiary/10',
-    value: '$450k',
-    customTrend: (
-      <div className="flex items-center gap-1 bg-surface-container-high px-2 py-0.5 rounded text-xs font-medium text-on-surface-variant">
-        <span className="w-1.5 h-1.5 rounded-full bg-success"></span>
-        92% Reconciled
-      </div>
-    ),
-  },
-  {
-    title: 'Profit Margin',
-    icon: 'monitoring',
-    iconColor: 'text-success',
-    iconBg: 'bg-success/10',
-    circleBg: 'bg-success/10',
-    value: '25%',
-    trendIcon: 'trending_up',
-    trendIconColor: 'text-success',
-    trendValue: '+2.1%',
-    trendValueColor: 'text-success',
-    trendText: 'vs last quarter',
-  },
-];
+type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | string;
 
-const codReconciliations = [
-  {
-    name: 'John Doe',
-    initials: 'JD',
-    avatarBg: 'bg-primary-container text-primary',
-    amount: '$1,250.00',
-    status: 'Reconciled',
-    statusBg: 'bg-success/10 text-success',
-    statusDot: 'bg-success',
-    date: 'Today',
-  },
-  {
-    name: 'Sarah Ahmed',
-    initials: 'SA',
-    avatarBg: 'bg-secondary-container text-secondary',
-    amount: '$840.50',
-    status: 'Pending',
-    statusBg: 'bg-surface-variant/30 text-on-surface-variant',
-    statusDot: 'bg-outline',
-    date: 'Yesterday',
-  },
-  {
-    name: 'Mike Ross',
-    initials: 'MR',
-    avatarBg: 'bg-tertiary-container text-tertiary',
-    amount: '$2,100.00',
-    status: 'Reconciled',
-    statusBg: 'bg-success/10 text-success',
-    statusDot: 'bg-success',
-    date: 'Jun 14',
-  },
-];
+interface FinancialHistoryPoint {
+  month: string;
+  revenue: number;
+  expense: number;
+  profit: number;
+  cashIn: number;
+  cashOut: number;
+  orderVolume: number;
+}
 
-const recentInvoices = [
-  {
-    id: 'INV-2023-089',
-    client: 'Acme Logistics Corp.',
-    iconBg: 'bg-primary/10 text-primary',
-    amount: '$14,500.00',
-    amountClass: 'text-on-surface',
-    statusText: 'Due in 5 days',
-    statusClass: 'text-on-surface-variant',
-    hasActions: true,
+interface FinancialForecastPoint {
+  forecastId?: number | null;
+  month: string;
+  forecastRevenue: number;
+  forecastExpense: number;
+  forecastProfit: number;
+  cashInForecast: number;
+  cashOutForecast: number;
+  confidenceScore: number;
+  riskLevel: RiskLevel;
+  trendDirection: string;
+  modelVersion: string;
+  insight: string;
+}
+
+interface FinancialForecastSummary {
+  nextRevenue: number;
+  nextExpense: number;
+  nextProfit: number;
+  netCashFlow: number;
+  averageConfidence: number;
+  overallRisk: RiskLevel;
+  hasMinimumHistory: boolean;
+  historyMonths: number;
+  modelVersion: string;
+  lastGeneratedAt?: string | null;
+}
+
+interface AiModelTrainingLog {
+  trainingLogId: number;
+  modelName: string;
+  modelVersion: string;
+  trainingDate: string;
+  dataFrom?: string | null;
+  dataTo?: string | null;
+  accuracyScore?: number | null;
+  status: string;
+  errorMessage?: string | null;
+  triggerType: string;
+}
+
+interface FinancialForecastDashboard {
+  summary: FinancialForecastSummary;
+  history: FinancialHistoryPoint[];
+  forecasts: FinancialForecastPoint[];
+  alerts: string[];
+  trainingLogs: AiModelTrainingLog[];
+}
+
+const fallbackDashboard: FinancialForecastDashboard = {
+  summary: {
+    nextRevenue: 815000000,
+    nextExpense: 548000000,
+    nextProfit: 267000000,
+    netCashFlow: 82000000,
+    averageConfidence: 84.7,
+    overallRisk: 'LOW',
+    hasMinimumHistory: true,
+    historyMonths: 6,
+    modelVersion: 'FIN-TREND-LOCAL',
+    lastGeneratedAt: null,
   },
-  {
-    id: 'INV-2023-088',
-    client: 'Global Freightways',
-    iconBg: 'bg-primary/10 text-primary',
-    amount: '$8,240.00',
-    amountClass: 'text-on-surface',
-    statusText: 'Overdue',
-    statusClass: 'text-error',
-    hasActions: true,
-  },
-  {
-    id: 'INV-2023-087',
-    client: 'Prime Delivery Co.',
-    iconBg: 'bg-surface-variant/50 text-on-surface-variant',
-    amount: '$3,100.00',
-    amountClass: 'text-on-surface-variant line-through',
-    statusText: 'Paid',
-    statusClass: 'text-success',
-    hasActions: false,
-  },
-];
+  history: [
+    { month: '2025-01', revenue: 650000000, expense: 421000000, profit: 229000000, cashIn: 520000000, cashOut: 438000000, orderVolume: 28 },
+    { month: '2025-02', revenue: 695000000, expense: 448000000, profit: 247000000, cashIn: 562000000, cashOut: 462000000, orderVolume: 31 },
+    { month: '2025-03', revenue: 712000000, expense: 468000000, profit: 244000000, cashIn: 581000000, cashOut: 489000000, orderVolume: 34 },
+    { month: '2025-04', revenue: 748000000, expense: 486000000, profit: 262000000, cashIn: 604000000, cashOut: 503000000, orderVolume: 37 },
+    { month: '2025-05', revenue: 771000000, expense: 502000000, profit: 269000000, cashIn: 618000000, cashOut: 522000000, orderVolume: 39 },
+    { month: '2025-06', revenue: 794000000, expense: 522000000, profit: 272000000, cashIn: 639000000, cashOut: 542000000, orderVolume: 42 },
+  ],
+  forecasts: [
+    { month: '2025-07', forecastRevenue: 815000000, forecastExpense: 548000000, forecastProfit: 267000000, cashInForecast: 652000000, cashOutForecast: 570000000, confidenceScore: 88.5, riskLevel: 'LOW', trendDirection: 'GROWTH', modelVersion: 'FIN-TREND-LOCAL', insight: 'Doanh thu du kien tang on dinh, dong tien rong van duong.' },
+    { month: '2025-08', forecastRevenue: 852000000, forecastExpense: 604000000, forecastProfit: 248000000, cashInForecast: 681000000, cashOutForecast: 632000000, confidenceScore: 84, riskLevel: 'MEDIUM', trendDirection: 'MARGIN_PRESSURE', modelVersion: 'FIN-TREND-LOCAL', insight: 'Chi phi van hanh tang nhanh, can theo doi bien loi nhuan.' },
+    { month: '2025-09', forecastRevenue: 894000000, forecastExpense: 628000000, forecastProfit: 266000000, cashInForecast: 718000000, cashOutForecast: 650000000, confidenceScore: 81.5, riskLevel: 'LOW', trendDirection: 'GROWTH', modelVersion: 'FIN-TREND-LOCAL', insight: 'Dong tien du kien duong neu thu hoi cong no dung han.' },
+  ],
+  alerts: ['Khong phat hien rui ro tai chinh nghiem trong trong 3 thang forecast.'],
+  trainingLogs: [
+    {
+      trainingLogId: 1,
+      modelName: 'AI Financial Trend Forecasting',
+      modelVersion: 'FIN-TREND-LOCAL',
+      trainingDate: new Date().toISOString(),
+      dataFrom: '2025-01-01',
+      dataTo: '2025-06-01',
+      accuracyScore: 88.5,
+      status: 'SUCCESS',
+      triggerType: 'AUTO',
+    },
+  ],
+};
+
+const moneyFormatter = new Intl.NumberFormat('vi-VN', {
+  maximumFractionDigits: 1,
+  notation: 'compact',
+});
+
+const fullMoneyFormatter = new Intl.NumberFormat('vi-VN', {
+  style: 'currency',
+  currency: 'VND',
+  maximumFractionDigits: 0,
+});
+
+const formatMoney = (value = 0) => `${moneyFormatter.format(value)} VND`;
+const formatMonth = (month: string) => {
+  const [year, value] = month.split('-');
+  return `T${Number(value)}/${year}`;
+};
+
+const riskStyles: Record<string, string> = {
+  LOW: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  MEDIUM: 'bg-amber-50 text-amber-700 border-amber-200',
+  HIGH: 'bg-rose-50 text-rose-700 border-rose-200',
+};
+
+const riskLabels: Record<string, string> = {
+  LOW: 'Thap',
+  MEDIUM: 'Trung binh',
+  HIGH: 'Cao',
+};
+
+const statusStyles: Record<string, string> = {
+  SUCCESS: 'bg-emerald-50 text-emerald-700',
+  INSUFFICIENT_DATA: 'bg-amber-50 text-amber-700',
+  FAILED: 'bg-rose-50 text-rose-700',
+};
 
 const AdminFinance: React.FC = () => {
+  const [dashboard, setDashboard] = useState<FinancialForecastDashboard>(fallbackDashboard);
+  const [loading, setLoading] = useState(true);
+  const [busyAction, setBusyAction] = useState<'generate' | 'retrain' | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get<FinancialForecastDashboard>('/finance/forecast');
+      setDashboard(response.data);
+      setNotice(null);
+    } catch {
+      setDashboard(fallbackDashboard);
+      setNotice('Dang hien thi du lieu mau vi API forecast chua san sang.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const trendData = useMemo(() => {
+    const history = dashboard.history.map((item) => ({
+      month: formatMonth(item.month),
+      actualRevenue: item.revenue,
+      actualExpense: item.expense,
+      forecastRevenue: null,
+      forecastExpense: null,
+      profit: item.profit,
+    }));
+
+    const forecasts = dashboard.forecasts.map((item) => ({
+      month: formatMonth(item.month),
+      actualRevenue: null,
+      actualExpense: null,
+      forecastRevenue: item.forecastRevenue,
+      forecastExpense: item.forecastExpense,
+      profit: item.forecastProfit,
+    }));
+
+    return [...history, ...forecasts];
+  }, [dashboard]);
+
+  const cashFlowData = useMemo(
+    () =>
+      dashboard.forecasts.map((item) => ({
+        month: formatMonth(item.month),
+        cashIn: item.cashInForecast,
+        cashOut: item.cashOutForecast,
+        net: item.cashInForecast - item.cashOutForecast,
+      })),
+    [dashboard],
+  );
+
+  const handleGenerate = async () => {
+    try {
+      setBusyAction('generate');
+      const response = await api.post<FinancialForecastDashboard>('/finance/forecast/generate', { months: 3 });
+      setDashboard(response.data);
+      setNotice('Da tao forecast 3 thang moi cho Admin.');
+    } catch {
+      setNotice('Khong the tao forecast luc nay. Vui long kiem tra backend va database.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const handleRetrain = async () => {
+    try {
+      setBusyAction('retrain');
+      await api.post('/finance/forecast/retrain', {});
+      await fetchDashboard();
+      setNotice('Da ghi nhan retrain model AI Financial Trend.');
+    } catch {
+      setNotice('Khong the retrain model luc nay. Vui long kiem tra backend va database.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const handleExportCsv = () => {
+    const header = ['Month', 'Revenue', 'Expense', 'Profit', 'Cash In', 'Cash Out', 'Confidence', 'Risk'];
+    const rows = dashboard.forecasts.map((item) => [
+      item.month,
+      item.forecastRevenue,
+      item.forecastExpense,
+      item.forecastProfit,
+      item.cashInForecast,
+      item.cashOutForecast,
+      item.confidenceScore,
+      item.riskLevel,
+    ]);
+    const csv = [header, ...rows].map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'ai-financial-trend-forecast.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const kpis = [
+    {
+      label: 'Doanh thu thang toi',
+      value: formatMoney(dashboard.summary.nextRevenue),
+      icon: 'trending_up',
+      tone: 'text-blue-700 bg-blue-50',
+      hint: `Confidence ${dashboard.summary.averageConfidence}%`,
+    },
+    {
+      label: 'Chi phi du bao',
+      value: formatMoney(dashboard.summary.nextExpense),
+      icon: 'account_balance_wallet',
+      tone: 'text-slate-700 bg-slate-100',
+      hint: 'Operational cost forecast',
+    },
+    {
+      label: 'Loi nhuan du kien',
+      value: formatMoney(dashboard.summary.nextProfit),
+      icon: 'monitoring',
+      tone: dashboard.summary.nextProfit >= 0 ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50',
+      hint: 'Revenue minus expense',
+    },
+    {
+      label: 'Dong tien rong',
+      value: formatMoney(dashboard.summary.netCashFlow),
+      icon: 'swap_vert',
+      tone: dashboard.summary.netCashFlow >= 0 ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50',
+      hint: `Risk ${riskLabels[dashboard.summary.overallRisk] ?? dashboard.summary.overallRisk}`,
+    },
+  ];
+
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex antialiased">
-      {/* SideNavBar */}
+    <div className="min-h-screen bg-[#f5f7fb] text-slate-900 antialiased">
       <AdminSidebar />
 
-      {/* Main Content Area */}
-      <main className="flex-1 md:ml-[280px] w-full max-w-[1600px] mx-auto min-h-screen flex flex-col relative bg-surface-container-low/30">
-        {/* Background Decorative Gradient */}
-        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-primary/5 to-transparent -z-10 pointer-events-none"></div>
-        
-        {/* TopNavBar */}
-        <header className="docked full-width top-0 sticky z-40 bg-surface/70 backdrop-blur-md shadow-sm w-full h-[72px] px-8 flex justify-between items-center text-primary dark:text-inverse-primary">
-          <div className="flex items-center gap-8">
-            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Finance Management</h2>
-            <nav className="hidden lg:flex gap-6 font-body-md text-body-md">
-              <a className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg px-3 py-1 transition-all" href="#">Analytics</a>
-              <a className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg px-3 py-1 transition-all" href="#">Reports</a>
-              <a className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg px-3 py-1 transition-all" href="#">Logs</a>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative hidden md:block">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50">search</span>
-              <input className="h-12 pl-10 pr-4 w-64 bg-black/5 border-none rounded-[18px] focus:ring-2 focus:ring-primary focus:bg-white transition-all font-body-sm text-body-sm placeholder:text-on-surface-variant/50" placeholder="Search invoices, drivers..." type="text" />
+      <main className="min-h-screen md:ml-[280px]">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-4 shadow-sm md:px-8">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <span>M4 Finance & Reconciliation</span>
+                <span className="h-1 w-1 rounded-full bg-slate-300" />
+                <span>Admin</span>
+              </div>
+              <h1 className="mt-1 text-2xl font-semibold tracking-normal text-slate-950 md:text-3xl">
+                AI Financial Trend Forecasting
+              </h1>
             </div>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant">
-              <span className="material-symbols-outlined">apps</span>
-            </button>
-            <div className="w-10 h-10 rounded-full bg-primary/20 overflow-hidden ml-2 border border-primary/30">
-              <img alt="Admin User Avatar" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASnhvk-lpw0ncLpzk09bea-FErx8tGqfIyV__puhA0GNgkq408-W_VO9XhARNhwN61Om4SD_DkR5WGJTn62Mvz8DRIgw8rLwT6iMtlI5_asZFW3PklqXUZxZ-5Ru5-yCkruldLfzJDAjKPHwFk4Panh0xu1csj9eJiyKY1eY5hdJQ-8G2SUluCfyVXSZPUROOcj7ytmtRhRSEIaRH6IfuPD26_V-5P36xmPjhJsTiQVXHPd_AguFMOlGI3RwAU-y6I2G_dhqfO10xL" />
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+              >
+                <span className="material-symbols-outlined text-[18px]">download</span>
+                Export
+              </button>
+              <button
+                type="button"
+                onClick={handleRetrain}
+                disabled={busyAction !== null}
+                className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-[18px]">model_training</span>
+                {busyAction === 'retrain' ? 'Retraining...' : 'Retrain'}
+              </button>
+              <button
+                type="button"
+                onClick={handleGenerate}
+                disabled={busyAction !== null}
+                className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+                {busyAction === 'generate' ? 'Generating...' : 'Generate 3M Forecast'}
+              </button>
             </div>
           </div>
         </header>
 
-        {/* Content Canvas */}
-        <div className="p-4 md:p-container-padding space-y-gutter flex-1">
-          {/* KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            {kpiCards.map((kpi, index) => (
-              <div key={index} className="glass-card rounded-xl p-6 flex flex-col gap-2 relative overflow-hidden group" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.04)', borderTop: '1px solid rgba(255, 255, 255, 0.3)' }}>
-                <div className={`absolute top-0 right-0 w-24 h-24 ${kpi.circleBg} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}></div>
-                <div className="flex justify-between items-start">
-                  <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{kpi.title}</p>
-                  <div className={`w-8 h-8 rounded-full ${kpi.iconBg} flex items-center justify-center ${kpi.iconColor}`}>
-                    <span className="material-symbols-outlined text-[20px]">{kpi.icon}</span>
+        <section className="space-y-5 p-4 md:p-8">
+          {notice && (
+            <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <span className="material-symbols-outlined text-[20px]">info</span>
+              <span>{notice}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {kpis.map((item) => (
+              <article key={item.label} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">{item.label}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-normal text-slate-950">{item.value}</p>
+                  </div>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${item.tone}`}>
+                    <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
                   </div>
                 </div>
-                <h3 className="font-display-lg text-display-lg text-on-surface mt-2">{kpi.value}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  {kpi.customTrend ? (
-                    kpi.customTrend
-                  ) : (
-                    <>
-                      <span className={`material-symbols-outlined ${kpi.trendIconColor} text-[16px]`}>{kpi.trendIcon}</span>
-                      <span className={`font-body-sm text-body-sm ${kpi.trendValueColor} font-medium`}>{kpi.trendValue}</span>
-                      <span className="font-body-sm text-body-sm text-on-surface-variant/70">{kpi.trendText}</span>
-                    </>
-                  )}
-                </div>
-              </div>
+                <p className="mt-4 text-sm text-slate-500">{item.hint}</p>
+              </article>
             ))}
           </div>
 
-          {/* Bento Grid Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Revenue vs Cost Chart (Spans 2 columns) */}
-            <div className="lg:col-span-2 glass-card rounded-xl p-6 flex flex-col" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.04)', borderTop: '1px solid rgba(255, 255, 255, 0.3)' }}>
-              <div className="flex justify-between items-center mb-6">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(360px,1fr)]">
+            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">Revenue vs Operations</h3>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">Last 6 months performance</p>
+                  <h2 className="text-lg font-semibold text-slate-950">Revenue, Cost & Forecast</h2>
+                  <p className="mt-1 text-sm text-slate-500">6 thang lich su va 3 thang AI forecast tiep theo.</p>
                 </div>
-                <div className="flex gap-2">
-                  <button className="px-3 py-1.5 text-sm font-medium bg-surface-container-low text-on-surface rounded-lg hover:bg-surface-container transition-colors">Monthly</button>
-                  <button className="px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors">Quarterly</button>
-                </div>
-              </div>
-              {/* Placeholder for Chart */}
-              <div className="flex-1 w-full min-h-[300px] relative mt-4 border-b border-l border-surface-variant/50">
-                {/* Y-Axis Labels */}
-                <div className="absolute -left-10 h-full flex flex-col justify-between text-xs text-on-surface-variant pb-6">
-                  <span>$3M</span>
-                  <span>$2M</span>
-                  <span>$1M</span>
-                  <span>0</span>
-                </div>
-                {/* Grid Lines */}
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
-                  <div className="w-full h-px bg-surface-variant/30"></div>
-                  <div className="w-full h-px bg-surface-variant/30"></div>
-                  <div className="w-full h-px bg-surface-variant/30"></div>
-                  <div className="w-full h-px"></div>
-                </div>
-                {/* SVG Chart Lines (Visual Mockup) */}
-                <svg className="w-full h-full pb-6 overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-                  {/* Revenue Line */}
-                  <path className="drop-shadow-md" d="M0,80 Q15,75 30,60 T50,50 T70,30 T100,10" fill="none" stroke="#004ac6" strokeWidth="2"></path>
-                  {/* Cost Line */}
-                  <path d="M0,90 Q20,85 40,80 T60,65 T80,70 T100,55" fill="none" stroke="#5e6476" strokeDasharray="4,2" strokeWidth="2"></path>
-                  {/* Data Points Revenue */}
-                  <circle cx="0" cy="80" fill="#004ac6" r="1.5"></circle>
-                  <circle cx="30" cy="60" fill="#004ac6" r="1.5"></circle>
-                  <circle cx="50" cy="50" fill="#004ac6" r="1.5"></circle>
-                  <circle cx="70" cy="30" fill="#004ac6" r="1.5"></circle>
-                  <circle cx="100" cy="10" fill="#004ac6" r="1.5"></circle>
-                </svg>
-                {/* X-Axis Labels */}
-                <div className="absolute bottom-0 w-full flex justify-between text-xs text-on-surface-variant px-2">
-                  <span>Jan</span>
-                  <span>Feb</span>
-                  <span>Mar</span>
-                  <span>Apr</span>
-                  <span>May</span>
-                  <span>Jun</span>
+                <div className="flex flex-wrap gap-2 text-xs font-medium">
+                  <span className="rounded-md bg-blue-50 px-2 py-1 text-blue-700">Actual</span>
+                  <span className="rounded-md bg-indigo-50 px-2 py-1 text-indigo-700">Forecast</span>
+                  <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-700">{dashboard.summary.modelVersion}</span>
                 </div>
               </div>
-              <div className="flex justify-center gap-6 mt-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-primary"></div>
-                  <span className="font-body-sm text-body-sm text-on-surface-variant">Revenue</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-secondary border border-surface-variant"></div>
-                  <span className="font-body-sm text-body-sm text-on-surface-variant">Operational Costs</span>
-                </div>
+
+              <div className="h-[360px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={trendData} margin={{ top: 16, right: 16, left: 8, bottom: 0 }}>
+                    <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis tickFormatter={formatMoney} tick={{ fill: '#64748b', fontSize: 12 }} axisLine={false} tickLine={false} width={92} />
+                    <Tooltip formatter={(value: number) => fullMoneyFormatter.format(value)} />
+                    <Legend />
+                    <Area type="monotone" dataKey="profit" name="Profit" fill="#dcfce7" stroke="#16a34a" strokeWidth={2} />
+                    <Line type="monotone" dataKey="actualRevenue" name="Actual Revenue" stroke="#1d4ed8" strokeWidth={3} dot={{ r: 3 }} connectNulls={false} />
+                    <Line type="monotone" dataKey="actualExpense" name="Actual Expense" stroke="#64748b" strokeWidth={2} dot={false} connectNulls={false} />
+                    <Line type="monotone" dataKey="forecastRevenue" name="Forecast Revenue" stroke="#4f46e5" strokeWidth={3} strokeDasharray="6 4" dot={{ r: 3 }} connectNulls={false} />
+                    <Line type="monotone" dataKey="forecastExpense" name="Forecast Expense" stroke="#f59e0b" strokeWidth={2} strokeDasharray="6 4" dot={false} connectNulls={false} />
+                  </ComposedChart>
+                </ResponsiveContainer>
               </div>
-            </div>
-            
-            {/* AI Forecast */}
-            <div className="glass-card rounded-xl p-6 flex flex-col relative overflow-hidden" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.04)', borderTop: '1px solid rgba(255, 255, 255, 0.3)' }}>
-              <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'linear-gradient(135deg, #a855f7, #06b6d4)' }}></div>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="material-symbols-outlined text-[18px] text-purple-500">auto_awesome</span>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">AI Forecast</h3>
+            </section>
+
+            <aside className="space-y-5">
+              <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-slate-950">AI Readiness</h2>
+                  <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${riskStyles[dashboard.summary.overallRisk] ?? riskStyles.MEDIUM}`}>
+                    Risk {riskLabels[dashboard.summary.overallRisk] ?? dashboard.summary.overallRisk}
+                  </span>
+                </div>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-slate-50 p-4">
+                    <p className="text-sm text-slate-500">History window</p>
+                    <p className="mt-1 text-xl font-semibold text-slate-950">{dashboard.summary.historyMonths}/6</p>
                   </div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">July Projected Revenue</p>
+                  <div className="rounded-lg bg-slate-50 p-4">
+                    <p className="text-sm text-slate-500">Confidence</p>
+                    <p className="mt-1 text-xl font-semibold text-slate-950">{dashboard.summary.averageConfidence}%</p>
+                  </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-full bg-surface-container-high text-xs font-label-md font-medium text-on-surface-variant">
-                  94% Confidence
-                </span>
-              </div>
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="font-display-lg text-display-lg text-on-surface">$2.85M</span>
-                <span className="text-sm text-on-surface-variant">est.</span>
-              </div>
-              {/* Mini AI Chart */}
-              <div className="flex-1 w-full mt-6 relative min-h-[150px]">
-                <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-                  {/* Historical Line */}
-                  <path d="M0,90 Q30,70 50,50" fill="none" stroke="#004ac6" strokeWidth="2"></path>
-                  {/* AI Forecast Cone (Confidence Interval) */}
-                  <path d="M50,50 L100,10 L100,50 Z" fill="url(#ai-cone)" opacity="0.2"></path>
-                  {/* AI Forecast Line */}
-                  <path d="M50,50 Q75,30 100,20" fill="none" stroke="#a855f7" strokeDasharray="2,2" strokeWidth="2"></path>
-                  {/* Defs for gradients */}
-                  <defs>
-                    <linearGradient id="ai-cone" x1="0" x2="1" y1="0" y2="0">
-                      <stop offset="0%" stopColor="#06b6d4"></stop>
-                      <stop offset="100%" stopColor="#a855f7"></stop>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-              <div className="mt-6 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                <p className="font-body-sm text-body-sm text-on-surface">
-                  <span className="font-semibold text-primary">Insight:</span> Expanding route efficiency in Sector 4 is projected to increase margins by 2.4% next month.
-                </p>
-              </div>
-            </div>
+                <div className="mt-4 rounded-lg border border-slate-200 p-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-slate-700">Minimum data</span>
+                    <span className={dashboard.summary.hasMinimumHistory ? 'text-emerald-700' : 'text-amber-700'}>
+                      {dashboard.summary.hasMinimumHistory ? 'Ready' : 'Need more data'}
+                    </span>
+                  </div>
+                  <div className="mt-3 h-2 rounded-full bg-slate-100">
+                    <div
+                      className="h-2 rounded-full bg-blue-700"
+                      style={{ width: `${Math.min(100, (dashboard.summary.historyMonths / 6) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 className="text-lg font-semibold text-slate-950">Cash Flow Forecast</h2>
+                <div className="mt-4 h-[220px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={cashFlowData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                      <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <YAxis hide />
+                      <Tooltip formatter={(value: number) => fullMoneyFormatter.format(value)} />
+                      <Bar dataKey="cashIn" name="Cash In" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="cashOut" name="Cash Out" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                      <Line type="monotone" dataKey="net" name="Net" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </section>
+            </aside>
           </div>
 
-          {/* Bottom Row: Tables & Actions */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* COD Reconciliation */}
-            <div className="glass-card rounded-xl p-6 flex flex-col" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.04)', borderTop: '1px solid rgba(255, 255, 255, 0.3)' }}>
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">COD Reconciliation</h3>
-                <button className="text-primary hover:text-primary-fixed-variant text-sm font-medium transition-colors">View All</button>
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,1fr)]">
+            <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-200 px-5 py-4">
+                <h2 className="text-lg font-semibold text-slate-950">3-Month Forecast Plan</h2>
               </div>
-              <div className="flex flex-col gap-3">
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-label-md text-on-surface-variant uppercase tracking-wider border-b border-surface-variant/30">
-                  <div className="col-span-4">Driver</div>
-                  <div className="col-span-3 text-right">Amount</div>
-                  <div className="col-span-3">Status</div>
-                  <div className="col-span-2 text-right">Date</div>
-                </div>
-                {/* Rows */}
-                {codReconciliations.map((item, index) => (
-                  <div key={index} className="grid grid-cols-12 gap-4 px-4 py-3 bg-surface-container-lowest/50 hover:bg-surface-container-lowest hover:shadow-md rounded-lg transition-all items-center border border-transparent hover:border-surface-variant/30 cursor-pointer">
-                    <div className="col-span-4 flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full ${item.avatarBg} font-bold flex items-center justify-center text-xs`}>{item.initials}</div>
-                      <span className="font-body-sm text-body-sm font-medium text-on-surface">{item.name}</span>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                    <tr>
+                      <th className="px-5 py-3 text-left font-semibold">Month</th>
+                      <th className="px-5 py-3 text-right font-semibold">Revenue</th>
+                      <th className="px-5 py-3 text-right font-semibold">Expense</th>
+                      <th className="px-5 py-3 text-right font-semibold">Profit</th>
+                      <th className="px-5 py-3 text-left font-semibold">Confidence</th>
+                      <th className="px-5 py-3 text-left font-semibold">Risk</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {dashboard.forecasts.map((item) => (
+                      <tr key={item.month} className="hover:bg-slate-50">
+                        <td className="px-5 py-4 font-semibold text-slate-900">{formatMonth(item.month)}</td>
+                        <td className="px-5 py-4 text-right text-slate-700">{formatMoney(item.forecastRevenue)}</td>
+                        <td className="px-5 py-4 text-right text-slate-700">{formatMoney(item.forecastExpense)}</td>
+                        <td className="px-5 py-4 text-right font-semibold text-slate-900">{formatMoney(item.forecastProfit)}</td>
+                        <td className="px-5 py-4">
+                          <div className="flex min-w-[120px] items-center gap-2">
+                            <div className="h-2 flex-1 rounded-full bg-slate-100">
+                              <div className="h-2 rounded-full bg-blue-700" style={{ width: `${item.confidenceScore}%` }} />
+                            </div>
+                            <span className="text-xs font-semibold text-slate-600">{item.confidenceScore}%</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${riskStyles[item.riskLevel] ?? riskStyles.MEDIUM}`}>
+                            {riskLabels[item.riskLevel] ?? item.riskLevel}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-semibold text-slate-950">AI Insights & Model Logs</h2>
+              <div className="mt-4 space-y-3">
+                {dashboard.forecasts.slice(0, 2).map((item) => (
+                  <div key={item.month} className="rounded-lg border border-slate-200 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-950">{formatMonth(item.month)}</p>
+                        <p className="mt-1 text-sm text-slate-600">{item.insight || 'AI dang theo doi bien dong doanh thu va chi phi.'}</p>
+                      </div>
+                      <span className="material-symbols-outlined text-[20px] text-blue-700">psychology</span>
                     </div>
-                    <div className="col-span-3 text-right font-label-md text-sm text-on-surface">{item.amount}</div>
-                    <div className="col-span-3">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded ${item.statusBg} text-xs font-medium`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${item.statusDot}`}></span>
-                        {item.status}
+                  </div>
+                ))}
+                {dashboard.alerts.map((alert) => (
+                  <div key={alert} className="flex gap-3 rounded-lg bg-slate-50 p-4 text-sm text-slate-700">
+                    <span className="material-symbols-outlined text-[20px] text-amber-600">warning</span>
+                    <span>{alert}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 border-t border-slate-200 pt-4">
+                <h3 className="text-sm font-semibold uppercase text-slate-500">Training history</h3>
+                <div className="mt-3 space-y-3">
+                  {dashboard.trainingLogs.map((log) => (
+                    <div key={log.trainingLogId} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">{log.modelVersion}</p>
+                        <p className="text-xs text-slate-500">
+                          {log.triggerType} / {new Date(log.trainingDate).toLocaleDateString('vi-VN')}
+                        </p>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[log.status] ?? 'bg-slate-100 text-slate-700'}`}>
+                        {log.accuracyScore ? `${log.accuracyScore}%` : log.status}
                       </span>
                     </div>
-                    <div className="col-span-2 text-right font-body-sm text-body-sm text-on-surface-variant">{item.date}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Invoice Management */}
-            <div className="glass-card rounded-xl p-6 flex flex-col" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.04)', borderTop: '1px solid rgba(255, 255, 255, 0.3)' }}>
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">Recent Invoices</h3>
-                <div className="flex gap-2">
-                  <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[20px]">filter_list</span>
-                  </button>
+                  ))}
                 </div>
               </div>
-              <div className="flex flex-col gap-3">
-                {/* Invoice Items */}
-                {recentInvoices.map((invoice, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-surface-container-lowest/50 hover:bg-surface-container-lowest hover:shadow-md rounded-lg border border-transparent hover:border-surface-variant/30 transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-lg ${invoice.iconBg} flex items-center justify-center`}>
-                        <span className="material-symbols-outlined">description</span>
-                      </div>
-                      <div>
-                        <h4 className="font-body-md text-body-md font-medium text-on-surface">{invoice.id}</h4>
-                        <p className="font-body-sm text-body-sm text-on-surface-variant">{invoice.client}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <p className={`font-label-md text-sm ${invoice.amountClass}`}>{invoice.amount}</p>
-                        <p className={`font-body-sm text-xs ${invoice.statusClass} mt-0.5`}>{invoice.statusText}</p>
-                      </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="px-3 py-1.5 text-xs font-medium border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface rounded-md transition-colors flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
-                          PDF
-                        </button>
-                        {invoice.hasActions && (
-                          <button className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[16px]">download</span>
-                            Export
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button className="w-full mt-4 py-3 rounded-xl border border-dashed border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-medium text-sm">
-                <span className="material-symbols-outlined text-[18px]">add</span>
-                Create New Invoice
-              </button>
-            </div>
+            </section>
           </div>
-        </div>
+
+          {loading && (
+            <div className="fixed bottom-5 right-5 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-lg">
+              Loading financial trend data...
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );

@@ -8,6 +8,10 @@ public partial class SmartLogAiContext
 
     public virtual DbSet<OverstayAlert> OverstayAlerts { get; set; }
 
+    public virtual DbSet<FinancialForecast> FinancialForecasts { get; set; }
+
+    public virtual DbSet<AiModelTrainingLog> AiModelTrainingLogs { get; set; }
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<VehicleDockSession>(entity =>
@@ -70,6 +74,44 @@ public partial class SmartLogAiContext
 
             entity.HasOne(d => d.ResolvedByNavigation).WithMany()
                 .HasForeignKey(d => d.ResolvedBy);
+        });
+
+        modelBuilder.Entity<FinancialForecast>(entity =>
+        {
+            entity.HasKey(e => e.ForecastId);
+            entity.HasIndex(e => e.ForecastMonth);
+
+            entity.Property(e => e.ForecastId).HasColumnName("ForecastID");
+            entity.Property(e => e.ForecastMonth).HasColumnType("date");
+            entity.Property(e => e.ForecastRevenue).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ForecastExpense).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ForecastProfit).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CashInForecast).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CashOutForecast).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ConfidenceScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.RiskLevel).HasMaxLength(20).IsUnicode(false);
+            entity.Property(e => e.TrendDirection).HasMaxLength(30).IsUnicode(false);
+            entity.Property(e => e.ModelVersion).HasMaxLength(50).IsUnicode(false);
+            entity.Property(e => e.Insight).HasMaxLength(500);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany()
+                .HasForeignKey(d => d.CreatedBy);
+        });
+
+        modelBuilder.Entity<AiModelTrainingLog>(entity =>
+        {
+            entity.HasKey(e => e.TrainingLogId);
+            entity.Property(e => e.TrainingLogId).HasColumnName("TrainingLogID");
+            entity.Property(e => e.ModelName).HasMaxLength(100);
+            entity.Property(e => e.ModelVersion).HasMaxLength(50).IsUnicode(false);
+            entity.Property(e => e.AccuracyScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.Status).HasMaxLength(30).IsUnicode(false);
+            entity.Property(e => e.ErrorMessage).HasMaxLength(500);
+            entity.Property(e => e.TriggerType).HasMaxLength(30).IsUnicode(false);
+
+            entity.HasOne(d => d.TriggeredByNavigation).WithMany()
+                .HasForeignKey(d => d.TriggeredBy);
         });
     }
 }
