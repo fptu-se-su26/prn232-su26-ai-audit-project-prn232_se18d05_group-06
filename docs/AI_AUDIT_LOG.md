@@ -188,6 +188,17 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 
 ---
 
+## Log #15
+- Date: 2026-07-02
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: AI Financial Trend Forecasting cho role Admin.
+- Prompt Reference: PROMPTS.md#prompt-15
+- AI Output Summary: Goi y tach use case thanh cac phan backend API forecast, schema database, service tinh xu huong tai chinh va dashboard Admin Finance co chart, KPI, insight, retrain model va export.
+- Human Decision: Nhom chi ap dung phan phu hop voi cau truc hien co cua SmartLog AI, giu route `/admin/finance`, khong hien thi ma UC042 tren UI va thiet ke man hinh theo phong cach operations dashboard gon, sang, de doc.
+- Applied To: BACKEND/Controllers/FinancialForecastController.cs, BACKEND/Services/FinancialForecastService.cs, BACKEND/DTOs/FinancialForecastDTOs.cs, BACKEND/Models/FinancialForecast.cs, BACKEND/Models/AiModelTrainingLog.cs, BACKEND/Models/SmartLogAiContext.UC023.cs, BACKEND/Program.cs, FRONTEND/src/features/admin/Finance.tsx, smartlogAI.sql
+- Verification: `dotnet build` backend thanh cong; `npm run type-check` frontend van con loi cu ngoai pham vi UC042 do thieu `InventoryAudit.types`; thu seed SQL local khong thanh cong vi SQL Server `(local)` khong ket noi duoc.
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
