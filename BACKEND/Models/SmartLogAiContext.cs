@@ -128,7 +128,7 @@ public partial class SmartLogAiContext : DbContext
             	IConfiguration configuration = new ConfigurationBuilder()
                 		.SetBasePath(Directory.GetCurrentDirectory())
                 		.AddJsonFile("appsettings.json", true, true).Build();
-           		 return configuration["ConnectionStrings:DefaultConnectionString"];
+           		 return configuration["ConnectionStrings:DefaultConnection"] ?? throw new InvalidOperationException("Connection string not found");
         	}
 
 protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

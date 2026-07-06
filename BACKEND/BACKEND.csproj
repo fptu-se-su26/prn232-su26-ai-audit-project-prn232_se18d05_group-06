@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.416.5" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.75.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />

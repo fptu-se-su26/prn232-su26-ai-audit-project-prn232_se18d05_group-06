@@ -51,7 +51,7 @@ import WarehouseSettings from './features/warehouse/Settings';
 import WarehouseAIOCR from './features/warehouse/AIOCRScan';
 
 // Only Admin (RoleID = 1) and Warehouse (RoleID = 2) may access warehouse pages.
-const WAREHOUSE_ROLES = ['ADMIN', 'WAREHOUSE'];
+const WAREHOUSE_ROLES = ['ADMIN', 'WAREHOUSE', 'WF'];
 
 const modules = [
   { path: '/admin/dashboard', name: 'Dashboard', desc: 'KPI Grid, AI Insights, Maps', icon: 'dashboard', color: 'from-blue-500 to-indigo-600' },
