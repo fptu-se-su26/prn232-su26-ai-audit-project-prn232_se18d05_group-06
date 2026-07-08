@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using BACKEND.Models;
 using BACKEND.Services;
+using BACKEND.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -64,6 +65,11 @@ builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
 builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>();
 builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
 builder.Services.AddSingleton<ILprService, LprService>();
+builder.Services.AddScoped<IVehicleDashboardService, VehicleDashboardService>();
+builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
+
+// Register Workers
+builder.Services.AddHostedService<TierRecalculationWorker>();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();

@@ -17,6 +17,7 @@ const menuItems: MenuItem[] = [
   { label: 'Finance', icon: 'payments', path: '/admin/finance' },
   { label: 'BI Analytics', icon: 'analytics', path: '/admin/analytics' },
   { label: 'SmartLog AI', icon: 'psychology', path: '/admin/smart-log-ai' },
+  { label: 'Customer Tiers', icon: 'military_tech', path: '/admin/tier-management' },
   { label: 'Notifications', icon: 'notifications', path: '/admin/notifications' },
   { label: 'Audit Logs', icon: 'history', path: '/admin/audit-log' },
   { label: 'Settings', icon: 'settings', path: '/admin/settings' },
