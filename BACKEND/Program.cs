@@ -54,13 +54,29 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IGateService, GateService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<IBlacklistValidationService, BlacklistValidationService>();
-builder.Services.AddHostedService<VehicleCleanupWorker>();
+builder.Services.AddScoped<IS3StorageService, S3StorageService>();
+builder.Services.AddScoped<IStockAlertService, StockAlertService>();
+builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
+builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>();
+builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
+// Temporarily disable background services due to database connection issues
+// builder.Services.AddHostedService<VehicleCleanupWorker>();
+// builder.Services.AddHostedService<StockAlertWorker>();
+// builder.Services.AddHostedService<OverstayAlertWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Apply pending EF Core migrations at startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SmartLogAiContext>();
+// db.Database.Migrate();
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

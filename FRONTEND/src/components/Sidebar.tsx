@@ -1,18 +1,19 @@
 import { NavLink } from 'react-router-dom'
+import { ROUTE_PATHS } from '../routes'
 
 const navItems = [
-  { label: 'Dashboard', icon: 'dashboard', to: '/warehouse/dashboard' },
-  { label: 'Import Goods', icon: 'input', to: '/warehouse/import' },
-  { label: 'Export Goods', icon: 'output', to: '/warehouse/export' },
-  { label: 'Inventory', icon: 'inventory_2', to: '/warehouse/inventory' },
-  { label: 'Reports', icon: 'assessment', to: '/warehouse/reports' },
-  { label: 'QR Scanner', icon: 'qr_code_scanner', to: '/warehouse/qr-scanner' },
-  { label: 'AI OCR Scan', icon: 'document_scanner', to: '/warehouse/ai-ocr' },
-  { label: 'Inventory Audit', icon: 'checklist', to: '/warehouse/inventory-audit' },
-  { label: 'Warehouse Transfer', icon: 'local_shipping', to: '/warehouse/transfer' },
-  { label: 'Stock Alerts', icon: 'notifications_active', to: '/warehouse/stock-alerts' },
-  { label: 'Notifications', icon: 'notifications', to: '/warehouse/notifications' },
-  { label: 'Gate Checkout', icon: 'sensor_door', to: '/warehouse/gate-checkout' },
+  { label: 'Dashboard', icon: 'dashboard', to: ROUTE_PATHS.WAREHOUSE_DASHBOARD },
+  { label: 'Import Goods', icon: 'input', to: ROUTE_PATHS.WAREHOUSE_IMPORT },
+  { label: 'Export Goods', icon: 'output', to: ROUTE_PATHS.WAREHOUSE_EXPORT },
+  { label: 'Inventory', icon: 'inventory_2', to: ROUTE_PATHS.WAREHOUSE_INVENTORY },
+  { label: 'Reports', icon: 'assessment', to: ROUTE_PATHS.WAREHOUSE_REPORTS },
+  { label: 'QR Scanner', icon: 'qr_code_scanner', to: ROUTE_PATHS.WAREHOUSE_QR_SCANNER },
+  { label: 'AI OCR Scan', icon: 'document_scanner', to: ROUTE_PATHS.WAREHOUSE_AI_OCR },
+  { label: 'Inventory Audit', icon: 'checklist', to: ROUTE_PATHS.WAREHOUSE_INVENTORY_AUDIT },
+  { label: 'Warehouse Transfer', icon: 'local_shipping', to: ROUTE_PATHS.WAREHOUSE_TRANSFER },
+  { label: 'Stock Alerts', icon: 'notifications_active', to: ROUTE_PATHS.WAREHOUSE_STOCK_ALERTS },
+  { label: 'Notifications', icon: 'notifications', to: ROUTE_PATHS.WAREHOUSE_NOTIFICATIONS },
+  { label: 'Gate Checkout', icon: 'sensor_door', to: ROUTE_PATHS.WAREHOUSE_GATE_CHECKOUT },
 ]
 
 const Sidebar = () => (
@@ -27,7 +28,7 @@ const Sidebar = () => (
         <NavLink
           key={item.label}
           to={item.to}
-          end={item.to === '/'}
+          end={item.to === ROUTE_PATHS.WAREHOUSE_DASHBOARD}
           className={({ isActive }) =>
             `flex items-center gap-3 transition-all duration-300 px-4 py-3 rounded-xl ${
               isActive
@@ -42,7 +43,7 @@ const Sidebar = () => (
       ))}
       <div className="pt-4 mt-4 border-t border-slate-500/20">
         <NavLink
-          to="/warehouse/settings"
+          to={ROUTE_PATHS.WAREHOUSE_SETTINGS}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 ${
               isActive

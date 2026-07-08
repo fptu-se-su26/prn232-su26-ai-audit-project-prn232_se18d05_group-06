@@ -1,6 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace BACKEND.Models;
 
@@ -148,12 +153,17 @@ public partial class SmartLogAiContext : DbContext
         }
     }
 
+    private string GetConnectionString()
+    {
+        IConfiguration configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", true, true).Build();
+        return configuration["ConnectionStrings:DefaultConnection"] ?? throw new InvalidOperationException("Connection string not found");
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (!optionsBuilder.IsConfigured)
-        {
-            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=SmartLogAI;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True");
-        }
+        optionsBuilder.UseSqlServer(GetConnectionString());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

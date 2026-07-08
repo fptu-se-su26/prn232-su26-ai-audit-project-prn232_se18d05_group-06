@@ -14,5 +14,7 @@ namespace BACKEND.Services
             DateTime startTime, 
             DateTime endTime, 
             string qrCodeBase64);
+
+        Task SendEmailAsync(string toEmail, string subject, string body);
     }
 }

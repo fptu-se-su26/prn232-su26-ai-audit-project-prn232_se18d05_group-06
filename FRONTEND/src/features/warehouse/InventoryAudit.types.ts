@@ -1,4 +1,5 @@
 export type AuditRow = {
+  lineId: number
   sku: string
   label: string
   category: string
@@ -10,4 +11,5 @@ export type AuditStats = {
   verified: number
   mismatches: number
   percent: number
+  criticalAlerts: number
 }

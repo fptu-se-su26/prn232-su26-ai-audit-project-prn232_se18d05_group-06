@@ -140,21 +140,7 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - AI Output Summary: Cung cấp tài liệu cấu hình `Google.Apis.Auth` và code mẫu sinh token JWT.
 - Human Decision: Nhóm chỉ dùng code mẫu để kiểm tra token Google. Sau đó tự viết Endpoint `[HttpPost("google")]` và tự cấu hình JWT Claims để phân quyền dựa vào Database thực tế.
 - Applied To: BACKEND/Controllers/AuthController.cs, BACKEND/DTOs/AuthDTOs.cs
-- Verification: Đăng nhập bằng tài khoản Google thành công, lấy được JWT token và giải mã thấy đúng các thông tin claims.
-
-## Log #10
-- Date: 2026-06-21
-- Author: Trần Văn Tùng (DE180109)
-- AI Tool: Antigravity
-- Purpose: Triển khai hệ thống thông báo Email cho tồn kho và tái cấu trúc UI Stock Alerts
-- Prompt Reference: PROMPTS.md#prompt-10
-- AI Output Summary: Gợi ý cấu trúc `EmailService` dùng SMTP, logic Debounce 12h và layout Grid 75/25 cho UI.
-- Human Decision: Tinh chỉnh template Email HTML chuyên nghiệp, thêm bộ lọc (Filter) động cho bảng cảnh báo và xử lý logic chỉ cập nhật trạng thái gửi khi SMTP thực sự thành công.
-- Applied To: BACKEND/Services/StockAlertService.cs, BACKEND/Services/EmailService.cs, FRONTEND/src/features/warehouse/StockAlerts.tsx
-- Verification: Nhấn "Quét ngay" trên UI, nhận được Email tại tvan20152@gmail.com và kiểm tra filter hoạt động mượt mà.
-
----
-
+- Verification: Đăng nhập bằng tài khoản Google thành công, lấy được JWT token và giải
 ## Log #11
 - Date: 2026-06-21
 - Author: Lê Quốc Hùng (DE180096)
@@ -199,7 +185,49 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: FRONTEND/tailwind.config.js, FRONTEND/src/index.css, FRONTEND/src/layouts/DispatcherLayout.tsx
 - Verification: Chạy `npm run build` thành công (0 lỗi). Quan sát trực tiếp các text trong panel chi tiết xe/tài xế hiển thị rõ ràng, sáng đủ trên nền tối glassmorphism.
 
----
+## Log #15
+- Date: 2026-07-01
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Cải thiện toàn bộ UI/UX Dispatcher theo hướng màn hình vận hành logistics.
+- Prompt Reference: PROMPTS.md#prompt-12
+- AI Output Summary: Gợi ý chuyển từ giao diện tối/glow sang operations console sáng, có sidebar nhóm chức năng, header tìm kiếm booking/biển số/dock, KPI Dock & SLA, queue điều phối, AI insight và nhật ký vận hành.
+- Human Decision: Nhóm giữ cấu trúc tab Dispatcher hiện có, chỉ thay đổi UI/UX và nhãn hiển thị để phù hợp mô tả dự án SmartLog AI.
+- Applied To: FRONTEND/src/layouts/DispatcherLayout.tsx, FRONTEND/src/features/dispatcher/components/Sidebar.tsx, FRONTEND/src/features/dispatcher/components/Header.tsx, FRONTEND/src/features/dispatcher/components/tabs/DashboardTab.tsx, FRONTEND/src/index.css
+- Verification: Kiểm tra route `/dispatcher`; trong màn hình Dispatcher.
+
+## Log #16
+- Date: 2026-07-01
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Gộp script SQL Overstay Alert vào file SQL chính.
+- Prompt Reference: PROMPTS.md#prompt-13
+- AI Output Summary: Đề xuất loại bỏ file setup rời, đưa schema và seed Overstay Alert vào `smartlogAI.sql` để tránh lệch dữ liệu giữa hai script.
+- Human Decision: Nhóm giữ `smartlogAI.sql` là nguồn chính cho database, dùng dữ liệu mẫu tự chọn Vehicle/Dock/Booking có sẵn thay vì hard-code phụ thuộc môi trường.
+- Applied To: smartlogAI.sql
+- Verification: Rà `rg` xác nhận chỉ còn một file SQL chính chứa `VehicleDockSessions` và `OverstayAlerts`; không chạy lại script vì có lệnh `DROP DATABASE`.
+
+## Log #17
+- Date: 2026-07-01
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Giảm lỗi console do SMTP khi StockAlertWorker chạy nền.
+- Prompt Reference: PROMPTS.md#prompt-14
+- AI Output Summary: Gợi ý bắt riêng lỗi SMTP authentication để chuyển sang simulated email thay vì throw exception gây spam log đỏ.
+- Human Decision: Nhóm chỉ thay đổi hành vi khi SMTP từ chối xác thực; các lỗi email khác vẫn giữ cơ chế log error và throw để không che lỗi thật.
+- Applied To: BACKEND/Services/EmailService.cs
+- Verification: Build backend sang thư mục kiểm tra thành công và endpoint Overstay Alert vẫn trả HTTP 200.
+
+## Log #18
+- Date: 2026-07-02
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: AI Financial Trend Forecasting cho role Admin.
+- Prompt Reference: PROMPTS.md#prompt-15
+- AI Output Summary: Goi y tach use case thanh cac phan backend API forecast, schema database, service tinh xu huong tai chinh va dashboard Admin Finance co chart, KPI, insight, retrain model va export.
+- Human Decision: Nhom chi ap dung phan phu hop voi cau truc hien co cua SmartLog AI, giu route `/admin/finance`, khong hien thi ma UC042 tren UI va thiet ke man hinh theo phong cach operations dashboard gon, sang, de doc.
+- Applied To: BACKEND/Controllers/FinancialForecastController.cs, BACKEND/Services/FinancialForecastService.cs, BACKEND/DTOs/FinancialForecastDTOs.cs, BACKEND/Models/FinancialForecast.cs, BACKEND/Models/AiModelTrainingLog.cs, BACKEND/Models/SmartLogAiContext.UC023.cs, BACKEND/Program.cs, FRONTEND/src/features/admin/Finance.tsx, smartlogAI.sql
+- Verification: `dotnet build` backend thanh cong; `npm run type-check` frontend van con loi cu ngoai pham vi UC042 do thieu `InventoryAudit.types`; thu seed SQL local khong thanh cong vi SQL Server `(local)` khong ket noi duoc.
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
@@ -252,9 +280,7 @@ Nhóm chạy thử chương trình trên môi trường phát triển cục bộ
 |---|---|---|---|---|
 | Vũ Lê Duy | DE180104 | Cấu trúc dự án, điều hướng Router chính | Có | [App.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
 | Lê Quốc Hùng | DE180096 | Thiết lập Driver UI, Thực hiện UC004, UC015, UC018, UC020, UC021 (Full-stack) và tối ưu độ tương phản giao diện Dispatcher Dashboard | Có | [Orders.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx), [VehicleTrackingDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx), [GateCheckoutDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx), [VehiclesTab.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/components/tabs/VehiclesTab.tsx) |
-
 | Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
-
 
 ---
 
