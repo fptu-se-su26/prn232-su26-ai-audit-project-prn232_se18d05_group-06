@@ -12,10 +12,12 @@ namespace BACKEND.Controllers
     public class GateController : ControllerBase
     {
         private readonly IGateService _gateService;
+        private readonly ILprService _lprService;
 
-        public GateController(IGateService gateService)
+        public GateController(IGateService gateService, ILprService lprService)
         {
             _gateService = gateService;
+            _lprService = lprService;
         }
 
         // GET: api/gate/active-booking?search={search}
@@ -110,6 +112,89 @@ namespace BACKEND.Controllers
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/gate/check-plate
+        [HttpPost("check-plate")]
+        public async Task<ActionResult<GateCheckResultDto>> CheckPlate([FromBody] GateCheckPlateRequestDto request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.DetectedPlate))
+            {
+                return BadRequest("DetectedPlate is required.");
+            }
+
+            try
+            {
+                int? operatorId = null;
+                var operatorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (operatorIdClaim != null && int.TryParse(operatorIdClaim.Value, out int oid))
+                {
+                    operatorId = oid;
+                }
+
+                var result = await _gateService.CheckVehiclePlateAsync(request, operatorId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/gate/scan
+        [HttpPost("scan")]
+        public async Task<ActionResult> ScanLicensePlate([FromForm] Microsoft.AspNetCore.Http.IFormFile imageFile, [FromForm] string eventType = "")
+        {
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                return BadRequest("No image provided.");
+            }
+
+            try
+            {
+                // Run LprService
+                var lprResult = await _lprService.RecognizeLicensePlateAsync(imageFile);
+                var licensePlate = lprResult.Text;
+                
+                if (string.IsNullOrWhiteSpace(licensePlate))
+                {
+                    return Ok(new { 
+                        LicensePlate = (string)null, 
+                        Message = "Could not detect license plate.",
+                        DebugInfo = new { confidence = lprResult.Confidence, bbox = lprResult.BoundingBox }
+                    });
+                }
+
+                // Clean the plate text for processing (remove spaces/dashes)
+                licensePlate = licensePlate.Replace(" ", "").Replace("-", "").ToUpper();
+
+                int? operatorId = null;
+                var subClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                               ?? User.FindFirst("sub")?.Value 
+                               ?? User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (int.TryParse(subClaim, out int parsedId))
+                {
+                    operatorId = parsedId;
+                }
+
+                if (eventType.Equals("IN", StringComparison.OrdinalIgnoreCase))
+                {
+                    var result = await _gateService.ProcessCheckInAsync(new GateCheckInRequestDto { AlprPlate = licensePlate }, operatorId);
+                    return Ok(new { LicensePlate = licensePlate, Result = result, DebugInfo = new { confidence = lprResult.Confidence, bbox = lprResult.BoundingBox } });
+                }
+                else if (eventType.Equals("OUT", StringComparison.OrdinalIgnoreCase))
+                {
+                    var result = await _gateService.ProcessCheckoutAsync(new CheckoutRequestDto { AlprPlate = licensePlate }, operatorId);
+                    return Ok(new { LicensePlate = licensePlate, Result = result, DebugInfo = new { confidence = lprResult.Confidence, bbox = lprResult.BoundingBox } });
+                }
+
+                return Ok(new { LicensePlate = licensePlate, DebugInfo = new { confidence = lprResult.Confidence, bbox = lprResult.BoundingBox } });
             }
             catch (Exception ex)
             {
