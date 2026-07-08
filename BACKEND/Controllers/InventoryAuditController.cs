@@ -1,7 +1,6 @@
-using BACKEND.Models;
+﻿using BACKEND.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace BACKEND.Controllers
 {
@@ -20,39 +19,46 @@ namespace BACKEND.Controllers
         public async Task<IActionResult> GetStocktakeAudit(int stocktakeId)
         {
             var stocktake = await _context.StocktakeOrders
-                .Include(s => s.StocktakeLines)
-                .ThenInclude(l => l.Sku)
-                .Include(s => s.Warehouse)
-                .FirstOrDefaultAsync(s => s.StocktakeId == stocktakeId);
+                .AsNoTracking()
+                .Where(s => s.StocktakeId == stocktakeId)
+                .Select(s => new
+                {
+                    s.StocktakeId,
+                    s.StocktakeCode,
+                    s.Status,
+                    s.StocktakeDate,
+                    Warehouse = s.Warehouse != null ? s.Warehouse.WarehouseName : "Unknown",
+                    Lines = s.StocktakeLines.Select(line => new
+                    {
+                        lineId = line.LineId,
+                        sku = line.Sku != null ? line.Sku.Skucode : "N/A",
+                        label = line.Sku != null ? line.Sku.ProductName : "Unknown",
+                        category = line.Sku != null && line.Sku.Category != null ? line.Sku.Category.CategoryName : "General",
+                        systemQty = line.SystemQty,
+                        actualQty = line.CountedQty ?? 0,
+                        variance = line.Variance ?? ((line.CountedQty ?? 0) - line.SystemQty),
+                        variancePct = line.VariancePct,
+                        requireRecount = line.RequireRecount ?? false,
+                        note = line.Note
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
 
             if (stocktake == null)
             {
                 return NotFound(new { Message = "Stocktake order not found" });
             }
 
-            var auditData = stocktake.StocktakeLines.Select(line => new
-            {
-                lineId = line.LineId,
-                sku = line.Sku?.Skucode ?? "N/A",
-                label = line.Sku?.ProductName ?? "Unknown",
-                category = line.Sku?.Category?.CategoryName ?? "General",
-                systemQty = line.SystemQty,
-                actualQty = line.CountedQty ?? 0,
-                variance = line.Variance,
-                variancePct = line.VariancePct,
-                requireRecount = line.RequireRecount,
-                note = line.Note
-            }).ToList();
-
+            var auditData = stocktake.Lines;
             var stats = new
             {
                 totalItems = auditData.Count,
                 matched = auditData.Count(d => d.actualQty == d.systemQty),
                 mismatches = auditData.Count(d => d.actualQty != d.systemQty),
-                criticalAlerts = auditData.Count(d => d.variancePct > 10),
+                criticalAlerts = auditData.Count(d => Math.Abs(d.variance) > 0 && d.variancePct.HasValue && Math.Abs(d.variancePct.Value) > 10),
                 status = stocktake.Status,
                 stocktakeDate = stocktake.StocktakeDate,
-                warehouse = stocktake.Warehouse?.WarehouseName ?? "Unknown"
+                warehouse = stocktake.Warehouse
             };
 
             return Ok(new
@@ -60,7 +66,7 @@ namespace BACKEND.Controllers
                 stocktakeId = stocktake.StocktakeId,
                 stocktakeCode = stocktake.StocktakeCode,
                 data = auditData,
-                stats = stats
+                stats
             });
         }
 
@@ -68,7 +74,7 @@ namespace BACKEND.Controllers
         public async Task<IActionResult> GetStocktakeList()
         {
             var stocktakes = await _context.StocktakeOrders
-                .Include(s => s.Warehouse)
+                .AsNoTracking()
                 .OrderByDescending(s => s.StocktakeDate)
                 .Select(s => new
                 {
@@ -76,8 +82,8 @@ namespace BACKEND.Controllers
                     stocktakeCode = s.StocktakeCode,
                     stocktakeDate = s.StocktakeDate,
                     status = s.Status,
-                    warehouse = s.Warehouse.WarehouseName,
-                    varianceAlert = s.VarianceAlert
+                    warehouse = s.Warehouse != null ? s.Warehouse.WarehouseName : "Unknown",
+                    varianceAlert = s.VarianceAlert ?? false
                 })
                 .ToListAsync();
 
@@ -96,9 +102,12 @@ namespace BACKEND.Controllers
             }
 
             line.CountedQty = request.CountedQty;
-            line.Variance = line.SystemQty - line.CountedQty;
-            line.VariancePct = line.SystemQty > 0 ? (decimal?)Math.Abs((double)line.Variance / line.SystemQty * 100) : null;
-            line.RequireRecount = line.VariancePct > 10;
+
+            var variance = request.CountedQty - line.SystemQty;
+            var variancePct = line.SystemQty > 0
+                ? Math.Abs((decimal)variance * 100m / line.SystemQty)
+                : 0m;
+            line.RequireRecount = variancePct > 10m;
 
             await _context.SaveChangesAsync();
 

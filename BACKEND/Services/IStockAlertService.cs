@@ -5,11 +5,10 @@ namespace BACKEND.Services
     public interface IStockAlertService
     {
         /// <summary>
-        /// Scans inventory, detects SKUs at/below their safety threshold, records alerts
-        /// and sends (mock) email notifications applying the debounce window. Returns the
-        /// number of alerts for which an email was sent in this run.
+        /// Scans inventory, detects SKUs at or below their safety threshold, records alerts,
+        /// and sends email notifications. Scheduled scans use debounce; manual scans can force resend.
         /// </summary>
-        Task<int> ScanAndNotifyAsync(CancellationToken cancellationToken = default);
+        Task<int> ScanAndNotifyAsync(bool forceResend = false, string? recipientEmail = null, CancellationToken cancellationToken = default);
 
         Task<List<StockAlertDto>> GetActiveAlertsAsync();
 

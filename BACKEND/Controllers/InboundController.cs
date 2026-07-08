@@ -1,4 +1,4 @@
-using BACKEND.DTOs;
+﻿using BACKEND.DTOs;
 using BACKEND.Models;
 using BACKEND.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -24,23 +24,53 @@ namespace BACKEND.Controllers
             _storage = storage;
         }
 
-        // GET: api/inbound
         [HttpGet]
         public async Task<ActionResult<List<InboundOrderDto>>> GetInboundOrders()
         {
             try
             {
                 var orders = await _context.InboundOrders
-                    .Include(o => o.Customer)
-                    .Include(o => o.Warehouse)
-                    .Include(o => o.InboundOrderLines).ThenInclude(l => l.Sku)
-                    .Include(o => o.InboundOrderLines).ThenInclude(l => l.Bin)
-                    .Include(o => o.InboundOrderLines).ThenInclude(l => l.CargoPhotos)
+                    .AsNoTracking()
                     .OrderByDescending(o => o.InboundId)
+                    .Select(o => new InboundOrderDto
+                    {
+                        InboundId = o.InboundId,
+                        InboundCode = o.InboundCode,
+                        CustomerName = o.Customer != null ? o.Customer.CompanyName : null,
+                        WarehouseName = o.Warehouse != null ? o.Warehouse.WarehouseName : null,
+                        Status = o.Status,
+                        ActualDate = o.ActualDate,
+                        Lines = o.InboundOrderLines
+                            .OrderBy(l => l.LineId)
+                            .Select(l => new InboundLineDto
+                            {
+                                LineId = l.LineId,
+                                Skucode = l.Sku != null ? l.Sku.Skucode : null,
+                                ProductName = l.Sku != null ? l.Sku.ProductName : null,
+                                ExpectedQty = l.ExpectedQty,
+                                ReceivedQty = l.ReceivedQty,
+                                ConditionStatus = l.ConditionStatus,
+                                BinCode = l.Bin != null ? l.Bin.BinCode : null,
+                                PhotoCount = l.CargoPhotos.Count,
+                                RequiresMinPhotos = l.ConditionStatus != null && l.ConditionStatus.ToUpper() == "DAMAGED",
+                                MinPhotos = l.ConditionStatus != null && l.ConditionStatus.ToUpper() == "DAMAGED" ? DamagedMinPhotos : 0,
+                                Photos = l.CargoPhotos
+                                    .OrderBy(p => p.PhotoId)
+                                    .Select(p => new CargoPhotoDto
+                                    {
+                                        PhotoId = p.PhotoId,
+                                        PhotoUrl = p.PhotoUrl,
+                                        PhotoAngle = p.PhotoAngle,
+                                        IsDamaged = p.IsDamaged ?? false,
+                                        TakenAt = p.TakenAt
+                                    })
+                                    .ToList()
+                            })
+                            .ToList()
+                    })
                     .ToListAsync();
 
-                var result = orders.Select(MapOrder).ToList();
-                return Ok(result);
+                return Ok(orders);
             }
             catch (Exception ex)
             {
@@ -48,27 +78,51 @@ namespace BACKEND.Controllers
             }
         }
 
-        // GET: api/inbound/{id}/lines
         [HttpGet("{id}/lines")]
         public async Task<ActionResult<List<InboundLineDto>>> GetLines(int id)
         {
             try
             {
-                var orderExists = await _context.InboundOrders.AnyAsync(o => o.InboundId == id);
+                var orderExists = await _context.InboundOrders
+                    .AsNoTracking()
+                    .AnyAsync(o => o.InboundId == id);
+
                 if (!orderExists)
                 {
                     return NotFound($"Inbound order {id} not found.");
                 }
 
                 var lines = await _context.InboundOrderLines
+                    .AsNoTracking()
                     .Where(l => l.InboundId == id)
-                    .Include(l => l.Sku)
-                    .Include(l => l.Bin)
-                    .Include(l => l.CargoPhotos)
                     .OrderBy(l => l.LineId)
+                    .Select(l => new InboundLineDto
+                    {
+                        LineId = l.LineId,
+                        Skucode = l.Sku != null ? l.Sku.Skucode : null,
+                        ProductName = l.Sku != null ? l.Sku.ProductName : null,
+                        ExpectedQty = l.ExpectedQty,
+                        ReceivedQty = l.ReceivedQty,
+                        ConditionStatus = l.ConditionStatus,
+                        BinCode = l.Bin != null ? l.Bin.BinCode : null,
+                        PhotoCount = l.CargoPhotos.Count,
+                        RequiresMinPhotos = l.ConditionStatus != null && l.ConditionStatus.ToUpper() == "DAMAGED",
+                        MinPhotos = l.ConditionStatus != null && l.ConditionStatus.ToUpper() == "DAMAGED" ? DamagedMinPhotos : 0,
+                        Photos = l.CargoPhotos
+                            .OrderBy(p => p.PhotoId)
+                            .Select(p => new CargoPhotoDto
+                            {
+                                PhotoId = p.PhotoId,
+                                PhotoUrl = p.PhotoUrl,
+                                PhotoAngle = p.PhotoAngle,
+                                IsDamaged = p.IsDamaged ?? false,
+                                TakenAt = p.TakenAt
+                            })
+                            .ToList()
+                    })
                     .ToListAsync();
 
-                return Ok(lines.Select(MapLine).ToList());
+                return Ok(lines);
             }
             catch (Exception ex)
             {
@@ -76,24 +130,35 @@ namespace BACKEND.Controllers
             }
         }
 
-        // GET: api/inbound/lines/{lineId}/photos
         [HttpGet("lines/{lineId}/photos")]
         public async Task<ActionResult<List<CargoPhotoDto>>> GetPhotos(int lineId)
         {
             try
             {
-                var lineExists = await _context.InboundOrderLines.AnyAsync(l => l.LineId == lineId);
+                var lineExists = await _context.InboundOrderLines
+                    .AsNoTracking()
+                    .AnyAsync(l => l.LineId == lineId);
+
                 if (!lineExists)
                 {
                     return NotFound($"Inbound line {lineId} not found.");
                 }
 
                 var photos = await _context.CargoPhotos
+                    .AsNoTracking()
                     .Where(p => p.LineId == lineId)
                     .OrderBy(p => p.PhotoId)
+                    .Select(p => new CargoPhotoDto
+                    {
+                        PhotoId = p.PhotoId,
+                        PhotoUrl = p.PhotoUrl,
+                        PhotoAngle = p.PhotoAngle,
+                        IsDamaged = p.IsDamaged ?? false,
+                        TakenAt = p.TakenAt
+                    })
                     .ToListAsync();
 
-                return Ok(photos.Select(MapPhoto).ToList());
+                return Ok(photos);
             }
             catch (Exception ex)
             {
@@ -101,7 +166,6 @@ namespace BACKEND.Controllers
             }
         }
 
-        // POST: api/inbound/lines/{lineId}/photos
         [HttpPost("lines/{lineId}/photos")]
         public async Task<ActionResult<CargoPhotoDto>> UploadPhoto(
             int lineId,
@@ -152,53 +216,19 @@ namespace BACKEND.Controllers
                 _context.CargoPhotos.Add(photo);
                 await _context.SaveChangesAsync();
 
-                return Ok(MapPhoto(photo));
+                return Ok(new CargoPhotoDto
+                {
+                    PhotoId = photo.PhotoId,
+                    PhotoUrl = photo.PhotoUrl,
+                    PhotoAngle = photo.PhotoAngle,
+                    IsDamaged = photo.IsDamaged ?? false,
+                    TakenAt = photo.TakenAt
+                });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-        // ---- mapping helpers ----
-
-        private static InboundOrderDto MapOrder(InboundOrder o) => new()
-        {
-            InboundId = o.InboundId,
-            InboundCode = o.InboundCode,
-            CustomerName = o.Customer?.CompanyName,
-            WarehouseName = o.Warehouse?.WarehouseName,
-            Status = o.Status,
-            ActualDate = o.ActualDate,
-            Lines = o.InboundOrderLines.OrderBy(l => l.LineId).Select(MapLine).ToList()
-        };
-
-        private static InboundLineDto MapLine(InboundOrderLine l)
-        {
-            var isDamaged = string.Equals(l.ConditionStatus, "DAMAGED", StringComparison.OrdinalIgnoreCase);
-            return new InboundLineDto
-            {
-                LineId = l.LineId,
-                Skucode = l.Sku?.Skucode,
-                ProductName = l.Sku?.ProductName,
-                ExpectedQty = l.ExpectedQty,
-                ReceivedQty = l.ReceivedQty,
-                ConditionStatus = l.ConditionStatus,
-                BinCode = l.Bin?.BinCode,
-                PhotoCount = l.CargoPhotos.Count,
-                RequiresMinPhotos = isDamaged,
-                MinPhotos = isDamaged ? DamagedMinPhotos : 0,
-                Photos = l.CargoPhotos.OrderBy(p => p.PhotoId).Select(MapPhoto).ToList()
-            };
-        }
-
-        private static CargoPhotoDto MapPhoto(CargoPhoto p) => new()
-        {
-            PhotoId = p.PhotoId,
-            PhotoUrl = p.PhotoUrl,
-            PhotoAngle = p.PhotoAngle,
-            IsDamaged = p.IsDamaged ?? false,
-            TakenAt = p.TakenAt
-        };
     }
 }

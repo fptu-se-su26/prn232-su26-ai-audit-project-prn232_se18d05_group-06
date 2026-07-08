@@ -28,9 +28,9 @@ namespace BACKEND.Services
 
             // 1. Get system inventory counts
             var query = _context.Inventories.Include(i => i.Sku).AsQueryable();
-            
-            // if (request.WarehouseId.HasValue) 
-            // { 
+
+            // if (request.WarehouseId.HasValue)
+            // {
             //    // We might need to join WarehouseBin if WarehouseId is provided
             //    query = query.Where(i => i.Bin.WarehouseId == request.WarehouseId.Value);
             // }
@@ -54,7 +54,13 @@ namespace BACKEND.Services
             using (var workbook = new XLWorkbook(stream))
             {
                 var worksheet = workbook.Worksheet(1);
-                var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Skip header
+                var usedRange = worksheet.RangeUsed();
+                if (usedRange == null)
+                {
+                    throw new InvalidDataException("Uploaded Excel file does not contain any inventory rows.");
+                }
+
+                var rows = usedRange.RowsUsed().Skip(1); // Skip header
 
                 foreach (var row in rows)
                 {
@@ -120,7 +126,7 @@ namespace BACKEND.Services
                     ws.Cell(rowIdx, 1).Value = item.SkuCode;
                     ws.Cell(rowIdx, 2).Value = item.SystemQty;
                     ws.Cell(rowIdx, 3).Value = item.ActualQty;
-                    
+
                     ws.Cell(rowIdx, 4).Value = item.DiffPercent;
                     ws.Cell(rowIdx, 4).Style.NumberFormat.Format = "0.00%";
 
@@ -131,7 +137,7 @@ namespace BACKEND.Services
                         ws.Row(rowIdx).Style.Fill.BackgroundColor = XLColor.Yellow;
                         criticalDiffs.Add(item);
                     }
-                    
+
                     rowIdx++;
                 }
 
@@ -140,7 +146,7 @@ namespace BACKEND.Services
                 using (var ms = new MemoryStream())
                 {
                     outWorkbook.SaveAs(ms);
-                    
+
                     return new ReconciliationResult
                     {
                         ExcelReport = ms.ToArray(),
