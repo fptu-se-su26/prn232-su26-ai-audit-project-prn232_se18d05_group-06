@@ -51,17 +51,6 @@ import GateCheckoutDashboard from './features/warehouse/GateCheckoutDashboard';
 // Warehouse role pages (RoleID = 2)
 import RoleGuard from './components/RoleGuard';
 import { ROUTE_PATHS } from './routes';
-import WarehouseDashboard from './features/warehouse/WarehouseDashboard';
-import WarehouseTransfer from './features/warehouse/WarehouseTransfer';
-import WarehouseInventory from './features/warehouse/Inventory';
-import WarehouseImport from './features/warehouse/ImportGoods';
-import WarehouseExport from './features/warehouse/ExportGoods';
-import WarehouseStockAlerts from './features/warehouse/StockAlerts';
-import WarehouseInventoryAudit from './features/warehouse/InventoryAudit';
-import WarehouseReports from './features/warehouse/Reports';
-import WarehouseNotifications from './features/warehouse/Notifications';
-import WarehouseSettings from './features/warehouse/Settings';
-import WarehouseAIOCR from './features/warehouse/AIOCRScan';
 
 // Only Admin (RoleID = 1) and Warehouse (RoleID = 2) may access warehouse pages.
 const WAREHOUSE_ROLES = ['ADMIN', 'WAREHOUSE', 'WF'];
