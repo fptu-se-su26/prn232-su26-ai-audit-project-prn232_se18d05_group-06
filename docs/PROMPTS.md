@@ -65,6 +65,11 @@ Sinh viên/nhóm cần ghi lại:
 | 12 | 21/06/2026 | Antigravity | Full-Stack & Animation | Triển khai UC020 (Xác nhận Check-out & Điều khiển Cổng ra) | Thiết kế API giao dịch check-out, giải phóng Dock, ghi nhận logs và hoạt ảnh SVG Barrier Gate | Có | GateCheckoutDashboard.tsx, GateService.cs |
 | 13 | 29/06/2026 | Antigravity (Claude Sonnet 4.6) | Security & Full-Stack | Triển khai UC021 - Quản lý Danh sách Đen Phương tiện & Tài xế | Guard clause blacklist nguyên tử, 403 Forbidden payload, toggle UI glassmorphism và Red Alarm Modal | Có | VehicleService.cs, DriverService.cs, GateController.cs, VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx |
 | 14 | 29/06/2026 | Antigravity (Claude Sonnet 4.6) | UI Fix & CSS | Sửa lỗi UI Contrast tối Dispatcher Dashboard - kéo thả sang CSS variable mapping | Phân tích trùng key Tailwind, giải pháp CSS custom properties và `.dark` class override | Có | tailwind.config.js, index.css, DispatcherLayout.tsx |
+| 15 | 01/07/2026 | Antigravity | Overstay Alert | Hoàn thiện Overstay Alert cho Dispatcher | API /api/fleet/overstay-alerts, service tính SLA, worker quét nền, schema và màn hình Overstay Alert | Có | OverstayAlertService.cs, DispatcherLayout.tsx |
+| 16 | 01/07/2026 | Antigravity | UI/UX | Sửa lại toàn bộ UI/UX của Dispatcher | Cập nhật DispatcherLayout, Sidebar, Header, DashboardTab, KPISection, ActiveOrders, AIInsights, LiveEvents, MapLayer | Có | DispatcherLayout.tsx, Sidebar.tsx, DashboardTab.tsx |
+| 17 | 01/07/2026 | Antigravity | SQL Optimization | Gộp hai file SQL smartlogAI.sql và setup-overstay-alert.sql | Gộp schema và seed Overstay Alert vào smartlogAI.sql, xóa setup-overstay-alert.sql | Có | smartlogAI.sql |
+| 18 | 01/07/2026 | Antigravity | Email Error Handling | Bắt lỗi SMTP Authentication Required để tránh log đỏ | EmailService log warning và mô phỏng email thay vì throw exception | Có | EmailService.cs |
+| 19 | 02/07/2026 | Antigravity | AI Forecasting | Hoan thien AI Financial Trend Forecasting cho Admin | API forecast tai chinh, model, service, seed, va dashboard Admin Finance | Có | FinancialForecastController.cs, Finance.tsx |
 
 ---
 
@@ -346,6 +351,160 @@ Antigravity đã thiết kế giải pháp toàn diện, nghiêm ngặt tuân th
 ### Evaluation
 Antigravity chẩn đoán chính xác nguyên nhân gốc rễ: `tailwind.config.js` khai báo cùng một key `on-surface` nhiều lần khiến giá trị cuối ghi đè giá trị trước (light theme thắng dark theme). Giải pháp CSS variable mapping rất sạch và không ảnh hưởng các trang khác. Build thành công 100% sau khi áp dụng.
 
+---
+
+## Prompt #15 
+
+- Date: 2026-07-01
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Hoàn thiện Overstay Alert cho Dispatcher
+
+### Bối cảnh
+```text
+Dự án SmartLog AI cần hoàn thiện chức năng Cảnh báo xe lưu bãi quá hạn cho role Dispatcher. Backend dùng ASP.NET Core, Entity Framework Core và SQL Server. Frontend dùng React/TypeScript.
+```
+
+### Prompt đã dùng
+```text
+Hãy hoàn thành chức năng Cảnh báo xe lưu bãi quá hạn (Overstay Alert). Tự động tính toán thời gian xe đỗ tại khu vực Dock, kích hoạt cảnh báo trực quan trên màn hình điều phối nếu xe vượt quá thời gian quy định của SLA. Có thể thêm dữ liệu vào database để nó hiển thị lên UI. Lưu ý UI hiển thị Overstay Alert.
+```
+
+### Kết quả đã áp dụng
+```text
+Tạo API /api/fleet/overstay-alerts, service tính SLA, worker quét nền, schema VehicleDockSessions/OverstayAlerts và màn hình Overstay Alert trong Dispatcher.
+```
+
+### Điều chỉnh của nhóm
+```text
+Nhóm kiểm tra dữ liệu trả về từ API bằng HTTP request, tự quyết định nhãn UI là Overstay Alert và loại bỏ mã use case khỏi giao diện.
+```
+
+---
+
+## Prompt #16
+
+- Date: 2026-07-01
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Cải thiện UI/UX Dispatcher
+
+### Bối cảnh
+```text
+Dispatcher là màn hình điều phối logistics, cần phù hợp mô tả SmartLog AI và các use case đội xe, dock, cảnh báo SLA.
+```
+
+### Prompt đã dùng
+```text
+Hãy sửa lại toàn bộ UI/UX của Dispatcher cho đẹp hơn. Chỉ sửa UI/UX sao cho phù hợp với mô tả dự án và use case.
+```
+
+### Kết quả đã áp dụng
+```text
+Cập nhật DispatcherLayout, Sidebar, Header, DashboardTab, KPISection, ActiveOrders, AIInsights, LiveEvents, MapLayer và CSS dispatcher-shell.
+```
+
+### Điều chỉnh của nhóm
+```text
+Nhóm giữ nguyên routing và cấu trúc tab chính, chỉ đổi giao diện, nhãn hiển thị và cách tổ chức thông tin.
+```
+
+---
+
+## Prompt #17
+
+- Date: 2026-07-01
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Gộp SQL Overstay Alert
+
+### Bối cảnh
+```text
+Dự án đang có smartlogAI.sql là file SQL chính và setup-overstay-alert.sql là file vá riêng cho chức năng Overstay Alert.
+```
+
+### Prompt đã dùng
+```text
+Hai file SQL này hãy tối ưu thành một file.
+```
+
+### Kết quả đã áp dụng
+```text
+Gộp schema và seed Overstay Alert vào smartlogAI.sql, xóa setup-overstay-alert.sql để tránh duy trì hai nguồn dữ liệu.
+```
+
+### Điều chỉnh của nhóm
+```text
+Không chạy lại smartlogAI.sql sau khi gộp vì file chính có lệnh DROP DATABASE; chỉ rà nội dung và giữ logic seed an toàn hơn bằng cách lấy Vehicle/Dock/Booking hiện có.
+```
+
+---
+
+## Prompt #18
+
+- Date: 2026-07-01
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Xử lý log SMTP khi test backend
+
+### Bối cảnh
+```text
+Khi backend chạy, StockAlertWorker gửi email tồn kho và Gmail trả lỗi Authentication Required, làm console xuất hiện lỗi đỏ trong lúc test Overstay Alert.
+```
+
+### Prompt đã dùng
+```text
+Log backend báo SMTP Authentication Required trong khi Overstay Alert vẫn query được. Hãy xử lý để lỗi email không làm nhiễu console khi test Dispatcher/Overstay.
+```
+
+### Kết quả đã áp dụng
+```text
+EmailService bắt riêng SmtpException do authentication, log warning và mô phỏng email thay vì throw exception.
+```
+
+### Điều chỉnh của nhóm
+```text
+Chỉ xử lý lỗi xác thực SMTP; các lỗi gửi email khác vẫn throw để nhóm có thể phát hiện sự cố thật.
+```
+
+---
+
+## Prompt #19
+
+- Date: 2026-07-02
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Hoan thien AI Financial Trend Forecasting cho Admin
+
+### Boi cảnh
+```text
+Du an SmartLog AI da co module Admin Finance nhung man hinh con la mock UI cu, chua co API forecast tai chinh, chua co schema luu forecast va log retrain model.
+```
+
+### Prompt da dung
+```text
+Hay lam UC042 Du bao tai chinh (AI Trend) doi voi role Admin. Co the sua UI/UX cua man hinh du bao tai chinh lai cho dep hon va xin hon. Su dung FRONTEND, BACKEND va cac skills da hoc de lam tot hon.
+```
+
+### Ket qua da ap dung
+```text
+Them backend API /api/finance/forecast, /generate, /retrain, /history; them DTO, model FinancialForecast, AiModelTrainingLog, service tinh forecast 3 thang; bo sung schema/seed vao smartlogAI.sql; lam lai man hinh Admin Finance thanh dashboard AI Trend co KPI, chart, cash flow, bang forecast, insight, training logs va export CSV.
+```
+
+### Dieu chinh cua nhom
+```text
+Nhom giu route /admin/finance, khong hien thi ma UC042 tren UI, dung fallback data khi API/database chua san sang va kiem tra lai bang dotnet build. Phan type-check frontend con loi cu InventoryAudit.types nen khong tinh la loi cua UC042.
+```
+
+### Expected Output
+- Backend: API forecast tai chinh, service xu ly du lieu lich su toi thieu 6 thang, generate forecast 3 thang, retrain log va history.
+- Database: Bang `FinancialForecasts`, `AiModelTrainingLogs` va seed mau trong `smartlogAI.sql`.
+- Frontend: Dashboard Admin Finance hien dai, de doc, co chart revenue/cost, cash flow forecast, bang du bao 3 thang, risk badge, confidence va AI insights.
+
+### Evaluation
+Antigravity ho tro chia nho use case thanh cac lop backend, database va UI ro rang. Nhom tu dieu chinh theo cau truc hien co cua du an, bo cac phan khong can thiet, uu tien giao dien nghiep vu gon va tranh dua ma use case len man hinh nguoi dung.
+
+---
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.

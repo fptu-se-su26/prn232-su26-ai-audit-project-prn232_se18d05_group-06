@@ -7,20 +7,29 @@ interface MapLayerProps {
   onOrderSelect: (orderId: string | null) => void;
 }
 
+const statusLabel = (status: Order['status']) => {
+  if (status === 'delayed') return 'Trễ hạn';
+  if (status === 'transit') return 'Đang đi';
+  if (status === 'approaching') return 'Đang đến';
+  if (status === 'delivered') return 'Đã giao';
+  return status;
+};
+
 export const MapLayer: React.FC<MapLayerProps> = ({
   orders,
   selectedOrderId,
   onOrderSelect,
 }) => {
   return (
-    <div className="absolute inset-0 z-0 bg-surface-container-lowest select-none">
+    <div className="absolute inset-0 z-0 select-none bg-[#eef3f7]">
       <img
-        alt="Command Center Map Base"
-        className="w-full h-full object-cover opacity-25 mix-blend-screen transition-opacity duration-700"
+        alt="Dispatcher operating map"
+        className="h-full w-full object-cover opacity-[0.18] mix-blend-multiply saturate-75 transition-opacity duration-700"
         src="https://lh3.googleusercontent.com/aida-public/AB6AXuCa7DktpFT3Ozv5c3gM_VQP7SL5_nIt_alsUbKj4m3JOarFTqzmlCpwroKSFd4rBasfP_LqBGJ4MB44vvSdwUFQyCEbu8_n8tFt2moxBoB5Dmj3y2q8uEZVrqHzt6hONKx2lrL0qoCxcDBBuFtYrcU-btNhCyV6BpjpIxvtbL7lom4v_4PD2Q86zm8Ln0wi0WtoS6ae9RonPb5Z7mF4ORDgXDwJ7spbtZUYLXOQiScAKFPTp50rPGumvvvAOQDaGQKYnP5j6ZVSf7br"
       />
 
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(5,20,36,0.1)_0%,rgba(5,20,36,0.9)_80%)] pointer-events-none" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.22)_0%,rgba(238,243,247,0.96)_78%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(15,53,84,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(15,53,84,0.05)_1px,transparent_1px)] bg-[size:44px_44px]" />
 
       {orders.map((order) => {
         const isSelected = selectedOrderId === order.id;
@@ -30,79 +39,53 @@ export const MapLayer: React.FC<MapLayerProps> = ({
           <div
             key={order.id}
             style={{ top: `${order.coordinates.y}%`, left: `${order.coordinates.x}%` }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-auto z-10 group"
+            className="group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center pointer-events-auto"
           >
             <button
               onClick={() => onOrderSelect(isSelected ? null : order.id)}
-              className={`relative flex items-center justify-center p-2 rounded-full cursor-pointer transition-all duration-300 ${isSelected
+              className={`relative flex h-9 w-9 items-center justify-center rounded-full border shadow-sm transition-all duration-200 ${
+                isSelected
                   ? isDelayed
-                    ? 'bg-error/30 ring-2 ring-error scale-125 glow-alert'
-                    : 'bg-secondary/30 ring-2 ring-secondary scale-125 glow-active'
-                  : 'bg-black/40 hover:bg-black/60 hover:scale-110 border border-outline-variant/30'
-                }`}
+                    ? 'scale-110 border-rose-300 bg-rose-100 text-rose-700 ring-4 ring-rose-100'
+                    : 'scale-110 border-cyan-300 bg-cyan-100 text-cyan-800 ring-4 ring-cyan-100'
+                  : isDelayed
+                    ? 'border-rose-200 bg-white text-rose-700 hover:bg-rose-50'
+                    : 'border-slate-200 bg-white text-[#0f6b7d] hover:bg-cyan-50'
+              }`}
+              aria-label={`Chọn đơn ${order.id}`}
             >
-              <span
-                className={`material-symbols-outlined text-[18px] select-none ${isDelayed ? 'text-error' : 'text-secondary'
-                  }`}
-              >
+              <span className="material-symbols-outlined text-[18px]">
                 {isDelayed ? 'warning' : 'local_shipping'}
               </span>
-
-              <div
-                className={`absolute w-8 h-8 rounded-full pulse-marker pointer-events-none -z-10 ${isDelayed ? 'bg-error/25' : 'bg-secondary/25'
-                  }`}
-              />
+              <span className={`absolute -z-10 h-10 w-10 rounded-full ${isDelayed ? 'bg-rose-200/60' : 'bg-cyan-200/60'} ${isSelected ? '' : 'animate-ping'}`} />
             </button>
 
             <div
-              className={`absolute top-full mt-2 w-48 p-2.5 glass-panel rounded-lg shadow-2xl pointer-events-none transition-all duration-300 flex flex-col gap-1 border border-outline-variant/20 ${isSelected
-                  ? 'opacity-100 translate-y-0 visible z-30 scale-100'
-                  : 'opacity-0 -translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible group-hover:scale-95 group-hover:z-20'
-                }`}
+              className={`pointer-events-none absolute top-full mt-2 w-52 rounded-lg border bg-white p-3 shadow-xl transition-all duration-200 ${
+                isSelected
+                  ? 'visible z-30 translate-y-0 scale-100 opacity-100'
+                  : 'invisible -translate-y-1 scale-95 opacity-0 group-hover:visible group-hover:z-20 group-hover:translate-y-0 group-hover:opacity-100'
+              }`}
             >
-              <div className="flex justify-between items-center border-b border-white/5 pb-1">
-                <span className="font-data-tabular text-data-tabular text-primary font-bold">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                <span className="font-data-tabular text-[12px] font-bold text-[#0f3554]">
                   {order.id}
                 </span>
-                <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.25 rounded ${isDelayed ? 'bg-error/20 text-error' : 'bg-secondary/20 text-secondary'
-                  }`}>
-                  {order.status === 'delayed' ? 'Trễ hạn' : order.status === 'transit' ? 'Đang đi' : order.status === 'approaching' ? 'Đang đến' : order.status === 'delivered' ? 'Đã giao' : order.status}
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${isDelayed ? 'bg-rose-100 text-rose-700' : 'bg-cyan-100 text-cyan-900'}`}>
+                  {statusLabel(order.status)}
                 </span>
               </div>
-              <p className="text-[11px] font-semibold text-on-surface truncate">
+              <p className="mt-2 truncate text-[12px] font-semibold text-slate-800">
                 {order.driverName} ({order.vehicle})
               </p>
-              <p className="text-[10px] text-on-surface-variant leading-tight truncate">
+              <p className="mt-1 truncate text-[11px] font-semibold text-slate-500">
                 {order.location}
               </p>
-              <p className="text-[10px] font-bold text-secondary flex items-center gap-1 mt-0.5">
-                <span className="material-symbols-outlined text-[12px]">schedule</span>
-                Dự kiến: {order.eta}
+              <p className={`mt-2 flex items-center gap-1 text-[11px] font-bold ${isDelayed ? 'text-rose-700' : 'text-[#0f6b7d]'}`}>
+                <span className="material-symbols-outlined text-[13px]">schedule</span>
+                ETA: {order.eta}
               </p>
             </div>
-
-            {isSelected && (
-              <svg className="absolute w-[600px] h-[600px] -z-10 pointer-events-none opacity-30 animate-pulse">
-                <circle
-                  cx="300"
-                  cy="300"
-                  r="60"
-                  fill="none"
-                  stroke={isDelayed ? '#ffb4ab' : '#4cd7f6'}
-                  strokeWidth="1"
-                  strokeDasharray="4 4"
-                />
-                <circle
-                  cx="300"
-                  cy="300"
-                  r="120"
-                  fill="none"
-                  stroke={isDelayed ? '#ffb4ab' : '#4cd7f6'}
-                  strokeWidth="0.5"
-                  strokeDasharray="2 6"
-                />
-              </svg>
-            )}
           </div>
         );
       })}

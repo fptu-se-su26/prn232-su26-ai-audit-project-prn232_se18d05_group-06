@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+﻿import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CustomerLandingPage from './features/customer/CustomerLandingPage';
 import AuthPage from './features/auth/AuthPage';
 import CreateOrder from './features/customer/CreateOrder';
@@ -48,6 +48,13 @@ import WarehouseSettings from './features/warehouse/Settings';
 import WarehouseAIOCR from './features/warehouse/AIOCRScan';
 import GateCheckoutDashboard from './features/warehouse/GateCheckoutDashboard';
 
+// Warehouse role pages (RoleID = 2)
+import RoleGuard from './components/RoleGuard';
+import { ROUTE_PATHS } from './routes';
+
+// Only Admin (RoleID = 1) and Warehouse (RoleID = 2) may access warehouse pages.
+const WAREHOUSE_ROLES = ['ADMIN', 'WAREHOUSE', 'WF'];
+
 const modules = [
   { path: '/admin/dashboard', name: 'Dashboard', desc: 'KPI Grid, AI Insights, Maps', icon: 'dashboard', color: 'from-blue-500 to-indigo-600' },
   { path: '/admin/analytics', name: 'BI Analytics', desc: 'Operational Analytics, Reports', icon: 'analytics', color: 'from-purple-500 to-pink-600' },
@@ -65,7 +72,7 @@ const modules = [
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<CustomerLandingPage />} />
@@ -114,8 +121,21 @@ const App: React.FC = () => {
         <Route path="/admin/user-management" element={<AdminUserManagement />} />
         <Route path="/admin/role-permission" element={<AdminRolePermission />} />
         <Route path="/admin/smart-log-ai" element={<AdminSmartLogAI />} />
-        <Route path="/admin/warehouses" element={<AdminWarehouses />} />
+        <Route path="/admin/warehouses" element={<RoleGuard allow={WAREHOUSE_ROLES}><AdminWarehouses /></RoleGuard>} />
         <Route path="/admin/settings" element={<AdminSettings />} />
+
+        {/* Warehouse Management (Admin + Warehouse roles only) */}
+        <Route path={ROUTE_PATHS.WAREHOUSE_DASHBOARD} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseDashboard /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_TRANSFER} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseTransfer /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_INVENTORY} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseInventory /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_IMPORT} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseImport /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_EXPORT} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseExport /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_STOCK_ALERTS} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseStockAlerts /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_INVENTORY_AUDIT} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseInventoryAudit /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_REPORTS} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseReports /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_NOTIFICATIONS} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseNotifications /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_SETTINGS} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseSettings /></RoleGuard>} />
+        <Route path={ROUTE_PATHS.WAREHOUSE_AI_OCR} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseAIOCR /></RoleGuard>} />
 
         {/* Others */}
         <Route path="/about" element={<AboutPage />} />
@@ -148,3 +168,4 @@ const App: React.FC = () => {
 }
 
 export default App;
+

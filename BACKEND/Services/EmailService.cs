@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -247,10 +248,8 @@ namespace BACKEND.Services
             {
                 try
                 {
-                    // Find the solution base folder dynamically or use directory relative to app path
                     var projectRoot = AppDomain.CurrentDomain.BaseDirectory;
                     
-                    // Let's resolve parent directories if running inside bin/Debug/net9.0
                     if (projectRoot.Contains("bin"))
                     {
                         var binIndex = projectRoot.IndexOf("bin", StringComparison.OrdinalIgnoreCase);
@@ -263,7 +262,6 @@ namespace BACKEND.Services
                         Directory.CreateDirectory(sentEmailsFolder);
                     }
 
-                    // Create file name using BookingId (replace colon/backslash if any)
                     var safeBookingId = bookingId.Replace(":", "-").Replace("\\", "-").Replace("/", "-");
                     var filePath = Path.Combine(sentEmailsFolder, $"booking-{safeBookingId}.html");
 
@@ -274,6 +272,63 @@ namespace BACKEND.Services
                 {
                     _logger.LogError(ex, "Failed to write email backup file locally.");
                 }
+            }
+        }
+
+        public async Task SendEmailAsync(string toEmail, string subject, string body)
+        {
+            var host = _configuration["EmailSettings:SmtpHost"];
+            var port = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
+            var user = _configuration["EmailSettings:SmtpUser"];
+            var pass = _configuration["EmailSettings:SmtpPass"];
+            var senderEmail = _configuration["EmailSettings:SenderEmail"];
+            var senderName = _configuration["EmailSettings:SenderName"];
+            var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"] ?? "true");
+
+            if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(pass) || pass == "your_app_password_here")
+            {
+                throw new InvalidOperationException("SMTP credentials are not configured correctly in appsettings.json.");
+            }
+
+            try
+            {
+                using var client = new SmtpClient(host, port)
+                {
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(user, pass),
+                    EnableSsl = enableSsl,
+                    DeliveryMethod = SmtpDeliveryMethod.Network
+                };
+
+                using var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(senderEmail ?? user, senderName, Encoding.UTF8),
+                    Subject = subject,
+                    SubjectEncoding = Encoding.UTF8,
+                    Body = body,
+                    BodyEncoding = Encoding.UTF8,
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(toEmail);
+
+                await client.SendMailAsync(mailMessage);
+                _logger.LogInformation("Email sent successfully to {To}", toEmail);
+            }
+            catch (SmtpException ex) when (
+                ex.Message.Contains("Authentication Required", StringComparison.OrdinalIgnoreCase) ||
+                ex.Message.Contains("not authenticated", StringComparison.OrdinalIgnoreCase) ||
+                ex.Message.Contains("Username and Password not accepted", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogError(
+                    ex,
+                    "SMTP authentication failed for {User}. Gmail requires a valid App Password with 2-Step Verification enabled.",
+                    user);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send email to {To}", toEmail);
+                throw;
             }
         }
     }

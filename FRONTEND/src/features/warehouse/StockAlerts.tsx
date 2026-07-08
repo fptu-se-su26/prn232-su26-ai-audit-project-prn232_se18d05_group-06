@@ -1,348 +1,419 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Sidebar from '../../components/Sidebar'
+import api from '../../lib/api'
+
+type StockAlert = {
+  alertId: number
+  skuid: number
+  skucode: string | null
+  productName: string | null
+  customerName: string | null
+  alertType: string
+  currentQty: number | null
+  thresholdQty: number | null
+  emailSentAt: string | null
+  nextAllowedAt: string | null
+  isResolved: boolean
+  createdAt: string | null
+  severity: string
+}
+
+type StockAlertSummary = {
+  lowStock: number
+  expiringSoon: number
+  deadStock: number
+  total: number
+}
+
+const ALERT_EMAIL = 'tungtvde180109@fpt.edu.vn'
+
+const getCurrentUserEmail = () => {
+  try {
+    const raw = localStorage.getItem('user')
+    if (!raw) return ALERT_EMAIL
+    const user = JSON.parse(raw) as { email?: string }
+    return user.email?.trim() || ALERT_EMAIL
+  } catch {
+    return ALERT_EMAIL
+  }
+}
+const ALERT_TYPE_LABELS: Record<string, string> = {
+  LOW_STOCK: 'Tồn thấp',
+  EXPIRY_SOON: 'Sắp hết hạn',
+  DEAD_STOCK: 'Tồn lâu',
+}
+
+const formatDateTime = (value: string | null) => {
+  if (!value) return 'Chưa gửi'
+  return new Date(value).toLocaleString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+  })
+}
 
 const StockAlerts = () => {
-  const cardsRef = useRef<HTMLDivElement[]>([])
+  const [alerts, setAlerts] = useState<StockAlert[]>([])
+  const [summary, setSummary] = useState<StockAlertSummary | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [scanning, setScanning] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
+  const [filterText, setFilterText] = useState('')
+  const [filterType, setFilterType] = useState('ALL')
+  const recipientEmail = getCurrentUserEmail()
 
-  useEffect(() => {
-    cardsRef.current.forEach((card, index) => {
-      if (card) {
-        card.style.opacity = '0'
-        card.style.transform = 'translateY(20px)'
-        setTimeout(() => {
-          card.style.transition = 'all 0.5s ease-out'
-          card.style.opacity = '1'
-          card.style.transform = 'translateY(0)'
-        }, index * 100)
-      }
-    })
-  }, [])
-
-  const addToCardsRef = (el: HTMLDivElement | null) => {
-    if (el && !cardsRef.current.includes(el)) {
-      cardsRef.current.push(el)
+  const loadData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [alertsRes, summaryRes] = await Promise.all([
+        api.get<StockAlert[]>('/stockalerts'),
+        api.get<StockAlertSummary>('/stockalerts/summary'),
+      ])
+      setAlerts(alertsRes.data)
+      setSummary(summaryRes.data)
+    } catch {
+      setError('Không tải được dữ liệu cảnh báo tồn kho.')
+    } finally {
+      setLoading(false)
     }
   }
 
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const handleScan = async () => {
+    setScanning(true)
+    setError(null)
+    setMessage(null)
+    try {
+      const res = await api.post<{ emailsSent: number; message: string }>('/stockalerts/scan?force=true')
+      setMessage(res.data.message || `Quét hoàn tất. Email cảnh báo được gửi về ${recipientEmail}.`)
+      await loadData()
+    } catch (err) {
+      const data = (err as { response?: { data?: unknown } }).response?.data
+      const detail = typeof data === 'string' ? data : 'Vui lòng kiểm tra cấu hình SMTP trong backend.'
+      setError(`Quét tồn kho thất bại. ${detail}`)
+    } finally {
+      setScanning(false)
+    }
+  }
+
+  const handleResolve = async (id: number) => {
+    setError(null)
+    try {
+      await api.post(`/stockalerts/${id}/resolve`)
+      setAlerts((prev) => prev.filter((a) => a.alertId !== id))
+      const res = await api.get<StockAlertSummary>('/stockalerts/summary')
+      setSummary(res.data)
+    } catch {
+      setError('Không thể đánh dấu cảnh báo đã xử lý.')
+    }
+  }
+
+  const filteredAlerts = useMemo(() => {
+    const keyword = filterText.trim().toLowerCase()
+    return alerts.filter((alert) => {
+      const matchText =
+        !keyword ||
+        (alert.skucode ?? '').toLowerCase().includes(keyword) ||
+        (alert.productName ?? '').toLowerCase().includes(keyword) ||
+        (alert.customerName ?? '').toLowerCase().includes(keyword)
+      const matchType = filterType === 'ALL' || alert.alertType === filterType
+      return matchText && matchType
+    })
+  }, [alerts, filterText, filterType])
+
+  const criticalCount = filteredAlerts.filter((a) => a.severity === 'CRITICAL').length
+  const lowStockCount = summary?.lowStock ?? 0
+  const expiringCount = summary?.expiringSoon ?? 0
+  const deadStockCount = summary?.deadStock ?? 0
+  const totalCount = summary?.total ?? 0
+
+  const metricCards = [
+    {
+      label: 'Tồn kho thấp',
+      value: lowStockCount,
+      hint: `${criticalCount} mục nghiêm trọng`,
+      icon: 'trending_down',
+      tone: 'rose',
+      badge: 'NGHIÊM TRỌNG',
+    },
+    {
+      label: 'Sắp hết hạn',
+      value: expiringCount,
+      hint: 'Cần ưu tiên xuất',
+      icon: 'event_busy',
+      tone: 'cyan',
+      badge: 'KHẨN',
+    },
+    {
+      label: 'Tồn kho lâu',
+      value: deadStockCount,
+      hint: 'Hàng trên 90 ngày',
+      icon: 'hourglass_empty',
+      tone: 'blue',
+      badge: 'THEO DÕI',
+    },
+    {
+      label: 'Cảnh báo đang mở',
+      value: totalCount,
+      hint: 'Chưa xử lý',
+      icon: 'notifications_active',
+      tone: 'slate',
+      badge: 'TỔNG',
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-background text-on-surface antialiased overflow-hidden flex">
+    <div className="min-h-screen bg-[#f5f7fb] text-slate-950 antialiased flex overflow-hidden">
       <Sidebar />
 
-      <main className="ml-[280px] flex-1 h-screen overflow-y-auto custom-scrollbar flex flex-col relative animate-fade-in-up">
-        {/* Top Navigation */}
-        <header className="sticky top-0 w-full h-20 bg-surface/75 backdrop-blur-md border-b border-outline-variant/30 flex justify-between items-center px-gutter z-40">
-          <div className="flex items-center gap-4">
-            <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Stock Alerts</h2>
-            <div className="h-6 w-px bg-outline-variant/50"></div>
-            <span className="text-on-surface-variant font-label-md">
-              System Health: <span className="text-primary font-bold">Optimal</span>
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-6">
-            <div className="relative group">
-              <span className="material-symbols-outlined p-2 hover:bg-surface-container-high/50 rounded-full cursor-pointer transition-all duration-200">search</span>
+      <main className="ml-[280px] h-screen flex-1 overflow-y-auto bg-[#f5f7fb]">
+        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 px-8 py-5 backdrop-blur-xl">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="text-2xl font-black tracking-tight text-slate-950">Cảnh báo tồn kho</h1>
+              <p className="mt-1 text-sm font-semibold text-slate-500">
+                Quét tự động mỗi <span className="text-blue-700">30 phút</span> · Worker giữ debounce 12 giờ · Quét thủ công gửi lại email để test
+              </p>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined p-2 hover:bg-surface-container-high/50 rounded-full cursor-pointer transition-all duration-200">notifications</span>
-              <span className="material-symbols-outlined p-2 hover:bg-surface-container-high/50 rounded-full cursor-pointer transition-all duration-200">smart_toy</span>
-            </div>
-            
-            <div className="flex items-center gap-3 ml-2 pl-4 border-l border-outline-variant/30">
-              <div className="text-right">
-                <p className="font-label-md text-on-surface leading-none">Warehouse Staff</p>
-                <p className="text-[10px] text-on-surface-variant uppercase tracking-wider">Sector A-12</p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-800">
+                Email nhận cảnh báo: {recipientEmail}
               </div>
-              <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden">
-                <img 
-                  alt="User Profile" 
-                  className="w-full h-full object-cover" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0hyBnUR7_hnYs1cCNEfeCcZzThnM76FZtVXItDSgV12eAVHB0RzWpshmH6dhIfZFa6ErcYVAIW5pbF8QmlK2fuvtXD0Tpbfn1tV1_q0ICPttg6rSSwtYNp6Hssv9gtiym1DrUCNBM64ZMpP9MXa-4YwmaLKSQHTXiv9IAkvvU6CDD1ERAIlKS6UnKg4nAYwSwpleL0uz1489QoiYWq5x_j-PZgqqlLNUn-xqD_8nB3ZHcH4g2YnTnGO_BxpxTa-CO8aDUpUJzCHsw" 
-                />
-              </div>
+              <button
+                onClick={handleScan}
+                disabled={scanning}
+                className="inline-flex h-12 items-center gap-2 rounded-lg bg-blue-700 px-5 text-sm font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-[20px]">{scanning ? 'hourglass_top' : 'refresh'}</span>
+                {scanning ? 'Đang quét...' : 'Quét ngay'}
+              </button>
             </div>
           </div>
         </header>
 
-        {/* Main Content */}
-        <div className="p-container_padding min-h-screen">
-          {/* Statistics Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack_lg">
-            {/* Low Stock Card */}
-            <div ref={addToCardsRef} className="glass-card p-6 rounded-lg flex flex-col justify-between hover:glow-primary transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-error/10 text-error flex items-center justify-center">
-                  <span className="material-symbols-outlined">trending_down</span>
-                </div>
-                <span className="px-2 py-1 bg-error/10 text-error rounded text-[12px] font-bold">CRITICAL</span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-on-surface-variant font-label-md">Low Stock</h3>
-                <p className="text-display-lg font-display-lg leading-tight">24</p>
-                <p className="text-error font-label-md mt-1">↑ 12% from yesterday</p>
-              </div>
+        <section className="space-y-6 p-6 lg:p-8">
+          {error && (
+            <div className="flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-bold text-rose-800">
+              <span className="material-symbols-outlined text-[20px]">error</span>
+              <span>{error}</span>
             </div>
+          )}
 
-            {/* Expiring Soon Card */}
-            <div ref={addToCardsRef} className="glass-card p-6 rounded-lg flex flex-col justify-between hover:glow-primary transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-secondary-container/20 text-on-secondary-container flex items-center justify-center">
-                  <span className="material-symbols-outlined">event_busy</span>
-                </div>
-                <span className="px-2 py-1 bg-secondary-container/20 text-on-secondary-container rounded text-[12px] font-bold">UERGENT</span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-on-surface-variant font-label-md">Expiring Soon</h3>
-                <p className="text-display-lg font-display-lg leading-tight">08</p>
-                <p className="text-on-surface-variant font-label-md mt-1">Sectors A, D, and F</p>
-              </div>
+          {message && (
+            <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-bold text-emerald-800">
+              <span className="material-symbols-outlined text-[20px]">mark_email_read</span>
+              <span>{message}</span>
             </div>
+          )}
 
-            {/* Long-term Storage */}
-            <div ref={addToCardsRef} className="glass-card p-6 rounded-lg flex flex-col justify-between hover:glow-primary transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined">hourglass_empty</span>
-                </div>
-                <span className="px-2 py-1 bg-primary/10 text-primary rounded text-[12px] font-bold">MONITOR</span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-on-surface-variant font-label-md">Long-term Storage</h3>
-                <p className="text-display-lg font-display-lg leading-tight">112</p>
-                <p className="text-on-surface-variant font-label-md mt-1">Items &gt; 90 days</p>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {metricCards.map((card) => {
+              const toneClass =
+                card.tone === 'rose'
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : card.tone === 'cyan'
+                    ? 'bg-cyan-50 text-cyan-700 border-cyan-200'
+                    : card.tone === 'blue'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-slate-100 text-slate-700 border-slate-200'
 
-            {/* Overstock */}
-            <div ref={addToCardsRef} className="glass-card p-6 rounded-lg flex flex-col justify-between hover:glow-primary transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-tertiary-container/10 text-tertiary flex items-center justify-center">
-                  <span className="material-symbols-outlined">inventory</span>
+              return (
+                <div key={card.label} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-lg border ${toneClass}`}>
+                      <span className="material-symbols-outlined text-[24px]">{card.icon}</span>
+                    </div>
+                    <span className={`rounded px-2.5 py-1 text-xs font-black ${toneClass}`}>{card.badge}</span>
+                  </div>
+                  <div className="mt-5">
+                    <p className="text-sm font-bold text-slate-500">{card.label}</p>
+                    <p className="mt-1 text-5xl font-black leading-none text-slate-950">{card.value}</p>
+                    <p className="mt-3 text-sm font-bold text-slate-600">{card.hint}</p>
+                  </div>
                 </div>
-                <span className="px-2 py-1 bg-tertiary-container/10 text-tertiary rounded text-[12px] font-bold">INFO</span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-on-surface-variant font-label-md">Overstock</h3>
-                <p className="text-display-lg font-display-lg leading-tight">42</p>
-                <p className="text-on-surface-variant font-label-md mt-1">High holding cost</p>
-              </div>
-            </div>
+              )
+            })}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter mt-6">
-            {/* Detailed Alert Table */}
-            <div className="lg:col-span-2 glass-card rounded-lg overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-outline-variant/30 flex justify-between items-center">
-                <h3 className="font-headline-md text-headline-md">Active Alerts Inventory</h3>
-                <button className="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-lg hover:bg-surface-container-highest transition-colors font-label-md">
-                  <span className="material-symbols-outlined text-[20px]">filter_list</span>
-                  Filter Alerts
-                </button>
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+              <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-950">Danh sách cảnh báo</h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Đang hiển thị {filteredAlerts.length} / {alerts.length} bản ghi</p>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <label className="relative block sm:w-72">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">search</span>
+                    <input
+                      value={filterText}
+                      onChange={(event) => setFilterText(event.target.value)}
+                      placeholder="Tìm SKU, sản phẩm..."
+                      className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                    />
+                  </label>
+                  <select
+                    value={filterType}
+                    onChange={(event) => setFilterType(event.target.value)}
+                    className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                  >
+                    <option value="ALL">Tất cả loại</option>
+                    <option value="LOW_STOCK">Tồn thấp</option>
+                    <option value="EXPIRY_SOON">Sắp hết hạn</option>
+                    <option value="DEAD_STOCK">Tồn lâu</option>
+                  </select>
+                </div>
               </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-surface-container-low/50">
-                      <th className="px-6 py-4 font-label-md text-outline">SKU</th>
-                      <th className="px-6 py-4 font-label-md text-outline">Product</th>
-                      <th className="px-6 py-4 font-label-md text-outline">Qty / Min</th>
-                      <th className="px-6 py-4 font-label-md text-outline">Alert Type</th>
-                      <th className="px-6 py-4 font-label-md text-outline">Severity</th>
-                      <th className="px-6 py-4 font-label-md text-outline">Action</th>
+
+              <div className="hidden overflow-x-auto lg:block">
+                <table className="w-full min-w-[980px] border-collapse text-left">
+                  <thead className="bg-slate-50 text-xs font-black uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-6 py-4">Mã SKU</th>
+                      <th className="px-6 py-4">Sản phẩm</th>
+                      <th className="px-6 py-4">Tồn / Ngưỡng</th>
+                      <th className="px-6 py-4">Loại cảnh báo</th>
+                      <th className="px-6 py-4">Email gần nhất</th>
+                      <th className="px-6 py-4">Mức độ</th>
+                      <th className="px-6 py-4 text-right">Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-outline-variant/20">
-                    {/* Row 1 */}
-                    <tr className="hover:bg-surface-container-high/20 transition-colors group">
-                      <td className="px-6 py-4 font-data-mono text-primary">LOG-7239-X</td>
-                      <td className="px-6 py-4">
-                        <div className="font-body-md">Precision Gasket Set</div>
-                        <div className="text-[12px] text-on-surface-variant">Industrial Mechanical</div>
-                      </td>
-                      <td className="px-6 py-4 font-data-mono">12 / <span className="text-outline">50</span></td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-error">
-                          <span className="material-symbols-outlined text-[18px]">report_problem</span>
-                          <span className="font-label-md">Low Stock</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full bg-error text-on-error text-[12px] font-bold shadow-sm">CRITICAL</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button className="p-2 rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all">
-                          <span className="material-symbols-outlined">shopping_cart_checkout</span>
-                        </button>
-                      </td>
-                    </tr>
-                    
-                    {/* Row 2 */}
-                    <tr className="bg-surface-container-low/20 hover:bg-surface-container-high/20 transition-colors group">
-                      <td className="px-6 py-4 font-data-mono text-primary">ELC-1022-A</td>
-                      <td className="px-6 py-4">
-                        <div className="font-body-md">Lithium Core Cell</div>
-                        <div className="text-[12px] text-on-surface-variant">Electronics / Power</div>
-                      </td>
-                      <td className="px-6 py-4 font-data-mono">85 / <span className="text-outline">100</span></td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-secondary">
-                          <span className="material-symbols-outlined text-[18px]">history</span>
-                          <span className="font-label-md">Expiring</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[12px] font-bold shadow-sm">WARNING</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button className="p-2 rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all">
-                          <span className="material-symbols-outlined">move_up</span>
-                        </button>
-                      </td>
-                    </tr>
-                    
-                    {/* Row 3 */}
-                    <tr className="hover:bg-surface-container-high/20 transition-colors group">
-                      <td className="px-6 py-4 font-data-mono text-primary">MEC-4450-Z</td>
-                      <td className="px-6 py-4">
-                        <div className="font-body-md">Hydraulic Valve B2</div>
-                        <div className="text-[12px] text-on-surface-variant">Heavy Machinery</div>
-                      </td>
-                      <td className="px-6 py-4 font-data-mono">450 / <span className="text-outline">200</span></td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-primary">
-                          <span className="material-symbols-outlined text-[18px]">layers</span>
-                          <span className="font-label-md">Overstock</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed-variant text-[12px] font-bold shadow-sm">OPTIMIZE</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button className="p-2 rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all">
-                          <span className="material-symbols-outlined">sell</span>
-                        </button>
-                      </td>
-                    </tr>
-                    
-                    {/* Row 4 */}
-                    <tr className="bg-surface-container-low/20 hover:bg-surface-container-high/20 transition-colors group">
-                      <td className="px-6 py-4 font-data-mono text-primary">CHM-8812-K</td>
-                      <td className="px-6 py-4">
-                        <div className="font-body-md">Solvent Cleaner 5L</div>
-                        <div className="text-[12px] text-on-surface-variant">Chemical / Hazardous</div>
-                      </td>
-                      <td className="px-6 py-4 font-data-mono">5 / <span className="text-outline">20</span></td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-error">
-                          <span className="material-symbols-outlined text-[18px]">warning</span>
-                          <span className="font-label-md">Critical Low</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full bg-error text-on-error text-[12px] font-bold shadow-sm">CRITICAL</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button className="p-2 rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all">
-                          <span className="material-symbols-outlined">shopping_cart_checkout</span>
-                        </button>
-                      </td>
-                    </tr>
+                  <tbody className="divide-y divide-slate-100">
+                    {loading && (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-10 text-center text-sm font-bold text-slate-500">Đang tải dữ liệu...</td>
+                      </tr>
+                    )}
+                    {!loading && filteredAlerts.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-10 text-center text-sm font-bold text-slate-500">Không có cảnh báo phù hợp.</td>
+                      </tr>
+                    )}
+                    {!loading && filteredAlerts.map((alert) => {
+                      const isCritical = alert.severity === 'CRITICAL'
+                      return (
+                        <tr key={alert.alertId} className="transition hover:bg-blue-50/50">
+                          <td className="px-6 py-4 font-mono text-sm font-black text-blue-700">{alert.skucode ?? '-'}</td>
+                          <td className="px-6 py-4">
+                            <p className="max-w-[260px] truncate text-sm font-black text-slate-900">{alert.productName ?? '-'}</p>
+                            <p className="mt-1 max-w-[260px] truncate text-xs font-semibold text-slate-500">{alert.customerName ?? 'Chưa gán khách hàng'}</p>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-black text-slate-900">
+                            <span className={isCritical ? 'text-rose-700' : 'text-slate-900'}>{alert.currentQty ?? 0}</span>
+                            <span className="text-slate-400"> / {alert.thresholdQty ?? 0}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-black text-rose-700">
+                              <span className="material-symbols-outlined text-[16px]">report_problem</span>
+                              {ALERT_TYPE_LABELS[alert.alertType] ?? alert.alertType}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-xs font-bold text-slate-600">{formatDateTime(alert.emailSentAt)}</td>
+                          <td className="px-6 py-4">
+                            <span className={`rounded-full px-3 py-1 text-xs font-black ${isCritical ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
+                              {isCritical ? 'NGHIÊM TRỌNG' : 'CẢNH BÁO'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleResolve(alert.alertId)}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                              title="Đánh dấu đã xử lý"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">task_alt</span>
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
-              <div className="p-4 border-t border-outline-variant/30 flex justify-center mt-auto">
-                <button className="text-primary font-label-md hover:underline">View All Active Alerts</button>
+
+              <div className="divide-y divide-slate-100 lg:hidden">
+                {loading && <p className="p-5 text-center text-sm font-bold text-slate-500">Đang tải dữ liệu...</p>}
+                {!loading && filteredAlerts.length === 0 && <p className="p-5 text-center text-sm font-bold text-slate-500">Không có cảnh báo phù hợp.</p>}
+                {!loading && filteredAlerts.map((alert) => {
+                  const isCritical = alert.severity === 'CRITICAL'
+                  return (
+                    <article key={alert.alertId} className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-mono text-sm font-black text-blue-700">{alert.skucode ?? '-'}</p>
+                          <h3 className="mt-1 text-base font-black text-slate-950">{alert.productName ?? '-'}</h3>
+                          <p className="mt-1 text-xs font-semibold text-slate-500">{alert.customerName ?? 'Chưa gán khách hàng'}</p>
+                        </div>
+                        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${isCritical ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {isCritical ? 'NGHIÊM TRỌNG' : 'CẢNH BÁO'}
+                        </span>
+                      </div>
+                      <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                        <div className="rounded-lg bg-slate-50 p-3">
+                          <p className="font-bold text-slate-500">Tồn / Ngưỡng</p>
+                          <p className="mt-1 font-black text-slate-950">{alert.currentQty ?? 0} / {alert.thresholdQty ?? 0}</p>
+                        </div>
+                        <div className="rounded-lg bg-slate-50 p-3">
+                          <p className="font-bold text-slate-500">Email gần nhất</p>
+                          <p className="mt-1 font-black text-slate-950">{formatDateTime(alert.emailSentAt)}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleResolve(alert.alertId)}
+                        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-black text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">task_alt</span>
+                        Đánh dấu đã xử lý
+                      </button>
+                    </article>
+                  )
+                })}
               </div>
             </div>
 
-            {/* Right Column: AI & Trends */}
-            <div className="space-y-gutter flex flex-col gap-6">
-              {/* AI Prediction Panel */}
-              <div ref={addToCardsRef} className="glass-card rounded-lg p-6 glow-primary-active border-primary/30 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <span className="material-symbols-outlined text-[80px]">smart_toy</span>
+            <aside className="space-y-6">
+              <section className="rounded-lg border border-blue-200 bg-blue-50 p-5">
+                <div className="flex items-center gap-3 text-blue-800">
+                  <span className="material-symbols-outlined">auto_awesome</span>
+                  <h2 className="text-lg font-black">Dự đoán AI</h2>
                 </div>
-                
-                <h3 className="font-headline-md text-headline-md mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">auto_awesome</span>
-                  AI Prediction
-                </h3>
-                
-                <div className="space-y-6 relative z-10">
-                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-                    <p className="font-label-md text-on-surface mb-2">Out-of-Stock Risk</p>
-                    <div className="flex items-end gap-4 mb-2">
-                      <span className="text-headline-lg font-headline-lg text-primary leading-none">82%</span>
-                      <span className="text-on-surface-variant font-label-md mb-1">Probability for Sector B</span>
-                    </div>
-                    <div className="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden">
-                      <div className="bg-primary h-full w-[82%] rounded-full shadow-[0_0_8px_rgba(0,74,198,0.5)]"></div>
-                    </div>
+                <div className="mt-5 rounded-lg border border-blue-200 bg-white p-4">
+                  <p className="text-sm font-bold text-slate-500">Nguy cơ hết hàng</p>
+                  <div className="mt-2 flex items-end gap-3">
+                    <span className="text-4xl font-black text-blue-700">{lowStockCount > 0 ? '82%' : '12%'}</span>
+                    <span className="pb-1 text-sm font-bold text-slate-500">tuần tới</span>
                   </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="font-label-md text-outline uppercase tracking-widest text-[10px]">Upcoming Demand Spikes</h4>
-                    
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1">
-                        <p className="font-body-md">Cold Storage Units</p>
-                        <p className="text-[12px] text-on-surface-variant">Predicting +45% increase next week</p>
-                      </div>
-                      <div className="w-12 h-12 flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined text-[32px]">trending_up</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1">
-                        <p className="font-body-md">Packaging Material</p>
-                        <p className="text-[12px] text-on-surface-variant">Holiday season preparation start</p>
-                      </div>
-                      <div className="w-12 h-12 flex items-center justify-center text-secondary">
-                        <span className="material-symbols-outlined text-[32px]">insights</span>
-                      </div>
-                    </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-blue-100">
+                    <div className="h-full rounded-full bg-blue-700" style={{ width: lowStockCount > 0 ? '82%' : '12%' }} />
                   </div>
-                  
-                  <button className="w-full py-3 bg-primary text-on-primary rounded-lg font-label-md shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform flex items-center justify-center gap-2">
-                    <span className="material-symbols-outlined text-[20px]">bolt</span>
-                    Execute Smart Reorder
-                  </button>
                 </div>
-              </div>
+                <p className="mt-4 text-sm font-semibold leading-6 text-blue-900">
+                  Nên ưu tiên bổ sung các SKU đang dưới ngưỡng an toàn và theo dõi email đã gửi để tránh bỏ sót cảnh báo.
+                </p>
+              </section>
 
-              {/* Demand Trend Mini Graph */}
-              <div ref={addToCardsRef} className="glass-card rounded-lg p-6 overflow-hidden">
-                <h3 className="font-label-md text-on-surface mb-4">Stock Velocity Trend</h3>
-                <div className="h-32 w-full flex items-end gap-1 px-2">
-                  <div className="flex-1 bg-primary/20 h-[40%] rounded-t-sm hover:bg-primary transition-all cursor-help" title="Mon: 40%"></div>
-                  <div className="flex-1 bg-primary/20 h-[55%] rounded-t-sm hover:bg-primary transition-all cursor-help" title="Tue: 55%"></div>
-                  <div className="flex-1 bg-primary/20 h-[45%] rounded-t-sm hover:bg-primary transition-all cursor-help" title="Wed: 45%"></div>
-                  <div className="flex-1 bg-primary/20 h-[70%] rounded-t-sm hover:bg-primary transition-all cursor-help" title="Thu: 70%"></div>
-                  <div className="flex-1 bg-primary/20 h-[85%] rounded-t-sm hover:bg-primary transition-all cursor-help" title="Fri: 85%"></div>
-                  <div className="flex-1 bg-primary h-[95%] rounded-t-sm relative group cursor-help" title="Sat: 95%">
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-on-primary text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Peak Demand</div>
-                  </div>
-                  <div className="flex-1 bg-primary/20 h-[60%] rounded-t-sm hover:bg-primary transition-all cursor-help" title="Sun: 60%"></div>
-                </div>
-                <div className="flex justify-between mt-2 text-[10px] text-outline-variant font-data-mono">
-                  <span>MON</span>
-                  <span>WED</span>
-                  <span>FRI</span>
-                  <span>SUN</span>
-                </div>
-              </div>
-            </div>
+              <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 className="flex items-center gap-2 text-base font-black text-slate-950">
+                  <span className="material-symbols-outlined text-blue-700">schedule</span>
+                  Cơ chế cảnh báo
+                </h2>
+                <ul className="mt-4 space-y-3 text-sm font-semibold leading-6 text-slate-600">
+                  <li className="flex gap-2"><span className="material-symbols-outlined text-[18px] text-blue-700">autorenew</span>Worker quét nền định kỳ mỗi 30 phút.</li>
+                  <li className="flex gap-2"><span className="material-symbols-outlined text-[18px] text-blue-700">mail</span>Nút Quét ngay gửi lại email để test thủ công.</li>
+                  <li className="flex gap-2"><span className="material-symbols-outlined text-[18px] text-blue-700">timer</span>Debounce chỉ áp dụng cho quét nền để tránh spam.</li>
+                </ul>
+              </section>
+            </aside>
           </div>
-        </div>
+        </section>
       </main>
-
-      {/* Floating Action Button */}
-      <button className="fixed bottom-10 right-10 w-16 h-16 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center glow-primary-active hover:scale-110 active:scale-95 transition-all z-50">
-        <span className="material-symbols-outlined text-[32px]">add</span>
-      </button>
     </div>
   )
 }

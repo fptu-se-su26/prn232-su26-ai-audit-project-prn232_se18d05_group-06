@@ -27,10 +27,12 @@ export const ROUTE_PATHS = {
   WAREHOUSE_SETTINGS: '/warehouse/settings',
   WAREHOUSE_AI_OCR: '/warehouse/ai-ocr',
   ADMIN_WAREHOUSES: '/admin/warehouses',
+  WAREHOUSE_GATE_CHECKOUT: '/warehouse/gate-checkout',
+  WAREHOUSE_QR_SCANNER: '/warehouse/qr-scanner',
 };
 // Routes configuration
 // Define your application routes here using React Router
 
-const routes: [] = []
+const routes: [] = [];
 
-export default routes
+export default routes;
