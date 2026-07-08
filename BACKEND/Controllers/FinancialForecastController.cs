@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BACKEND.Controllers;
 
 [ApiController]
+[Route("api/finance/forecasts")]
 [Route("api/finance/forecast")]
 public class FinancialForecastController : ControllerBase
 {
@@ -16,9 +17,9 @@ public class FinancialForecastController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<FinancialForecastDashboardDto>> GetDashboard()
+    public async Task<ActionResult<FinancialForecastDashboardDto>> GetDashboard([FromQuery] int months = 3)
     {
-        return Ok(await _forecastService.GetDashboardAsync());
+        return Ok(await _forecastService.GetDashboardAsync(months));
     }
 
     [HttpPost("generate")]

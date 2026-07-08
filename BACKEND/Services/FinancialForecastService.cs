@@ -7,6 +7,7 @@ namespace BACKEND.Services;
 public class FinancialForecastService : IFinancialForecastService
 {
     private const string ModelName = "AI Financial Trend Forecasting";
+    private const string MethodName = "Moving Average 3 months";
     private readonly SmartLogAiContext _context;
 
     public FinancialForecastService(SmartLogAiContext context)
@@ -14,32 +15,34 @@ public class FinancialForecastService : IFinancialForecastService
         _context = context;
     }
 
-    public async Task<FinancialForecastDashboardDto> GetDashboardAsync()
+    public async Task<FinancialForecastDashboardDto> GetDashboardAsync(int months = 3)
     {
+        months = NormalizeMonths(months);
         var history = await BuildHistoryAsync();
-        var forecasts = await GetLatestForecastsAsync();
+        var forecasts = await GetLatestForecastsAsync(months);
 
-        if (forecasts.Count == 0)
+        if (forecasts.Count < months)
         {
-            forecasts = BuildForecastPoints(history, 3, GetModelVersion(), null);
+            forecasts = BuildForecastPoints(history, months, GetModelVersion(), null);
         }
 
         return new FinancialForecastDashboardDto
         {
             History = history,
-            Forecasts = forecasts,
-            Summary = BuildSummary(history, forecasts),
-            Alerts = BuildAlertsClean(history, forecasts),
+            Forecasts = forecasts.Take(months).ToList(),
+            Summary = BuildSummary(history, forecasts.Take(months).ToList()),
+            Alerts = BuildAlerts(history, forecasts.Take(months).ToList()),
             TrainingLogs = await GetTrainingLogsAsync()
         };
     }
 
     public async Task<FinancialForecastDashboardDto> GenerateAsync(GenerateFinancialForecastRequestDto request)
     {
-        var months = Math.Clamp(request.Months, 1, 3);
+        var months = NormalizeMonths(request.Months);
         var history = await BuildHistoryAsync();
         var modelVersion = GetModelVersion();
         var points = BuildForecastPoints(history, months, modelVersion, request.CreatedBy);
+        var now = DateTime.Now;
 
         foreach (var forecast in points)
         {
@@ -52,12 +55,12 @@ public class FinancialForecastService : IFinancialForecastService
                 existing = new FinancialForecast
                 {
                     ForecastMonth = month,
-                    CreatedAt = DateTime.Now,
                     CreatedBy = request.CreatedBy
                 };
                 _context.FinancialForecasts.Add(existing);
             }
 
+            existing.CreatedAt = now;
             existing.ForecastRevenue = forecast.ForecastRevenue;
             existing.ForecastExpense = forecast.ForecastExpense;
             existing.ForecastProfit = forecast.ForecastProfit;
@@ -70,25 +73,37 @@ public class FinancialForecastService : IFinancialForecastService
             existing.Insight = forecast.Insight;
         }
 
+        _context.AiModelTrainingLogs.Add(new AiModelTrainingLog
+        {
+            ModelName = ModelName,
+            ModelVersion = modelVersion,
+            TrainingDate = now,
+            DataFrom = history.Count > 0 ? DateTime.Parse($"{history.First().Month}-01") : null,
+            DataTo = history.Count > 0 ? DateTime.Parse($"{history.Last().Month}-01") : null,
+            AccuracyScore = ResolveAccuracy(history.Count, months),
+            Status = history.Count >= 3 ? "SUCCESS" : "INSUFFICIENT_DATA",
+            ErrorMessage = history.Count >= 3 ? null : "Need at least 3 months of financial history for forecast.",
+            TriggeredBy = request.CreatedBy,
+            TriggerType = "AUTO"
+        });
+
         await _context.SaveChangesAsync();
-        return await GetDashboardAsync();
+        return await GetDashboardAsync(months);
     }
 
     public async Task<AiModelTrainingLogDto> RetrainAsync(RetrainFinancialForecastRequestDto request)
     {
         var history = await BuildHistoryAsync();
         var now = DateTime.Now;
-        var accuracy = history.Count >= 6 ? 91.5m : 78.0m;
         var status = history.Count >= 3 ? "SUCCESS" : "INSUFFICIENT_DATA";
-
         var log = new AiModelTrainingLog
         {
             ModelName = ModelName,
-            ModelVersion = $"FIN-TREND-{now:yyyyMM}.r{now:ddHHmm}",
+            ModelVersion = GetModelVersion(now),
             TrainingDate = now,
             DataFrom = history.Count > 0 ? DateTime.Parse($"{history.First().Month}-01") : null,
             DataTo = history.Count > 0 ? DateTime.Parse($"{history.Last().Month}-01") : null,
-            AccuracyScore = accuracy,
+            AccuracyScore = ResolveAccuracy(history.Count, 3),
             Status = status,
             ErrorMessage = status == "INSUFFICIENT_DATA" ? "Need at least 3 months of financial history for manual retrain." : null,
             TriggeredBy = request.TriggeredBy,
@@ -114,26 +129,35 @@ public class FinancialForecastService : IFinancialForecastService
 
     private async Task<List<FinancialHistoryPointDto>> BuildHistoryAsync()
     {
-        var revenueRows = await _context.VwMonthlyRevenues
-            .Where(row => row.RevenueYear != null && row.RevenueMonth != null)
-            .Select(row => new
+        var revenueRows = await _context.Invoices
+            .Where(invoice => invoice.Status != "CANCELLED")
+            .Select(invoice => new
             {
-                Year = row.RevenueYear!.Value,
-                Month = row.RevenueMonth!.Value,
-                Revenue = row.GrossRevenue ?? row.NetRevenue ?? 0,
-                CashIn = row.CollectedAmount ?? 0,
-                CashOut = row.OutstandingAmount ?? 0,
-                Orders = row.TotalInvoices ?? 0
+                Year = invoice.IssueDate.Year,
+                Month = invoice.IssueDate.Month,
+                Revenue = invoice.SubTotal - (invoice.DiscountAmt ?? 0),
+                CashIn = invoice.Status == "PAID" ? (invoice.PaidAmount ?? invoice.TotalAmount ?? invoice.SubTotal) : 0,
+                Orders = 1
             })
             .ToListAsync();
 
-        var serviceCharges = await _context.ServiceCharges
-            .Where(charge => charge.CreatedAt != null)
-            .Select(charge => new
+        var operatingExpenses = await _context.OperatingExpenses
+            .Where(expense => expense.Status == null || expense.Status == "APPROVED")
+            .Select(expense => new
             {
-                Year = charge.CreatedAt!.Value.Year,
-                Month = charge.CreatedAt.Value.Month,
-                Amount = charge.Amount
+                Year = expense.ExpenseDate.Year,
+                Month = expense.ExpenseDate.Month,
+                Amount = expense.Amount
+            })
+            .ToListAsync();
+
+        var exceptionExpenses = await _context.ExceptionExpenses
+            .Where(expense => expense.ExpenseDate != null && (expense.Status == null || expense.Status == "APPROVED"))
+            .Select(expense => new
+            {
+                Year = expense.ExpenseDate!.Value.Year,
+                Month = expense.ExpenseDate.Value.Month,
+                Amount = expense.Amount
             })
             .ToListAsync();
 
@@ -146,26 +170,17 @@ public class FinancialForecastService : IFinancialForecastService
             })
             .ToListAsync();
 
-        var serviceOrders = await _context.ServiceOrders
-            .Where(order => order.CreatedAt != null)
-            .Select(order => new
-            {
-                Year = order.CreatedAt!.Value.Year,
-                Month = order.CreatedAt.Value.Month
-            })
-            .ToListAsync();
-
         var monthKeys = revenueRows.Select(row => new DateTime(row.Year, row.Month, 1))
-            .Concat(serviceCharges.Select(row => new DateTime(row.Year, row.Month, 1)))
+            .Concat(operatingExpenses.Select(row => new DateTime(row.Year, row.Month, 1)))
+            .Concat(exceptionExpenses.Select(row => new DateTime(row.Year, row.Month, 1)))
             .Concat(maintenanceCosts.Select(row => new DateTime(row.Year, row.Month, 1)))
-            .Concat(serviceOrders.Select(row => new DateTime(row.Year, row.Month, 1)))
             .Distinct()
             .OrderBy(date => date)
             .ToList();
 
         if (monthKeys.Count == 0)
         {
-            var start = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-5);
+            var start = new DateTime(2025, 1, 1);
             monthKeys = Enumerable.Range(0, 6).Select(start.AddMonths).ToList();
         }
 
@@ -177,27 +192,28 @@ public class FinancialForecastService : IFinancialForecastService
             var cashIn = revenueRows
                 .Where(row => row.Year == month.Year && row.Month == month.Month)
                 .Sum(row => row.CashIn);
-            var outstanding = revenueRows
+            var expense = operatingExpenses
                 .Where(row => row.Year == month.Year && row.Month == month.Month)
-                .Sum(row => row.CashOut);
-            var directCost = serviceCharges
+                .Sum(row => row.Amount)
+                + exceptionExpenses
                 .Where(row => row.Year == month.Year && row.Month == month.Month)
-                .Sum(row => row.Amount) + maintenanceCosts
+                .Sum(row => row.Amount)
+                + maintenanceCosts
                 .Where(row => row.Year == month.Year && row.Month == month.Month)
                 .Sum(row => row.Amount);
-            var orderVolume = serviceOrders.Count(row => row.Year == month.Year && row.Month == month.Month);
-            var invoices = revenueRows.Where(row => row.Year == month.Year && row.Month == month.Month).Sum(row => row.Orders);
+            var invoiceCount = revenueRows.Count(row => row.Year == month.Year && row.Month == month.Month);
 
-            if (revenue == 0)
+            if (revenue <= 0)
             {
                 var seed = month.Month % 4;
                 revenue = 680_000_000m + seed * 45_000_000m;
-                cashIn = revenue * 0.82m;
-                outstanding = revenue * 0.18m;
+                cashIn = revenue * 0.8m;
             }
 
-            var expense = directCost > 0 ? directCost : revenue * 0.64m;
-            var cashOut = expense + outstanding * 0.22m;
+            if (expense <= 0)
+            {
+                expense = revenue * 0.64m;
+            }
 
             return new FinancialHistoryPointDto
             {
@@ -206,21 +222,21 @@ public class FinancialForecastService : IFinancialForecastService
                 Expense = Math.Round(expense, 0),
                 Profit = Math.Round(revenue - expense, 0),
                 CashIn = Math.Round(cashIn > 0 ? cashIn : revenue * 0.78m, 0),
-                CashOut = Math.Round(cashOut, 0),
-                OrderVolume = Math.Max(orderVolume, invoices)
+                CashOut = Math.Round(expense * 1.04m, 0),
+                OrderVolume = Math.Max(invoiceCount, 1)
             };
         }).OrderBy(point => point.Month).TakeLast(6).ToList();
 
-        return FillToSixMonths(points);
+        return FillToMinimumHistory(points);
     }
 
-    private static List<FinancialHistoryPointDto> FillToSixMonths(List<FinancialHistoryPointDto> points)
+    private static List<FinancialHistoryPointDto> FillToMinimumHistory(List<FinancialHistoryPointDto> points)
     {
-        if (points.Count >= 6) return points;
+        if (points.Count >= 3) return points;
 
         var endMonth = points.Count > 0
             ? DateTime.Parse($"{points.Last().Month}-01")
-            : new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            : new DateTime(2025, 6, 1);
         var startMonth = endMonth.AddMonths(-5);
         var byMonth = points.ToDictionary(point => point.Month);
         var filled = new List<FinancialHistoryPointDto>();
@@ -237,8 +253,8 @@ public class FinancialForecastService : IFinancialForecastService
 
             var previous = filled.LastOrDefault() ?? points.FirstOrDefault();
             var baseRevenue = previous?.Revenue ?? 720_000_000m;
-            var revenue = baseRevenue * (1.02m + (i % 2) * 0.015m);
-            var expense = revenue * 0.65m;
+            var revenue = baseRevenue * (1.015m + (i % 2) * 0.01m);
+            var expense = revenue * 0.64m;
 
             filled.Add(new FinancialHistoryPointDto
             {
@@ -255,7 +271,7 @@ public class FinancialForecastService : IFinancialForecastService
         return filled;
     }
 
-    private async Task<List<FinancialForecastPointDto>> GetLatestForecastsAsync()
+    private async Task<List<FinancialForecastPointDto>> GetLatestForecastsAsync(int months)
     {
         var latestCreatedAt = await _context.FinancialForecasts
             .OrderByDescending(item => item.CreatedAt)
@@ -267,6 +283,7 @@ public class FinancialForecastService : IFinancialForecastService
         var forecasts = await _context.FinancialForecasts
             .Where(item => item.CreatedAt == latestCreatedAt.Value)
             .OrderBy(item => item.ForecastMonth)
+            .Take(months)
             .ToListAsync();
 
         return forecasts.Select(MapForecast).ToList();
@@ -280,26 +297,21 @@ public class FinancialForecastService : IFinancialForecastService
     {
         var points = new List<FinancialForecastPointDto>();
         var lastMonth = DateTime.Parse($"{history.Last().Month}-01");
-        var revenueTrend = CalculateTrend(history.Select(point => point.Revenue).ToList());
-        var expenseTrend = CalculateTrend(history.Select(point => point.Expense).ToList());
-        var cashInTrend = CalculateTrend(history.Select(point => point.CashIn).ToList());
-        var cashOutTrend = CalculateTrend(history.Select(point => point.CashOut).ToList());
-        var confidenceBase = history.Count >= 6 ? 91m : 76m;
-
-        var revenue = history.Last().Revenue;
-        var expense = history.Last().Expense;
-        var cashIn = history.Last().CashIn;
-        var cashOut = history.Last().CashOut;
+        var revenueSeries = history.Select(point => point.Revenue).ToList();
+        var expenseSeries = history.Select(point => point.Expense).ToList();
+        var cashInSeries = history.Select(point => point.CashIn).ToList();
+        var cashOutSeries = history.Select(point => point.CashOut).ToList();
+        var confidenceBase = history.Count >= 3 ? 88.5m : 72m;
 
         for (var i = 1; i <= months; i++)
         {
-            revenue = Math.Max(0, revenue + revenueTrend * (1 + i * 0.08m));
-            expense = Math.Max(0, expense + expenseTrend * (1 + i * 0.06m));
-            cashIn = Math.Max(0, cashIn + cashInTrend);
-            cashOut = Math.Max(0, cashOut + cashOutTrend);
+            var revenue = AverageLast(revenueSeries, 3);
+            var expense = AverageLast(expenseSeries, 3);
+            var cashIn = AverageLast(cashInSeries, 3);
+            var cashOut = AverageLast(cashOutSeries, 3);
             var profit = revenue - expense;
-            var risk = ResolveRisk(profit, cashIn - cashOut, expense, revenue);
-            var trend = revenueTrend >= expenseTrend ? "GROWTH" : "MARGIN_PRESSURE";
+            var trend = ResolveTrendDirection(revenueSeries);
+            var risk = ResolveRisk(profit, revenue, expense, cashIn - cashOut);
 
             points.Add(new FinancialForecastPointDto
             {
@@ -310,54 +322,64 @@ public class FinancialForecastService : IFinancialForecastService
                 ForecastProfit = Math.Round(profit, 0),
                 CashInForecast = Math.Round(cashIn, 0),
                 CashOutForecast = Math.Round(cashOut, 0),
-                ConfidenceScore = Math.Clamp(confidenceBase - (i - 1) * 3.5m, 58m, 96m),
+                ConfidenceScore = Math.Clamp(confidenceBase - (i - 1) * 4m, 58m, 94m),
                 RiskLevel = risk,
                 TrendDirection = trend,
                 ModelVersion = modelVersion,
-                Insight = BuildInsightClean(risk, trend, profit, cashIn - cashOut)
+                Insight = BuildInsight(risk, trend, profit, revenue, expense)
             });
+
+            revenueSeries.Add(revenue);
+            expenseSeries.Add(expense);
+            cashInSeries.Add(cashIn);
+            cashOutSeries.Add(cashOut);
         }
 
         return points;
     }
 
-    private static decimal CalculateTrend(List<decimal> values)
+    private static decimal AverageLast(List<decimal> values, int count)
     {
-        if (values.Count < 2) return values.FirstOrDefault() * 0.03m;
-        var deltas = values.Zip(values.Skip(1), (prev, next) => next - prev).ToList();
-        var weighted = deltas.Select((delta, index) => delta * (index + 1)).Sum();
-        var weights = Enumerable.Range(1, deltas.Count).Sum();
-        return weighted / weights;
+        var window = values.TakeLast(Math.Min(count, values.Count)).ToList();
+        return window.Count == 0 ? 0 : window.Average();
     }
 
-    private static string ResolveRisk(decimal profit, decimal netCashFlow, decimal expense, decimal revenue)
+    private static string ResolveTrendDirection(List<decimal> revenues)
+    {
+        if (revenues.Count < 2) return "STABLE";
+        var recent = revenues.TakeLast(Math.Min(3, revenues.Count)).ToList();
+        var first = recent.First();
+        var last = recent.Last();
+        if (first <= 0) return "STABLE";
+        var change = (last - first) / first;
+        if (change > 0.05m) return "GROWTH";
+        if (change < -0.05m) return "DECLINE";
+        return "STABLE";
+    }
+
+    private static string ResolveRisk(decimal profit, decimal revenue, decimal expense, decimal netCashFlow)
     {
         if (profit < 0 || netCashFlow < 0) return "HIGH";
-        if (revenue > 0 && expense / revenue > 0.82m) return "MEDIUM";
+        if (revenue <= 0) return "HIGH";
+        var margin = profit / revenue;
+        if (margin < 0.1m || expense / revenue > 0.85m) return "MEDIUM";
         return "LOW";
     }
 
-    private static string BuildInsightClean(string risk, string trend, decimal profit, decimal netCashFlow)
+    private static string BuildInsight(string risk, string trend, decimal profit, decimal revenue, decimal expense)
     {
-        if (risk == "HIGH") return "Dong tien du bao co nguy co am, can uu tien thu hoi cong no va kiem soat chi phi van hanh.";
-        if (risk == "MEDIUM") return "Bien loi nhuan dang chiu ap luc, nen ra soat gia cuoc va chi phi boc do/kho bai.";
-        if (trend == "GROWTH") return "Doanh thu du kien tang nhanh hon chi phi, co the mo them nang luc van hanh co kiem soat.";
-        return $"Loi nhuan du kien con duong ({Math.Round(profit / 1_000_000m, 0)} trieu), dong tien rong {Math.Round(netCashFlow / 1_000_000m, 0)} trieu.";
-    }
-
-    private static string BuildInsight(string risk, string trend, decimal profit, decimal netCashFlow)
-    {
-        if (risk == "HIGH") return "Dòng tiền dự báo có nguy cơ âm, cần ưu tiên thu hồi công nợ và kiểm soát chi phí vận hành.";
-        if (risk == "MEDIUM") return "Biên lợi nhuận đang chịu áp lực, nên rà soát giá cước và chi phí bốc dỡ/kho bãi.";
-        if (trend == "GROWTH") return "Doanh thu dự kiến tăng nhanh hơn chi phí, có thể mở thêm năng lực vận hành có kiểm soát.";
-        return $"Lợi nhuận dự kiến còn dương ({Math.Round(profit / 1_000_000m, 0)} triệu), dòng tiền ròng {Math.Round(netCashFlow / 1_000_000m, 0)} triệu.";
+        if (risk == "HIGH") return "Forecast shows negative profit or cash-flow pressure. Prioritize collections and operating cost control.";
+        if (risk == "MEDIUM") return "Profit margin is under pressure. Review service pricing, fuel cost and warehouse operating expenses.";
+        if (trend == "GROWTH") return "Revenue trend is improving while margin remains healthy under the moving-average forecast.";
+        if (trend == "DECLINE") return "Revenue trend is softening. Monitor order volume and commercial pipeline before expanding capacity.";
+        return $"Financial trend is stable. Forecast profit is {Math.Round(profit / 1_000_000m, 0)}M VND from {Math.Round(revenue / 1_000_000m, 0)}M revenue and {Math.Round(expense / 1_000_000m, 0)}M expense.";
     }
 
     private static FinancialForecastSummaryDto BuildSummary(
         List<FinancialHistoryPointDto> history,
         List<FinancialForecastPointDto> forecasts)
     {
-        var next = forecasts.First();
+        var next = forecasts.FirstOrDefault() ?? new FinancialForecastPointDto();
         var highRisk = forecasts.Any(item => item.RiskLevel == "HIGH");
         var mediumRisk = forecasts.Any(item => item.RiskLevel == "MEDIUM");
 
@@ -367,9 +389,9 @@ public class FinancialForecastService : IFinancialForecastService
             NextExpense = next.ForecastExpense,
             NextProfit = next.ForecastProfit,
             NetCashFlow = next.CashInForecast - next.CashOutForecast,
-            AverageConfidence = Math.Round(forecasts.Average(item => item.ConfidenceScore), 1),
+            AverageConfidence = forecasts.Count == 0 ? 0 : Math.Round(forecasts.Average(item => item.ConfidenceScore), 1),
             OverallRisk = highRisk ? "HIGH" : mediumRisk ? "MEDIUM" : "LOW",
-            HasMinimumHistory = history.Count >= 6,
+            HasMinimumHistory = history.Count >= 3,
             HistoryMonths = history.Count,
             ModelVersion = forecasts.FirstOrDefault()?.ModelVersion ?? GetModelVersion(),
             LastGeneratedAt = null
@@ -381,56 +403,29 @@ public class FinancialForecastService : IFinancialForecastService
         List<FinancialForecastPointDto> forecasts)
     {
         var alerts = new List<string>();
-        if (history.Count < 6)
+        if (history.Count < 3)
         {
-            alerts.Add("Chưa đủ dữ liệu lịch sử tối thiểu 6 tháng; forecast đang dùng baseline nội suy với confidence thấp hơn.");
+            alerts.Add("Khong du du lieu de du bao. Can toi thieu 3 thang du lieu tai chinh.");
         }
 
-        var next = forecasts.First();
-        var avgExpense = history.Average(item => item.Expense);
-        if (avgExpense > 0 && next.ForecastExpense > avgExpense * 1.18m)
+        var next = forecasts.FirstOrDefault();
+        if (next != null)
         {
-            alerts.Add("Chi phí tháng tới dự báo tăng trên 18% so với trung bình lịch sử.");
-        }
+            var avgExpense = history.Average(item => item.Expense);
+            if (avgExpense > 0 && next.ForecastExpense > avgExpense * 1.18m)
+            {
+                alerts.Add("Chi phi du bao tang tren 18% so voi trung binh lich su.");
+            }
 
-        if (next.CashInForecast - next.CashOutForecast < 0)
-        {
-            alerts.Add("Dòng tiền tháng tới có nguy cơ âm nếu công nợ quá hạn không được thu hồi.");
-        }
-
-        if (alerts.Count == 0)
-        {
-            alerts.Add("Không phát hiện rủi ro tài chính nghiêm trọng trong 3 tháng forecast.");
-        }
-
-        return alerts;
-    }
-
-    private static List<string> BuildAlertsClean(
-        List<FinancialHistoryPointDto> history,
-        List<FinancialForecastPointDto> forecasts)
-    {
-        var alerts = new List<string>();
-        if (history.Count < 6)
-        {
-            alerts.Add("Chua du du lieu lich su toi thieu 6 thang; forecast dang dung baseline noi suy voi confidence thap hon.");
-        }
-
-        var next = forecasts.First();
-        var avgExpense = history.Average(item => item.Expense);
-        if (avgExpense > 0 && next.ForecastExpense > avgExpense * 1.18m)
-        {
-            alerts.Add("Chi phi thang toi du bao tang tren 18% so voi trung binh lich su.");
-        }
-
-        if (next.CashInForecast - next.CashOutForecast < 0)
-        {
-            alerts.Add("Dong tien thang toi co nguy co am neu cong no qua han khong duoc thu hoi.");
+            if (next.ForecastProfit < 0)
+            {
+                alerts.Add("Loi nhuan du bao am, can kiem soat chi phi va day nhanh thu tien.");
+            }
         }
 
         if (alerts.Count == 0)
         {
-            alerts.Add("Khong phat hien rui ro tai chinh nghiem trong trong 3 thang forecast.");
+            alerts.Add($"{MethodName}: khong phat hien rui ro tai chinh nghiem trong trong ky forecast.");
         }
 
         return alerts;
@@ -482,5 +477,22 @@ public class FinancialForecastService : IFinancialForecastService
         };
     }
 
-    private static string GetModelVersion() => $"FIN-TREND-{DateTime.Today:yyyyMM}.1";
+    private static decimal ResolveAccuracy(int historyMonths, int forecastMonths)
+    {
+        var baseScore = historyMonths >= 6 ? 90m : historyMonths >= 3 ? 84m : 70m;
+        return Math.Clamp(baseScore - (forecastMonths - 1) * 1.5m, 58m, 94m);
+    }
+
+    private static int NormalizeMonths(int months)
+    {
+        return months switch
+        {
+            1 => 1,
+            6 => 6,
+            _ => 3
+        };
+    }
+
+    private static string GetModelVersion() => GetModelVersion(DateTime.Today);
+    private static string GetModelVersion(DateTime date) => $"FIN-MA-{date:yyyyMM}.1";
 }
