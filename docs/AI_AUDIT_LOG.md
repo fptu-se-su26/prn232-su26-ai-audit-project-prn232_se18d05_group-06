@@ -199,6 +199,18 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: BACKEND/Controllers/FinancialForecastController.cs, BACKEND/Services/FinancialForecastService.cs, BACKEND/DTOs/FinancialForecastDTOs.cs, BACKEND/Models/FinancialForecast.cs, BACKEND/Models/AiModelTrainingLog.cs, BACKEND/Models/SmartLogAiContext.UC023.cs, BACKEND/Program.cs, FRONTEND/src/features/admin/Finance.tsx, smartlogAI.sql
 - Verification: `dotnet build` backend thanh cong; `npm run type-check` frontend van con loi cu ngoai pham vi UC042 do thieu `InventoryAudit.types`; thu seed SQL local khong thanh cong vi SQL Server `(local)` khong ket noi duoc.
 
+## Log #15
+- Date: 2026-07-08
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Hoàn thiện chức năng Cảnh báo tồn kho và gửi Email cho nhân viên phụ trách.
+- Prompt Reference: PROMPTS.md#prompt-20
+- AI Output Summary: Gợi ý kiểm tra chuỗi lỗi SMTP, cấu hình Gmail App Password, sửa service gửi email thật, thêm dữ liệu test tồn kho thấp, cải thiện luồng quét thủ công và quét nền, đồng thời làm rõ trạng thái gửi email trên UI Stock Alerts.
+- Human Decision: Nhóm áp dụng luồng gửi email thật bằng SMTP Gmail, ưu tiên gửi về email của người đang đăng nhập thông qua JWT claim, nếu không có email thì fallback về `tungtvde180109@fpt.edu.vn`. Nút Quét ngay được dùng cho test thủ công nên cho phép gửi lại email, còn worker nền vẫn giữ debounce để tránh spam.
+- Applied To: BACKEND/appsettings.json, BACKEND/Services/EmailService.cs, BACKEND/Services/StockAlertService.cs, BACKEND/Services/IStockAlertService.cs, BACKEND/Services/StockAlertWorker.cs, BACKEND/Controllers/StockAlertsController.cs, FRONTEND/src/features/warehouse/StockAlerts.tsx, insert-stock-alert-email-test.sql
+- Verification: Test SMTP gửi thành công bằng Gmail App Password; gọi `/api/stockalerts/scan?force=true` trả về `Đã gửi 3 email`; `dotnet build` backend thành công 0 warning/0 error; `npm run build` frontend thành công.
+--
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.

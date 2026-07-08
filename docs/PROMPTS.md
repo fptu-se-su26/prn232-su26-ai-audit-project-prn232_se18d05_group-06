@@ -388,7 +388,7 @@ Du an SmartLog AI da co module Admin Finance nhung man hinh con la mock UI cu, c
 
 ### Prompt da dung
 ```text
-Hay lam UC042 Du bao tai chinh (AI Trend) doi voi role Admin. Co the sua UI/UX cua man hinh du bao tai chinh lai cho dep hon va xin hon. Su dung FRONTEND, BACKEND va cac skills da hoc de lam tot hon.
+Hay lam Du bao tai chinh (AI Trend) doi voi role Admin. Co the sua UI/UX cua man hinh du bao tai chinh lai cho dep hon va xin hon. Su dung FRONTEND, BACKEND va cac skills da hoc de lam tot hon.
 ```
 
 ### Ket qua da ap dung
@@ -398,7 +398,7 @@ Them backend API /api/finance/forecast, /generate, /retrain, /history; them DTO,
 
 ### Dieu chinh cua nhom
 ```text
-Nhom giu route /admin/finance, khong hien thi ma UC042 tren UI, dung fallback data khi API/database chua san sang va kiem tra lai bang dotnet build. Phan type-check frontend con loi cu InventoryAudit.types nen khong tinh la loi cua UC042.
+Nhom giu route /admin/finance, khong hien thi ma UC042 tren UI, dung fallback data khi API/database chua san sang va kiem tra lai bang dotnet build. Phan type-check frontend con loi cu InventoryAudit.types nen khong tinh la loi cua.
 ```
 
 ### Expected Output
@@ -410,7 +410,43 @@ Nhom giu route /admin/finance, khong hien thi ma UC042 tren UI, dung fallback da
 Antigravity ho tro chia nho use case thanh cac lop backend, database va UI ro rang. Nhom tu dieu chinh theo cau truc hien co cua du an, bo cac phan khong can thiet, uu tien giao dien nghiep vu gon va tranh dua ma use case len man hinh nguoi dung.
 
 ---
+<<<<<<< Updated upstream
 
+=======
+## Prompt #20 
+
+- Date: 2026-07-08
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Hoàn thiện Stock Alerts, gửi email thật và cải thiện UI/UX trang cảnh báo tồn kho.
+
+### Prompt Content
+```text
+Hoàn thiện chức năng Cảnh báo tồn kho và gửi Email. Khi SKU chạm mức tối thiểu, hệ thống gửi cảnh báo trên dashboard và email cho nhân viên phụ trách. Email mặc định là tungtvde180109@fpt.edu.vn. Sau đó cải thiện thêm để gửi về email của người đang đăng nhập, nếu không có thì mới gửi về email mặc định. Đồng thời sửa UI trang Stock Alerts cho rõ ràng, đẹp hơn và sửa lỗi font tiếng Việt.
+```
+
+### AI Assistance
+- Phân tích lỗi SMTP `5.7.0 Authentication Required` và xác định Gmail cần App Password.
+- Gợi ý sửa `EmailSettings` đúng key mà backend đang đọc: `SmtpHost`, `SmtpPort`, `SmtpUser`, `SmtpPass`, `SenderEmail`, `SenderName`, `EnableSsl`.
+- Gợi ý thêm dữ liệu test SKU tồn kho thấp để kích hoạt cảnh báo.
+- Gợi ý tách luồng worker nền và quét thủ công: worker dùng debounce, nút Quét ngay dùng `force=true` để test gửi lại email.
+- Gợi ý lấy email người dùng hiện tại từ JWT claim `ClaimTypes.Email` và fallback về email mặc định.
+- Gợi ý cải thiện UI Stock Alerts với màu tương phản cao, bảng dễ đọc, mobile cards và trạng thái email gần nhất.
+
+### Human Adjustment
+Nhóm kiểm tra bằng log backend, test SMTP thật, thay App Password do Gmail cấp và tự quyết định chỉ cho phép quét thủ công gửi lại email để test, còn worker nền vẫn tránh spam bằng debounce. UI được chỉnh để không hiển thị mã use case, không dùng chữ bị lỗi font và phù hợp màn hình vận hành kho.
+
+### Expected Output
+- Backend gửi email cảnh báo tồn kho thật qua Gmail SMTP.
+- Nếu người dùng đăng nhập có email, email cảnh báo gửi về email đó.
+- Nếu request không có email đăng nhập, hệ thống gửi về `tungtvde180109@fpt.edu.vn`.
+- Trang Stock Alerts hiển thị danh sách cảnh báo rõ, có nút Quét ngay, thông báo kết quả gửi email và email gần nhất.
+
+### Evaluation
+Kết quả được kiểm chứng bằng SMTP test, API `/api/stockalerts/scan?force=true`, backend build và frontend build. AI hỗ trợ tốt ở phần debug, định hướng luồng xử lý và cải thiện UI; nhóm vẫn kiểm soát quyết định nghiệp vụ để tránh gửi email trùng không cần thiết.
+
+---
+>>>>>>> Stashed changes
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.

@@ -290,6 +290,35 @@ Author: Trần Văn Tùng (DE180109)
 - `npm run type-check` frontend van fail do loi cu ngoai pham vi UC042: thieu `InventoryAudit.types` trong `AuditSidebarPanel.tsx` va `InventoryComparisonTable.tsx`.
 - Thu seed SQL truc tiep bang `sqlcmd` khong thanh cong vi SQL Server `(local)` tren may hien khong ket noi duoc.
 
+<<<<<<< Updated upstream
+=======
+---
+## [2026-07-08]
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Hoàn thiện chức năng Cảnh báo tồn kho gửi email thật qua Gmail SMTP.
+- Thêm cơ chế gửi email về người dùng đang đăng nhập; nếu không có email trong JWT thì fallback về `tungtvde180109@fpt.edu.vn`.
+
+### Changed
+- Cập nhật `EmailSettings` trong `appsettings.json` theo đúng key backend sử dụng và cấu hình Gmail App Password.
+- Tách luồng quét nền và quét thủ công: worker nền vẫn áp dụng debounce, nút Quét ngay dùng `force=true` để hỗ trợ test gửi lại email.
+- Thiết kế lại UI Stock Alerts với tương phản tốt hơn, tiếng Việt đúng font, bảng rõ ràng, responsive mobile và hiển thị email gần nhất.
+
+### Fixed
+- Sửa lỗi SMTP `5.7.0 Authentication Required` bằng App Password hợp lệ.
+- Sửa lỗi `/api/stockalerts/scan` trả 500 khi SMTP lỗi, chuyển sang thông báo rõ trạng thái gửi email.
+- Sửa lỗi build backend do process `BACKEND.exe` đang khóa file khi chạy lại `dotnet run`.
+
+### Verification
+- SMTP test gửi thành công tới `tungtvde180109@fpt.edu.vn`.
+- API `/api/stockalerts/scan?force=true` trả về `Đã gửi 3 email`.
+- `dotnet build` backend thành công 0 warning/0 error.
+- `npm run build` frontend thành công.
+
+---
+
+>>>>>>> Stashed changes
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
