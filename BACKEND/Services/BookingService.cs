@@ -68,7 +68,7 @@ namespace BACKEND.Services
                 {
                     WarehouseId = w.WarehouseId,
                     WarehouseName = w.WarehouseName,
-                    Address = w.Address
+                    Address = w.Address ?? string.Empty
                 })
                 .ToListAsync();
         }

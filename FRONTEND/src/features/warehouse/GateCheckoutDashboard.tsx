@@ -42,6 +42,17 @@ interface SessionLog {
   barrierSignal: string;
 }
 
+// Typed shape matching backend GateAccessDeniedResponseDto (UC021)
+interface BlacklistAlertDto {
+  accessDenied: boolean;
+  alertType: string;
+  alarmLevel: string;
+  blockedEntity: string;
+  licensePlate: string;
+  driverName: string;
+  reason: string;
+}
+
 const GateCheckoutDashboard: React.FC = () => {
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,7 +67,7 @@ const GateCheckoutDashboard: React.FC = () => {
   const [barrierOpen, setBarrierOpen] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
-  const [blacklistAlert, setBlacklistAlert] = useState<any | null>(null);
+  const [blacklistAlert, setBlacklistAlert] = useState<BlacklistAlertDto | null>(null);
   
   // Audit logs for session
   const [sessionLogs, setSessionLogs] = useState<SessionLog[]>([]);
