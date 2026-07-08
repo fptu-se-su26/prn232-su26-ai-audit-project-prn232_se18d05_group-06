@@ -13,6 +13,11 @@ import {
 } from 'recharts';
 import AdminSidebar from '@components/AdminSidebar';
 import api from '@lib/api';
+import RevenueByServicePanel from './RevenueByServicePanel';
+import PaymentReconciliationPanel from './PaymentReconciliationPanel';
+import OperatingExpensePanel from './OperatingExpensePanel';
+import ProfitReportPanel from './ProfitReportPanel';
+import FinanceExportButtons from './FinanceExportButtons';
 
 type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | string;
 
@@ -156,12 +161,13 @@ const AdminFinance: React.FC = () => {
   const [dashboard, setDashboard] = useState<FinancialForecastDashboard>(fallbackDashboard);
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<'generate' | 'retrain' | null>(null);
+  const [forecastMonths, setForecastMonths] = useState<1 | 3 | 6>(3);
   const [notice, setNotice] = useState<string | null>(null);
 
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const response = await api.get<FinancialForecastDashboard>('/finance/forecast');
+      const response = await api.get<FinancialForecastDashboard>('/finance/forecasts', { params: { months: forecastMonths } });
       setDashboard(response.data);
       setNotice(null);
     } catch {
@@ -174,7 +180,7 @@ const AdminFinance: React.FC = () => {
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [forecastMonths]);
 
   const trendData = useMemo(() => {
     const history = dashboard.history.map((item) => ({
@@ -212,9 +218,9 @@ const AdminFinance: React.FC = () => {
   const handleGenerate = async () => {
     try {
       setBusyAction('generate');
-      const response = await api.post<FinancialForecastDashboard>('/finance/forecast/generate', { months: 3 });
+      const response = await api.post<FinancialForecastDashboard>('/finance/forecasts/generate', { months: forecastMonths });
       setDashboard(response.data);
-      setNotice('Da tao forecast 3 thang moi cho Admin.');
+      setNotice(`Da tao forecast ${forecastMonths} thang moi theo Moving Average.`);
     } catch {
       setNotice('Khong the tao forecast luc nay. Vui long kiem tra backend va database.');
     } finally {
@@ -225,7 +231,7 @@ const AdminFinance: React.FC = () => {
   const handleRetrain = async () => {
     try {
       setBusyAction('retrain');
-      await api.post('/finance/forecast/retrain', {});
+      await api.post('/finance/forecasts/retrain', {});
       await fetchDashboard();
       setNotice('Da ghi nhan retrain model AI Financial Trend.');
     } catch {
@@ -302,11 +308,23 @@ const AdminFinance: React.FC = () => {
                 <span>Admin</span>
               </div>
               <h1 className="mt-1 text-2xl font-semibold tracking-normal text-slate-950 md:text-3xl">
-                AI Financial Trend Forecasting
+                Finance Reports
               </h1>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex h-10 rounded-lg border border-slate-300 bg-slate-50 p-1">
+                {([1, 3, 6] as const).map((months) => (
+                  <button
+                    key={months}
+                    type="button"
+                    onClick={() => setForecastMonths(months)}
+                    className={`rounded-md px-3 text-sm font-semibold transition ${forecastMonths === months ? 'bg-blue-700 text-white shadow-sm' : 'text-slate-600 hover:bg-white'}`}
+                  >
+                    {months}M
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
                 onClick={handleExportCsv}
@@ -315,6 +333,7 @@ const AdminFinance: React.FC = () => {
                 <span className="material-symbols-outlined text-[18px]">download</span>
                 Export
               </button>
+              <FinanceExportButtons reportType="financial-forecast" compact />
               <button
                 type="button"
                 onClick={handleRetrain}
@@ -331,13 +350,17 @@ const AdminFinance: React.FC = () => {
                 className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-                {busyAction === 'generate' ? 'Generating...' : 'Generate 3M Forecast'}
+                {busyAction === 'generate' ? 'Generating...' : `Generate ${forecastMonths}M Forecast`}
               </button>
             </div>
           </div>
         </header>
 
         <section className="space-y-5 p-4 md:p-8">
+          <PaymentReconciliationPanel />
+          <RevenueByServicePanel />
+          <OperatingExpensePanel />
+          <ProfitReportPanel />
           {notice && (
             <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               <span className="material-symbols-outlined text-[20px]">info</span>
@@ -367,11 +390,12 @@ const AdminFinance: React.FC = () => {
               <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-950">Revenue, Cost & Forecast</h2>
-                  <p className="mt-1 text-sm text-slate-500">6 thang lich su va 3 thang AI forecast tiep theo.</p>
+                  <p className="mt-1 text-sm text-slate-500">6 thang lich su va forecast Moving Average theo so thang dang chon.</p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs font-medium">
                   <span className="rounded-md bg-blue-50 px-2 py-1 text-blue-700">Actual</span>
                   <span className="rounded-md bg-indigo-50 px-2 py-1 text-indigo-700">Forecast</span>
+                  <span className="rounded-md bg-emerald-50 px-2 py-1 text-emerald-700">Moving Average</span>
                   <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-700">{dashboard.summary.modelVersion}</span>
                 </div>
               </div>
@@ -450,7 +474,7 @@ const AdminFinance: React.FC = () => {
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,1fr)]">
             <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
               <div className="border-b border-slate-200 px-5 py-4">
-                <h2 className="text-lg font-semibold text-slate-950">3-Month Forecast Plan</h2>
+                <h2 className="text-lg font-semibold text-slate-950">{forecastMonths}-Month Forecast Plan</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-slate-200 text-sm">
