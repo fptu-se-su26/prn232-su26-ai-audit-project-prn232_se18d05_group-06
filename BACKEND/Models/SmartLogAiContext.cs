@@ -1,6 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace BACKEND.Models;
 
@@ -123,18 +128,43 @@ public partial class SmartLogAiContext : DbContext
 
     public virtual DbSet<WarehouseZone> WarehouseZones { get; set; }
 
-    private string GetConnectionString()
-        	{
-            	IConfiguration configuration = new ConfigurationBuilder()
-                		.SetBasePath(Directory.GetCurrentDirectory())
-                		.AddJsonFile("appsettings.json", true, true).Build();
-           		 return configuration["ConnectionStrings:DefaultConnectionString"];
-        	}
+    public virtual DbSet<VehicleEvent> VehicleEvents { get; set; }
 
-protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-       	{
- 		optionsBuilder.UseSqlServer(GetConnectionString());
-        	}
+    public override int SaveChanges()
+    {
+        PreventVehicleEventModification();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        PreventVehicleEventModification();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void PreventVehicleEventModification()
+    {
+        var entries = ChangeTracker.Entries<VehicleEvent>()
+            .Where(e => e.State == EntityState.Modified || e.State == EntityState.Deleted);
+
+        if (entries.Any())
+        {
+            throw new InvalidOperationException("Modifying or deleting VehicleEvents is strictly forbidden to preserve the immutable audit trail.");
+        }
+    }
+
+    private string GetConnectionString()
+    {
+        IConfiguration configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", true, true).Build();
+        return configuration["ConnectionStrings:DefaultConnection"] ?? throw new InvalidOperationException("Connection string not found");
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlServer(GetConnectionString());
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1743,6 +1773,26 @@ protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
                 .HasForeignKey(d => d.WarehouseId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Warehouse__Wareh__787EE5A0");
+        });
+
+        modelBuilder.Entity<VehicleEvent>(entity =>
+        {
+            entity.HasKey(e => e.EventId).HasName("PK__VehicleEvents__EventID");
+
+            entity.ToTable("VehicleEvents");
+
+            entity.Property(e => e.EventId).HasColumnName("EventID");
+            entity.Property(e => e.VehicleId).HasColumnName("VehicleID");
+            entity.Property(e => e.EventType)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.EventTime)
+                .HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Remarks).HasMaxLength(500);
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.VehicleEvents)
+                .HasForeignKey(d => d.VehicleId)
+                .HasConstraintName("FK__VehicleEvents__Vehicles");
         });
 
         OnModelCreatingPartial(modelBuilder);

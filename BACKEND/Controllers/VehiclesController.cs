@@ -101,5 +101,33 @@ namespace BACKEND.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        // POST: api/vehicles/{id}/blacklist
+        [HttpPost("{id}/blacklist")]
+        public async Task<ActionResult<VehicleDto>> UpdateBlacklist(int id, [FromBody] UpdateBlacklistRequestDto request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Request body is required.");
+            }
+
+            try
+            {
+                var updated = await _vehicleService.UpdateBlacklistStatusAsync(id, request);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

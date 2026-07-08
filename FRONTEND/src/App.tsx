@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+﻿import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CustomerLandingPage from './features/customer/CustomerLandingPage';
 import AuthPage from './features/auth/AuthPage';
 import CreateOrder from './features/customer/CreateOrder';
@@ -19,6 +19,7 @@ import AboutPage from './features/customer/AboutPage';
 import PaymentPage from './features/customer/PaymentPage';
 import DispatcherDashboard from '@features/dispatcher/pages/DispatcherDashboard';
 import DriverDashboard from './features/driver/pages/DriverDashboard';
+import SlotBooking from './features/warehouse/SlotBooking';
 
 
 // Import Admin Components
@@ -34,10 +35,6 @@ import AdminRolePermission from '@features/admin/RolePermission';
 import AdminSmartLogAI from '@features/admin/SmartLogAI';
 import AdminWarehouses from '@features/admin/Warehouses';
 import AdminSettings from '@features/admin/Settings';
-
-// Warehouse role pages (RoleID = 2)
-import RoleGuard from './components/RoleGuard';
-import { ROUTE_PATHS } from './routes';
 import WarehouseDashboard from './features/warehouse/WarehouseDashboard';
 import WarehouseTransfer from './features/warehouse/WarehouseTransfer';
 import WarehouseInventory from './features/warehouse/Inventory';
@@ -49,9 +46,14 @@ import WarehouseReports from './features/warehouse/Reports';
 import WarehouseNotifications from './features/warehouse/Notifications';
 import WarehouseSettings from './features/warehouse/Settings';
 import WarehouseAIOCR from './features/warehouse/AIOCRScan';
+import GateCheckoutDashboard from './features/warehouse/GateCheckoutDashboard';
+
+// Warehouse role pages (RoleID = 2)
+import RoleGuard from './components/RoleGuard';
+import { ROUTE_PATHS } from './routes';
 
 // Only Admin (RoleID = 1) and Warehouse (RoleID = 2) may access warehouse pages.
-const WAREHOUSE_ROLES = ['ADMIN', 'WAREHOUSE'];
+const WAREHOUSE_ROLES = ['ADMIN', 'WAREHOUSE', 'WF'];
 
 const modules = [
   { path: '/admin/dashboard', name: 'Dashboard', desc: 'KPI Grid, AI Insights, Maps', icon: 'dashboard', color: 'from-blue-500 to-indigo-600' },
@@ -70,7 +72,7 @@ const modules = [
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<CustomerLandingPage />} />
@@ -90,6 +92,7 @@ const App: React.FC = () => {
         <Route path="/tracking" element={<OrderTracking />} />
         <Route path="/order-details" element={<OrderDetails />} />
         <Route path="/tracking-map" element={<OrderTrackingMap />} />
+        <Route path="/slot-booking" element={<SlotBooking />} />
 
         {/* Complaints (Coral) */}
         <Route path="/complaints" element={<ComplaintCenter />} />
@@ -142,7 +145,21 @@ const App: React.FC = () => {
         
         {/* Route for Driver Dashboard */}
         <Route path="/driver" element={<DriverDashboard />} />
-        
+
+        {/* Warehouse Routes */}
+        <Route path="/warehouse/dashboard" element={<WarehouseDashboard />} />
+        <Route path="/warehouse/transfer" element={<WarehouseTransfer />} />
+        <Route path="/warehouse/inventory" element={<WarehouseInventory />} />
+        <Route path="/warehouse/import" element={<WarehouseImport />} />
+        <Route path="/warehouse/export" element={<WarehouseExport />} />
+        <Route path="/warehouse/stock-alerts" element={<WarehouseStockAlerts />} />
+        <Route path="/warehouse/inventory-audit" element={<WarehouseInventoryAudit />} />
+        <Route path="/warehouse/reports" element={<WarehouseReports />} />
+        <Route path="/warehouse/notifications" element={<WarehouseNotifications />} />
+        <Route path="/warehouse/settings" element={<WarehouseSettings />} />
+        <Route path="/warehouse/ai-ocr" element={<WarehouseAIOCR />} />
+        <Route path="/warehouse/gate-checkout" element={<GateCheckoutDashboard />} />
+
         {/* Catch-all redirect to Dispatcher */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -151,3 +168,4 @@ const App: React.FC = () => {
 }
 
 export default App;
+

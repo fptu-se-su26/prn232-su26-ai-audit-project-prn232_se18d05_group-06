@@ -22,97 +22,110 @@ export const Header: React.FC<HeaderProps> = ({
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
 
   return (
-    <header className="fixed top-0 right-0 w-full md:w-[calc(100%-240px)] h-16 z-40 bg-surface/60 dark:bg-surface/60 backdrop-blur-md border-b border-outline-variant/10 shadow-sm flex justify-between items-center px-4 md:px-margin-desktop">
-      <div className="flex items-center gap-3">
+    <header className="fixed right-0 top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-300/70 bg-white/88 px-4 shadow-sm backdrop-blur md:w-[calc(100%-264px)] lg:px-5">
+      <div className="flex min-w-0 items-center gap-3">
         <button
+          aria-label="Mở menu"
           onClick={onMenuToggle}
-          className="md:hidden text-on-surface-variant hover:text-primary transition-colors p-2"
+          className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-950 md:hidden"
         >
           <span className="material-symbols-outlined text-[24px]">menu</span>
         </button>
-        <h2 className="font-headline-md text-[18px] md:text-headline-md font-bold text-on-surface truncate">
-          {title}
-        </h2>
+
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 text-[12px] font-semibold text-slate-500">
+            <span>Module M2/M3</span>
+            <span className="h-1 w-1 rounded-full bg-slate-300" />
+            <span>Điều phối xe & Dock</span>
+          </div>
+          <h2 className="truncate text-[18px] font-bold leading-tight text-slate-950 md:text-[20px]">
+            {title}
+          </h2>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3 md:gap-4 shrink-0">
+      <div className="flex shrink-0 items-center gap-2 md:gap-3">
         <div className="relative hidden sm:block">
           <input
-            className="bg-black/25 border border-outline-variant/30 text-on-surface font-data-tabular text-data-tabular rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all placeholder-on-surface-variant/50"
-            placeholder="Tìm kiếm đơn hàng, tài xế..."
+            className="ops-control h-10 w-56 rounded-md py-2 pl-10 pr-9 text-[14px] font-semibold placeholder:text-slate-400 lg:w-80"
+            placeholder="Tìm booking, biển số, dock..."
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <span className="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px] pointer-events-none">
+          <span className="material-symbols-outlined pointer-events-none absolute left-3 top-2.5 text-[18px] text-slate-400">
             search
           </span>
           {searchQuery && (
             <button
+              aria-label="Xóa tìm kiếm"
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-2.5 text-on-surface-variant hover:text-error transition-colors"
+              className="absolute right-2.5 top-2.5 rounded text-slate-400 transition-colors hover:text-slate-950"
             >
               <span className="material-symbols-outlined text-[16px]">close</span>
             </button>
           )}
         </div>
 
+        <button
+          onClick={onAiAssistantClick}
+          className="hidden h-10 items-center gap-2 rounded-md border border-cyan-200 bg-cyan-50 px-3 text-[13px] font-bold text-cyan-900 transition-colors hover:bg-cyan-100 lg:flex"
+          title="Hỏi trợ lý AI"
+        >
+          <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+          AI gợi ý
+        </button>
+
         <div className="relative">
           <button
             onClick={() => {
               setShowNotificationDropdown(!showNotificationDropdown);
-              if (notificationsCount > 0) {
-                resetNotifications();
-              }
+              if (notificationsCount > 0) resetNotifications();
             }}
-            className="text-on-surface-variant hover:text-secondary p-1.5 rounded-full hover:bg-surface-variant/20 transition-all relative"
+            className="relative grid h-10 w-10 place-items-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-950"
             title="Thông báo"
           >
             <span className="material-symbols-outlined text-[22px]">notifications</span>
             {notificationsCount > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full animate-pulse ring-2 ring-surface"></span>
+              <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
             )}
           </button>
 
           {showNotificationDropdown && (
-            <div className="absolute right-0 mt-2 w-80 glass-panel rounded-lg overflow-hidden z-50 border border-outline-variant/30 shadow-2xl animate-fade-in">
-              <div className="p-3 border-b border-white/10 flex justify-between items-center bg-surface/80">
-                <span className="font-semibold text-body-md text-primary">Thông báo</span>
+            <div className="ops-panel-strong absolute right-0 mt-2 w-80 overflow-hidden rounded-lg">
+              <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                <span className="text-[14px] font-bold text-slate-950">Thông báo vận hành</span>
                 <button
                   onClick={() => setShowNotificationDropdown(false)}
-                  className="text-on-surface-variant hover:text-error"
+                  className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-950"
                 >
                   <span className="material-symbols-outlined text-[16px]">close</span>
                 </button>
               </div>
-              <div className="max-h-64 overflow-y-auto p-2 space-y-1.5">
-                <div className="p-2.5 bg-primary-container/10 border border-primary/20 rounded hover:bg-primary-container/15 transition-all text-left">
-                  <p className="text-[12px] font-semibold text-primary">SmartLog Live Telemetry</p>
-                  <p className="text-[11px] text-on-surface-variant mt-0.5">Trình mô phỏng thời gian thực đang hoạt động. Đang theo dõi sự kiện điều phối...</p>
+              <div className="max-h-72 space-y-2 overflow-y-auto p-3">
+                <div className="rounded-md border border-cyan-200 bg-cyan-50 p-3 text-left">
+                  <p className="text-[13px] font-bold text-cyan-900">Telemetry đang hoạt động</p>
+                  <p className="mt-1 text-[12px] leading-snug text-slate-600">
+                    Dữ liệu xe, dock và cảnh báo SLA đang được cập nhật theo chu kỳ.
+                  </p>
                 </div>
-                <div className="p-2.5 bg-error/10 border border-error/20 rounded hover:bg-error/15 transition-all text-left">
-                  <p className="text-[12px] font-semibold text-error">Cảnh báo Trễ hạn</p>
-                  <p className="text-[11px] text-on-surface-variant mt-0.5">Đơn hàng #ORD-7731C đang bị kẹt xe. Thời gian dự kiến (ETA) tăng.</p>
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-left">
+                  <p className="text-[13px] font-bold text-amber-900">Theo dõi Overstay Alert</p>
+                  <p className="mt-1 text-[12px] leading-snug text-slate-600">
+                    Màn hình điều phối sẽ nổi bật xe đang vượt thời gian lưu bãi theo SLA.
+                  </p>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        <button
-          onClick={onAiAssistantClick}
-          className="text-on-surface-variant hover:text-secondary p-1.5 rounded-full hover:bg-surface-variant/20 transition-all"
-          title="Hỏi Trợ lý AI"
-        >
-          <span className="material-symbols-outlined text-[22px]">smart_toy</span>
-        </button>
-
-        <div className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant overflow-hidden ml-1 hover:ring-2 hover:ring-secondary/50 transition-all cursor-pointer">
-          <img
-            alt="User Avatar"
-            className="w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCEllfmv5du0bX7Z3NvSYPH-Htk1GoVEGbJ4S7xTPS6KLdxDKrJ7fHHl3tRIuK7flYpZByJmTZx6zlrZuQ9uUH1P_gfR2GPOqhz3ChcDDi5-TYBDpNexnOZI8jCeardPidbUJzsF5gebjAd0vX_jw6UVxvfsG_eqT35-kWU7NrttIHv9yHp-FP081ytS3JKXS2AeU5KrCaFYWkWUBffAgSg5rp_8wpoL0-rRRyo-EwEV5bEfMsBb7NZNFZ7z8xoc6UbrnWpH46r2Mq"
-          />
+        <div className="hidden items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 md:flex">
+          <div className="grid h-7 w-7 place-items-center rounded bg-[#0f3554] text-[12px] font-bold text-white">D</div>
+          <div className="leading-tight">
+            <p className="text-[12px] font-bold text-slate-950">Dispatcher</p>
+            <p className="text-[11px] font-semibold text-slate-500">Ca vận hành</p>
+          </div>
         </div>
       </div>
     </header>

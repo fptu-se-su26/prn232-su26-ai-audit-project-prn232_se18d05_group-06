@@ -1,4 +1,4 @@
-import type { AuditStats } from '../InventoryAudit.types'
+import type { AuditStats } from '../features/warehouse/InventoryAudit.types'
 
 type AuditSidebarPanelProps = {
   auditStats: AuditStats

@@ -19,8 +19,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? builder.Configuration.GetConnectionString("DefaultConnectionString")
+    ?? throw new InvalidOperationException("Database connection string is missing. Configure ConnectionStrings:DefaultConnection.");
+
 builder.Services.AddDbContext<SmartLogAiContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(defaultConnection));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is missing");
@@ -48,17 +52,35 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IOutboundService, OutboundService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<ITrackingService, TrackingService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IGateService, GateService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<IBlacklistValidationService, BlacklistValidationService>();
 builder.Services.AddScoped<IS3StorageService, S3StorageService>();
 builder.Services.AddScoped<IStockAlertService, StockAlertService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddHostedService<VehicleCleanupWorker>();
+builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
+builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>();
+builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
+// Background workers
+// builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();
+// builder.Services.AddHostedService<OverstayAlertWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Apply pending EF Core migrations at startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SmartLogAiContext>();
+// db.Database.Migrate();
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -78,28 +100,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

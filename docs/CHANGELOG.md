@@ -236,8 +236,81 @@ Author: Trần Văn Tùng (DE180109)
 
 ---
 
-##  [2026-07-01]
+## [2026-06-21]
+Author: Lê Quốc Hùng (DE180096)
 
+### Added
+- Feature: Thực hiện trọn gói "UC018: Track Vehicle Entry/Exit History and Trip Count" (Theo dõi lịch sử vào/ra và đếm chuyến xe).
+- Database: Cập nhật tệp [smartlogAI.sql] bổ sung bảng `VehicleEvents` chứa vết di chuyển và chỉ mục tối ưu hóa truy vấn `IX_VehicleEvents_Vehicle`.
+- Backend:
+  - Cấu hình lớp Entity `VehicleEvent` và thiết lập quan hệ trong DbContext.
+  - Chặn tuyệt đối việc chỉnh sửa/xóa vết di chuyển (Audit Trail Immutability) tại database context bằng cách ghi đè `SaveChanges` & `SaveChangesAsync`, ném lỗi `InvalidOperationException`.
+  - Xây dựng `TrackingService` chứa thuật toán đếm chuyến dựa trên các cặp check-in/check-out liên tiếp.
+  - Triển khai `TrackingController` cung cấp các API lấy danh sách xe, ghi nhận sự kiện, tra cứu lịch sử hành trình và lấy số lượng chuyến xe.
+- Frontend:
+  - Thiết kế trang `VehicleTrackingDashboard.tsx` hiển thị các thẻ KPI (Chuyến xe, Tổng sự kiện, Trạng thái) và form ghi nhận sự kiện kèm dòng thời gian hành trình.
+  - Tích hợp trang vào hệ thống điều phối thông qua thanh điều hướng `Sidebar.tsx`, router định tuyến và phân loại hiển thị.
+
+### Changed
+- Refactored UI Contrast: Thay đổi mã màu của các class text `text-on-surface` và `text-on-surface-variant` tại trang `VehicleTrackingDashboard.tsx` sang các tông màu sáng rõ rệt như `text-[#d4e4fa]`, `text-slate-300`, `text-slate-400` để đảm bảo văn bản hiển thị rõ ràng trên nền tối của giao diện điều phối.
+
+### AI-assisted
+- Sử dụng Antigravity để hỗ trợ thiết kế cấu trúc database, viết logic đè SaveChanges để chặn chỉnh sửa dữ liệu, thiết kế giao diện timeline dòng thời gian và đề xuất các lớp màu thay thế nâng cao độ tương phản hiển thị chữ. Nhóm đã tự kiểm tra và chỉnh sửa chi tiết giao diện để đạt thẩm mỹ cao nhất.
+
+---
+
+## [2026-06-21]
+Author: Lê Quốc Hùng (DE180096)
+
+### Added
+- Feature: Triển khai toàn diện "UC020: Confirm Check-out & Exit Gate Control" (Xác nhận Check-out & Điều khiển Cổng ra).
+- Backend:
+  - Xây dựng các lớp DTO (`CheckoutRequestDto`, `CheckoutResponseDto`, `ActiveBookingSummaryDto`).
+  - Triển khai `GateService` xử lý nghiệp vụ giao dịch check-out trong `IDbContextTransaction`: cập nhật trạng thái đặt chỗ sang `COMPLETED`, cập nhật thời gian check-out, giải phóng Dock đỗ về `AVAILABLE`, ghi nhận nhật ký cổng `GateLogs` (`CHECKOUT`), và thêm sự kiện lịch sử xe `VehicleEvents` (`CheckOut`).
+  - Thiết lập `GateController` cung cấp API tra cứu thông tin đặt chỗ hoạt động (`GET /api/gate/active-booking`) và API thực hiện thủ tục check-out (`POST /api/gate/checkout`).
+  - Đăng ký dịch vụ trong `Program.cs`.
+- Frontend:
+  - Phát triển dashboard điều phối cổng ra `GateCheckoutDashboard.tsx` cho nhân viên bảo vệ.
+  - Thiết kế giao diện camera ALPR mô phỏng quét biển số xe, bảng điều khiển thông tin chi tiết xe/tài xế, và bộ kiểm thử giả lập nhanh các biển số xe mẫu.
+  - Tạo mô phỏng đồ họa động SVG Barrier Arm Gate hoạt động trực quan (xoay đứng thanh chắn cổng 90 độ, đèn tín hiệu nhấp nháy xanh lá, đếm ngược tự đóng sau 8 giây).
+  - Tích hợp liên kết Sidebar điều hướng và khai báo Route trong `App.tsx`.
+
+### Changed
+- Tối ưu mã nguồn Frontend: Điều chỉnh đường dẫn import kiểu dữ liệu `InventoryAudit.types` bị sai trong hai component `AuditSidebarPanel.tsx` và `InventoryComparisonTable.tsx` để sửa triệt để lỗi biên dịch TypeScript.
+
+### AI-assisted
+- Sử dụng Antigravity để tư vấn thiết kế giao dịch ACID bằng `IDbContextTransaction` bảo vệ toàn vẹn lịch sử vết di chuyển của xe và thiết kế giao diện mô phỏng SVG Barrier Gate. Nhóm tự thực hiện kiểm thử tích hợp trên Swagger và điều chỉnh giao diện hiển thị.
+
+---
+
+## [2026-06-29]
+Author: Lê Quốc Hùng (DE180096)
+
+### Added
+- Feature: Triển khai toàn diện "UC021: Quản lý Danh sách Đen Phương tiện & Tài xế" (Blacklist Management).
+- Backend:
+  - Tận dụng các trường `IsBlacklisted` và `BlacklistReason` sẵn có trong `Vehicles` và `Drivers` models — **Không tạo migration hay thay đổi schema database**.
+  - Bổ sung phương thức `ToggleBlacklistAsync` vào `VehicleService.cs` với kiểm tra business: bắt buộc nhập lý do khi blacklist, xóa lý do khi unblacklist.
+  - Bổ sung phương thức `ToggleBlacklistAsync` vào `DriverService.cs` với cùng quy tắc business validation.
+  - Tích hợp kiểm tra blacklist vào `GateService.ProcessCheckInAsync` như guard clause **nguyên tử** trước mọi thay đổi trạng thái booking/dock/log — đảm bảo rejection không ghi log thành công, không mở barrier, không chiếm dock.
+  - `GateController.cs` trả về HTTP 403 Forbidden kèm payload `BlacklistAlertDto` có các trường: `alertType`, `alarmLevel`, `blockedEntity`, `licensePlate`, `driverName`, `reason`.
+- Frontend:
+  - `VehiclesTab.tsx`: Tích hợp toggle switch "Kiểm soát Danh sách Đen" trong HUD panel chi tiết xe với UI glassmorphism. Hiển thị trạng thái, lý do blacklist và xử lý prompt nhập lý do.
+  - `DispatchersTab.tsx`: Tích hợp toggle switch "Kiểm soát Danh sách Đen" trong panel chi tiết tài xế. Chỉ hoạt động với driver thực từ backend (không mock).
+  - `GateCheckoutDashboard.tsx`: Thêm xử lý 403 Forbidden, parse payload `accessDenied`, và hiển thị **Red Critical Security Alert Modal** — màu đỏ nhấp nháy, hiển thị entity bị chặn, lý do từ chối, mức độ nghiêm trọng. Barrier không mở khi bị từ chối.
+
+### Fixed
+- Sửa lỗi UI Contrast toàn diện trong Dispatcher Dashboard: Tailwind `surface`, `on-surface`, `on-surface-variant`, `surface-variant`, `outline-variant`, `error` đều bị trỏ đến màu light theme (#191c1e) do trùng key trong `tailwind.config.js`.
+- Chuyển đổi các token màu này sang CSS custom properties (`var(--on-surface)`, v.v.) trong `tailwind.config.js`.
+- Định nghĩa dark overrides trong `index.css` dưới `.dark, .dispatcher-dark-theme`.
+- Thêm class `dark dispatcher-dark-theme` vào container gốc trong `DispatcherLayout.tsx`.
+
+### AI-assisted
+- Sử dụng Antigravity (Claude Sonnet 4.6) để thiết kế luồng guard clause blacklist nguyên tử trong GateService, cấu trúc 403 payload, thiết kế UI Red Alarm Modal, phân tích nguyên nhân lỗi tương phản màu sắc Tailwind CSS và đề xuất giải pháp CSS variable mapping. Nhóm tự kiểm tra toàn bộ 3 kịch bản nghiệm vụ (blacklist xe, blacklist tài xế, unblacklist rồi check-in lại) và tự tinh chỉnh giao diện.
+
+---
+
+## [2026-07-01]
 Author: Trần Văn Tùng (DE180109)
 
 ### Added
@@ -290,8 +363,8 @@ Author: Trần Văn Tùng (DE180109)
 - `npm run type-check` frontend van fail do loi cu ngoai pham vi UC042: thieu `InventoryAudit.types` trong `AuditSidebarPanel.tsx` va `InventoryComparisonTable.tsx`.
 - Thu seed SQL truc tiep bang `sqlcmd` khong thanh cong vi SQL Server `(local)` tren may hien khong ket noi duoc.
 
-<<<<<<< Updated upstream
-=======
+
+
 ---
 ## [2026-07-08]
 Author: Trần Văn Tùng (DE180109)
@@ -318,7 +391,8 @@ Author: Trần Văn Tùng (DE180109)
 
 ---
 
->>>>>>> Stashed changes
+---
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
@@ -329,6 +403,10 @@ Author: Trần Văn Tùng (DE180109)
 | 2 | Giao diện màn hình Tài xế | Completed | DriverDashboard | Giao diện tĩnh |
 | 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
 | 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
+| 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
+| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
+| 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
+
 
 ---
 
@@ -336,7 +414,7 @@ Author: Trần Văn Tùng (DE180109)
 
 | STT | Chức năng | Lý do chưa hoàn thành | Hướng cải thiện |
 |---:|---|---|---|
-| 1 | Xử lý Backend và database thực tế | Giới hạn thời gian làm giao diện | Kết nối API thật ở phase sau |
+| 1 | Kết nối API thật cho các chức năng còn lại | Giới hạn thời gian | Đã kết nối API thật cho các chức năng quan trọng (Vận đơn, Phê duyệt xe ALPR, Đặt lịch kho, Theo dõi hành trình xe). Sẽ tiếp tục mở rộng cho các tab phụ. |
 
 ---
 

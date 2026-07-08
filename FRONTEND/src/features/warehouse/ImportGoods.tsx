@@ -54,6 +54,13 @@ const CONDITION_LABELS: Record<string, string> = {
   PARTIAL: 'Thiếu một phần',
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Đang chờ',
+  IN_PROGRESS: 'Đang xử lý',
+  COMPLETED: 'Hoàn tất',
+  CANCELLED: 'Đã hủy',
+}
+
 const getStoredUserId = (): number | null => {
   try {
     const raw = localStorage.getItem('user')
@@ -89,7 +96,6 @@ const ImportGoods = () => {
     [lines, selectedLineId],
   )
 
-  // Tải danh sách đơn nhập kho khi mở trang.
   useEffect(() => {
     let active = true
     setLoadingOrders(true)
@@ -107,7 +113,6 @@ const ImportGoods = () => {
     }
   }, [])
 
-  // Tải dòng hàng mỗi khi đổi đơn nhập.
   useEffect(() => {
     if (selectedOrderId == null) {
       setLines([])
@@ -131,7 +136,6 @@ const ImportGoods = () => {
     }
   }, [selectedOrderId])
 
-  // Kiện hư hỏng thì mặc định bật cờ "đánh dấu hư hỏng".
   useEffect(() => {
     setMarkDamaged(Boolean(selectedLine?.requiresMinPhotos))
   }, [selectedLine?.lineId, selectedLine?.requiresMinPhotos])
@@ -176,7 +180,6 @@ const ImportGoods = () => {
     if (file) handleUpload(file)
   }
 
-  // UC002: kiện hư hỏng phải đủ tối thiểu minPhotos góc ảnh trước khi xác nhận.
   const currentPhotos = selectedLine?.photos?.length ?? 0
   const photosNeeded = selectedLine?.requiresMinPhotos
     ? Math.max(0, selectedLine.minPhotos - currentPhotos)
@@ -187,28 +190,29 @@ const ImportGoods = () => {
 
   const conditionBadge = (status: string | null) => {
     const s = (status ?? 'GOOD').toUpperCase()
-    if (s === 'DAMAGED') return 'bg-red-100 text-red-700'
-    if (s === 'PARTIAL') return 'bg-amber-100 text-amber-700'
-    return 'bg-emerald-100 text-emerald-700'
+    if (s === 'DAMAGED') return 'bg-red-100 text-red-700 ring-red-200'
+    if (s === 'PARTIAL') return 'bg-amber-100 text-amber-700 ring-amber-200'
+    return 'bg-emerald-100 text-emerald-700 ring-emerald-200'
   }
   const conditionText = (status: string | null) =>
     CONDITION_LABELS[(status ?? 'GOOD').toUpperCase()] ?? status ?? 'Nguyên vẹn'
+  const statusText = (status: string | null) => STATUS_LABELS[(status ?? '').toUpperCase()] ?? status ?? 'Chưa có'
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased overflow-hidden">
       <Sidebar />
 
-      <header className="fixed top-0 right-0 w-[calc(100%-280px)] h-20 bg-white/80 backdrop-blur-md z-40 border-b border-slate-200/70 flex items-center justify-between px-8">
+      <header className="fixed top-0 right-0 w-[calc(100%-280px)] h-20 bg-white/90 backdrop-blur-md z-40 border-b border-slate-200/70 flex items-center justify-between px-8">
         <div>
           <h1 className="text-2xl font-bold">Nhập kho hàng hóa</h1>
-          <p className="text-xs text-slate-500">Chụp ảnh tình trạng hàng khi nhập (UC002)</p>
+          <p className="text-xs text-slate-500">Chụp ảnh tình trạng hàng khi nhập</p>
         </div>
         <div className="flex items-center gap-4">
-          <button className="relative rounded-full p-2 text-slate-600 hover:bg-slate-100 transition-all duration-200">
+          <button className="relative rounded-full p-2 text-slate-600 hover:bg-slate-100 transition-all duration-200" type="button">
             <span className="material-symbols-outlined">notifications</span>
             <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-red-600" />
           </button>
-          <button className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200">
+          <button className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200" type="button">
             <span className="material-symbols-outlined text-base">smart_toy</span>
             Trạng thái AI: Sẵn sàng
           </button>
@@ -225,7 +229,6 @@ const ImportGoods = () => {
 
         <div className="grid gap-6 lg:grid-cols-[1.75fr_1fr]">
           <div className="space-y-6">
-            {/* Thông tin đơn nhập */}
             <section className="glass-card rounded-[28px] border border-white/80 p-6 shadow-xl shadow-slate-900/5">
               <div className="flex items-center gap-3 mb-6">
                 <span className="material-symbols-outlined text-primary">local_shipping</span>
@@ -241,43 +244,22 @@ const ImportGoods = () => {
                     disabled={loadingOrders || orders.length === 0}
                   >
                     {orders.length === 0 && (
-                      <option value="">{loadingOrders ? 'Đang tải…' : 'Không có đơn nhập'}</option>
+                      <option value="">{loadingOrders ? 'Đang tải...' : 'Không có đơn nhập'}</option>
                     )}
                     {orders.map((o) => (
                       <option key={o.inboundId} value={o.inboundId}>
-                        {o.inboundCode} — {o.customerName ?? 'Không rõ'}
+                        {o.inboundCode} - {o.customerName ?? 'Không rõ'}
                       </option>
                     ))}
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-500">Khách hàng</label>
-                  <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900">
-                    {selectedOrder?.customerName ?? '—'}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-500">Kho</label>
-                  <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900">
-                    {selectedOrder?.warehouseName ?? '—'}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-500">Mã đơn</label>
-                  <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900">
-                    {selectedOrder?.inboundCode ?? '—'}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-500">Trạng thái</label>
-                  <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900">
-                    {selectedOrder?.status ?? '—'}
-                  </div>
-                </div>
+                <InfoBox label="Khách hàng" value={selectedOrder?.customerName ?? '-'} />
+                <InfoBox label="Kho" value={selectedOrder?.warehouseName ?? '-'} />
+                <InfoBox label="Mã đơn" value={selectedOrder?.inboundCode ?? '-'} />
+                <InfoBox label="Trạng thái" value={statusText(selectedOrder?.status ?? null)} />
               </div>
             </section>
 
-            {/* Chi tiết hàng hóa */}
             <section className="glass-card rounded-[28px] border border-white/80 p-6 shadow-xl shadow-slate-900/5">
               <div className="flex items-center justify-between gap-3 mb-5">
                 <div className="flex items-center gap-3">
@@ -302,7 +284,7 @@ const ImportGoods = () => {
                     {loadingLines && (
                       <tr>
                         <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
-                          Đang tải dòng hàng…
+                          Đang tải dòng hàng...
                         </td>
                       </tr>
                     )}
@@ -328,13 +310,13 @@ const ImportGoods = () => {
                                 : 'hover:bg-slate-50'
                             }`}
                           >
-                            <td className="px-4 py-4 font-semibold text-slate-900">{row.skucode ?? '—'}</td>
-                            <td className="px-4 py-4">{row.productName ?? '—'}</td>
+                            <td className="px-4 py-4 font-semibold text-slate-900">{row.skucode ?? '-'}</td>
+                            <td className="px-4 py-4">{row.productName ?? '-'}</td>
                             <td className="px-4 py-4">{row.receivedQty ?? row.expectedQty}</td>
-                            <td className="px-4 py-4 text-slate-500">{row.binCode ?? '—'}</td>
+                            <td className="px-4 py-4 text-slate-500">{row.binCode ?? '-'}</td>
                             <td className="px-4 py-4">
                               <span
-                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${conditionBadge(
+                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ${conditionBadge(
                                   row.conditionStatus,
                                 )}`}
                               >
@@ -360,43 +342,20 @@ const ImportGoods = () => {
               </div>
             </section>
 
-            {/* Vị trí lưu kho (trang trí) */}
             <section className="glass-card rounded-[28px] border border-white/80 p-6 shadow-xl shadow-slate-900/5">
               <div className="flex items-center gap-3 mb-5">
                 <span className="material-symbols-outlined text-primary">warehouse</span>
                 <h2 className="text-xl font-semibold">Vị trí lưu kho</h2>
               </div>
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-500">Khu vực</label>
-                  <select className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
-                    <option>Khu A (Kho lạnh)</option>
-                    <option>Khu B (Hàng khô)</option>
-                    <option>Khu C (Hàng nguy hiểm)</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-500">Kệ</label>
-                  <select className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
-                    <option>Kệ S1-01</option>
-                    <option>Kệ S1-02</option>
-                    <option>Kệ S2-01</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-500">Ô chứa (Bin)</label>
-                  <select className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
-                    <option>Bin B10</option>
-                    <option>Bin B11</option>
-                    <option>Bin B12</option>
-                  </select>
-                </div>
+                <SelectBox label="Khu vực" options={['Khu A (Kho lạnh)', 'Khu B (Hàng khô)', 'Khu C (Hàng nguy hiểm)']} />
+                <SelectBox label="Kệ" options={['Kệ S1-01', 'Kệ S1-02', 'Kệ S2-01']} />
+                <SelectBox label="Ô chứa (Bin)" options={['Bin B10', 'Bin B11', 'Bin B12']} />
               </div>
             </section>
           </div>
 
           <div className="space-y-6">
-            {/* Quét hóa đơn AI (trang trí) */}
             <section className="glass-card rounded-[28px] border border-white/80 p-6 shadow-xl shadow-slate-900/5">
               <div className="flex items-center gap-3 mb-5">
                 <span className="material-symbols-outlined text-primary">document_scanner</span>
@@ -408,13 +367,12 @@ const ImportGoods = () => {
                 <p className="mx-auto max-w-xs text-sm text-slate-500">
                   Kéo thả file PDF hoặc ảnh hóa đơn vào đây để tự động điền thông tin
                 </p>
-                <button className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 transition hover:bg-blue-700">
+                <button className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 transition hover:bg-blue-700" type="button">
                   Chọn file
                 </button>
               </div>
             </section>
 
-            {/* UC002 — Ảnh tình trạng hàng */}
             <section className="glass-card rounded-[28px] border border-white/80 p-6 shadow-xl shadow-slate-900/5">
               <div className="flex items-center justify-between gap-3 mb-5">
                 <div className="flex items-center gap-3">
@@ -431,7 +389,7 @@ const ImportGoods = () => {
 
               {!selectedLine && (
                 <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-                  Chọn một dòng hàng ở bảng bên trái để chụp / xem ảnh tình trạng.
+                  Chọn một dòng hàng ở bảng bên trái để chụp hoặc xem ảnh tình trạng.
                 </div>
               )}
 
@@ -440,11 +398,10 @@ const ImportGoods = () => {
                   <div className="rounded-2xl bg-slate-50 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Đang thao tác</p>
                     <p className="text-sm font-semibold text-slate-900">
-                      {selectedLine.skucode} · {selectedLine.productName}
+                      {selectedLine.skucode} - {selectedLine.productName}
                     </p>
                   </div>
 
-                  {/* Cảnh báo ràng buộc UC002 */}
                   {selectedLine.requiresMinPhotos && (
                     <div
                       className={`flex items-start gap-2 rounded-2xl border px-4 py-3 text-sm font-medium ${
@@ -464,7 +421,6 @@ const ImportGoods = () => {
                     </div>
                   )}
 
-                  {/* Khu vực upload */}
                   <div className="grid gap-3">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
@@ -503,13 +459,13 @@ const ImportGoods = () => {
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/40 bg-slate-50 px-6 py-5 text-sm font-semibold text-primary transition hover:bg-primary/5 disabled:opacity-60"
+                      type="button"
                     >
                       <span className="material-symbols-outlined">add_a_photo</span>
-                      {uploading ? 'Đang tải lên…' : 'Chụp / Tải ảnh lên'}
+                      {uploading ? 'Đang tải lên...' : 'Chụp / Tải ảnh lên'}
                     </button>
                   </div>
 
-                  {/* Thư viện ảnh từ DB */}
                   <div>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                       Ảnh đã lưu ({currentPhotos})
@@ -521,10 +477,7 @@ const ImportGoods = () => {
                         </p>
                       )}
                       {(selectedLine.photos ?? []).map((p) => (
-                        <div
-                          key={p.photoId}
-                          className="group relative overflow-hidden rounded-2xl bg-slate-950 shadow-sm"
-                        >
+                        <div key={p.photoId} className="group relative overflow-hidden rounded-2xl bg-slate-950 shadow-sm">
                           <img
                             className="h-32 w-full object-cover opacity-90 transition group-hover:scale-105"
                             src={p.photoUrl}
@@ -548,7 +501,6 @@ const ImportGoods = () => {
               )}
             </section>
 
-            {/* Nhãn theo dõi (trang trí) */}
             <section className="glass-card rounded-[28px] border border-primary p-6 shadow-xl shadow-slate-900/5">
               <div className="flex items-center gap-3 mb-5">
                 <span className="material-symbols-outlined text-primary">qr_code_2</span>
@@ -559,13 +511,9 @@ const ImportGoods = () => {
                   <span className="material-symbols-outlined text-[120px] text-slate-800">qr_code_2</span>
                 </div>
                 <div className="rounded-3xl bg-white p-5 shadow-sm">
-                  <p className="text-xs text-slate-500">
-                    MÃ NHÃN: {selectedOrder?.inboundCode ?? 'IMP-—'}
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">
-                    Dòng hàng: {selectedLine?.skucode ?? '—'}
-                  </p>
-                  <button className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                  <p className="text-xs text-slate-500">Mã nhãn: {selectedOrder?.inboundCode ?? 'IMP-'}</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">Dòng hàng: {selectedLine?.skucode ?? '-'}</p>
+                  <button className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800" type="button">
                     <span className="material-symbols-outlined">print</span>
                     In nhãn
                   </button>
@@ -579,15 +527,16 @@ const ImportGoods = () => {
           {blockConfirm && (
             <p className="flex items-center gap-1.5 text-sm font-medium text-red-600">
               <span className="material-symbols-outlined text-base">block</span>
-              Còn kiện hàng lỗi chưa đủ số ảnh bắt buộc — chưa thể xác nhận.
+              Còn kiện hàng lỗi chưa đủ số ảnh bắt buộc - chưa thể xác nhận.
             </p>
           )}
-          <button className="rounded-full border border-blue-600 bg-white px-8 py-4 text-sm font-bold text-blue-600 transition hover:bg-blue-50">
+          <button className="rounded-full border border-blue-600 bg-white px-8 py-4 text-sm font-bold text-blue-600 transition hover:bg-blue-50" type="button">
             Lưu nháp
           </button>
           <button
             disabled={blockConfirm}
             className="rounded-full bg-blue-600 px-10 py-4 text-sm font-bold text-white shadow-[0_20px_50px_rgba(37,99,235,0.25)] transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            type="button"
           >
             Xác nhận nhập kho
           </button>
@@ -596,5 +545,25 @@ const ImportGoods = () => {
     </div>
   )
 }
+
+const InfoBox = ({ label, value }: { label: string; value: string }) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-semibold text-slate-500">{label}</label>
+    <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900">
+      {value}
+    </div>
+  </div>
+)
+
+const SelectBox = ({ label, options }: { label: string; options: string[] }) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-semibold text-slate-500">{label}</label>
+    <select className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+      {options.map((option) => (
+        <option key={option}>{option}</option>
+      ))}
+    </select>
+  </div>
+)
 
 export default ImportGoods

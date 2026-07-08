@@ -1,11 +1,12 @@
-import type { AuditRow } from '../InventoryAudit.types'
+import type { AuditRow } from '../features/warehouse/InventoryAudit.types'
 
 type InventoryComparisonTableProps = {
   rows: AuditRow[]
   onQtyChange: (index: number, value: number) => void
+  onQtyBlur: (index: number, value: number) => void
 }
 
-const InventoryComparisonTable = ({ rows, onQtyChange }: InventoryComparisonTableProps) => (
+const InventoryComparisonTable = ({ rows, onQtyChange, onQtyBlur }: InventoryComparisonTableProps) => (
   <div className="glass-card rounded-[28px] border border-slate-200/70 bg-white shadow-sm overflow-hidden">
     <div className="overflow-x-auto">
       <table className="min-w-full text-left text-sm text-slate-700">
@@ -15,6 +16,7 @@ const InventoryComparisonTable = ({ rows, onQtyChange }: InventoryComparisonTabl
             <th className="px-6 py-4 text-right uppercase tracking-[0.2em]">System Qty</th>
             <th className="px-6 py-4 text-right uppercase tracking-[0.2em]">Actual Qty</th>
             <th className="px-6 py-4 text-right uppercase tracking-[0.2em]">Difference</th>
+            <th className="px-6 py-4 text-right uppercase tracking-[0.2em]">Variance %</th>
             <th className="px-6 py-4 text-center uppercase tracking-[0.2em]">Status</th>
           </tr>
         </thead>
@@ -22,16 +24,27 @@ const InventoryComparisonTable = ({ rows, onQtyChange }: InventoryComparisonTabl
           {rows.map((row, index) => {
             const diff = row.actualQty - row.systemQty
             const diffText = diff === 0 ? '0' : diff > 0 ? `+${diff}` : `${diff}`
+            const variance = row.systemQty > 0 ? (Math.abs(diff) / row.systemQty) * 100 : 0
+            const varianceText = variance.toFixed(1)
+            const isCritical = variance > 10
+            
             const actualInputBorder =
               diff === 0
                 ? 'border-transparent text-slate-900'
                 : diff > 0
                 ? 'border-[#0f766e] text-[#0f766e]'
                 : 'border-[#b91c1c] text-[#b91c1c]'
-            const statusBg = diff === 0 ? 'bg-[#ecfdf5] text-[#0f766e]' : 'bg-[#fee2e2] text-[#b91c1c]'
+            
+            const statusBg = isCritical 
+              ? 'bg-[#991b1b] text-white animate-pulse'
+              : diff === 0 
+              ? 'bg-[#ecfdf5] text-[#0f766e]' 
+              : 'bg-[#fee2e2] text-[#b91c1c]'
+
+            const rowBg = isCritical ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-slate-50'
 
             return (
-              <tr key={row.sku} className="hover:bg-slate-50 transition-colors">
+              <tr key={row.sku} className={`${rowBg} transition-colors`}>
                 <td className="px-6 py-4">
                   <div className="flex flex-col gap-1">
                     <span className="font-mono text-slate-900">{row.sku}</span>
@@ -44,12 +57,18 @@ const InventoryComparisonTable = ({ rows, onQtyChange }: InventoryComparisonTabl
                     type="number"
                     value={row.actualQty}
                     onChange={(event) => onQtyChange(index, Number(event.target.value))}
+                    onBlur={(event) => onQtyBlur(index, Number(event.target.value))}
                     className={`w-20 bg-transparent border-b-2 ${actualInputBorder} text-right font-mono outline-none focus:ring-0`}
                   />
                 </td>
                 <td className={`px-6 py-4 text-right font-semibold ${diff === 0 ? 'text-[#0f766e]' : diff > 0 ? 'text-[#0f766e]' : 'text-[#b91c1c]'}`}>{diffText}</td>
+                <td className={`px-6 py-4 text-right font-mono ${isCritical ? 'text-red-600 font-bold' : 'text-slate-600'}`}>
+                  {varianceText}%
+                </td>
                 <td className="px-6 py-4 text-center">
-                  <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${statusBg}`}>{diff === 0 ? 'MATCHED' : 'MISMATCH'}</span>
+                  <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${statusBg}`}>
+                    {isCritical ? 'CRITICAL' : diff === 0 ? 'MATCHED' : 'MISMATCH'}
+                  </span>
                 </td>
               </tr>
             )

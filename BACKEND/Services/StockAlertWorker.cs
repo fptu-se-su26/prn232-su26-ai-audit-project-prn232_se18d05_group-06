@@ -1,9 +1,9 @@
 namespace BACKEND.Services
 {
     /// <summary>
-    /// UC006: quét ngầm tồn kho định kỳ (mặc định mỗi 30 phút), phát hiện SKU chạm ngưỡng
-    /// an toàn và gửi email cảnh báo (áp dụng debounce 12h trong StockAlertService).
-    /// Chu kỳ quét đọc từ AIParameters key STOCK_SCAN_INTERVAL_MINUTES.
+    /// Quét tồn kho định kỳ, tạo cảnh báo khi SKU chạm ngưỡng tối thiểu
+    /// và gửi email qua StockAlertService với cơ chế debounce 12 giờ.
+    /// Chu kỳ mặc định là 30 phút, có thể cấu hình bằng AIParameters.STOCK_SCAN_INTERVAL_MINUTES.
     /// </summary>
     public class StockAlertWorker : BackgroundService
     {
@@ -20,16 +20,17 @@ namespace BACKEND.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("StockAlertWorker đã khởi động.");
+            _logger.LogInformation("StockAlertWorker started.");
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 var intervalMinutes = DefaultIntervalMinutes;
+
                 try
                 {
                     using var scope = _serviceProvider.CreateScope();
                     var alertService = scope.ServiceProvider.GetRequiredService<IStockAlertService>();
-                    await alertService.ScanAndNotifyAsync(stoppingToken);
+                    await alertService.ScanAndNotifyAsync(cancellationToken: stoppingToken);
 
                     intervalMinutes = await GetIntervalMinutesAsync(scope, stoppingToken);
                 }
@@ -39,7 +40,7 @@ namespace BACKEND.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Lỗi khi quét tồn kho (StockAlertWorker).");
+                    _logger.LogError(ex, "Stock alert scheduled scan failed.");
                 }
 
                 try
@@ -52,16 +53,20 @@ namespace BACKEND.Services
                 }
             }
 
-            _logger.LogInformation("StockAlertWorker đã dừng.");
+            _logger.LogInformation("StockAlertWorker stopped.");
         }
 
-        private static async Task<int> GetIntervalMinutesAsync(IServiceScope scope, CancellationToken ct)
+        private static async Task<int> GetIntervalMinutesAsync(IServiceScope scope, CancellationToken cancellationToken)
         {
             var db = scope.ServiceProvider.GetRequiredService<Models.SmartLogAiContext>();
             var param = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions
-                .FirstOrDefaultAsync(db.Aiparameters, p => p.ParamKey == "STOCK_SCAN_INTERVAL_MINUTES", ct);
-            if (param != null && int.TryParse(param.ParamValue, out var m) && m > 0)
-                return m;
+                .FirstOrDefaultAsync(db.Aiparameters, p => p.ParamKey == "STOCK_SCAN_INTERVAL_MINUTES", cancellationToken);
+
+            if (param != null && int.TryParse(param.ParamValue, out var minutes) && minutes > 0)
+            {
+                return minutes;
+            }
+
             return DefaultIntervalMinutes;
         }
     }
