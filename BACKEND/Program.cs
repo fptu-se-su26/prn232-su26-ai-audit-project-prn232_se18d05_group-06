@@ -62,6 +62,9 @@ builder.Services.AddScoped<IS3StorageService, S3StorageService>();
 builder.Services.AddScoped<IStockAlertService, StockAlertService>();
 builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
 builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>();
+builder.Services.AddScoped<IFinanceReportService, FinanceReportService>();
+builder.Services.AddScoped<IFinanceReconciliationService, FinanceReconciliationService>();
+builder.Services.AddScoped<IFinanceReportExportService, FinanceReportExportService>();
 builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
