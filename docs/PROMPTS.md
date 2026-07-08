@@ -70,6 +70,7 @@ Sinh viên/nhóm cần ghi lại:
 | 17 | 01/07/2026 | Antigravity | SQL Optimization | Gộp hai file SQL smartlogAI.sql và setup-overstay-alert.sql | Gộp schema và seed Overstay Alert vào smartlogAI.sql, xóa setup-overstay-alert.sql | Có | smartlogAI.sql |
 | 18 | 01/07/2026 | Antigravity | Email Error Handling | Bắt lỗi SMTP Authentication Required để tránh log đỏ | EmailService log warning và mô phỏng email thay vì throw exception | Có | EmailService.cs |
 | 19 | 02/07/2026 | Antigravity | AI Forecasting | Hoan thien AI Financial Trend Forecasting cho Admin | API forecast tai chinh, model, service, seed, va dashboard Admin Finance | Có | FinancialForecastController.cs, Finance.tsx |
+| 20 | 08/07/2026 | Antigravity | Lỗi LINQ Translation 500 | Khắc phục lỗi dịch Entity Framework LINQ sang SQL | Gợi ý sử dụng `.Replace().ToUpper()` thay cho C# string method | Có | GateService.cs |
 
 ---
 
@@ -537,6 +538,18 @@ Nhóm kiểm tra bằng log backend, test SMTP thật, thay App Password do Gmai
 
 ### Evaluation
 Kết quả được kiểm chứng bằng SMTP test, API `/api/stockalerts/scan?force=true`, backend build và frontend build. AI hỗ trợ tốt ở phần debug, định hướng luồng xử lý và cải thiện UI; nhóm vẫn kiểm soát quyết định nghiệp vụ để tránh gửi email trùng không cần thiết.
+
+---
+
+## Prompt #21
+
+- Date: 2026-07-08
+- AI Tool: Antigravity
+- Author: Vũ Lê Duy (DE180104)
+- Purpose: Khắc phục lỗi 500 Internal Server Error do LINQ Query không dịch được sang SQL
+- Prompt: "Làm sao để so sánh biển số xe trong Entity Framework LINQ mà bỏ qua dấu gạch ngang và dấu chấm mà không bị lỗi translation 500?"
+- Expected Output: Một đoạn mã C# sử dụng EF.Functions hoặc các hàm tương đương được EF hỗ trợ.
+- Evaluation: AI đã gợi ý chuẩn xác việc áp dụng trực tiếp `.Replace("-", "")` và `.ToUpper()` vào truy vấn `FirstOrDefaultAsync`.
 
 ---
 
