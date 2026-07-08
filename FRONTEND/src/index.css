@@ -344,3 +344,16 @@ body {
 .animate-pulse-glow {
   animation: pulse-glow-2 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+.arc-header {
+  background: radial-gradient(150% 100% at 50% 0%, rgba(255,104,44,0.05) 0%, rgba(20,20,20,0) 100%);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.pulse-dot {
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+

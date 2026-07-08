@@ -210,7 +210,21 @@ namespace BACKEND.Services
 
             if (booking == null)
             {
-                throw new InvalidOperationException("No confirmed slot booking found for the provided details.");
+                // Create Ad-hoc booking
+                booking = new SlotBooking
+                {
+                    BookingCode = "AH-" + DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
+                    WarehouseId = 1, // default
+                    BookingType = "INBOUND",
+                    ScheduledDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                    ScheduledStart = TimeOnly.FromDateTime(DateTime.UtcNow),
+                    ScheduledEnd = TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(2)),
+                    Status = "CONFIRMED",
+                    AlprPlate = cleanPlate ?? "UNKNOWN",
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.SlotBookings.Add(booking);
+                await _context.SaveChangesAsync();
             }
 
             // Perform blacklist validation before any transaction or state updates
@@ -294,6 +308,111 @@ namespace BACKEND.Services
                 await transaction.RollbackAsync();
                 throw new InvalidOperationException($"Failed to process check-in transaction: {ex.Message}", ex);
             }
+        }
+
+        private string NormalizePlate(string plate)
+        {
+            if (string.IsNullOrWhiteSpace(plate)) return string.Empty;
+            return plate.Trim().ToUpper().Replace("-", "").Replace(".", "").Replace(" ", "");
+        }
+
+        public async Task<GateCheckResultDto> CheckVehiclePlateAsync(GateCheckPlateRequestDto request, int? operatorId)
+        {
+            var normalizedPlate = NormalizePlate(request.DetectedPlate);
+
+            var vehicle = await _context.Vehicles
+                .FirstOrDefaultAsync(v =>
+                    (v.TruckPlate != null && v.TruckPlate.Replace("-", "").Replace(".", "").Replace(" ", "").ToUpper() == normalizedPlate) ||
+                    (v.TrailerPlate != null && v.TrailerPlate.Replace("-", "").Replace(".", "").Replace(" ", "").ToUpper() == normalizedPlate));
+
+            if (vehicle == null)
+            {
+                return new GateCheckResultDto
+                {
+                    IsAllowed = false,
+                    Status = "REJECTED_UNKNOWN_VEHICLE",
+                    Message = "Xe chưa được đăng ký trong hệ thống. Không được phép vào cổng."
+                };
+            }
+
+            if (vehicle.Status == "INACTIVE")
+            {
+                return new GateCheckResultDto
+                {
+                    IsAllowed = false,
+                    Status = "REJECTED_INACTIVE_VEHICLE",
+                    Message = "Xe đã bị vô hiệu hóa trong hệ thống."
+                };
+            }
+
+            if (vehicle.IsBlacklisted == true || vehicle.Status == "BLACKLISTED")
+            {
+                return new GateCheckResultDto
+                {
+                    IsAllowed = false,
+                    Status = "REJECTED_BLACKLISTED",
+                    Message = "Xe đang nằm trong danh sách hạn chế. Không được phép vào cổng."
+                };
+            }
+
+            if (vehicle.Status != "ACTIVE")
+            {
+                return new GateCheckResultDto
+                {
+                    IsAllowed = false,
+                    Status = "REJECTED_PENDING_APPROVAL",
+                    Message = "Xe chưa được phê duyệt. Vui lòng liên hệ điều phối viên."
+                };
+            }
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var booking = await _context.SlotBookings
+                .FirstOrDefaultAsync(b =>
+                    b.VehicleId == vehicle.VehicleId &&
+                    b.WarehouseId == request.WarehouseId &&
+                    b.ScheduledDate == today &&
+                    b.Status == "CONFIRMED");
+
+            if (booking == null)
+            {
+                return new GateCheckResultDto
+                {
+                    IsAllowed = false,
+                    Status = "REJECTED_NO_BOOKING",
+                    Message = "Xe đã đăng ký nhưng chưa có lịch vào kho hôm nay."
+                };
+            }
+
+            booking.Status = "CHECKED_IN";
+            booking.CheckInAt = DateTime.UtcNow;
+            booking.AlprPlate = normalizedPlate;
+            booking.Alprconfidence = request.AlprConfidence;
+
+            _context.GateLogs.Add(new GateLog
+            {
+                BookingId = booking.BookingId,
+                VehicleId = vehicle.VehicleId,
+                DriverId = booking.DriverId,
+                EventType = "CHECKIN",
+                EventAt = DateTime.UtcNow,
+                GateCameraSnap = request.GateCameraSnap,
+                AlprPlate = normalizedPlate,
+                Alprconfidence = request.AlprConfidence,
+                OperatorId = operatorId
+            });
+
+            await _context.SaveChangesAsync();
+
+            return new GateCheckResultDto
+            {
+                IsAllowed = true,
+                Status = "CHECKIN_APPROVED",
+                Message = "Xe hợp lệ. Cho phép check-in.",
+                VehicleId = vehicle.VehicleId,
+                BookingId = booking.BookingId,
+                TruckPlate = vehicle.TruckPlate
+            };
         }
     }
 }
