@@ -250,7 +250,20 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: BACKEND/Services/GateService.cs, FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx
 - Verification: Đã chạy thử AI Camera quét biển số trên trình duyệt. Backend không còn văng lỗi HTTP 500, Frontend hiện đúng cảnh báo UI đỏ.
 
---
+---
+
+## Log #19
+- Date: 2026-07-09
+- Author: Trần Văn Tùng (DE180109)
+- AI Tool: Antigravity
+- Purpose: Hoàn thiện cụm use case Finance M4 gồm báo cáo doanh thu, chi phí, lợi nhuận, đối soát thanh toán, export Excel/PDF và dự báo tài chính Moving Average.
+- Prompt Summary: nghiệp vụ SmartLog AI, chỉ sửa đúng module Admin/Finance, không hiển thị mã UC trên UI.
+- AI Output Summary: Đề xuất và hỗ trợ viết DTO, service, controller API, dashboard React, biểu đồ Recharts, nút Export Excel/PDF, logic Payment Reconciliation và Financial Forecast theo Moving Average 3 tháng.
+- Human Decision: Giữ module ở màn Finance của Admin, ưu tiên báo cáo nghiệp vụ dễ đọc, dùng dữ liệu bảng hiện có, thêm OperatingExpenses để UC045 đủ nghĩa hơn và giữ route cũ forecast để tránh vỡ tích hợp.
+- Applied To: BACKEND/Controllers/FinanceReportsController.cs, BACKEND/Controllers/FinanceReconciliationsController.cs, BACKEND/Controllers/FinancialForecastController.cs, BACKEND/Services/FinanceReportService.cs, BACKEND/Services/FinanceReconciliationService.cs, BACKEND/Services/FinanceReportExportService.cs, BACKEND/Services/FinancialForecastService.cs, BACKEND/DTOs/*Finance*.cs, FRONTEND/src/features/admin/Finance.tsx, FRONTEND/src/features/admin/RevenueByServicePanel.tsx, FRONTEND/src/features/admin/OperatingExpensePanel.tsx, FRONTEND/src/features/admin/ProfitReportPanel.tsx, FRONTEND/src/features/admin/PaymentReconciliationPanel.tsx, FRONTEND/src/features/admin/FinanceExportButtons.tsx, smartlogAI.sql.
+- Verification: `npx tsc --noEmit` frontend thành công; `dotnet build --no-restore /p:UseAppHost=false -o .\obj\codex-check` backend thành công 0 warning/0 error.
+- Notes: Một số thư mục build tạm `.verify-backend-build` và `BACKEND/obj/codex-check` bị Windows giữ quyền nên chưa xóa sạch được; đây là artifact build, không phải mã chức năng.
+---
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 

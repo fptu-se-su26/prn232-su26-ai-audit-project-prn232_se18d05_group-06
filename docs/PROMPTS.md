@@ -553,6 +553,20 @@ Kết quả được kiểm chứng bằng SMTP test, API `/api/stockalerts/scan
 
 ---
 
+## Prompt #22
+
+- Date: 2026-07-09
+- AI Tool: Antigravity
+- Author: Trần Văn Tùng (DE180109)
+- Purpose: Hoàn thiện cụm Finance M4 
+- Prompt: "Hãy triển khai các use case Finance cho SmartLog AI: báo cáo doanh thu theo loại dịch vụ, báo cáo chi phí vận hành, báo cáo lợi nhuận, đối soát giao dịch thanh toán, xuất báo cáo Excel/PDF và dự báo tài chính Moving Average. Backend dùng .NET/EF Core, frontend dùng React, UI phải có card, bảng, biểu đồ và action rõ ràng."
+- Expected Output: API backend, DTO, service xử lý nghiệp vụ, UI Admin Finance có biểu đồ trực quan, nút export file và logic forecast lưu vào database.
+- AI Response Summary: AI hỗ trợ thiết kế `FinanceReportService`, `FinanceReconciliationService`, `FinanceReportExportService`, cập nhật `FinancialForecastService` theo Moving Average, thêm controller API và các panel React cho từng báo cáo.
+- Human Evaluation: Kết quả phù hợp với database và use case đồ án. Nhóm đã điều chỉnh để route forecast mới không làm vỡ route cũ, giới hạn số tháng forecast theo 1/3/6 và dùng export PDF đơn giản để đủ yêu cầu demo.
+- Final Applied Result: Hoàn thành màn Admin Finance có báo cáo doanh thu, chi phí, lợi nhuận, đối soát thanh toán, xuất Excel/PDF và dự báo tài chính cơ bản.
+- Verification: `npx tsc --noEmit` và `dotnet build --no-restore /p:UseAppHost=false -o .\obj\codex-check` đều thành công.
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
