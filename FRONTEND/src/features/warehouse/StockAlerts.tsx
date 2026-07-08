@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Sidebar from '../../components/Sidebar'
 import api from '../../lib/api'
 
@@ -25,10 +25,32 @@ type StockAlertSummary = {
   total: number
 }
 
+const ALERT_EMAIL = 'tungtvde180109@fpt.edu.vn'
+
+const getCurrentUserEmail = () => {
+  try {
+    const raw = localStorage.getItem('user')
+    if (!raw) return ALERT_EMAIL
+    const user = JSON.parse(raw) as { email?: string }
+    return user.email?.trim() || ALERT_EMAIL
+  } catch {
+    return ALERT_EMAIL
+  }
+}
 const ALERT_TYPE_LABELS: Record<string, string> = {
   LOW_STOCK: 'Tồn thấp',
   EXPIRY_SOON: 'Sắp hết hạn',
   DEAD_STOCK: 'Tồn lâu',
+}
+
+const formatDateTime = (value: string | null) => {
+  if (!value) return 'Chưa gửi'
+  return new Date(value).toLocaleString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+  })
 }
 
 const StockAlerts = () => {
@@ -40,6 +62,7 @@ const StockAlerts = () => {
   const [message, setMessage] = useState<string | null>(null)
   const [filterText, setFilterText] = useState('')
   const [filterType, setFilterType] = useState('ALL')
+  const recipientEmail = getCurrentUserEmail()
 
   const loadData = async () => {
     setLoading(true)
@@ -67,171 +90,180 @@ const StockAlerts = () => {
     setError(null)
     setMessage(null)
     try {
-      const res = await api.post<{ emailsSent: number; message: string }>('/stockalerts/scan')
-      setMessage(res.data.message)
+      const res = await api.post<{ emailsSent: number; message: string }>('/stockalerts/scan?force=true')
+      setMessage(res.data.message || `Quét hoàn tất. Email cảnh báo được gửi về ${recipientEmail}.`)
       await loadData()
-    } catch {
-      setError('Quét tồn kho thất bại.')
+    } catch (err) {
+      const data = (err as { response?: { data?: unknown } }).response?.data
+      const detail = typeof data === 'string' ? data : 'Vui lòng kiểm tra cấu hình SMTP trong backend.'
+      setError(`Quét tồn kho thất bại. ${detail}`)
     } finally {
       setScanning(false)
     }
   }
 
   const handleResolve = async (id: number) => {
+    setError(null)
     try {
       await api.post(`/stockalerts/${id}/resolve`)
       setAlerts((prev) => prev.filter((a) => a.alertId !== id))
-      await api.get<StockAlertSummary>('/stockalerts/summary').then((r) => setSummary(r.data))
+      const res = await api.get<StockAlertSummary>('/stockalerts/summary')
+      setSummary(res.data)
     } catch {
-      setError('Không thể xử lý cảnh báo.')
+      setError('Không thể đánh dấu cảnh báo đã xử lý.')
     }
   }
 
+  const filteredAlerts = useMemo(() => {
+    const keyword = filterText.trim().toLowerCase()
+    return alerts.filter((alert) => {
+      const matchText =
+        !keyword ||
+        (alert.skucode ?? '').toLowerCase().includes(keyword) ||
+        (alert.productName ?? '').toLowerCase().includes(keyword) ||
+        (alert.customerName ?? '').toLowerCase().includes(keyword)
+      const matchType = filterType === 'ALL' || alert.alertType === filterType
+      return matchText && matchType
+    })
+  }, [alerts, filterText, filterType])
+
+  const criticalCount = filteredAlerts.filter((a) => a.severity === 'CRITICAL').length
   const lowStockCount = summary?.lowStock ?? 0
   const expiringCount = summary?.expiringSoon ?? 0
   const deadStockCount = summary?.deadStock ?? 0
-  
-  const filteredAlerts = alerts.filter(a => {
-    const matchText = (a.skucode?.toLowerCase() || '').includes(filterText.toLowerCase()) || 
-                     (a.productName?.toLowerCase() || '').includes(filterText.toLowerCase());
-    const matchType = filterType === 'ALL' || a.alertType === filterType;
-    return matchText && matchType;
-  });
+  const totalCount = summary?.total ?? 0
 
-  const criticalCount = filteredAlerts.filter((a) => a.severity === 'CRITICAL').length;
+  const metricCards = [
+    {
+      label: 'Tồn kho thấp',
+      value: lowStockCount,
+      hint: `${criticalCount} mục nghiêm trọng`,
+      icon: 'trending_down',
+      tone: 'rose',
+      badge: 'NGHIÊM TRỌNG',
+    },
+    {
+      label: 'Sắp hết hạn',
+      value: expiringCount,
+      hint: 'Cần ưu tiên xuất',
+      icon: 'event_busy',
+      tone: 'cyan',
+      badge: 'KHẨN',
+    },
+    {
+      label: 'Tồn kho lâu',
+      value: deadStockCount,
+      hint: 'Hàng trên 90 ngày',
+      icon: 'hourglass_empty',
+      tone: 'blue',
+      badge: 'THEO DÕI',
+    },
+    {
+      label: 'Cảnh báo đang mở',
+      value: totalCount,
+      hint: 'Chưa xử lý',
+      icon: 'notifications_active',
+      tone: 'slate',
+      badge: 'TỔNG',
+    },
+  ]
 
   return (
-    <div className="min-h-screen bg-background text-on-surface antialiased overflow-hidden flex">
+    <div className="min-h-screen bg-[#f5f7fb] text-slate-950 antialiased flex overflow-hidden">
       <Sidebar />
 
-      <main className="ml-[280px] flex-1 h-screen overflow-y-auto custom-scrollbar flex flex-col relative animate-fade-in-up">
-        {/* Top Navigation */}
-        <header className="sticky top-0 w-full h-20 bg-surface/75 backdrop-blur-md border-b border-outline-variant/30 flex justify-between items-center px-gutter z-40">
-          <div className="flex items-center gap-4">
-            <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Cảnh báo tồn kho</h2>
-            <div className="h-6 w-px bg-outline-variant/50"></div>
-            <span className="text-on-surface-variant font-label-md">
-              Quét tự động mỗi <span className="text-primary font-bold">30 phút</span> · Debounce 12 giờ
-            </span>
-          </div>
+      <main className="ml-[280px] h-screen flex-1 overflow-y-auto bg-[#f5f7fb]">
+        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 px-8 py-5 backdrop-blur-xl">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="text-2xl font-black tracking-tight text-slate-950">Cảnh báo tồn kho</h1>
+              <p className="mt-1 text-sm font-semibold text-slate-500">
+                Quét tự động mỗi <span className="text-blue-700">30 phút</span> · Worker giữ debounce 12 giờ · Quét thủ công gửi lại email để test
+              </p>
+            </div>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleScan}
-              disabled={scanning}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform disabled:opacity-60"
-            >
-              <span className="material-symbols-outlined text-[20px]">{scanning ? 'hourglass_top' : 'refresh'}</span>
-              {scanning ? 'Đang quét…' : 'Quét ngay'}
-            </button>
-            <span className="material-symbols-outlined p-2 hover:bg-surface-container-high/50 rounded-full cursor-pointer transition-all duration-200">notifications</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-800">
+                Email nhận cảnh báo: {recipientEmail}
+              </div>
+              <button
+                onClick={handleScan}
+                disabled={scanning}
+                className="inline-flex h-12 items-center gap-2 rounded-lg bg-blue-700 px-5 text-sm font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-[20px]">{scanning ? 'hourglass_top' : 'refresh'}</span>
+                {scanning ? 'Đang quét...' : 'Quét ngay'}
+              </button>
+            </div>
           </div>
         </header>
 
-        {/* Main Content */}
-        <div className="p-8 md:p-12 min-h-screen space-y-10">
+        <section className="space-y-6 p-6 lg:p-8">
           {error && (
-            <div className="mb-6 flex items-center gap-2 rounded-lg border border-error/30 bg-error/10 px-5 py-4 text-error font-label-md">
+            <div className="flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-bold text-rose-800">
               <span className="material-symbols-outlined text-[20px]">error</span>
-              {error}
+              <span>{error}</span>
             </div>
           )}
+
           {message && (
-            <div className="mb-6 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-5 py-4 text-primary font-label-md">
+            <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-bold text-emerald-800">
               <span className="material-symbols-outlined text-[20px]">mark_email_read</span>
-              {message}
+              <span>{message}</span>
             </div>
           )}
 
-          {/* Statistics Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack_lg">
-            {/* Low Stock Card */}
-            <div className="glass-card p-6 rounded-lg flex flex-col justify-between hover:glow-primary transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-error/10 text-error flex items-center justify-center">
-                  <span className="material-symbols-outlined">trending_down</span>
-                </div>
-                <span className="px-2 py-1 bg-error/10 text-error rounded text-[12px] font-bold">NGHIÊM TRỌNG</span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-on-surface-variant font-label-md">Tồn kho thấp</h3>
-                <p className="text-display-lg font-display-lg leading-tight">{lowStockCount}</p>
-                <p className="text-error font-label-md mt-1">{criticalCount} mục mức nghiêm trọng</p>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {metricCards.map((card) => {
+              const toneClass =
+                card.tone === 'rose'
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : card.tone === 'cyan'
+                    ? 'bg-cyan-50 text-cyan-700 border-cyan-200'
+                    : card.tone === 'blue'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-slate-100 text-slate-700 border-slate-200'
 
-            {/* Expiring Soon Card */}
-            <div className="glass-card p-6 rounded-lg flex flex-col justify-between hover:glow-primary transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-secondary-container/20 text-on-secondary-container flex items-center justify-center">
-                  <span className="material-symbols-outlined">event_busy</span>
+              return (
+                <div key={card.label} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-lg border ${toneClass}`}>
+                      <span className="material-symbols-outlined text-[24px]">{card.icon}</span>
+                    </div>
+                    <span className={`rounded px-2.5 py-1 text-xs font-black ${toneClass}`}>{card.badge}</span>
+                  </div>
+                  <div className="mt-5">
+                    <p className="text-sm font-bold text-slate-500">{card.label}</p>
+                    <p className="mt-1 text-5xl font-black leading-none text-slate-950">{card.value}</p>
+                    <p className="mt-3 text-sm font-bold text-slate-600">{card.hint}</p>
+                  </div>
                 </div>
-                <span className="px-2 py-1 bg-secondary-container/20 text-on-secondary-container rounded text-[12px] font-bold">KHẨN</span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-on-surface-variant font-label-md">Sắp hết hạn</h3>
-                <p className="text-display-lg font-display-lg leading-tight">{expiringCount}</p>
-                <p className="text-on-surface-variant font-label-md mt-1">Cần ưu tiên xuất</p>
-              </div>
-            </div>
-
-            {/* Long-term Storage */}
-            <div className="glass-card p-6 rounded-lg flex flex-col justify-between hover:glow-primary transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined">hourglass_empty</span>
-                </div>
-                <span className="px-2 py-1 bg-primary/10 text-primary rounded text-[12px] font-bold">THEO DÕI</span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-on-surface-variant font-label-md">Tồn kho lâu</h3>
-                <p className="text-display-lg font-display-lg leading-tight">{deadStockCount}</p>
-                <p className="text-on-surface-variant font-label-md mt-1">Hàng &gt; 90 ngày</p>
-              </div>
-            </div>
-
-            {/* Total alerts */}
-            <div className="glass-card p-6 rounded-lg flex flex-col justify-between hover:glow-primary transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-tertiary-container/10 text-tertiary flex items-center justify-center">
-                  <span className="material-symbols-outlined">notifications_active</span>
-                </div>
-                <span className="px-2 py-1 bg-tertiary-container/10 text-tertiary rounded text-[12px] font-bold">TỔNG</span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-on-surface-variant font-label-md">Cảnh báo đang mở</h3>
-                <p className="text-display-lg font-display-lg leading-tight">{summary?.total ?? 0}</p>
-                <p className="text-on-surface-variant font-label-md mt-1">Chưa xử lý</p>
-              </div>
-            </div>
+              )
+            })}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
-            {/* Detailed Alert Table */}
-            <div className="lg:col-span-3 glass-card rounded-2xl border border-outline-variant/30 flex flex-col shadow-2xl">
-              <div className="p-8 border-b border-outline-variant/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+              <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h3 className="font-headline-md text-headline-md font-bold">Danh sách cảnh báo</h3>
-                  <p className="text-on-surface-variant font-label-md mt-1">Tổng cộng {filteredAlerts.length} bản ghi</p>
+                  <h2 className="text-xl font-black text-slate-950">Danh sách cảnh báo</h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Đang hiển thị {filteredAlerts.length} / {alerts.length} bản ghi</p>
                 </div>
-                
-                <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-                  <div className="relative flex-1 md:w-64">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
-                    <input 
-                      type="text" 
-                      placeholder="Tìm SKU, sản phẩm..." 
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <label className="relative block sm:w-72">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">search</span>
+                    <input
                       value={filterText}
-                      onChange={(e) => setFilterText(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-surface-container-high rounded-xl border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                      onChange={(event) => setFilterText(event.target.value)}
+                      placeholder="Tìm SKU, sản phẩm..."
+                      className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                     />
-                  </div>
-                  
-                  <select 
+                  </label>
+                  <select
                     value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="pl-4 pr-10 py-2.5 bg-surface-container-high rounded-xl border border-outline-variant/50 focus:border-primary outline-none transition-all text-sm appearance-none cursor-pointer"
-                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' height=\'24\' viewBox=\'0 -960 960 960\' width=\'24\'%3E%3Cpath d=\'M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
+                    onChange={(event) => setFilterType(event.target.value)}
+                    className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                   >
                     <option value="ALL">Tất cả loại</option>
                     <option value="LOW_STOCK">Tồn thấp</option>
@@ -241,162 +273,146 @@ const StockAlerts = () => {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[900px]">
-                  <thead>
-                    <tr className="bg-surface-container-low/50">
-                      <th className="px-6 py-4 font-label-md text-outline whitespace-nowrap">Mã SKU</th>
-                      <th className="px-6 py-4 font-label-md text-outline whitespace-nowrap">Sản phẩm</th>
-                      <th className="px-6 py-4 font-label-md text-outline whitespace-nowrap">Tồn / Ngưỡng</th>
-                      <th className="px-6 py-4 font-label-md text-outline whitespace-nowrap">Loại cảnh báo</th>
-                      <th className="px-6 py-4 font-label-md text-outline whitespace-nowrap">Mức độ</th>
-                      <th className="px-6 py-4 font-label-md text-outline whitespace-nowrap">Thao tác</th>
+              <div className="hidden overflow-x-auto lg:block">
+                <table className="w-full min-w-[980px] border-collapse text-left">
+                  <thead className="bg-slate-50 text-xs font-black uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-6 py-4">Mã SKU</th>
+                      <th className="px-6 py-4">Sản phẩm</th>
+                      <th className="px-6 py-4">Tồn / Ngưỡng</th>
+                      <th className="px-6 py-4">Loại cảnh báo</th>
+                      <th className="px-6 py-4">Email gần nhất</th>
+                      <th className="px-6 py-4">Mức độ</th>
+                      <th className="px-6 py-4 text-right">Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-outline-variant/20">
+                  <tbody className="divide-y divide-slate-100">
                     {loading && (
                       <tr>
-                        <td colSpan={6} className="px-6 py-8 text-center text-on-surface-variant">Đang tải…</td>
+                        <td colSpan={7} className="px-6 py-10 text-center text-sm font-bold text-slate-500">Đang tải dữ liệu...</td>
                       </tr>
                     )}
-                    {!loading && alerts.length === 0 && (
+                    {!loading && filteredAlerts.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="px-6 py-8 text-center text-on-surface-variant">
-                          Không có cảnh báo nào đang mở.
-                        </td>
+                        <td colSpan={7} className="px-6 py-10 text-center text-sm font-bold text-slate-500">Không có cảnh báo phù hợp.</td>
                       </tr>
                     )}
-                    {!loading &&
-                      filteredAlerts.map((a, idx) => {
-                        const isCritical = a.severity === 'CRITICAL'
-                        return (
-                          <tr
-                            key={a.alertId}
-                            className={`hover:bg-surface-container-high/20 transition-colors group ${
-                              idx % 2 === 1 ? 'bg-surface-container-low/20' : ''
-                            }`}
-                          >
-                            <td className="px-6 py-4 font-data-mono text-primary whitespace-nowrap">{a.skucode ?? '—'}</td>
-                            <td className="px-6 py-4">
-                              <div className="font-body-md line-clamp-1">{a.productName ?? '—'}</div>
-                              <div className="text-[12px] text-on-surface-variant">{a.customerName ?? ''}</div>
-                            </td>
-                            <td className="px-6 py-4 font-data-mono whitespace-nowrap">
-                              {a.currentQty ?? 0} / <span className="text-outline">{a.thresholdQty ?? 0}</span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className={`flex items-center gap-2 whitespace-nowrap ${isCritical ? 'text-error' : 'text-secondary'}`}>
-                                <span className="material-symbols-outlined text-[18px]">report_problem</span>
-                                <span className="font-label-md">{ALERT_TYPE_LABELS[a.alertType] ?? a.alertType}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span
-                                className={`px-3 py-1 rounded-full text-[12px] font-bold shadow-sm whitespace-nowrap inline-block ${
-                                  isCritical
-                                    ? 'bg-error text-on-error'
-                                    : 'bg-secondary-container text-on-secondary-container'
-                                }`}
-                              >
-                                {isCritical ? 'NGHIÊM TRỌNG' : 'CẢNH BÁO'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <button
-                                onClick={() => handleResolve(a.alertId)}
-                                title="Đánh dấu đã xử lý"
-                                className="p-2 rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all"
-                              >
-                                <span className="material-symbols-outlined">task_alt</span>
-                              </button>
-                            </td>
-                          </tr>
-                        )
-                      })}
+                    {!loading && filteredAlerts.map((alert) => {
+                      const isCritical = alert.severity === 'CRITICAL'
+                      return (
+                        <tr key={alert.alertId} className="transition hover:bg-blue-50/50">
+                          <td className="px-6 py-4 font-mono text-sm font-black text-blue-700">{alert.skucode ?? '-'}</td>
+                          <td className="px-6 py-4">
+                            <p className="max-w-[260px] truncate text-sm font-black text-slate-900">{alert.productName ?? '-'}</p>
+                            <p className="mt-1 max-w-[260px] truncate text-xs font-semibold text-slate-500">{alert.customerName ?? 'Chưa gán khách hàng'}</p>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-black text-slate-900">
+                            <span className={isCritical ? 'text-rose-700' : 'text-slate-900'}>{alert.currentQty ?? 0}</span>
+                            <span className="text-slate-400"> / {alert.thresholdQty ?? 0}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-black text-rose-700">
+                              <span className="material-symbols-outlined text-[16px]">report_problem</span>
+                              {ALERT_TYPE_LABELS[alert.alertType] ?? alert.alertType}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-xs font-bold text-slate-600">{formatDateTime(alert.emailSentAt)}</td>
+                          <td className="px-6 py-4">
+                            <span className={`rounded-full px-3 py-1 text-xs font-black ${isCritical ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
+                              {isCritical ? 'NGHIÊM TRỌNG' : 'CẢNH BÁO'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleResolve(alert.alertId)}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                              title="Đánh dấu đã xử lý"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">task_alt</span>
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
-              <div className="p-6 border-t border-outline-variant/30 flex justify-center bg-surface-container-low/30 rounded-b-2xl">
-                <span className="text-on-surface-variant font-label-md font-medium italic">
-                  Đang hiển thị {filteredAlerts.length} trên tổng số {alerts.length} cảnh báo
-                </span>
+
+              <div className="divide-y divide-slate-100 lg:hidden">
+                {loading && <p className="p-5 text-center text-sm font-bold text-slate-500">Đang tải dữ liệu...</p>}
+                {!loading && filteredAlerts.length === 0 && <p className="p-5 text-center text-sm font-bold text-slate-500">Không có cảnh báo phù hợp.</p>}
+                {!loading && filteredAlerts.map((alert) => {
+                  const isCritical = alert.severity === 'CRITICAL'
+                  return (
+                    <article key={alert.alertId} className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-mono text-sm font-black text-blue-700">{alert.skucode ?? '-'}</p>
+                          <h3 className="mt-1 text-base font-black text-slate-950">{alert.productName ?? '-'}</h3>
+                          <p className="mt-1 text-xs font-semibold text-slate-500">{alert.customerName ?? 'Chưa gán khách hàng'}</p>
+                        </div>
+                        <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${isCritical ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {isCritical ? 'NGHIÊM TRỌNG' : 'CẢNH BÁO'}
+                        </span>
+                      </div>
+                      <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                        <div className="rounded-lg bg-slate-50 p-3">
+                          <p className="font-bold text-slate-500">Tồn / Ngưỡng</p>
+                          <p className="mt-1 font-black text-slate-950">{alert.currentQty ?? 0} / {alert.thresholdQty ?? 0}</p>
+                        </div>
+                        <div className="rounded-lg bg-slate-50 p-3">
+                          <p className="font-bold text-slate-500">Email gần nhất</p>
+                          <p className="mt-1 font-black text-slate-950">{formatDateTime(alert.emailSentAt)}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleResolve(alert.alertId)}
+                        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-black text-slate-700 transition hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">task_alt</span>
+                        Đánh dấu đã xử lý
+                      </button>
+                    </article>
+                  )
+                })}
               </div>
             </div>
 
-            {/* Right Column: AI & Trends */}
-            <div className="lg:col-span-1 space-y-10 flex flex-col">
-              {/* AI Prediction Panel */}
-              <div className="glass-card rounded-2xl p-8 glow-primary-active border-primary/30 relative overflow-hidden shadow-xl">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <span className="material-symbols-outlined text-[80px]">smart_toy</span>
+            <aside className="space-y-6">
+              <section className="rounded-lg border border-blue-200 bg-blue-50 p-5">
+                <div className="flex items-center gap-3 text-blue-800">
+                  <span className="material-symbols-outlined">auto_awesome</span>
+                  <h2 className="text-lg font-black">Dự đoán AI</h2>
                 </div>
-
-                <h3 className="font-headline-md text-headline-md mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">auto_awesome</span>
-                  Dự đoán AI
-                </h3>
-
-                <div className="space-y-6 relative z-10">
-                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-                    <p className="font-label-md text-on-surface mb-2">Nguy cơ hết hàng</p>
-                    <div className="flex items-end gap-4 mb-2">
-                      <span className="text-headline-lg font-headline-lg text-primary leading-none">
-                        {summary && summary.lowStock > 0 ? '82%' : '12%'}
-                      </span>
-                      <span className="text-on-surface-variant font-label-md mb-1">Dự báo tuần tới</span>
-                    </div>
-                    <div className="w-full bg-outline-variant/30 h-2 rounded-full overflow-hidden">
-                      <div
-                        className="bg-primary h-full rounded-full shadow-[0_0_8px_rgba(0,74,198,0.5)]"
-                        style={{ width: summary && summary.lowStock > 0 ? '82%' : '12%' }}
-                      ></div>
-                    </div>
+                <div className="mt-5 rounded-lg border border-blue-200 bg-white p-4">
+                  <p className="text-sm font-bold text-slate-500">Nguy cơ hết hàng</p>
+                  <div className="mt-2 flex items-end gap-3">
+                    <span className="text-4xl font-black text-blue-700">{lowStockCount > 0 ? '82%' : '12%'}</span>
+                    <span className="pb-1 text-sm font-bold text-slate-500">tuần tới</span>
                   </div>
-
-                  <div className="space-y-4">
-                    <h4 className="font-label-md text-outline uppercase tracking-widest text-[10px]">Khuyến nghị</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1">
-                        <p className="font-body-md">Đặt hàng bổ sung</p>
-                        <p className="text-[12px] text-on-surface-variant">Cho {lowStockCount} SKU dưới ngưỡng an toàn</p>
-                      </div>
-                      <div className="w-12 h-12 flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined text-[32px]">trending_up</span>
-                      </div>
-                    </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-blue-100">
+                    <div className="h-full rounded-full bg-blue-700" style={{ width: lowStockCount > 0 ? '82%' : '12%' }} />
                   </div>
-
-                  <button className="w-full py-3 bg-primary text-on-primary rounded-lg font-label-md shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform flex items-center justify-center gap-2">
-                    <span className="material-symbols-outlined text-[20px]">bolt</span>
-                    Tạo đề xuất nhập hàng
-                  </button>
                 </div>
-              </div>
+                <p className="mt-4 text-sm font-semibold leading-6 text-blue-900">
+                  Nên ưu tiên bổ sung các SKU đang dưới ngưỡng an toàn và theo dõi email đã gửi để tránh bỏ sót cảnh báo.
+                </p>
+              </section>
 
-              {/* Debounce info */}
-              <div className="glass-card rounded-lg p-6 overflow-hidden">
-                <h3 className="font-label-md text-on-surface mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[20px]">schedule</span>
+              <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 className="flex items-center gap-2 text-base font-black text-slate-950">
+                  <span className="material-symbols-outlined text-blue-700">schedule</span>
                   Cơ chế cảnh báo
-                </h3>
-                <ul className="space-y-3 text-on-surface-variant font-label-md">
-                  <li className="flex items-start gap-2">
-                    <span className="material-symbols-outlined text-primary text-[18px]">autorenew</span>
-                    Quét ngầm tồn kho định kỳ mỗi 30 phút.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="material-symbols-outlined text-primary text-[18px]">mail</span>
-                    Gửi email khi SKU chạm ngưỡng tối thiểu.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="material-symbols-outlined text-primary text-[18px]">timer</span>
-                    Debounce 12 giờ — không gửi lại email trùng trong 12 giờ.
-                  </li>
+                </h2>
+                <ul className="mt-4 space-y-3 text-sm font-semibold leading-6 text-slate-600">
+                  <li className="flex gap-2"><span className="material-symbols-outlined text-[18px] text-blue-700">autorenew</span>Worker quét nền định kỳ mỗi 30 phút.</li>
+                  <li className="flex gap-2"><span className="material-symbols-outlined text-[18px] text-blue-700">mail</span>Nút Quét ngay gửi lại email để test thủ công.</li>
+                  <li className="flex gap-2"><span className="material-symbols-outlined text-[18px] text-blue-700">timer</span>Debounce chỉ áp dụng cho quét nền để tránh spam.</li>
                 </ul>
-              </div>
-            </div>
+              </section>
+            </aside>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   )

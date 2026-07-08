@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -284,11 +285,9 @@ namespace BACKEND.Services
             var senderName = _configuration["EmailSettings:SenderName"];
             var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"] ?? "true");
 
-            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass) || pass == "your_app_password_here")
+            if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(pass) || pass == "your_app_password_here")
             {
-                _logger.LogWarning("Email sending is skipped because SMTP credentials are not configured correctly in appsettings.json.");
-                _logger.LogInformation("SIMULATED EMAIL TO: {To}\nSUBJECT: {Subject}\nBODY: {Body}", toEmail, subject, body);
-                return;
+                throw new InvalidOperationException("SMTP credentials are not configured correctly in appsettings.json.");
             }
 
             try
@@ -301,11 +300,13 @@ namespace BACKEND.Services
                     DeliveryMethod = SmtpDeliveryMethod.Network
                 };
 
-                var mailMessage = new MailMessage
+                using var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(senderEmail!, senderName),
+                    From = new MailAddress(senderEmail ?? user, senderName, Encoding.UTF8),
                     Subject = subject,
+                    SubjectEncoding = Encoding.UTF8,
                     Body = body,
+                    BodyEncoding = Encoding.UTF8,
                     IsBodyHtml = true
                 };
                 mailMessage.To.Add(toEmail);
@@ -315,12 +316,14 @@ namespace BACKEND.Services
             }
             catch (SmtpException ex) when (
                 ex.Message.Contains("Authentication Required", StringComparison.OrdinalIgnoreCase) ||
-                ex.Message.Contains("not authenticated", StringComparison.OrdinalIgnoreCase))
+                ex.Message.Contains("not authenticated", StringComparison.OrdinalIgnoreCase) ||
+                ex.Message.Contains("Username and Password not accepted", StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogWarning(
-                    "Email sending is simulated because SMTP authentication failed for {User}. To send real email, configure an app password or valid SMTP credentials.",
+                _logger.LogError(
+                    ex,
+                    "SMTP authentication failed for {User}. Gmail requires a valid App Password with 2-Step Verification enabled.",
                     user);
-                _logger.LogInformation("SIMULATED EMAIL TO: {To}\nSUBJECT: {Subject}\nBODY: {Body}", toEmail, subject, body);
+                throw;
             }
             catch (Exception ex)
             {

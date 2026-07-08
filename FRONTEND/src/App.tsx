@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+﻿import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CustomerLandingPage from './features/customer/CustomerLandingPage';
 import AuthPage from './features/auth/AuthPage';
 import CreateOrder from './features/customer/CreateOrder';
@@ -72,7 +72,7 @@ const modules = [
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<CustomerLandingPage />} />
@@ -168,3 +168,4 @@ const App: React.FC = () => {
 }
 
 export default App;
+
