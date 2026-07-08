@@ -212,7 +212,7 @@ Mô tả rõ phần nào là đóng góp chính của sinh viên/nhóm, không p
 Sau bài tập/project này, em/nhóm học được gì về kiến thức môn học?
 
 ```text
-Hiểu được tầm quan trọng của việc thiết kế giao diện thân thiện với người dùng và cách tổ chức các component React một cách khoa học để dễ mở rộng dự án sau này.
+Hiểu được tầm quan trọng của việc thiết kế giao diện thân thiện với người dùng và cách tổ chức các component React một cách khoa học để dễ mở rộng dự án sau này. Đồng thời học được cách ORM như Entity Framework biên dịch mã LINQ sang SQL, nhận ra không thể gọi hàm tự viết của C# tùy ý bên trong câu lệnh truy vấn tới Cơ sở dữ liệu.
 ```
 
 ---
