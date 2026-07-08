@@ -239,6 +239,17 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Human Decision: Nhóm áp dụng luồng gửi email thật bằng SMTP Gmail, ưu tiên gửi về email của người đang đăng nhập thông qua JWT claim, nếu không có email thì fallback về `tungtvde180109@fpt.edu.vn`. Nút Quét ngay được dùng cho test thủ công nên cho phép gửi lại email, còn worker nền vẫn giữ debounce để tránh spam.
 - Applied To: BACKEND/appsettings.json, BACKEND/Services/EmailService.cs, BACKEND/Services/StockAlertService.cs, BACKEND/Services/IStockAlertService.cs, BACKEND/Services/StockAlertWorker.cs, BACKEND/Controllers/StockAlertsController.cs, FRONTEND/src/features/warehouse/StockAlerts.tsx, insert-stock-alert-email-test.sql
 - Verification: Test SMTP gửi thành công bằng Gmail App Password; gọi `/api/stockalerts/scan?force=true` trả về `Đã gửi 3 email`; `dotnet build` backend thành công 0 warning/0 error; `npm run build` frontend thành công.
+## Log #16
+- Date: 2026-07-08
+- Author: Vũ Lê Duy (DE180104)
+- AI Tool: Antigravity
+- Purpose: Khắc phục lỗi 500 khi Entity Framework Core không dịch được hàm C# sang SQL trong tính năng ALPR Gate In/Out.
+- Prompt Reference: PROMPTS.md#prompt-21
+- AI Output Summary: Phát hiện hàm `NormalizePlate()` gây lỗi `IQueryable` translation, gợi ý dùng `.Replace()` và `.ToUpper()` lồng nhau để xử lý chuỗi trên database server.
+- Human Decision: Xác nhận thay đổi đúng đắn, áp dụng ngay vào backend. Ngoài ra quyết định làm Modal Pop-up đỏ chót cho dễ nhìn thay vì in lỗi 404 xuống Console.
+- Applied To: BACKEND/Services/GateService.cs, FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx
+- Verification: Đã chạy thử AI Camera quét biển số trên trình duyệt. Backend không còn văng lỗi HTTP 500, Frontend hiện đúng cảnh báo UI đỏ.
+
 --
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
