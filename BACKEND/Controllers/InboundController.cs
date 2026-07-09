@@ -17,11 +17,13 @@ namespace BACKEND.Controllers
 
         private readonly SmartLogAiContext _context;
         private readonly IS3StorageService _storage;
+        private readonly ISlottingService _slottingService;
 
-        public InboundController(SmartLogAiContext context, IS3StorageService storage)
+        public InboundController(SmartLogAiContext context, IS3StorageService storage, ISlottingService slottingService)
         {
             _context = context;
             _storage = storage;
+            _slottingService = slottingService;
         }
 
         [HttpGet]
@@ -51,6 +53,7 @@ namespace BACKEND.Controllers
                                 ReceivedQty = l.ReceivedQty,
                                 ConditionStatus = l.ConditionStatus,
                                 BinCode = l.Bin != null ? l.Bin.BinCode : null,
+                                AiSlottedBinCode = l.AislottedBin != null ? l.AislottedBin.BinCode : null,
                                 PhotoCount = l.CargoPhotos.Count,
                                 RequiresMinPhotos = l.ConditionStatus != null && l.ConditionStatus.ToUpper() == "DAMAGED",
                                 MinPhotos = l.ConditionStatus != null && l.ConditionStatus.ToUpper() == "DAMAGED" ? DamagedMinPhotos : 0,
@@ -105,6 +108,7 @@ namespace BACKEND.Controllers
                         ReceivedQty = l.ReceivedQty,
                         ConditionStatus = l.ConditionStatus,
                         BinCode = l.Bin != null ? l.Bin.BinCode : null,
+                        AiSlottedBinCode = l.AislottedBin != null ? l.AislottedBin.BinCode : null,
                         PhotoCount = l.CargoPhotos.Count,
                         RequiresMinPhotos = l.ConditionStatus != null && l.ConditionStatus.ToUpper() == "DAMAGED",
                         MinPhotos = l.ConditionStatus != null && l.ConditionStatus.ToUpper() == "DAMAGED" ? DamagedMinPhotos : 0,
@@ -159,6 +163,46 @@ namespace BACKEND.Controllers
                     .ToListAsync();
 
                 return Ok(photos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("lines/{lineId}/slotting-suggestions")]
+        public async Task<ActionResult<SlottingSuggestionResponseDto>> GetSlottingSuggestions(int lineId)
+        {
+            try
+            {
+                var result = await _slottingService.GetSuggestionsAsync(lineId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("lines/{lineId}/confirm-slot")]
+        public async Task<ActionResult<ConfirmSlottingResponseDto>> ConfirmSlot(int lineId, [FromBody] ConfirmSlottingRequestDto request)
+        {
+            try
+            {
+                var result = await _slottingService.ConfirmSlotAsync(lineId, request);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
