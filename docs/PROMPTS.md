@@ -599,6 +599,24 @@ AI hỗ trợ phân tích nguyên nhân layout. Sinh viên đối chiếu với 
 
 ---
 
+## Prompt #24
+
+- Date: 2026-07-09
+- AI Tool: Antigravity
+- Author: Tran Van Tung (DE180109)
+- Purpose: Cai tien UI/UX trang Finance Reports.
+
+### Prompt Summary
+```text
+Tach Finance Reports thanh cac tab Overview, Revenue, Expenses, Profit, Reconciliation, Forecast, Exports. Dua action dung pham vi, tao Overview mac dinh va lam gon bang doi soat bang modal Manual Match.
+```
+
+### Result
+```text
+Da cap nhat Finance.tsx thanh workspace tab, them Exports tab, chuyen Generate/Retrain vao Forecast va doi Manual Match tu input trong bang sang modal.
+
+---
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
