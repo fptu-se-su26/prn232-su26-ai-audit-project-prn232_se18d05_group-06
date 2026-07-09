@@ -391,6 +391,31 @@ Author: Trần Văn Tùng (DE180109)
 
 ---
 
+## [2026-07-09]
+Author: Trần Văn Tùng (DE180109)
+
+### Added
+- Báo cáo doanh thu theo loại dịch vụ: Thêm báo cáo doanh thu theo loại dịch vụ với API `/api/finance/reports/revenue-by-service`, card tổng quan, bảng dữ liệu, biểu đồ cột và biểu đồ tỷ lệ đóng góp.
+- Báo cáo chi phí vận hành: Thêm báo cáo chi phí vận hành với dữ liệu `OperatingExpenses`, `ExceptionExpenses` và `VehicleMaintenanceLogs`, hỗ trợ lọc theo ngày và loại chi phí.
+- Báo cáo lợi nhuận theo thời gian: Thêm báo cáo lợi nhuận theo thời gian, tính doanh thu - chi phí, profit margin và biểu đồ xu hướng theo kỳ.
+- Đối soát giao dịch thanh toán: Thêm đối soát thanh toán với API danh sách, auto-match, manual-match và biểu đồ trực quan trạng thái giao dịch ngân hàng.
+- Xuất báo cáo tài chính ra Excel/PDF: Thêm endpoint export `/api/finance/reports/export` hỗ trợ `excel` và `pdf` cho các reportType: `revenue-by-service`, `operating-expenses`, `profit`, `payment-reconciliation`, `financial-forecast`.
+- Dự báo tài chính cơ bản: Cập nhật dự báo tài chính cơ bản theo Moving Average 3 tháng, hỗ trợ chọn forecast 1/3/6 tháng, lưu `FinancialForecasts` và ghi `AiModelTrainingLogs` khi generate.
+
+### Changed
+- Admin Finance được mở rộng thành trung tâm báo cáo M4 gồm Revenue by Service, Operating Expense, Profit Report, Payment Reconciliation và Financial Forecast.
+- Route forecast mới dùng `/api/finance/forecasts`, vẫn giữ `/api/finance/forecast` để tương thích màn cũ.
+- Model version forecast chuyển sang dạng `FIN-MA-YYYYMM.1` để phản ánh phương pháp Moving Average.
+- UI bổ sung nút `Export Excel` và `Export PDF` dùng chung qua `FinanceExportButtons`.
+
+### Fixed
+- Sửa lỗi controller export thiếu inject `IFinanceReportExportService`.
+- Sửa lỗi text mojibake còn sót ở nút Đối soát thanh toán.
+- Sửa lỗi TypeScript khi đọc `content-disposition` từ Axios headers trong luồng tải file.
+
+### Verification
+- `npx tsc --noEmit` frontend thành công.
+- `dotnet build --no-restore /p:UseAppHost=false -o .\obj\codex-check` backend thành công 0 warning/0 error.
 ---
 
 ## 4. Tổng kết thay đổi cuối project

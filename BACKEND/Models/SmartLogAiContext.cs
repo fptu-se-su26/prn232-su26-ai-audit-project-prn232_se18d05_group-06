@@ -62,6 +62,8 @@ public partial class SmartLogAiContext : DbContext
 
     public virtual DbSet<NotificationConfig> NotificationConfigs { get; set; }
 
+    public virtual DbSet<OperatingExpense> OperatingExpenses { get; set; }
+
     public virtual DbSet<OrderLine> OrderLines { get; set; }
 
     public virtual DbSet<OutboundLine> OutboundLines { get; set; }
@@ -816,6 +818,23 @@ public partial class SmartLogAiContext : DbContext
             entity.Property(e => e.Template).HasMaxLength(2000);
         });
 
+
+        modelBuilder.Entity<OperatingExpense>(entity =>
+        {
+            entity.HasKey(e => e.ExpenseId).HasName("PK_OperatingExpenses");
+            entity.HasIndex(e => e.ExpenseCode, "UQ_OperatingExpenses_ExpenseCode").IsUnique();
+            entity.Property(e => e.ExpenseId).HasColumnName("ExpenseID");
+            entity.Property(e => e.ExpenseCode).HasMaxLength(30).IsUnicode(false);
+            entity.Property(e => e.ExpenseCategory).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValue("APPROVED");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany()
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK_OperatingExpenses_CreatedBy");
+        });
         modelBuilder.Entity<OrderLine>(entity =>
         {
             entity.HasKey(e => e.LineId).HasName("PK__OrderLin__2EAE64C9F5F9A930");

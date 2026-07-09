@@ -1,4 +1,4 @@
-﻿import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CustomerLandingPage from './features/customer/CustomerLandingPage';
 import AuthPage from './features/auth/AuthPage';
 import CreateOrder from './features/customer/CreateOrder';
