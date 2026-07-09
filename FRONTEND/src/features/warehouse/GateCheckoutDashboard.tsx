@@ -220,7 +220,11 @@ const GateCheckoutDashboard: React.FC = () => {
       const result = response.data;
       if (result.isAllowed) {
         setCheckoutResult({
+           barrierCommand: 'OPEN_ENTRY',
            message: result.message,
+           bookingId: result.bookingId ?? 0,
+           bookingCode: result.bookingCode ?? result.bookingId?.toString() ?? '',
+           licensePlate: result.truckPlate || plate,
            status: result.status,
            checkOutAt: new Date().toISOString()
         });

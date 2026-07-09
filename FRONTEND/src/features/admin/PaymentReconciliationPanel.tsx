@@ -83,7 +83,8 @@ const PaymentReconciliationPanel: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [manualDrafts, setManualDrafts] = useState<Record<number, { invoiceId: string; paymentId: string }>>({});
+  const [manualTarget, setManualTarget] = useState<ReconciliationItem | null>(null);
+  const [manualDraft, setManualDraft] = useState({ invoiceId: '', paymentId: '' });
 
   const loadData = async () => {
     try {
@@ -118,26 +119,36 @@ const PaymentReconciliationPanel: React.FC = () => {
     }
   };
 
-  const manualMatch = async (item: ReconciliationItem) => {
-    const draft = manualDrafts[item.reconcileId];
-    const invoiceId = Number(draft?.invoiceId || item.matchedInvoiceId || 0);
-    const paymentId = Number(draft?.paymentId || item.matchedPaymentId || 0);
+  const openManualMatch = (item: ReconciliationItem) => {
+    setManualTarget(item);
+    setManualDraft({
+      invoiceId: item.matchedInvoiceId ? String(item.matchedInvoiceId) : '',
+      paymentId: item.matchedPaymentId ? String(item.matchedPaymentId) : '',
+    });
+    setError(null);
+  };
+
+  const manualMatch = async () => {
+    if (!manualTarget) return;
+    const invoiceId = Number(manualDraft.invoiceId || manualTarget.matchedInvoiceId || 0);
+    const paymentId = Number(manualDraft.paymentId || manualTarget.matchedPaymentId || 0);
     if (!invoiceId || !paymentId) {
-      setError('C\u1ea7n nh\u1eadp InvoiceID v\u00e0 PaymentID \u0111\u1ec3 x\u00e1c nh\u1eadn th\u1ee7 c\u00f4ng.');
+      setError('Can nhap InvoiceID va PaymentID de xac nhan thu cong.');
       return;
     }
 
     try {
       setBusy(true);
       const response = await api.post('/finance/reconciliations/manual-match', {
-        reconcileId: item.reconcileId,
+        reconcileId: manualTarget.reconcileId,
         invoiceId,
         paymentId,
       });
       setNotice(response.data.message || 'Manual match completed.');
+      setManualTarget(null);
       await loadData();
     } catch {
-      setError('X\u00e1c nh\u1eadn th\u1ee7 c\u00f4ng th\u1ea5t b\u1ea1i.');
+      setError('Xac nhan thu cong that bai.');
     } finally {
       setBusy(false);
     }
@@ -301,7 +312,7 @@ const PaymentReconciliationPanel: React.FC = () => {
                 <th className="px-5 py-3 text-left font-semibold">Payment</th>
                 <th className="px-5 py-3 text-left font-semibold">{'Tr\u1ea1ng th\u00e1i'}</th>
                 <th className="px-5 py-3 text-left font-semibold">{'Ghi ch\u00fa'}</th>
-                <th className="px-5 py-3 text-left font-semibold">{'X\u00e1c nh\u1eadn th\u1ee7 c\u00f4ng'}</th>
+                <th className="px-5 py-3 text-left font-semibold">Thao tac</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
@@ -327,13 +338,10 @@ const PaymentReconciliationPanel: React.FC = () => {
                   </td>
                   <td className="px-5 py-4 text-slate-600">{item.matchNote}</td>
                   <td className="px-5 py-4">
-                    <div className="flex min-w-[260px] items-center gap-2">
-                      <input placeholder="InvoiceID" value={manualDrafts[item.reconcileId]?.invoiceId ?? ''} onChange={(event) => setManualDrafts((prev) => ({ ...prev, [item.reconcileId]: { invoiceId: event.target.value, paymentId: prev[item.reconcileId]?.paymentId ?? '' } }))} className="h-9 w-24 rounded-lg border border-slate-300 px-2 text-sm outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" />
-                      <input placeholder="PaymentID" value={manualDrafts[item.reconcileId]?.paymentId ?? ''} onChange={(event) => setManualDrafts((prev) => ({ ...prev, [item.reconcileId]: { invoiceId: prev[item.reconcileId]?.invoiceId ?? '', paymentId: event.target.value } }))} className="h-9 w-24 rounded-lg border border-slate-300 px-2 text-sm outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" />
-                      <button type="button" onClick={() => manualMatch(item)} disabled={busy} className="h-9 rounded-lg border border-indigo-200 bg-indigo-50 px-3 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-60">
-                        {'X\u00e1c nh\u1eadn'}
-                      </button>
-                    </div>
+                    <button type="button" onClick={() => openManualMatch(item)} disabled={busy} className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-60">
+                      <span className="material-symbols-outlined text-[16px]">edit_note</span>
+                      Manual Match
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -342,6 +350,50 @@ const PaymentReconciliationPanel: React.FC = () => {
         </div>
         {!data.items.length && <div className="px-5 py-10 text-center text-sm text-slate-500">{'Kh\u00f4ng c\u00f3 giao d\u1ecbch \u0111\u1ed1i so\u00e1t theo b\u1ed9 l\u1ecdc hi\u1ec7n t\u1ea1i.'}</div>}
       </section>
+      {manualTarget && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-2xl">
+            <div className="border-b border-slate-200 px-5 py-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">Manual Match</p>
+                  <h3 className="mt-1 text-lg font-semibold text-slate-950">Xac nhan doi soat thu cong</h3>
+                </div>
+                <button type="button" onClick={() => setManualTarget(null)} className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
+                  <span className="material-symbols-outlined text-[20px]">close</span>
+                </button>
+              </div>
+            </div>
+            <div className="space-y-4 px-5 py-5">
+              <div className="rounded-lg bg-slate-50 p-4 text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-semibold text-slate-700">BankTxnRef</span>
+                  <span className="font-semibold text-slate-950">{manualTarget.bankTxnRef}</span>
+                </div>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <span className="font-semibold text-slate-700">So tien NH</span>
+                  <span className="font-semibold text-slate-950">{formatMoney(manualTarget.bankAmount)}</span>
+                </div>
+              </div>
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-slate-700">InvoiceID</span>
+                <input value={manualDraft.invoiceId} onChange={(event) => setManualDraft((prev) => ({ ...prev, invoiceId: event.target.value }))} className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" placeholder="Nhap InvoiceID" />
+              </label>
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-slate-700">PaymentID</span>
+                <input value={manualDraft.paymentId} onChange={(event) => setManualDraft((prev) => ({ ...prev, paymentId: event.target.value }))} className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" placeholder="Nhap PaymentID" />
+              </label>
+            </div>
+            <div className="flex flex-col-reverse gap-2 border-t border-slate-200 px-5 py-4 sm:flex-row sm:justify-end">
+              <button type="button" onClick={() => setManualTarget(null)} className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Huy</button>
+              <button type="button" onClick={manualMatch} disabled={busy} className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-indigo-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-800 disabled:opacity-60">
+                <span className="material-symbols-outlined text-[18px]">rule_settings</span>
+                Xac nhan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
