@@ -6,6 +6,17 @@ import api from '../../lib/api';
 
 const bgImage = "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80";
 
+const getHomeRouteByRole = (role: string | number | undefined) => {
+  const value = String(role ?? '').trim().toUpperCase();
+
+  if (value === 'ADMIN' || value === '1') return '/admin/dashboard';
+  if (value === 'WAREHOUSE' || value === 'WF' || value === '2') return '/warehouse/dashboard';
+  if (value === 'DISPATCHER') return '/dispatcher';
+  if (value === 'DRIVER') return '/driver';
+
+  return '/';
+};
+
 export default function AuthPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,7 +62,7 @@ export default function AuthPage() {
           email: res.data.email,
           role: res.data.role
         }));
-        navigate('/');
+        navigate(getHomeRouteByRole(res.data.role), { replace: true });
       } else {
         // Register Request
         if (password !== confirmPassword) {
@@ -90,7 +101,7 @@ export default function AuthPage() {
         email: res.data.email,
         role: res.data.role
       }));
-      navigate('/');
+      navigate(getHomeRouteByRole(res.data.role), { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng nhập Google thất bại');
     } finally {
@@ -183,12 +194,14 @@ export default function AuthPage() {
                   <div className="space-y-4">
                     <div className="relative">
                       <input
-                        type="email"
+                        type="text"
                         id="login-email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
-                        placeholder="Email"
+                        placeholder="Email hoặc tên đăng nhập"
+                        autoCapitalize="none"
+                        autoComplete="username"
                         required
                       />
                       <label

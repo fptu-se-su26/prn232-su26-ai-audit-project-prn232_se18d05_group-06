@@ -154,6 +154,7 @@ const App: React.FC = () => {
         <Route path="/warehouse/transfer" element={<WarehouseTransfer />} />
         <Route path="/warehouse/inventory" element={<WarehouseInventory />} />
         <Route path="/warehouse/import" element={<WarehouseImport />} />
+        <Route path="/import-goods" element={<WarehouseImport />} />
         <Route path="/warehouse/export" element={<WarehouseExport />} />
         <Route path="/warehouse/stock-alerts" element={<WarehouseStockAlerts />} />
         <Route path="/warehouse/inventory-audit" element={<WarehouseInventoryAudit />} />

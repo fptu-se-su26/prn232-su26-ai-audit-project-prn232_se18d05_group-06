@@ -68,6 +68,7 @@ builder.Services.AddScoped<IFinanceReportService, FinanceReportService>();
 builder.Services.AddScoped<IFinanceReconciliationService, FinanceReconciliationService>();
 builder.Services.AddScoped<IFinanceReportExportService, FinanceReportExportService>();
 builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
+builder.Services.AddScoped<ISlottingService, SlottingService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 builder.Services.AddScoped<IVehicleDashboardService, VehicleDashboardService>();
 builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();

@@ -18,10 +18,46 @@ type InboundLine = {
   receivedQty: number | null
   conditionStatus: string | null
   binCode: string | null
+  aiSlottedBinCode: string | null
   photoCount: number
   requiresMinPhotos: boolean
   minPhotos: number
   photos: CargoPhoto[]
+}
+
+type SlottingSuggestion = {
+  rank: number
+  binId: number
+  binCode: string
+  binType: string | null
+  shelfCode: string | null
+  floorLevel: number | null
+  zoneCode: string | null
+  zoneName: string | null
+  zoneType: string | null
+  capacityCbm: number
+  maxWeightKg: number
+  currentVolumeCbm: number
+  currentWeightKg: number
+  requiredVolumeCbm: number
+  requiredWeightKg: number
+  remainingVolumeCbm: number
+  remainingWeightKg: number
+  score: number
+  movementClass: string
+  reasons: string[]
+}
+
+type SlottingResponse = {
+  lineId: number
+  inboundId: number
+  warehouseId: number
+  skuCode: string | null
+  productName: string | null
+  quantityToSlot: number
+  statusCode: string
+  message: string
+  suggestions: SlottingSuggestion[]
 }
 
 type InboundOrder = {
@@ -80,8 +116,11 @@ const ImportGoods = () => {
 
   const [loadingOrders, setLoadingOrders] = useState(false)
   const [loadingLines, setLoadingLines] = useState(false)
+  const [loadingSlotting, setLoadingSlotting] = useState(false)
+  const [confirmingSlot, setConfirmingSlot] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [slottingResult, setSlottingResult] = useState<SlottingResponse | null>(null)
 
   const [photoAngle, setPhotoAngle] = useState<string>('FRONT')
   const [markDamaged, setMarkDamaged] = useState(false)
@@ -138,7 +177,22 @@ const ImportGoods = () => {
 
   useEffect(() => {
     setMarkDamaged(Boolean(selectedLine?.requiresMinPhotos))
+    setSlottingResult(null)
   }, [selectedLine?.lineId, selectedLine?.requiresMinPhotos])
+
+  const loadSlottingSuggestions = async (lineId = selectedLineId) => {
+    if (lineId == null) return
+    setLoadingSlotting(true)
+    setError(null)
+    try {
+      const res = await api.get<SlottingResponse>(`/inbound/lines/${lineId}/slotting-suggestions`)
+      setSlottingResult(res.data)
+    } catch {
+      setError('Không tải được gợi ý vị trí lưu kho từ AI.')
+    } finally {
+      setLoadingSlotting(false)
+    }
+  }
 
   const refreshSelectedLinePhotos = async (lineId: number) => {
     const res = await api.get<CargoPhoto[]>(`/inbound/lines/${lineId}/photos`)
@@ -175,6 +229,30 @@ const ImportGoods = () => {
     }
   }
 
+  const handleConfirmSlot = async (suggestion: SlottingSuggestion) => {
+    if (!selectedLine) return
+    setConfirmingSlot(suggestion.binId)
+    setError(null)
+    try {
+      await api.post(`/inbound/lines/${selectedLine.lineId}/confirm-slot`, {
+        binId: suggestion.binId,
+        isAiSuggestion: true,
+      })
+      setLines((prev) =>
+        prev.map((l) =>
+          l.lineId === selectedLine.lineId
+            ? { ...l, binCode: suggestion.binCode, aiSlottedBinCode: suggestion.binCode }
+            : l,
+        ),
+      )
+      await loadSlottingSuggestions(selectedLine.lineId)
+    } catch {
+      setError('Vị trí được chọn không còn phù hợp hoặc không đủ sức chứa.')
+    } finally {
+      setConfirmingSlot(null)
+    }
+  }
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) handleUpload(file)
@@ -197,6 +275,8 @@ const ImportGoods = () => {
   const conditionText = (status: string | null) =>
     CONDITION_LABELS[(status ?? 'GOOD').toUpperCase()] ?? status ?? 'Nguyên vẹn'
   const statusText = (status: string | null) => STATUS_LABELS[(status ?? '').toUpperCase()] ?? status ?? 'Chưa có'
+  const formatNumber = (value: number) =>
+    new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 }).format(value)
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased overflow-hidden">
@@ -343,15 +423,121 @@ const ImportGoods = () => {
             </section>
 
             <section className="glass-card rounded-[28px] border border-white/80 p-6 shadow-xl shadow-slate-900/5">
-              <div className="flex items-center gap-3 mb-5">
-                <span className="material-symbols-outlined text-primary">warehouse</span>
-                <h2 className="text-xl font-semibold">Vị trí lưu kho</h2>
+              <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary">warehouse</span>
+                  <div>
+                    <h2 className="text-xl font-semibold">AI gợi ý vị trí lưu kho</h2>
+                    <p className="text-xs font-medium text-slate-500">
+                      Lọc đúng kho, điều kiện bảo quản, tải trọng và dung tích trước khi chấm điểm.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => loadSlottingSuggestions()}
+                  disabled={!selectedLine || loadingSlotting}
+                  className="inline-flex min-w-[168px] items-center justify-center gap-2 rounded-full border border-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                  style={{ backgroundColor: '#0050C8', color: '#ffffff' }}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-base">auto_awesome</span>
+                  {loadingSlotting ? 'Đang phân tích...' : 'Gợi ý vị trí'}
+                </button>
               </div>
-              <div className="grid gap-4 md:grid-cols-3">
-                <SelectBox label="Khu vực" options={['Khu A (Kho lạnh)', 'Khu B (Hàng khô)', 'Khu C (Hàng nguy hiểm)']} />
-                <SelectBox label="Kệ" options={['Kệ S1-01', 'Kệ S1-02', 'Kệ S2-01']} />
-                <SelectBox label="Ô chứa (Bin)" options={['Bin B10', 'Bin B11', 'Bin B12']} />
-              </div>
+
+              {!selectedLine && (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+                  Chọn một dòng hàng để AI phân tích vị trí lưu kho phù hợp.
+                </div>
+              )}
+
+              {selectedLine && (
+                <div className="space-y-4">
+                  <div className="grid gap-3 md:grid-cols-3">
+                    <InfoBox label="SKU đang chọn" value={selectedLine.skucode ?? '-'} />
+                    <InfoBox label="Số lượng slot" value={String(slottingResult?.quantityToSlot ?? selectedLine.receivedQty ?? selectedLine.expectedQty)} />
+                    <InfoBox label="Vị trí đã chốt" value={selectedLine.binCode ?? selectedLine.aiSlottedBinCode ?? '-'} />
+                  </div>
+
+                  {slottingResult && (
+                    <div className="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-semibold text-cyan-800">
+                      {slottingResult.message}
+                    </div>
+                  )}
+
+                  {!slottingResult && !loadingSlotting && (
+                    <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
+                      Bấm “Gợi ý vị trí” để xem top 3-5 ô chứa tốt nhất cho dòng hàng này.
+                    </div>
+                  )}
+
+                  {slottingResult?.suggestions.length === 0 && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm font-semibold text-amber-800">
+                      Không tìm thấy vị trí phù hợp. Kiểm tra lại zone bảo quản, tải trọng hoặc dung tích bin.
+                    </div>
+                  )}
+
+                  <div className="grid gap-3">
+                    {slottingResult?.suggestions.map((item) => {
+                      const selected = selectedLine.binCode === item.binCode
+                      return (
+                        <div
+                          key={item.binId}
+                          className={`rounded-3xl border bg-white p-4 transition ${
+                            selected ? 'border-emerald-300 ring-4 ring-emerald-100' : 'border-slate-200 hover:border-blue-200'
+                          }`}
+                        >
+                          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">
+                                  {item.rank}
+                                </span>
+                                <h3 className="text-lg font-bold text-slate-950">{item.binCode}</h3>
+                                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                                  {item.score}/100 điểm
+                                </span>
+                                {selected && (
+                                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+                                    Đã xác nhận
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-2 text-sm text-slate-500">
+                                {item.zoneName ?? item.zoneCode ?? 'Zone'} • {item.zoneType ?? 'NORMAL'} • Kệ {item.shelfCode ?? '-'} • Tầng {item.floorLevel ?? '-'}
+                              </p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {item.reasons.map((reason) => (
+                                  <span key={reason} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                                    {reason}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => handleConfirmSlot(item)}
+                              disabled={confirmingSlot === item.binId || selected}
+                              className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/15 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                              type="button"
+                            >
+                              <span className="material-symbols-outlined text-base">check_circle</span>
+                              {confirmingSlot === item.binId ? 'Đang lưu...' : selected ? 'Đã lưu' : 'Xác nhận'}
+                            </button>
+                          </div>
+
+                          <div className="mt-4 grid gap-3 md:grid-cols-4">
+                            <Metric label="Cần chứa" value={`${formatNumber(item.requiredVolumeCbm)} CBM`} sub={`${formatNumber(item.requiredWeightKg)} kg`} />
+                            <Metric label="Đang dùng" value={`${formatNumber(item.currentVolumeCbm)} CBM`} sub={`${formatNumber(item.currentWeightKg)} kg`} />
+                            <Metric label="Còn trống" value={`${formatNumber(item.remainingVolumeCbm)} CBM`} sub={`${formatNumber(item.remainingWeightKg)} kg`} />
+                            <Metric label="Tần suất xuất" value={item.movementClass} sub={item.binType ?? 'Bin thường'} />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </section>
           </div>
 
@@ -555,14 +741,11 @@ const InfoBox = ({ label, value }: { label: string; value: string }) => (
   </div>
 )
 
-const SelectBox = ({ label, options }: { label: string; options: string[] }) => (
-  <div className="space-y-2">
-    <label className="block text-sm font-semibold text-slate-500">{label}</label>
-    <select className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
-      {options.map((option) => (
-        <option key={option}>{option}</option>
-      ))}
-    </select>
+const Metric = ({ label, value, sub }: { label: string; value: string; sub: string }) => (
+  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
+    <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{label}</p>
+    <p className="mt-1 text-sm font-bold text-slate-950">{value}</p>
+    <p className="text-xs font-medium text-slate-500">{sub}</p>
   </div>
 )
 
