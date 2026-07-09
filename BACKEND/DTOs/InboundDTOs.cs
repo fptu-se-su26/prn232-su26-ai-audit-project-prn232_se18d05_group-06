@@ -20,6 +20,7 @@ namespace BACKEND.DTOs
         public int? ReceivedQty { get; set; }
         public string? ConditionStatus { get; set; }
         public string? BinCode { get; set; }
+        public string? AiSlottedBinCode { get; set; }
         public int PhotoCount { get; set; }
 
         // UC002: damaged packages must have at least 2 photos.
