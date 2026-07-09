@@ -25,7 +25,8 @@ var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnec
     ?? throw new InvalidOperationException("Database connection string is missing. Configure ConnectionStrings:DefaultConnection.");
 
 builder.Services.AddDbContext<SmartLogAiContext>(options =>
-    options.UseSqlServer(defaultConnection));
+    options.UseSqlServer(defaultConnection, sqlOptions =>
+        sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is missing");
@@ -102,7 +103,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
