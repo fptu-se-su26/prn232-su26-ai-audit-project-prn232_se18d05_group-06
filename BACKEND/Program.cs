@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using BACKEND.Models;
 using BACKEND.Services;
+using BACKEND.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -71,6 +72,11 @@ builder.Services.AddScoped<IFinanceReconciliationService, FinanceReconciliationS
 builder.Services.AddScoped<IFinanceReportExportService, FinanceReportExportService>();
 builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
 builder.Services.AddSingleton<ILprService, LprService>();
+builder.Services.AddScoped<IVehicleDashboardService, VehicleDashboardService>();
+builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
+
+// Register Workers
+builder.Services.AddHostedService<TierRecalculationWorker>();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();

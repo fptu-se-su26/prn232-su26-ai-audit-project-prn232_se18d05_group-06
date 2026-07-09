@@ -7,6 +7,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import { getCustomerTier, getTierConfigs } from '../../lib/api/customerTier';
+import { TierConfigDto } from '../../types/customerTier';
 
 const CustomerProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -20,8 +22,11 @@ const CustomerProfile: React.FC = () => {
     points: 2450,
   });
 
+  const [tierConfigs, setTierConfigs] = useState<TierConfigDto[]>([]);
+
   useEffect(() => {
     const userStr = localStorage.getItem('user');
+    let userId = 1; // Default mock user id for testing
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
@@ -30,10 +35,30 @@ const CustomerProfile: React.FC = () => {
           fullName: user.name || prev.fullName,
           email: user.email || prev.email,
         }));
+        if (user.id) userId = user.id;
       } catch (e) {
         console.error('Lỗi khi đọc thông tin user từ localStorage', e);
       }
     }
+
+    // Fetch real tier from backend
+    const fetchTierInfo = async () => {
+      try {
+        const configs = await getTierConfigs();
+        setTierConfigs(configs.sort((a, b) => a.minRevenue - b.minRevenue));
+
+        const tierData = await getCustomerTier(userId);
+        if (tierData && tierData.tier) {
+          setProfile(prev => ({
+            ...prev,
+            memberTier: tierData.tier as string,
+          }));
+        }
+      } catch (e) {
+        console.error('Failed to fetch tier info', e);
+      }
+    };
+    fetchTierInfo();
   }, []);
 
   return (

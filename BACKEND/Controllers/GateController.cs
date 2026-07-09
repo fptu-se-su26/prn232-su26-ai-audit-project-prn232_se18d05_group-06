@@ -164,7 +164,7 @@ namespace BACKEND.Controllers
                 if (string.IsNullOrWhiteSpace(licensePlate))
                 {
                     return Ok(new { 
-                        LicensePlate = (string)null, 
+                        LicensePlate = string.Empty, 
                         Message = "Could not detect license plate.",
                         DebugInfo = new { confidence = lprResult.Confidence, bbox = lprResult.BoundingBox }
                     });
