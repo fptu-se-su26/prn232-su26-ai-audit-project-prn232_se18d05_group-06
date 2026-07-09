@@ -416,6 +416,21 @@ Author: Trần Văn Tùng (DE180109)
 ### Verification
 - `npx tsc --noEmit` frontend thành công.
 - `dotnet build --no-restore /p:UseAppHost=false -o .\obj\codex-check` backend thành công 0 warning/0 error.
+
+---
+
+## [2026-07-09]
+Author: Tran Van Tung (DE180109)
+
+### Changed
+- Tach trang Admin Finance thanh workspace theo tab: Overview, Revenue, Expenses, Profit, Reconciliation, Forecast, Exports.
+- Chuyen nut Generate Forecast va Retrain vao tab Forecast.
+- Them tab Exports de xuat bao cao theo tung loai.
+
+### Fixed
+- Rut gon bang doi soat thanh toan bang nut Manual Match va modal xac nhan.
+- Giu UI admin theo tone sang, sidebar den ro nhu man hinh warehouse.
+
 ---
 
 ## 4. Tổng kết thay đổi cuối project
