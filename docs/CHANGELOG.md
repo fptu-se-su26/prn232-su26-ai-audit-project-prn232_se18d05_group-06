@@ -501,3 +501,26 @@ Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các t
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 02/06/2026 |
+
+---
+
+## [1.5.0] - 2026-07-10
+Author: Vu Le Duy (DE180104)
+
+### Added
+- Bo sung luong dang nhap theo vai tro: sau khi dang nhap thanh cong, he thong tu chuyen nguoi dung ve dung man hinh cua role.
+- Tao va kiem thu tai khoan mau cho `WAREHOUSE` va `DISPATCHER` de phuc vu demo nghiep vu.
+- Them route alias `/import-goods` tro ve man hinh nhap kho de nguoi dung truy cap nhanh nghiep vu AI goi y vi tri luu kho.
+
+### Changed
+- Sua o dang nhap tu `type="email"` sang `type="text"` de chap nhan username va khong bi trinh duyet bat nhap ky tu `@`.
+- Cai thien nut **Goi y vi tri** trong man nhap kho de hien thi ro rang hon, tranh bi chim tren nen trang.
+- Dieu chinh connection string local co `TrustServerCertificate=True` khi can chay backend tren SQL Server local co certificate tu ky.
+
+### Notes
+- Azure Computer Vision duoc cau hinh qua `appsettings.json` theo section `AzureVision`, nhung khong ghi lo key trong tai lieu.
+- Cac thay doi duoc kiem thu bang API login, man hinh frontend localhost va lenh `npm run build`.
+
+### AI-assisted
+- AI duoc dung de tham khao cach kiem tra router, auth flow, role redirect va van de UI button bi chim mau.
+- Sinh vien tu doi chieu code hien co, tu chon cach sua, tu chay build va kiem thu dang nhap bang tai khoan mau.

@@ -317,3 +317,13 @@ Sinh viên/nhóm hiểu rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 02/06/2026 |
+
+---
+
+## 19. Reflection bo sung - Dang nhap theo role va cau hinh local - Vu Le Duy (DE180104)
+
+Trong giai doan hoan thien demo, em su dung AI nhu cong cu tham khao de tim nhanh vi tri code lien quan den dang nhap, phan quyen va dieu huong frontend. AI goi y can xem `AuthPage.tsx`, `RoleGuard.tsx` va router trong `App.tsx`, nhung em tu doc lai code that cua project de quyet dinh mapping role nao se ve man hinh nao. Ket qua cuoi cung la tai khoan `WAREHOUSE` vao dashboard kho, `DISPATCHER` vao man Dispatcher, `ADMIN` vao dashboard admin va `DRIVER` vao man driver.
+
+Khi gap loi o o dang nhap, em xac dinh nguyen nhan la input dang de `type="email"`, lam trinh duyet bat buoc phai co ky tu `@`. AI chi ho tro dinh huong cach tim loi, con em tu sua input thanh `type="text"`, them `autoComplete="username"` va build lai frontend de kiem tra. Voi nghiep vu AI goi y vi tri luu kho, em cung tu kiem tra giao dien thuc te va sua nut goi y de hien thi ro hon, tranh bi chim tren nen trang.
+
+Voi phan cau hinh local va Azure Vision, em nhan ra tai lieu khong nen ghi lo key hoac secret day du. AI ho tro nhac cach to chuc section cau hinh va canh bao bao mat, nhung viec kiem tra file `appsettings.json`, chay backend/frontend va xac nhan localhost hoat dong la do em thuc hien. Bai hoc rut ra la AI co the ho tro debug va goi y nhanh, nhung nguoi lam van phai tu hieu luong dang nhap, quyen truy cap va cach bao ve thong tin nhay cam.

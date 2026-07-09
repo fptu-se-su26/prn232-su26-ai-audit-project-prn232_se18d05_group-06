@@ -384,3 +384,27 @@ Sinh viên/nhóm cam kết rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 21/06/2026 |
+
+---
+
+## Log #22
+- Date: 2026-07-10
+- Author: Vu Le Duy (DE180104)
+- AI Tool: ChatGPT/Codex
+- Purpose: Tham khao hoan thien luong dang nhap theo role va cap nhat UI nghiep vu AI goi y vi tri luu kho.
+- Prompt Reference: PROMPTS.md#prompt-25
+- AI Output Summary: AI goi y kiem tra `AuthPage.tsx`, `RoleGuard.tsx`, router trong `App.tsx`, API login response va nguyen nhan input email khong cho nhap username.
+- Human Decision: Sinh vien tu doc code hien co, quyet dinh dieu huong theo role `ADMIN`, `WAREHOUSE`, `DISPATCHER`, `DRIVER`, sua input login thanh text va cai thien nut goi y vi tri bang style ro rang hon.
+- Applied To: FRONTEND/src/features/auth/AuthPage.tsx, FRONTEND/src/App.tsx, FRONTEND/src/features/warehouse/ImportGoods.tsx
+- Verification: Test API login voi tai khoan `warehouse` va `dispatcher`, chay `npm run build`, mo frontend localhost de kiem tra luong dang nhap va nut goi y vi tri.
+
+## Log #23
+- Date: 2026-07-10
+- Author: Vu Le Duy (DE180104)
+- AI Tool: ChatGPT/Codex
+- Purpose: Tham khao cach cau hinh moi truong local va bao ve thong tin nhay cam trong appsettings.
+- Prompt Reference: PROMPTS.md#prompt-26
+- AI Output Summary: AI ho tro kiem tra connection string SQL Server local, loi certificate va viec luu cau hinh Azure Vision theo section rieng.
+- Human Decision: Sinh vien tu quyet dinh chi ghi nhan cach cau hinh, khong dua secret/key day du vao tai lieu, va kiem tra backend/frontend tren localhost.
+- Applied To: BACKEND/appsettings.json, BACKEND/Program.cs, tai lieu docs
+- Verification: Backend Swagger tra 200, frontend tra 200, API `/api/inbound` tra 200 trong qua trinh test local.
