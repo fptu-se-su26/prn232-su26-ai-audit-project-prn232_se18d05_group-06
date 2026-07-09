@@ -294,7 +294,17 @@ Kỹ năng lập trình phần Backend để kết nối cơ sở dữ liệu th
 
 ---
 
-## 16. Cam kết Reflection
+## 16. Reflection bổ sung - Vũ Lê Duy (DE180104)
+
+Trong giai đoạn hoàn thiện module quản lý phương tiện cho Dispatcher, em có sử dụng AI như một công cụ hỗ trợ tham khảo để định hướng cách kiểm tra luồng nghiệp vụ và debug giao diện. Nội dung AI hỗ trợ chủ yếu là gợi ý nên kiểm tra các vị trí như service tạo booking, service check-in cổng, DTO phương tiện và component hiển thị danh sách xe. Em không xem AI là người làm thay toàn bộ chức năng, vì các quyết định nghiệp vụ như xe hết hạn đăng kiểm phải bị chặn đặt lịch/check-in, xe sắp bảo trì chỉ cảnh báo Dispatcher, vẫn cần tự đọc code và đối chiếu với yêu cầu dự án.
+
+Khi triển khai, em tự kiểm tra lại cấu trúc hiện có của backend và frontend, sau đó chỉnh sửa các file liên quan như `BookingService.cs`, `GateService.cs`, `VehiclesTab.tsx` và `index.css`. Với phần giao diện, AI có gợi ý nguyên nhân lỗi scroll có thể đến từ `overflow-hidden` hoặc chiều cao container, nhưng em phải dựa trên ảnh chụp thực tế và thử lại trên localhost để quyết định cách sửa phù hợp. Sau khi chỉnh sửa, em chạy `dotnet build`, `npm run build` và mở trang Dispatcher để kiểm tra danh sách phương tiện có kéo xuống được không.
+
+Bài học rút ra là AI giúp tiết kiệm thời gian khi phân tích lỗi và gợi ý hướng xử lý, nhưng nếu chỉ copy kết quả AI thì rất dễ sai với cấu trúc thật của project. Người làm vẫn phải hiểu nghiệp vụ, biết file nào chịu trách nhiệm cho backend, file nào chịu trách nhiệm cho UI, và phải kiểm thử lại trước khi ghi nhận là hoàn thành. Vì vậy, mức độ sử dụng AI trong phần này là hỗ trợ tham khảo, debug và gợi ý cải tiến; phần quyết định, chỉnh sửa và xác nhận kết quả do sinh viên thực hiện.
+
+---
+
+## 17. Cam kết Reflection
 
 Em/nhóm cam kết rằng nội dung reflection này phản ánh trung thực quá trình sử dụng AI và quá trình học tập trong bài tập/project.
 
