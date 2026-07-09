@@ -229,7 +229,7 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: BACKEND/Controllers/FinancialForecastController.cs, BACKEND/Services/FinancialForecastService.cs, BACKEND/DTOs/FinancialForecastDTOs.cs, BACKEND/Models/FinancialForecast.cs, BACKEND/Models/AiModelTrainingLog.cs, BACKEND/Models/SmartLogAiContext.UC023.cs, BACKEND/Program.cs, FRONTEND/src/features/admin/Finance.tsx, smartlogAI.sql
 - Verification: `dotnet build` backend thanh cong; `npm run type-check` frontend van con loi cu ngoai pham vi UC042 do thieu `InventoryAudit.types`; thu seed SQL local khong thanh cong vi SQL Server `(local)` khong ket noi duoc.
 
-## Log #15
+## Log #19
 - Date: 2026-07-08
 - Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
@@ -239,7 +239,10 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Human Decision: Nhóm áp dụng luồng gửi email thật bằng SMTP Gmail, ưu tiên gửi về email của người đang đăng nhập thông qua JWT claim, nếu không có email thì fallback về `tungtvde180109@fpt.edu.vn`. Nút Quét ngay được dùng cho test thủ công nên cho phép gửi lại email, còn worker nền vẫn giữ debounce để tránh spam.
 - Applied To: BACKEND/appsettings.json, BACKEND/Services/EmailService.cs, BACKEND/Services/StockAlertService.cs, BACKEND/Services/IStockAlertService.cs, BACKEND/Services/StockAlertWorker.cs, BACKEND/Controllers/StockAlertsController.cs, FRONTEND/src/features/warehouse/StockAlerts.tsx, insert-stock-alert-email-test.sql
 - Verification: Test SMTP gửi thành công bằng Gmail App Password; gọi `/api/stockalerts/scan?force=true` trả về `Đã gửi 3 email`; `dotnet build` backend thành công 0 warning/0 error; `npm run build` frontend thành công.
-## Log #16
+
+---
+
+## Log #20
 - Date: 2026-07-08
 - Author: Vũ Lê Duy (DE180104)
 - AI Tool: Antigravity
@@ -252,7 +255,7 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 
 ---
 
-## Log #19
+## Log #21
 - Date: 2026-07-09
 - Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
@@ -263,7 +266,22 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 - Applied To: BACKEND/Controllers/FinanceReportsController.cs, BACKEND/Controllers/FinanceReconciliationsController.cs, BACKEND/Controllers/FinancialForecastController.cs, BACKEND/Services/FinanceReportService.cs, BACKEND/Services/FinanceReconciliationService.cs, BACKEND/Services/FinanceReportExportService.cs, BACKEND/Services/FinancialForecastService.cs, BACKEND/DTOs/*Finance*.cs, FRONTEND/src/features/admin/Finance.tsx, FRONTEND/src/features/admin/RevenueByServicePanel.tsx, FRONTEND/src/features/admin/OperatingExpensePanel.tsx, FRONTEND/src/features/admin/ProfitReportPanel.tsx, FRONTEND/src/features/admin/PaymentReconciliationPanel.tsx, FRONTEND/src/features/admin/FinanceExportButtons.tsx, smartlogAI.sql.
 - Verification: `npx tsc --noEmit` frontend thành công; `dotnet build --no-restore /p:UseAppHost=false -o .\obj\codex-check` backend thành công 0 warning/0 error.
 - Notes: Một số thư mục build tạm `.verify-backend-build` và `BACKEND/obj/codex-check` bị Windows giữ quyền nên chưa xóa sạch được; đây là artifact build, không phải mã chức năng.
+
 ---
+
+## Log #22
+- Date: 2026-07-09
+- Author: Tran Van Tung (DE180109)
+- AI Tool: Antigravity
+- Purpose: Cai tien UI/UX Finance Admin thanh workspace theo tab.
+- Prompt Reference: PROMPTS.md#prompt-23
+- AI Output Summary: Tach Finance thanh Overview, Revenue, Expenses, Profit, Reconciliation, Forecast, Exports; dua action ve dung tab.
+- Human Decision: Giu mau sang, chi giu sidebar den va bo input manual match truc tiep trong bang.
+- Applied To: FRONTEND/src/features/admin/Finance.tsx, FRONTEND/src/features/admin/PaymentReconciliationPanel.tsx
+- Verification: Chay `npx tsc --noEmit` thanh cong.
+
+---
+
 
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
