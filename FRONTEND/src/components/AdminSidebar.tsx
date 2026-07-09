@@ -22,6 +22,7 @@ const menuItems: MenuItem[] = [
   { label: 'Notifications', icon: 'notifications', path: '/admin/notifications', group: 'system' },
   { label: 'Audit Logs', icon: 'history', path: '/admin/audit-log', group: 'system' },
   { label: 'Settings', icon: 'settings', path: '/admin/settings', group: 'system' },
+
 ];
 
 const groupLabels: Record<MenuItem['group'], string> = {

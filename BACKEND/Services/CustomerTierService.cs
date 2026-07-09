@@ -23,6 +23,7 @@ public class CustomerTierService : ICustomerTierService
     public async Task<List<TierConfigDto>> GetTierConfigsAsync()
     {
         await EnsureTierConfigsTableAsync();
+
         return await _context.TierConfigs
             .Select(t => new TierConfigDto
             {
@@ -41,6 +42,7 @@ public class CustomerTierService : ICustomerTierService
     public async Task<TierConfigDto> CreateTierConfigAsync(TierConfigDto dto)
     {
         await EnsureTierConfigsTableAsync();
+
         var entity = new TierConfig
         {
             TierName = dto.TierName,
@@ -61,6 +63,7 @@ public class CustomerTierService : ICustomerTierService
     public async Task<TierConfigDto?> UpdateTierConfigAsync(int id, TierConfigDto dto)
     {
         await EnsureTierConfigsTableAsync();
+
         var entity = await _context.TierConfigs.FindAsync(id);
         if (entity == null) return null;
 
@@ -79,6 +82,7 @@ public class CustomerTierService : ICustomerTierService
     public async Task<bool> DeleteTierConfigAsync(int id)
     {
         await EnsureTierConfigsTableAsync();
+
         var entity = await _context.TierConfigs.FindAsync(id);
         if (entity == null) return false;
 
@@ -90,6 +94,7 @@ public class CustomerTierService : ICustomerTierService
     public async Task<TierConfigDto?> GetBenefitsAsync(string tierCode)
     {
         await EnsureTierConfigsTableAsync();
+
         var config = await _context.TierConfigs
             .FirstOrDefaultAsync(t => t.TierCode == tierCode && t.IsActive);
             
@@ -110,6 +115,7 @@ public class CustomerTierService : ICustomerTierService
     public async Task<CustomerTierDto?> CalculateAndUpdateCustomerTierAsync(int customerId)
     {
         await EnsureTierConfigsTableAsync();
+
         var customer = await _context.Customers.FindAsync(customerId);
         if (customer == null) return null;
 
@@ -162,6 +168,7 @@ public class CustomerTierService : ICustomerTierService
     public async Task<int> UpdateAllCustomerTiersAsync()
     {
         await EnsureTierConfigsTableAsync();
+
         var customerIds = await _context.Customers.Select(c => c.CustomerId).ToListAsync();
         int updateCount = 0;
 
@@ -178,6 +185,7 @@ public class CustomerTierService : ICustomerTierService
     public async Task<List<CustomerTierSummaryDto>> GetTierSummaryAsync()
     {
         await EnsureTierConfigsTableAsync();
+
         var tierConfigs = await _context.TierConfigs.Where(t => t.IsActive).ToListAsync();
         var customerTiers = await _context.Customers.GroupBy(c => c.Tier).Select(g => new { Tier = g.Key, Count = g.Count() }).ToListAsync();
 
@@ -299,4 +307,5 @@ END;";
 
         await _context.Database.ExecuteSqlRawAsync(sql);
     }
+
 }
