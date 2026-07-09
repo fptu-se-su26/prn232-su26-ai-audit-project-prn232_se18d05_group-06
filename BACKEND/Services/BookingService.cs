@@ -180,7 +180,10 @@ namespace BACKEND.Services
             }
 
             // 5. Find or create the vehicle based on LicensePlate (maps to TruckPlate column)
-            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.TruckPlate == dto.LicensePlate);
+            var normalizedLicensePlate = NormalizePlate(dto.LicensePlate);
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v =>
+                v.TruckPlate != null &&
+                v.TruckPlate.Replace("-", "").Replace(".", "").Replace(" ", "").ToUpper() == normalizedLicensePlate);
             if (vehicle == null)
             {
                 vehicle = new Vehicle
@@ -196,6 +199,10 @@ namespace BACKEND.Services
                 };
                 _context.Vehicles.Add(vehicle);
                 await _context.SaveChangesAsync();
+            }
+            else if (IsInspectionExpired(vehicle))
+            {
+                throw new Exception($"Xe {dto.LicensePlate} đã hết hạn đăng kiểm, không thể đặt lịch.");
             }
 
             // 6. Generate Booking ID (BookingCode)
@@ -261,6 +268,19 @@ namespace BACKEND.Services
                 Status = "CONFIRMED",
                 QrCodeBase64 = qrCodeBase64
             };
+        }
+
+        private static bool IsInspectionExpired(Vehicle vehicle)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            return vehicle.InspectionExpiry.HasValue && vehicle.InspectionExpiry.Value < today;
+        }
+
+        private static string NormalizePlate(string plate)
+        {
+            return string.IsNullOrWhiteSpace(plate)
+                ? string.Empty
+                : plate.Trim().ToUpperInvariant().Replace("-", "").Replace(".", "").Replace(" ", "");
         }
     }
 }
