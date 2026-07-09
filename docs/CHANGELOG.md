@@ -490,6 +490,35 @@ Author: Vũ Lê Duy (DE180104)
 
 ---
 
+## [1.3.0] - 2026-07-09
+Author: Vũ Lê Duy (DE180104)
+
+### Added
+- Bổ sung nghiệp vụ kiểm tra hạn đăng kiểm của phương tiện khi tạo lịch booking kho.
+- Bổ sung rule chặn AI Camera check-in nếu xe đã hết hạn đăng kiểm.
+- Bổ sung cảnh báo Dispatcher cho xe sắp đến hạn bảo trì trong màn Hồ sơ xe.
+- Thêm KPI, bộ lọc rủi ro và nhãn cảnh báo trực tiếp trên danh sách phương tiện.
+
+### Changed
+- Cải thiện UI màn quản lý phương tiện theo hướng dashboard vận hành: thẻ thống kê rõ hơn, cảnh báo đăng kiểm/bảo trì nổi bật hơn, bảng phương tiện dễ quét thông tin hơn.
+- Điều chỉnh layout `VehiclesTab` để vùng danh sách phương tiện có thể cuộn dọc, tránh bị che/lấp bởi phần KPI và bộ lọc phía trên.
+- Chuẩn hóa việc so sánh biển số xe khi đặt lịch bằng cách bỏ dấu gạch ngang, dấu chấm và khoảng trắng trước khi truy vấn.
+
+### Fixed
+- Sửa lỗi danh sách phương tiện bị lấp ở cuối màn hình, không kéo xuống xem đầy đủ thông tin được.
+- Sửa nguy cơ xe hết hạn đăng kiểm vẫn đặt lịch hoặc check-in được nếu người dùng nhập biển số khác định dạng.
+
+### AI-assisted
+- Có sử dụng AI ở mức tham khảo để gợi ý vị trí kiểm tra logic, cách đọc lỗi layout scroll và cách tổ chức lại UI.
+- Sinh viên tự kiểm tra code hiện có, tự quyết định nghiệp vụ, chỉnh sửa thủ công, chạy build và kiểm thử trên localhost trước khi ghi nhận vào changelog.
+
+### Verification
+- `dotnet build BACKEND/BACKEND.csproj`: thành công.
+- `npm run build`: thành công.
+- Kiểm tra thủ công backend Swagger và frontend Dispatcher trên localhost.
+
+---
+
 ## 5. Cam kết cập nhật Changelog
 
 Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các thay đổi đã thực hiện trong quá trình làm bài tập/project.

@@ -80,6 +80,11 @@ namespace BACKEND.Controllers
             catch (Exception ex)
             {
                 // Return Bad Request for validation errors like double bookings
+                if (ex.Message.Contains("hết hạn đăng kiểm"))
+                {
+                    return BadRequest(ex.Message);
+                }
+
                 if (ex.Message.Contains("Trùng lịch") || ex.Message.Contains("không tồn tại"))
                 {
                     return BadRequest(ex.Message);

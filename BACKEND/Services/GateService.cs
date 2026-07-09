@@ -227,6 +227,12 @@ namespace BACKEND.Services
                 await _context.SaveChangesAsync();
             }
 
+            var checkInVehicle = await ResolveVehicleAsync(booking, cleanPlate);
+            if (IsInspectionExpired(checkInVehicle))
+            {
+                return CreateInspectionExpiredDenial(checkInVehicle, booking.Vehicle?.TruckPlate ?? booking.AlprPlate ?? cleanPlate);
+            }
+
             // Perform blacklist validation before any transaction or state updates
             var blacklistDenied = await _blacklistValidationService.CheckBlacklistAsync(booking.VehicleId, booking.DriverId);
             if (blacklistDenied != null)
@@ -355,6 +361,16 @@ namespace BACKEND.Services
                 };
             }
 
+            if (IsInspectionExpired(vehicle))
+            {
+                return new GateCheckResultDto
+                {
+                    IsAllowed = false,
+                    Status = "REJECTED_INSPECTION_EXPIRED",
+                    Message = "Xe đã hết hạn đăng kiểm. Không được phép check-in."
+                };
+            }
+
             if (vehicle.Status != "ACTIVE")
             {
                 return new GateCheckResultDto
@@ -412,6 +428,53 @@ namespace BACKEND.Services
                 VehicleId = vehicle.VehicleId,
                 BookingId = booking.BookingId,
                 TruckPlate = vehicle.TruckPlate
+            };
+        }
+
+        private async Task<Vehicle?> ResolveVehicleAsync(SlotBooking booking, string? cleanPlate)
+        {
+            if (booking.Vehicle != null)
+            {
+                return booking.Vehicle;
+            }
+
+            if (booking.VehicleId.HasValue)
+            {
+                return await _context.Vehicles.FindAsync(booking.VehicleId.Value);
+            }
+
+            var plateToFind = booking.AlprPlate ?? cleanPlate;
+            if (string.IsNullOrWhiteSpace(plateToFind))
+            {
+                return null;
+            }
+
+            var normalizedPlate = NormalizePlate(plateToFind);
+            return await _context.Vehicles.FirstOrDefaultAsync(v =>
+                v.TruckPlate != null &&
+                v.TruckPlate.Replace("-", "").Replace(".", "").Replace(" ", "").ToUpper() == normalizedPlate);
+        }
+
+        private static bool IsInspectionExpired(Vehicle? vehicle)
+        {
+            if (vehicle?.InspectionExpiry == null)
+            {
+                return false;
+            }
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            return vehicle.InspectionExpiry.Value < today;
+        }
+
+        private static GateAccessDeniedResponseDto CreateInspectionExpiredDenial(Vehicle? vehicle, string? fallbackPlate)
+        {
+            return new GateAccessDeniedResponseDto
+            {
+                AlertType = "INSPECTION_EXPIRED",
+                AlarmLevel = "CRITICAL",
+                BlockedEntity = "Vehicle",
+                Reason = "Xe đã hết hạn đăng kiểm. Không được phép check-in.",
+                LicensePlate = vehicle?.TruckPlate ?? fallbackPlate ?? string.Empty
             };
         }
     }

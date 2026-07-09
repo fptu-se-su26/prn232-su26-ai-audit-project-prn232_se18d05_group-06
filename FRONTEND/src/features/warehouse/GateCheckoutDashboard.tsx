@@ -224,6 +224,7 @@ const GateCheckoutDashboard: React.FC = () => {
            message: result.message,
            bookingId: result.bookingId ?? 0,
            bookingCode: result.bookingCode ?? result.bookingId?.toString() ?? '',
+
            licensePlate: result.truckPlate || plate,
            status: result.status,
            checkOutAt: new Date().toISOString()
@@ -345,6 +346,10 @@ const GateCheckoutDashboard: React.FC = () => {
       const response = await api.post<any>('/gate/checkin', payload);
       setCheckoutResult({
         ...response.data,
+        barrierCommand: response.data.barrierCommand || 'OPEN_ENTRY',
+        bookingId: response.data.bookingId || activeBooking.bookingId,
+        bookingCode: response.data.bookingCode || activeBooking.bookingCode,
+        licensePlate: response.data.licensePlate || activeBooking.truckPlate,
         status: "CHECKED-IN",
         checkOutAt: new Date().toISOString(),
         message: "Vào cổng thành công"
