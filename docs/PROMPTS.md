@@ -764,3 +764,43 @@ Sinh viên/nhóm cam kết rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 02/06/2026 |
+
+---
+
+## Prompt #25
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao sua luong dang nhap va dieu huong theo vai tro nguoi dung
+
+### Prompt
+Khi dang nhap thanh cong, toi muon he thong dua vao role de hien thi dung man hinh cua role do. Ngoai ra o dang nhap dang bao loi vi bat buoc email co dau @ khi nhap username.
+
+### Expected Output
+- Xac dinh file frontend chiu trach nhiem xu ly login.
+- Goi y cach doc `role` tu response API va dieu huong den dashboard tuong ung.
+- Sua input login de chap nhan username binh thuong.
+
+### Evaluation
+AI ho tro chi ra cac vi tri can kiem tra nhu `AuthPage.tsx`, router va `RoleGuard`. Sinh vien tu quyet dinh mapping role sang route, tu chinh code va chay `npm run build` de xac nhan khong loi TypeScript.
+
+---
+
+## Prompt #26
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao cau hinh appsettings, Azure Vision va backend local
+
+### Prompt
+Kiem tra appsettings da luu Azure Vision chua, chay du an frontend/backend va sua loi backend local neu bi loi certificate SQL Server.
+
+### Expected Output
+- Kiem tra co section `AzureVision` trong `appsettings.json` hay khong.
+- Khong hien thi lai secret/key day du trong tai lieu.
+- Goi y them `TrustServerCertificate=True` cho moi truong local neu SQL Server dung certificate tu ky.
+
+### Evaluation
+AI chi ho tro huong kiem tra va canh bao bao mat. Sinh vien tu xem file cau hinh hien tai, tu chay backend/frontend va tu xac nhan endpoint localhost hoat dong.
