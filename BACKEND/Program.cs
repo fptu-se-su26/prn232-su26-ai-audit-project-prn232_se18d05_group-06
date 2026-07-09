@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using BACKEND.Models;
 using BACKEND.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,7 +25,10 @@ var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnec
     ?? throw new InvalidOperationException("Database connection string is missing. Configure ConnectionStrings:DefaultConnection.");
 
 builder.Services.AddDbContext<SmartLogAiContext>(options =>
-    options.UseSqlServer(defaultConnection));
+    options.UseSqlServer(defaultConnection, sqlOptions =>
+        sqlOptions.EnableRetryOnFailure())
+    .ConfigureWarnings(warnings =>
+        warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is missing");
@@ -82,7 +86,29 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SmartLogAiContext>();
-// db.Database.Migrate();
+    if (!db.Database.CanConnect())
+    {
+        db.Database.Migrate();
+    }
+    else
+    {
+        db.Database.OpenConnection();
+        try
+        {
+            using var command = db.Database.GetDbConnection().CreateCommand();
+            command.CommandText = "SELECT CASE WHEN OBJECT_ID(N'[dbo].[CompanyProfile]', N'U') IS NULL THEN 0 ELSE 1 END";
+            var hasExistingSchema = Convert.ToInt32(command.ExecuteScalar()) == 1;
+
+            if (!hasExistingSchema)
+            {
+                db.Database.Migrate();
+            }
+        }
+        finally
+        {
+            db.Database.CloseConnection();
+        }
+    }
 }
 
 
