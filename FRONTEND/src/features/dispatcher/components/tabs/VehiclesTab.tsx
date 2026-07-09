@@ -1,165 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useMemo, useState } from 'react';
+import api from '@/lib/api';
 
-interface VehicleUnit {
-  id: string; // LicensePlate
-  dbVehicleId?: number; // DB Primary Key for pending vehicles
-  name: string; // Display Name
-  vehicleModel: string; // VehicleModel in DB
-  type: string;
-  status: 'Active' | 'Alert' | 'Idle' | 'Pending';
-  img: string;
-  capacityPercent: number;
-  capacityText: string;
-  fuelPercent: number;
-  maintText: string;
-  maintStatus: 'ok' | 'warning' | 'alert';
-  // Technical live diagnostics
-  engineTemp: number;
-  oilPressure: number;
-  batteryVoltage: number;
-  dpfLevel: number;
-  lat: number;
-  lon: number;
-  speed: number;
-  // Strict specs required by DB
-  payloadKg: number;
-  volumeCbm: number;
-  fuelConsumptionRate: number;
-  registrationExpiry: string;
-  insuranceExpiry: string;
-  isBlacklisted?: boolean;
+type VehicleStatus = 'ACTIVE' | 'PENDING_APPROVAL' | 'BLACKLISTED' | 'INACTIVE' | 'MAINTENANCE';
+type FilterStatus = 'ALL' | VehicleStatus;
+
+interface DispatcherVehicle {
+  vehicleId: number;
+  truckPlate: string;
+  trailerPlate?: string | null;
+  vehicleType: string;
+  maxWeightTon: number;
+  ownerName: string;
+  ownerPhone?: string | null;
+  isInternal: boolean;
+  defaultDriverId?: number | null;
+  defaultDriverName?: string | null;
+  defaultDriverCode?: string | null;
+  inspectionExpiry?: string | null;
+  nextServiceDate?: string | null;
+  gpsDeviceId?: string | null;
+  isBlacklisted: boolean;
   blacklistReason?: string | null;
+  status: VehicleStatus | string;
+  isActive: boolean;
+  createdAt?: string | null;
 }
 
-const INITIAL_VEHICLES: VehicleUnit[] = [
-  {
-    id: 'TRK-8492',
-    name: 'Volvo FH16',
-    vehicleModel: 'Volvo FH16',
-    type: 'Xe vận tải hạng nặng',
-    status: 'Active',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAhRsM2TlznkPIuzMGNeTy4rkLREL28LX2vZ4mvSjn6ET-OXDdaEyiy1EhAfnZFKbUJ8sgxyc6sjsCoqlVz8Cz-9Hb267kLaNfmDX6ryhyTEQ2E852MZWO3pKwxyhtVnera6HulDcZnKnD9Q44OT_dEmmrvchLnOA3nEjFMdfqfQBIz-Fs4qzmyOiKiExkIUTTytRjVfIIUT6MuA6i74dOQzqsb8NB3aGbOFfCm4LNs3PYKUIrVEdmzQODjR6ysYTSUW4D6cr0vqDr5',
-    capacityPercent: 85,
-    capacityText: '85% (20.4 tấn)',
-    fuelPercent: 60,
-    maintText: 'Bảo trì: TỐT',
-    maintStatus: 'ok',
-    engineTemp: 195,
-    oilPressure: 42,
-    batteryVoltage: 13.8,
-    dpfLevel: 24,
-    lat: 41.8781,
-    lon: -87.6298,
-    speed: 62,
-    payloadKg: 24000,
-    volumeCbm: 80,
-    fuelConsumptionRate: 32.5,
-    registrationExpiry: '2026-12-31',
-    insuranceExpiry: '2027-01-01'
-  },
-  {
-    id: 'TRK-1024',
-    name: 'MB Sprinter',
-    vehicleModel: 'MB Sprinter',
-    type: 'Xe van giao hàng',
-    status: 'Alert',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdhNKh0-GzAhH3e6mggj2qnjPIY5WLiL3dtC8dEYS3DoFmd_c8FrkOQuB320RwdOh7jAEcNZbo-sDFE1qkwipLnRBnSXUETeG84yeKpQQmohyZbrgFofdEZU6BI0JXb0rrX78XhqeAFbsS_1KVZgiv-Dvqupt_bYBtwfE5LK_7Fxn7oVM3VLuy8nfA1tPEPiBnBclX_8irReX__gxkdgJEI4N5xOjkflnAw2jkWDc54_gD2BzYYLR9YHbRGkjhwcvHjQ1mB5B8rIQT',
-    capacityPercent: 40,
-    capacityText: '40% (0.6 tấn)',
-    fuelPercent: 15,
-    maintText: 'Đăng kiểm hết hạn',
-    maintStatus: 'alert',
-    engineTemp: 215,
-    oilPressure: 34,
-    batteryVoltage: 12.2,
-    dpfLevel: 78,
-    lat: 34.0522,
-    lon: -118.2437,
-    speed: 0,
-    payloadKg: 1500,
-    volumeCbm: 12,
-    fuelConsumptionRate: 9.5,
-    registrationExpiry: '2026-06-01',
-    insuranceExpiry: '2026-06-15'
-  },
-  {
-    id: 'TRK-5510',
-    name: 'F-650 Box',
-    vehicleModel: 'F-650 Box',
-    type: 'Xe tải hạng trung',
-    status: 'Idle',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07',
-    capacityPercent: 0,
-    capacityText: '0% (Trống)',
-    fuelPercent: 90,
-    maintText: 'Bảo trì sau 14 ngày',
-    maintStatus: 'warning',
-    engineTemp: 140,
-    oilPressure: 38,
-    batteryVoltage: 12.6,
-    dpfLevel: 10,
-    lat: 40.7128,
-    lon: -74.0060,
-    speed: 0,
-    payloadKg: 5000,
-    volumeCbm: 30,
-    fuelConsumptionRate: 18.0,
-    registrationExpiry: '2026-10-10',
-    insuranceExpiry: '2026-10-15'
-  },
-  // Mock ALPR detected Pending vehicles
-  {
-    id: '29H-123.45',
-    name: 'TEMP_ALPR',
-    vehicleModel: 'TEMP_ALPR',
-    type: 'Xe tải hạng trung',
-    status: 'Pending',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07',
-    capacityPercent: 0,
-    capacityText: '0%',
-    fuelPercent: 0,
-    maintText: 'Chờ phê duyệt',
-    maintStatus: 'warning',
-    engineTemp: 0,
-    oilPressure: 0,
-    batteryVoltage: 0,
-    dpfLevel: 0,
-    lat: 21.0285,
-    lon: 105.8542,
-    speed: 0,
-    payloadKg: 1900,
-    volumeCbm: 10,
-    fuelConsumptionRate: 12.5,
-    registrationExpiry: '',
-    insuranceExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 - 30 * 60 * 1000).toISOString() // Expiry timestamp (Current Time + 7 days)
-  },
-  {
-    id: '51C-999.99',
-    name: 'TEMP_ALPR',
-    vehicleModel: 'TEMP_ALPR',
-    type: 'Xe vận tải hạng nặng',
-    status: 'Pending',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07',
-    capacityPercent: 0,
-    capacityText: '0%',
-    fuelPercent: 0,
-    maintText: 'Chờ phê duyệt',
-    maintStatus: 'warning',
-    engineTemp: 0,
-    oilPressure: 0,
-    batteryVoltage: 0,
-    dpfLevel: 0,
-    lat: 10.8231,
-    lon: 106.6297,
-    speed: 0,
-    payloadKg: 5000,
-    volumeCbm: 25,
-    fuelConsumptionRate: 18.0,
-    registrationExpiry: '',
-    insuranceExpiry: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString()
-  }
-];
+interface Driver {
+  driverId: number;
+  driverCode: string;
+  fullName: string;
+  phone?: string | null;
+  licenseNo: string;
+  licenseExpiry?: string | null;
+  isBlacklisted: boolean;
+  isActive: boolean;
+}
+
+interface VehicleFormState {
+  truckPlate: string;
+  trailerPlate: string;
+  vehicleType: string;
+  maxWeightTon: string;
+  ownerName: string;
+  ownerPhone: string;
+  isInternal: boolean;
+  defaultDriverId: string;
+  inspectionExpiry: string;
+  nextServiceDate: string;
+  gpsDeviceId: string;
+  status: VehicleStatus;
+}
 
 interface VehiclesTabProps {
   searchQuery: string;
@@ -167,1025 +58,754 @@ interface VehiclesTabProps {
   setActiveTab: (tab: string) => void;
 }
 
+const emptyForm: VehicleFormState = {
+  truckPlate: '',
+  trailerPlate: '',
+  vehicleType: 'CONTAINER_40',
+  maxWeightTon: '30',
+  ownerName: '',
+  ownerPhone: '',
+  isInternal: false,
+  defaultDriverId: '',
+  inspectionExpiry: '',
+  nextServiceDate: '',
+  gpsDeviceId: '',
+  status: 'ACTIVE',
+};
+
+const statusOptions: VehicleStatus[] = ['ACTIVE', 'PENDING_APPROVAL', 'MAINTENANCE', 'INACTIVE'];
+const vehicleTypes = ['CONTAINER_20', 'CONTAINER_40', 'TRUCK_5T', 'TRUCK_10T', 'REEFER', 'VAN', 'OTHER'];
+
+const statusLabels: Record<string, string> = {
+  ACTIVE: 'Hoạt động',
+  AVAILABLE: 'Hoạt động',
+  PENDING_APPROVAL: 'Chờ duyệt',
+  BLACKLISTED: 'Hạn chế',
+  INACTIVE: 'Vô hiệu hóa',
+  MAINTENANCE: 'Bảo trì',
+};
+
+const formatDate = (value?: string | null) => {
+  if (!value) return 'Chưa có';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10);
+  return date.toLocaleDateString('vi-VN');
+};
+
+const toDateInput = (value?: string | null) => value?.slice(0, 10) ?? '';
+
+const isExpiringSoon = (value?: string | null) => {
+  if (!value) return false;
+  const expiry = new Date(value);
+  if (Number.isNaN(expiry.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const threshold = new Date(today);
+  threshold.setDate(today.getDate() + 30);
+  return expiry >= today && expiry <= threshold;
+};
+
+const isExpired = (value?: string | null) => {
+  if (!value) return false;
+  const expiry = new Date(value);
+  if (Number.isNaN(expiry.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return expiry < today;
+};
+
+const isMaintenanceDueSoon = (value?: string | null) => isExpiringSoon(value);
+
+const isDriverEligible = (driver: Driver) => {
+  if (!driver.isActive || driver.isBlacklisted) return false;
+  if (!driver.licenseExpiry) return true;
+  const expiry = new Date(driver.licenseExpiry);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return expiry >= today;
+};
+
+const getErrorMessage = (error: unknown) => {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const response = (error as { response?: { data?: unknown } }).response;
+    const data = response?.data;
+    if (typeof data === 'string') return data;
+    if (typeof data === 'object' && data !== null && 'message' in data) {
+      return String((data as { message?: unknown }).message);
+    }
+  }
+
+  if (error instanceof Error) return error.message;
+  return 'Không thể xử lý yêu cầu.';
+};
+
 export const VehiclesTab: React.FC<VehiclesTabProps> = ({
   searchQuery,
   setToastMessage,
   setActiveTab,
 }) => {
-  const [vehicles, setVehicles] = useState<VehicleUnit[]>(INITIAL_VEHICLES);
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string>('TRK-8492');
-  const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'Active' | 'Alert' | 'Idle' | 'Pending'>('all');
+  const [vehicles, setVehicles] = useState<DispatcherVehicle[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('ALL');
+  const [typeFilter, setTypeFilter] = useState('ALL');
+  const [ownershipFilter, setOwnershipFilter] = useState<'ALL' | 'INTERNAL' | 'PARTNER'>('ALL');
+  const [riskFilter, setRiskFilter] = useState<'ALL' | 'EXPIRING' | 'MAINTENANCE_DUE' | 'BLACKLISTED'>('ALL');
+  const [showForm, setShowForm] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<DispatcherVehicle | null>(null);
+  const [form, setForm] = useState<VehicleFormState>(emptyForm);
+  const [assignDriverId, setAssignDriverId] = useState('');
+  const [blacklistReason, setBlacklistReason] = useState('');
 
-  // Input states for adding new vehicle
-  const [newId, setNewId] = useState('');
-  const [newName, setNewName] = useState('');
-  const [newType, setNewType] = useState('Heavy Duty Hauler');
-  const [newStatus, setNewStatus] = useState<'Active' | 'Alert' | 'Idle'>('Active');
-  const [newCapacity, setNewCapacity] = useState(50);
-  const [newFuel, setNewFuel] = useState(80);
+  const eligibleDrivers = useMemo(() => drivers.filter(isDriverEligible), [drivers]);
+  const selectedVehicle = vehicles.find((vehicle) => vehicle.vehicleId === selectedVehicleId) ?? vehicles[0];
 
-  // Approval flow state tracking & strict tech specs
-  const [approvingLicensePlate, setApprovingLicensePlate] = useState<string | null>(null);
-  const [newPayloadKg, setNewPayloadKg] = useState<number>(1900);
-  const [newVolumeCbm, setNewVolumeCbm] = useState<number>(10);
-  const [newFuelConsumptionRate, setNewFuelConsumptionRate] = useState<number>(12.5);
-  const [newRegistrationExpiry, setNewRegistrationExpiry] = useState<string>('');
-  const [newInsuranceExpiry, setNewInsuranceExpiry] = useState<string>('');
-
-  // Live telemetry diagnostics fluctuation interval ticker
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVehicles((prevVehicles) =>
-        prevVehicles.map((v) => {
-          if (v.status !== 'Active') return v;
-          // Fluctuate speed, temp, pressure, and voltage slightly
-          const speedDelta = (Math.random() - 0.5) * 4;
-          const tempDelta = (Math.random() - 0.5) * 2;
-          const pressDelta = (Math.random() - 0.5) * 1.5;
-          const voltDelta = (Math.random() - 0.5) * 0.1;
-
-          return {
-            ...v,
-            speed: Math.max(50, Math.min(75, Math.round(v.speed + speedDelta))),
-            engineTemp: Math.max(190, Math.min(205, Math.round(v.engineTemp + tempDelta))),
-            oilPressure: Math.max(38, Math.min(48, Math.round(v.oilPressure + pressDelta))),
-            batteryVoltage: Math.max(13.2, Math.min(14.2, parseFloat((v.batteryVoltage + voltDelta).toFixed(1)))),
-          };
-        })
-      );
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const focusedVehicle = vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0];
-
-  // Helper function to calculate countdown to expiration for ALPR pending entries
-  const getExpiryCountdown = (expiryStr?: string) => {
-    if (!expiryStr) return 'N/A';
-    const expiryDate = new Date(expiryStr);
-    const diffMs = expiryDate.getTime() - Date.now();
-    if (diffMs <= 0) return 'Hết hạn (Auto-deleted)';
-    
-    const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
-    const diffHours = Math.floor((diffMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-    const diffMins = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
-    
-    if (diffDays > 0) {
-      return `Hết hạn sau ${diffDays} ngày ${diffHours} giờ`;
-    }
-    return `Hết hạn sau ${diffHours} giờ ${diffMins} phút`;
-  };
-
-  const fetchPendingVehicles = async () => {
+  const loadData = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5184/api/vehicles/pending');
-      const backendPending = response.data.map((v: any) => ({
-        id: v.licensePlate,
-        dbVehicleId: v.vehicleId,
-        name: v.vehicleModel,
-        vehicleModel: v.vehicleModel,
-        type: v.payloadKg > 20000 ? 'Xe vận tải hạng nặng' : v.payloadKg > 2000 ? 'Xe tải hạng trung' : 'Xe van giao hàng',
-        status: 'Pending',
-        img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07',
-        capacityPercent: 0,
-        capacityText: '0%',
-        fuelPercent: 0,
-        maintText: 'Chờ phê duyệt',
-        maintStatus: 'warning',
-        engineTemp: 0,
-        oilPressure: 0,
-        batteryVoltage: 0,
-        dpfLevel: 0,
-        lat: 21.0285,
-        lon: 105.8542,
-        speed: 0,
-        payloadKg: v.payloadKg,
-        volumeCbm: v.volumeCbm,
-        fuelConsumptionRate: v.fuelConsumptionRate,
-        registrationExpiry: v.registrationExpiry,
-        insuranceExpiry: v.insuranceExpiry
-      }));
+      const params: Record<string, string | boolean> = {};
+      if (statusFilter !== 'ALL') params.status = statusFilter;
+      if (typeFilter !== 'ALL') params.vehicleType = typeFilter;
+      if (ownershipFilter !== 'ALL') params.isInternal = ownershipFilter === 'INTERNAL';
+      if (riskFilter === 'EXPIRING') params.expiringSoon = true;
+      if (riskFilter === 'BLACKLISTED') params.blacklisted = true;
+      if (searchQuery.trim()) params.search = searchQuery.trim();
 
-      setVehicles((prev) => {
-        const nonPending = prev.filter(v => v.status !== 'Pending');
-        return [...nonPending, ...backendPending];
+      const [vehicleResponse, driverResponse] = await Promise.all([
+        api.get<DispatcherVehicle[]>('/dispatcher/vehicles', { params }),
+        api.get<Driver[]>('/drivers'),
+      ]);
+
+      setVehicles(vehicleResponse.data);
+      setDrivers(driverResponse.data);
+      setSelectedVehicleId((current) => {
+        if (current && vehicleResponse.data.some((vehicle) => vehicle.vehicleId === current)) return current;
+        return vehicleResponse.data[0]?.vehicleId ?? null;
       });
     } catch (error) {
-      console.error("Lỗi khi tải danh sách xe lạ từ backend:", error);
-    }
-  };
-
-  const fetchActiveVehicles = async () => {
-    try {
-      const response = await axios.get('http://localhost:5184/api/tracking/vehicles');
-      const backendActive = response.data.map((v: any) => ({
-        id: v.licensePlate,
-        dbVehicleId: v.vehicleId,
-        name: v.licensePlate,
-        vehicleModel: v.vehicleModel,
-        type: 'Xe hạm đội',
-        status: v.isBlacklisted ? 'Alert' : 'Active',
-        img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAhRsM2TlznkPIuzMGNeTy4rkLREL28LX2vZ4mvSjn6ET-OXDdaEyiy1EhAfnZFKbUJ8sgxyc6sjsCoqlVz8Cz-9Hb267kLaNfmDX6ryhyTEQ2E852MZWO3pKwxyhtVnera6HulDcZnKnD9Q44OT_dEmmrvchLnOA3nEjFMdfqfQBIz-Fs4qzmyOiKiExkIUTTytRjVfIIUT6MuA6i74dOQzqsb8NB3aGbOFfCm4LNs3PYKUIrVEdmzQODjR6ysYTSUW4D6cr0vqDr5',
-        capacityPercent: 80,
-        capacityText: '80%',
-        fuelPercent: 90,
-        maintText: v.isBlacklisted ? `BLACKLISTED: ${v.blacklistReason}` : 'Bảo trì: TỐT',
-        maintStatus: v.isBlacklisted ? 'alert' : 'ok',
-        engineTemp: 194,
-        oilPressure: 40,
-        batteryVoltage: 13.6,
-        dpfLevel: 15,
-        lat: 21.0285,
-        lon: 105.8542,
-        speed: 0,
-        payloadKg: 5000,
-        volumeCbm: 20,
-        fuelConsumptionRate: 15.0,
-        registrationExpiry: '2026-12-31',
-        insuranceExpiry: '2026-12-31',
-        isBlacklisted: v.isBlacklisted,
-        blacklistReason: v.blacklistReason
-      }));
-
-      setVehicles((prev) => {
-        const mockVehicles = prev.filter(v => v.status !== 'Pending' && !v.dbVehicleId);
-        const filteredMock = mockVehicles.filter(mock => !backendActive.some((act: any) => act.id === mock.id));
-        return [...backendActive, ...filteredMock];
-      });
-    } catch (error) {
-      console.error("Lỗi khi tải danh sách xe từ backend:", error);
-    }
-  };
-
-  const handleToggleVehicleBlacklist = async (licensePlate: string, isChecked: boolean) => {
-    const currentVehicle = vehicles.find((v) => v.id === licensePlate);
-    if (!currentVehicle) return;
-
-    const dbId = currentVehicle.dbVehicleId;
-    if (!dbId) {
-      setToastMessage("Không thể thay đổi blacklist cho dữ liệu giả lập (mock data).");
-      return;
-    }
-
-    let reason: string | null = null;
-    if (isChecked) {
-      reason = window.prompt("Nhập lý do chặn phương tiện này:");
-      if (reason === null) {
-        return;
-      }
-      if (!reason.trim()) {
-        setToastMessage("Yêu cầu nhập lý do chặn phương tiện.");
-        return;
-      }
-    }
-
-    try {
-      await axios.post(`http://localhost:5184/api/vehicles/${dbId}/blacklist`, {
-        isBlacklisted: isChecked,
-        blacklistReason: reason
-      });
-
-      setToastMessage(
-        isChecked
-          ? `Đã đưa phương tiện ${licensePlate} vào danh sách đen.`
-          : `Đã gỡ phương tiện ${licensePlate} khỏi danh sách đen.`
-      );
-
-      await fetchActiveVehicles();
-      await fetchPendingVehicles();
-    } catch (err: any) {
-      console.error(err);
-      setToastMessage(`Lỗi cập nhật danh sách đen: ${err.response?.data || err.message}`);
+      setToastMessage(`Lỗi tải dữ liệu xe: ${getErrorMessage(error)}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchActiveVehicles();
-    fetchPendingVehicles();
-  }, []);
+    loadData();
+  }, [searchQuery, statusFilter, typeFilter, ownershipFilter, riskFilter]);
 
-  // Async API Hook: Approve a pending strange vehicle
-  const handleApprovePendingVehicle = async (payload: {
-    id: string;
-    vehicleModel: string;
-    type: string;
-    status: 'Active' | 'Alert' | 'Idle';
-    capacityPercent: number;
-    capacityText: string;
-    fuelPercent: number;
-    maintText: string;
-    maintStatus: 'ok' | 'warning' | 'alert';
-    engineTemp: number;
-    oilPressure: number;
-    batteryVoltage: number;
-    dpfLevel: number;
-    lat: number;
-    lon: number;
-    speed: number;
-    payloadKg: number;
-    volumeCbm: number;
-    fuelConsumptionRate: number;
-    registrationExpiry: string;
-    insuranceExpiry: string;
-  }) => {
-    try {
-      setToastMessage(`Đang phê duyệt phương tiện ${payload.id}...`);
+  useEffect(() => {
+    setAssignDriverId(selectedVehicle?.defaultDriverId ? String(selectedVehicle.defaultDriverId) : '');
+  }, [selectedVehicle?.vehicleId, selectedVehicle?.defaultDriverId]);
 
-      const currentVehicle = vehicles.find(v => v.id === payload.id);
-      const vehicleId = currentVehicle?.dbVehicleId;
-
-      if (!vehicleId) {
-        setToastMessage(`Lỗi: Không tìm thấy ID cơ sở dữ liệu cho phương tiện ${payload.id}.`);
-        return false;
-      }
-
-      const approvePayload = {
-        vehicleModel: payload.vehicleModel,
-        payloadKg: payload.payloadKg,
-        volumeCbm: payload.volumeCbm,
-        insuranceExpiry: new Date(payload.insuranceExpiry).toISOString(),
-        registrationExpiry: new Date(payload.registrationExpiry).toISOString(),
-        fuelConsumptionRate: payload.fuelConsumptionRate
-      };
-
-      await axios.post(`http://localhost:5184/api/vehicles/approve/${vehicleId}`, approvePayload);
-
-      setToastMessage(`Cập nhật Hạm đội: Mã phương tiện ${payload.id} (${payload.vehicleModel}) đã được phê duyệt vào hạm đội thành công!`);
-      
-      await fetchPendingVehicles();
-
-      const newUnit: VehicleUnit = {
-        ...payload,
-        name: payload.vehicleModel,
-        status: payload.status,
-        img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07',
-      };
-      setVehicles((prev) => [newUnit, ...prev.filter((v) => v.id !== payload.id)]);
-      setSelectedVehicleId(newUnit.id);
-      return true;
-    } catch (error) {
-      console.error('Failed to approve vehicle', error);
-      setToastMessage(`Lỗi phê duyệt: Không thể phê duyệt phương tiện ${payload.id}.`);
-      return false;
-    }
+  const openCreateForm = () => {
+    setEditingVehicle(null);
+    setForm(emptyForm);
+    setShowForm(true);
   };
 
-  // Async API Hook: Reject a pending strange vehicle
-  const handleRejectPendingVehicle = async (plate: string) => {
-    try {
-      setToastMessage(`Đang từ chối phương tiện ${plate}...`);
-
-      const currentVehicle = vehicles.find(v => v.id === plate);
-      const vehicleId = currentVehicle?.dbVehicleId;
-
-      if (!vehicleId) {
-        setToastMessage(`Lỗi: Không tìm thấy ID cơ sở dữ liệu cho phương tiện ${plate}.`);
-        return;
-      }
-
-      await axios.delete(`http://localhost:5184/api/vehicles/reject/${vehicleId}`);
-
-      setToastMessage(`Cập nhật Hạm đội: Đã từ chối và xóa biển số ${plate} khỏi danh sách chờ duyệt.`);
-      
-      await fetchPendingVehicles();
-      
-      setVehicles((prev) => prev.filter((v) => v.id !== plate));
-      
-      setVehicles((latest) => {
-        if (latest.length > 0) {
-          setSelectedVehicleId(latest[0].id);
-        }
-        return latest;
-      });
-    } catch (error) {
-      console.error('Failed to reject vehicle', error);
-      setToastMessage(`Lỗi: Không thể từ chối phương tiện ${plate}.`);
-    }
+  const openEditForm = (vehicle: DispatcherVehicle) => {
+    setEditingVehicle(vehicle);
+    setForm({
+      truckPlate: vehicle.truckPlate,
+      trailerPlate: vehicle.trailerPlate ?? '',
+      vehicleType: vehicle.vehicleType || 'OTHER',
+      maxWeightTon: String(vehicle.maxWeightTon || ''),
+      ownerName: vehicle.ownerName,
+      ownerPhone: vehicle.ownerPhone ?? '',
+      isInternal: vehicle.isInternal,
+      defaultDriverId: vehicle.defaultDriverId ? String(vehicle.defaultDriverId) : '',
+      inspectionExpiry: toDateInput(vehicle.inspectionExpiry),
+      nextServiceDate: toDateInput(vehicle.nextServiceDate),
+      gpsDeviceId: vehicle.gpsDeviceId ?? '',
+      status: vehicle.status === 'BLACKLISTED' ? 'ACTIVE' : (vehicle.status as VehicleStatus),
+    });
+    setShowForm(true);
   };
 
-  // Action: Add new vehicle to the registry database (Normal flow or Approval flow)
-  const handleAddVehicle = async () => {
-    if (!newId.trim() || !newName.trim()) {
-      setToastMessage('Cảnh báo Điều phối: Mã phương tiện và Tên mẫu xe không được để trống.');
+  const updateForm = (field: keyof VehicleFormState, value: string | boolean) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const submitForm = async () => {
+    if (!form.truckPlate.trim() || !form.vehicleType.trim() || !form.ownerName.trim()) {
+      setToastMessage('Biển số xe, loại xe và chủ xe là bắt buộc.');
       return;
     }
 
-    if (newPayloadKg <= 0 || newVolumeCbm <= 0 || newFuelConsumptionRate <= 0) {
-      setToastMessage('Cảnh báo Điều phối: Tải trọng, Thể tích, và Mức tiêu thụ phải lớn hơn 0.');
-      return;
-    }
-
-    if (!newRegistrationExpiry || !newInsuranceExpiry) {
-      setToastMessage('Cảnh báo Điều phối: Hạn đăng kiểm và Hạn bảo hiểm không được để trống.');
+    const maxWeightTon = Number(form.maxWeightTon);
+    if (!Number.isFinite(maxWeightTon) || maxWeightTon <= 0) {
+      setToastMessage('Tải trọng tối đa phải lớn hơn 0.');
       return;
     }
 
     const payload = {
-      id: newId.toUpperCase(),
-      vehicleModel: newName,
-      type: newType === 'Heavy Duty Hauler' ? 'Xe vận tải hạng nặng' : newType === 'Delivery Van' ? 'Xe van giao hàng' : 'Xe tải hạng trung',
-      status: newStatus,
-      capacityPercent: newCapacity,
-      capacityText: `${newCapacity}% (${Math.round(newCapacity * (newPayloadKg / 1000))} tấn)`,
-      fuelPercent: newFuel,
-      maintText: newStatus === 'Alert' ? 'Cảnh báo cảm biến chẩn đoán' : 'Bảo trì: TỐT',
-      maintStatus: (newStatus === 'Alert' ? 'alert' : newStatus === 'Idle' ? 'warning' : 'ok') as 'ok' | 'warning' | 'alert',
-      engineTemp: newStatus === 'Idle' ? 140 : 194,
-      oilPressure: 40,
-      batteryVoltage: 13.6,
-      dpfLevel: 15,
-      lat: 41.8781 + (Math.random() - 0.5) * 0.1,
-      lon: -87.6298 + (Math.random() - 0.5) * 0.1,
-      speed: newStatus === 'Active' ? 60 : 0,
-      payloadKg: newPayloadKg,
-      volumeCbm: newVolumeCbm,
-      fuelConsumptionRate: newFuelConsumptionRate,
-      registrationExpiry: newRegistrationExpiry,
-      insuranceExpiry: newInsuranceExpiry
+      truckPlate: form.truckPlate.trim(),
+      trailerPlate: form.trailerPlate.trim() || null,
+      vehicleType: form.vehicleType,
+      maxWeightTon,
+      ownerName: form.ownerName.trim(),
+      ownerPhone: form.ownerPhone.trim() || null,
+      isInternal: form.isInternal,
+      defaultDriverId: form.defaultDriverId ? Number(form.defaultDriverId) : null,
+      inspectionExpiry: form.inspectionExpiry || null,
+      nextServiceDate: form.nextServiceDate || null,
+      gpsDeviceId: form.gpsDeviceId.trim() || null,
+      status: form.status,
     };
 
-    if (approvingLicensePlate) {
-      const success = await handleApprovePendingVehicle(payload);
-      if (success) {
-        setNewId('');
-        setNewName('');
-        setApprovingLicensePlate(null);
-        setShowAddVehicleModal(false);
+    setSaving(true);
+    try {
+      if (editingVehicle) {
+        await api.put(`/dispatcher/vehicles/${editingVehicle.vehicleId}`, payload);
+        setToastMessage('Đã cập nhật hồ sơ xe.');
+      } else {
+        await api.post('/dispatcher/vehicles', payload);
+        setToastMessage('Tạo hồ sơ xe thành công.');
       }
-    } else {
-      // Normal Add Flow
-      const newUnit: VehicleUnit = {
-        ...payload,
-        name: payload.vehicleModel,
-        img: 'https://lh3.googleusercontent.com/aida-public/AB6AXu3A6rMNM418T8G08FXMLY-ftT-MgvMQ83G1I9dh6NTk2BY36MxMyzAXqTuNL6IcXaQUClS2pGp3CdZvXv4Ztljenc2xgAkgerRxGMIv5zbl5WijJ6J2qCQ2WKEfKuLyimdvg3gBQf9Hpg3R7Mu6a0McIpGqnCrg4kArBmSOuxAe0ducd_rrhk3td3wNAVlB3w-HJLCmHVWg3PdH2nUV4sdOIOTlFuASLtZRTBfAU_V8WBkAckJn-2uE9rKFJUCw33rUJLGDTbytS07', // default placeholder truck img
-      };
-
-      setVehicles((prev) => [newUnit, ...prev]);
-      setSelectedVehicleId(newUnit.id);
-      setToastMessage(`Cập nhật Hạm đội: Mã phương tiện ${newUnit.id} (${newUnit.vehicleModel}) đã được đăng ký thành công!`);
-      
-      // Clear inputs
-      setNewId('');
-      setNewName('');
-      setShowAddVehicleModal(false);
+      setShowForm(false);
+      await loadData();
+    } catch (error) {
+      setToastMessage(`Không lưu được xe: ${getErrorMessage(error)}`);
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Filters mapping - Vehicle grid
-  const filteredVehicles = vehicles.filter((v) => {
-    const q = searchQuery.toLowerCase().trim();
-    const matchesSearch = !q || (
-      v.id.toLowerCase().includes(q) ||
-      (v.name && v.name.toLowerCase().includes(q)) ||
-      (v.vehicleModel && v.vehicleModel.toLowerCase().includes(q)) ||
-      v.type.toLowerCase().includes(q) ||
-      v.status.toLowerCase().includes(q)
-    );
+  const deactivateVehicle = async (vehicle: DispatcherVehicle) => {
+    if (!window.confirm(`Vô hiệu hóa xe ${vehicle.truckPlate}?`)) return;
+    try {
+      await api.patch(`/dispatcher/vehicles/${vehicle.vehicleId}/deactivate`);
+      setToastMessage('Xe đã được vô hiệu hóa.');
+      await loadData();
+    } catch (error) {
+      setToastMessage(`Không thể vô hiệu hóa xe: ${getErrorMessage(error)}`);
+    }
+  };
 
-    if (!matchesSearch) return false;
-    if (statusFilter === 'all') return true;
-    return v.status === statusFilter;
+  const blacklistVehicle = async (vehicle: DispatcherVehicle) => {
+    const reason = blacklistReason.trim();
+    if (!reason) {
+      setToastMessage('Vui lòng nhập lý do blacklist.');
+      return;
+    }
+
+    try {
+      await api.patch(`/dispatcher/vehicles/${vehicle.vehicleId}/blacklist`, { reason });
+      setBlacklistReason('');
+      setToastMessage('Xe đã được đưa vào danh sách hạn chế.');
+      await loadData();
+    } catch (error) {
+      setToastMessage(`Không thể blacklist xe: ${getErrorMessage(error)}`);
+    }
+  };
+
+  const assignDriver = async (vehicle: DispatcherVehicle) => {
+    if (!assignDriverId) {
+      setToastMessage('Vui lòng chọn tài xế phụ trách.');
+      return;
+    }
+
+    try {
+      await api.patch(`/dispatcher/vehicles/${vehicle.vehicleId}/assign-driver`, {
+        driverId: Number(assignDriverId),
+      });
+      setToastMessage('Gán tài xế phụ trách thành công.');
+      await loadData();
+    } catch (error) {
+      setToastMessage(`Không thể gán tài xế: ${getErrorMessage(error)}`);
+    }
+  };
+
+  const visibleVehicles = vehicles.filter((vehicle) => {
+    const keyword = searchQuery.trim().toLowerCase();
+    const matchesKeyword = !keyword || [
+      vehicle.truckPlate,
+      vehicle.trailerPlate,
+      vehicle.vehicleType,
+      vehicle.ownerName,
+      vehicle.defaultDriverName,
+      vehicle.defaultDriverCode,
+    ].some((value) => (value ?? '').toLowerCase().includes(keyword));
+
+    if (!matchesKeyword) return false;
+    if (riskFilter === 'MAINTENANCE_DUE') return isMaintenanceDueSoon(vehicle.nextServiceDate);
+    return true;
   });
 
-  const alertsCount = vehicles.filter((v) => v.status === 'Alert').length;
-  const pendingCount = vehicles.filter((v) => v.status === 'Pending').length;
+  const activeCount = vehicles.filter((vehicle) => vehicle.isActive).length;
+  const blacklistCount = vehicles.filter((vehicle) => vehicle.isBlacklisted).length;
+  const expiredInspectionCount = vehicles.filter((vehicle) => isExpired(vehicle.inspectionExpiry)).length;
+  const expiringCount = vehicles.filter((vehicle) => isExpiringSoon(vehicle.inspectionExpiry)).length;
+  const maintenanceDueCount = vehicles.filter((vehicle) => isMaintenanceDueSoon(vehicle.nextServiceDate)).length;
+  const internalCount = vehicles.filter((vehicle) => vehicle.isInternal).length;
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row gap-gutter h-full min-h-0 relative select-none">
-      
-      {/* LEFT: Vehicle Cards List */}
-      <div className="flex-1 flex flex-col gap-4 overflow-hidden h-full">
-        
-        {/* Context bar */}
-        <div className="glass-panel rounded-xl p-4 flex justify-between items-center shrink-0">
-          <div className="text-left">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold">Hạm đội hoạt động</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant text-sm mt-1">
-              {vehicles.length - pendingCount} Phương tiện • {alertsCount} Cảnh báo bảo trì • {pendingCount} Xe chờ duyệt AI
-            </p>
-          </div>
-          
-          <div className="flex gap-2">
-            <div className="relative">
-              <button
-                onClick={() => setStatusFilter(statusFilter === 'all' ? 'Active' : statusFilter === 'Active' ? 'Alert' : statusFilter === 'Alert' ? 'Idle' : statusFilter === 'Idle' ? 'Pending' : 'all')}
-                className="bg-surface-variant/40 border border-outline-variant/50 text-on-surface rounded-lg px-3 py-1.5 font-data-tabular text-data-tabular flex items-center gap-2 hover:border-secondary/50 transition-colors text-xs font-semibold"
-              >
-                <span className="material-symbols-outlined text-[16px]">filter_list</span>
-                Bộ lọc: {statusFilter === 'all' ? 'TẤT CẢ' : statusFilter === 'Active' ? 'HOẠT ĐỘNG' : statusFilter === 'Alert' ? 'CẢNH BÁO' : statusFilter === 'Idle' ? 'ĐANG RẢNH' : 'CHỜ DUYỆT'}
-              </button>
+    <div className="fleet-workspace flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-6 pr-1">
+      <section className="fleet-hero relative shrink-0 overflow-hidden rounded-lg px-5 py-4">
+        <div className="fleet-hero-stripe absolute inset-x-0 top-0 h-1" />
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase text-[#0f6b7d]">
+              <span className="grid h-9 w-9 place-items-center rounded-md bg-[#0f3554] text-white shadow-sm">
+                <span className="material-symbols-outlined text-[18px]">local_shipping</span>
+              </span>
+              Điều phối • Quản lý phương tiện
             </div>
-            
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">
+              Hồ sơ xe
+            </h2>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => {
-                setApprovingLicensePlate(null);
-                setNewId('');
-                setNewName('');
-                setNewType('Heavy Duty Hauler');
-                setNewStatus('Active');
-                setNewCapacity(0);
-                setNewFuel(100);
-                setNewPayloadKg(1900);
-                setNewVolumeCbm(10);
-                setNewFuelConsumptionRate(12.5);
-                setNewRegistrationExpiry(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-                setNewInsuranceExpiry(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-                setShowAddVehicleModal(true);
-              }}
-              className="bg-primary-container text-on-primary-container rounded-lg px-4 py-1.5 font-label-caps text-label-caps text-xs font-bold shadow-[0_0_10px_rgba(37,99,235,0.3)] hover:shadow-[0_0_15px_rgba(37,99,235,0.5)] transition-all flex items-center gap-1.5"
+              type="button"
+              onClick={loadData}
+              className="fleet-icon-button grid h-10 w-10 place-items-center rounded-md transition-colors"
+              title="Tải lại"
             >
-              <span className="material-symbols-outlined text-[16px] font-bold">add</span>
-              THÊM PHƯƠNG TIỆN
+              <span className={`material-symbols-outlined text-[20px] ${loading ? 'animate-spin' : ''}`}>refresh</span>
+            </button>
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="flex h-10 items-center gap-2 rounded-md bg-[#0f3554] px-4 text-sm font-bold text-white shadow-[0_10px_22px_rgba(15,53,84,0.22)] transition-colors hover:bg-[#0f4a6d]"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Thêm xe mới
             </button>
           </div>
         </div>
+      </section>
 
-        {/* Scrollable grid */}
-        <div className="flex-1 overflow-y-auto pr-2 pb-20 md:pb-0">
-          {filteredVehicles.length === 0 ? (
-            <div className="glass-panel rounded-xl p-8 text-center text-on-surface-variant">
-              <span className="material-symbols-outlined text-[42px] opacity-40 mb-2 block">
-                no_transport
+      {(expiredInspectionCount > 0 || maintenanceDueCount > 0) && (
+        <section className="fleet-alert-strip shrink-0 rounded-lg px-4 py-3 text-white">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-white/14">
+                <span className="material-symbols-outlined text-[21px]">priority_high</span>
               </span>
-              Không có phương tiện hạm đội nào khớp với tiêu chí của bạn.
+              <div className="min-w-0">
+                <p className="text-sm font-black">Cảnh báo vận hành đội xe</p>
+                <p className="text-xs font-semibold text-white/75">
+                  Ưu tiên xử lý đăng kiểm hết hạn và xe sắp đến hạn bảo trì trước khi điều phối.
+                </p>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-gutter">
-              {filteredVehicles.map((vehicle) => {
-                const isSelected = selectedVehicleId === vehicle.id;
-                const isAlert = vehicle.status === 'Alert';
-                const isIdle = vehicle.status === 'Idle';
-                const isPending = vehicle.status === 'Pending';
+            <div className="grid grid-cols-2 gap-2 text-xs font-black sm:min-w-[300px]">
+              <button
+                type="button"
+                onClick={() => setRiskFilter('EXPIRING')}
+                className="rounded-md border border-white/18 bg-white/12 px-3 py-2 text-left transition-colors hover:bg-white/18"
+              >
+                <span className="block text-lg leading-none">{expiredInspectionCount}</span>
+                <span className="text-white/75">Hết đăng kiểm</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRiskFilter('MAINTENANCE_DUE')}
+                className="rounded-md border border-white/18 bg-white/12 px-3 py-2 text-left transition-colors hover:bg-white/18"
+              >
+                <span className="block text-lg leading-none">{maintenanceDueCount}</span>
+                <span className="text-white/75">Sắp bảo trì</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
-                return (
-                  <div
-                    key={vehicle.id}
-                    onClick={() => setSelectedVehicleId(vehicle.id)}
-                    className={`glass-panel rounded-xl p-4 cursor-pointer relative overflow-hidden group transition-all duration-300 ${
-                      isSelected
-                        ? 'glass-panel-active border-primary/70 shadow-[0_0_15px_rgba(37,99,235,0.3)] scale-[0.99]'
-                        : isAlert
-                        ? 'border-error/25 hover:border-error/50 shadow-[0_0_10px_rgba(255,180,171,0.05)]'
-                        : isPending
-                        ? 'border-amber-500/25 hover:border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.05)]'
-                        : 'hover:border-secondary/30'
-                    }`}
-                  >
-                    {/* Left highlight indicator */}
-                    {isSelected && (
-                      <div className="absolute top-0 left-0 w-1 h-full bg-primary shadow-[0_0_10px_rgba(37,99,235,1)]" />
-                    )}
-                    {isAlert && !isSelected && (
-                      <div className="absolute top-0 left-0 w-1 h-full bg-error shadow-[0_0_10px_rgba(255,180,171,0.5)]" />
-                    )}
-                    {isPending && !isSelected && (
-                      <div className="absolute top-0 left-0 w-1 h-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
-                    )}
+      <section className="grid shrink-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <SummaryTile icon="inventory_2" label="Tổng hồ sơ" value={vehicles.length} detail={`${internalCount} xe nội bộ`} tone="primary" />
+        <SummaryTile icon="verified" label="Được phép vận hành" value={activeCount} detail="ACTIVE và không blacklist" tone="success" />
+        <SummaryTile icon="fact_check" label="Sắp hết đăng kiểm" value={expiringCount} detail="Trong vòng 30 ngày" tone="warning" />
+        <SummaryTile icon="block" label="Blacklist" value={blacklistCount} detail="Từ chối đặt lịch/check-in" tone="danger" />
+        <SummaryTile icon="build_circle" label="Sắp bảo trì" value={maintenanceDueCount} detail="Cảnh báo Dispatcher trong 30 ngày" tone="danger" />
+      </section>
 
-                    <div className="flex justify-between items-start mb-3">
-                      <span className={`font-label-caps text-label-caps px-2 py-0.5 rounded border text-[10px] font-bold ${
-                        isSelected
-                          ? 'text-primary bg-primary/10 border-primary/30'
-                          : isPending
-                          ? 'text-amber-500 bg-amber-500/10 border-amber-500/30'
-                          : 'text-on-surface bg-surface-variant border-outline-variant/30'
-                      }`}>
-                        {vehicle.id}
-                      </span>
-                      
-                      {isAlert ? (
-                        <span className="bg-error/15 text-error border border-error/20 px-2 py-0.5 rounded text-[9px] font-label-caps text-label-caps uppercase flex items-center gap-1 font-bold animate-pulse">
-                          <span className="material-symbols-outlined text-[11px]" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span> Cảnh báo
-                        </span>
-                      ) : vehicle.status === 'Active' ? (
-                        <span className="bg-secondary/15 text-secondary border border-secondary/20 px-2 py-0.5 rounded text-[9px] font-label-caps text-label-caps uppercase flex items-center gap-1 font-bold">
-                          <span className="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse" /> Hoạt động
-                        </span>
-                      ) : isPending ? (
-                        <span className="bg-amber-500/15 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9px] font-label-caps text-label-caps uppercase flex items-center gap-1 font-bold animate-pulse">
-                          <span className="material-symbols-outlined text-[11px]">photo_camera</span> Chờ duyệt
-                        </span>
-                      ) : (
-                        <span className="bg-surface-variant/50 text-on-surface-variant border border-outline-variant/20 px-2 py-0.5 rounded text-[9px] font-label-caps text-label-caps uppercase font-bold">
-                          Đang rảnh
-                        </span>
-                      )}
-                    </div>
+      <section className="fleet-panel-muted shrink-0 rounded-lg p-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[repeat(4,minmax(150px,1fr))]">
+          <FilterSelect label="Trạng thái" value={statusFilter} onChange={(value) => {
+            if (value === 'MAINTENANCE_DUE') {
+              setStatusFilter('ALL');
+              setRiskFilter('MAINTENANCE_DUE');
+              return;
+            }
+            setStatusFilter(value as FilterStatus);
+          }}>
+            <option value="ALL">Tất cả trạng thái</option>
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="PENDING_APPROVAL">Chờ duyệt</option>
+            <option value="MAINTENANCE">Bảo trì</option>
+            <option value="INACTIVE">Vô hiệu hóa</option>
+            <option value="BLACKLISTED">Blacklist</option>
+          </FilterSelect>
 
-                    {/* Image cabin view */}
-                    <div className="w-full h-24 mb-4 rounded-lg overflow-hidden border border-outline-variant/30 relative select-none">
-                      <img alt={vehicle.vehicleModel} className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-102 ${isAlert ? 'opacity-60 grayscale-[20%]' : isPending ? 'opacity-50 grayscale' : 'opacity-80'}`} src={vehicle.img} />
-                      <div className="absolute bottom-2 right-2 bg-surface/85 backdrop-blur px-1.5 py-0.5 rounded text-[9px] font-data-tabular text-on-surface font-semibold select-none border border-white/5">
-                        {vehicle.vehicleModel}
-                      </div>
-                    </div>
+          <FilterSelect label="Loại xe" value={typeFilter} onChange={setTypeFilter}>
+            <option value="ALL">Tất cả loại xe</option>
+            {vehicleTypes.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </FilterSelect>
 
-                    <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-left">
-                      <div>
-                        <div className="text-[9px] font-label-caps text-on-surface-variant uppercase mb-0.5 font-bold">Tải trọng</div>
-                        <div className="font-data-tabular text-data-tabular text-on-surface text-[12px] font-semibold">
-                          {isPending ? 'Chờ nhập liệu' : vehicle.capacityText}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[9px] font-label-caps text-on-surface-variant uppercase mb-0.5 font-bold">Nhiên liệu / Điện</div>
-                        <div className={`font-data-tabular text-data-tabular text-[12px] flex items-center gap-1 font-bold ${isAlert && vehicle.fuelPercent <= 15 ? 'text-error' : 'text-on-surface'}`}>
-                          {isPending ? (
-                            'N/A'
-                          ) : (
-                            <>
-                              <div className="w-12 h-1 bg-surface-variant rounded-full overflow-hidden select-none">
-                                <div className={`h-full rounded-full ${isAlert && vehicle.fuelPercent <= 15 ? 'bg-error shadow-[0_0_5px_#ffdad6]' : isIdle ? 'bg-secondary-container' : 'bg-secondary'}`} style={{ width: `${vehicle.fuelPercent}%` }}></div>
-                              </div>
-                              {vehicle.fuelPercent}%
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <div className="col-span-2 mt-2 pt-2 border-t border-outline-variant/10">
-                        {isPending ? (
-                          <div className="flex items-center gap-1.5 text-amber-500 font-data-tabular text-data-tabular text-[11px] font-bold animate-pulse">
-                            <span className="material-symbols-outlined text-[14px]">lock_clock</span> Tự xóa: {getExpiryCountdown(vehicle.insuranceExpiry)}
+          <FilterSelect label="Sở hữu" value={ownershipFilter} onChange={(value) => setOwnershipFilter(value as typeof ownershipFilter)}>
+            <option value="ALL">Tất cả</option>
+            <option value="INTERNAL">Xe nội bộ</option>
+            <option value="PARTNER">Xe đối tác</option>
+          </FilterSelect>
+
+          <FilterSelect label="Rủi ro" value={riskFilter} onChange={(value) => setRiskFilter(value as typeof riskFilter)}>
+            <option value="ALL">Tất cả</option>
+            <option value="EXPIRING">Sắp hết đăng kiểm</option>
+            <option value="MAINTENANCE_DUE">Sắp bảo trì</option>
+            <option value="BLACKLISTED">Blacklist</option>
+          </FilterSelect>
+        </div>
+      </section>
+
+      <div className="grid min-h-[640px] shrink-0 grid-cols-1 gap-4 overflow-visible xl:grid-cols-[minmax(0,1fr)_400px]">
+        <section className="fleet-panel flex min-h-0 flex-col overflow-hidden rounded-lg">
+          <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-4">
+            <div>
+              <h3 className="text-sm font-black text-slate-900">Danh sách phương tiện</h3>
+              <p className="text-xs font-semibold text-slate-500">{visibleVehicles.length} bản ghi</p>
+            </div>
+            <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-600">
+              {loading ? 'Đang tải' : 'Đã đồng bộ'}
+            </span>
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-auto pb-24">
+            <table className="w-full min-w-[1040px] border-collapse text-left">
+              <thead className="fleet-table-header sticky top-0 z-10">
+                <tr className="border-b border-slate-200 text-[11px] font-black uppercase text-slate-500">
+                  <th className="px-4 py-3">Biển số</th>
+                  <th className="px-4 py-3">Rơ-moóc</th>
+                  <th className="px-4 py-3">Loại xe</th>
+                  <th className="px-4 py-3">Tải trọng</th>
+                  <th className="px-4 py-3">Tài xế</th>
+                  <th className="px-4 py-3">Chủ xe</th>
+                  <th className="px-4 py-3">Đăng kiểm</th>
+                  <th className="px-4 py-3">Trạng thái</th>
+                  <th className="px-4 py-3 text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {loading ? (
+                  <EmptyRow icon="hourglass_empty" text="Đang tải danh sách xe..." />
+                ) : visibleVehicles.length === 0 ? (
+                  <EmptyRow icon="inbox" text="Không có xe nào khớp với bộ lọc hiện tại." />
+                ) : (
+                  visibleVehicles.map((vehicle) => (
+                    <tr
+                      key={vehicle.vehicleId}
+                      onClick={() => setSelectedVehicleId(vehicle.vehicleId)}
+                      className={`fleet-table-row cursor-pointer ${
+                        isExpired(vehicle.inspectionExpiry)
+                          ? 'fleet-table-row-risk'
+                          : isMaintenanceDueSoon(vehicle.nextServiceDate) || isExpiringSoon(vehicle.inspectionExpiry)
+                            ? 'fleet-table-row-warning'
+                            : ''
+                      } ${selectedVehicle?.vehicleId === vehicle.vehicleId ? 'fleet-table-row-active' : ''}`}
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <span className="grid h-9 w-9 place-items-center rounded-md bg-[#0f3554] text-white">
+                            <span className="material-symbols-outlined text-[18px]">local_shipping</span>
+                          </span>
+                          <div>
+                            <p className="font-black text-slate-950">{vehicle.truckPlate}</p>
+                            <p className="text-[11px] font-semibold text-slate-500">{vehicle.isInternal ? 'Nội bộ' : 'Đối tác'}</p>
                           </div>
-                        ) : vehicle.maintStatus === 'ok' ? (
-                          <div className="flex items-center gap-1.5 text-primary font-data-tabular text-data-tabular text-[11px] font-semibold">
-                            <span className="material-symbols-outlined text-[14px]">check_circle</span> {vehicle.maintText}
-                          </div>
-                        ) : vehicle.maintStatus === 'alert' ? (
-                          <div className="flex items-center gap-1.5 text-error font-data-tabular text-data-tabular text-[11px] font-bold animate-pulse">
-                            <span className="material-symbols-outlined text-[14px]">engineering</span> {vehicle.maintText}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-slate-700">{vehicle.trailerPlate || '-'}</td>
+                      <td className="px-4 py-3">
+                        <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
+                          {vehicle.vehicleType || 'OTHER'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-data-tabular font-bold text-slate-800">{vehicle.maxWeightTon} t</td>
+                      <td className="px-4 py-3">
+                        {vehicle.defaultDriverName ? (
+                          <div>
+                            <p className="font-bold text-slate-900">{vehicle.defaultDriverName}</p>
+                            <p className="text-[11px] font-semibold text-slate-500">{vehicle.defaultDriverCode}</p>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-on-surface-variant font-data-tabular text-data-tabular text-[11px] font-medium">
-                            <span className="material-symbols-outlined text-[14px]">schedule</span> {vehicle.maintText}
-                          </div>
+                          <span className="font-semibold text-slate-400">Chưa gán</span>
                         )}
-                      </div>
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-slate-700">{vehicle.ownerName}</td>
+                      <td className="px-4 py-3">
+                        <span className={isExpired(vehicle.inspectionExpiry) ? 'font-black text-red-700' : isExpiringSoon(vehicle.inspectionExpiry) ? 'font-black text-amber-700' : 'font-semibold text-slate-500'}>
+                          {formatDate(vehicle.inspectionExpiry)}
+                        </span>
+                        {isMaintenanceDueSoon(vehicle.nextServiceDate) && (
+                          <span className="mt-1 block text-[11px] font-black text-red-700">
+                            Sắp bảo trì: {formatDate(vehicle.nextServiceDate)}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={vehicle.status} blacklisted={vehicle.isBlacklisted} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-1">
+                          <IconButton title="Sửa xe" icon="edit" onClick={(event) => {
+                            event.stopPropagation();
+                            openEditForm(vehicle);
+                          }} />
+                          <IconButton title="Vô hiệu hóa" icon="pause_circle" onClick={(event) => {
+                            event.stopPropagation();
+                            deactivateVehicle(vehicle);
+                          }} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside className="fleet-panel min-h-0 overflow-hidden rounded-lg">
+          {selectedVehicle ? (
+            <div className="flex h-full flex-col">
+              <div className="border-b border-slate-200 bg-[#f8fbfd] px-4 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <StatusBadge status={selectedVehicle.status} blacklisted={selectedVehicle.isBlacklisted} />
+                    <h2 className="mt-3 truncate text-2xl font-black text-slate-950">{selectedVehicle.truckPlate}</h2>
+                    <p className="text-sm font-bold text-slate-500">
+                      {selectedVehicle.vehicleType} • {selectedVehicle.isInternal ? 'Xe nội bộ' : 'Xe đối tác'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => openEditForm(selectedVehicle)}
+                    className="fleet-icon-button grid h-10 w-10 place-items-center rounded-md transition-colors"
+                    title="Sửa hồ sơ"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
+                <div className={`fleet-detail-banner rounded-lg p-3 ${
+                  isExpired(selectedVehicle.inspectionExpiry)
+                    ? 'border-red-200 bg-red-50'
+                    : isMaintenanceDueSoon(selectedVehicle.nextServiceDate) || isExpiringSoon(selectedVehicle.inspectionExpiry)
+                      ? 'border-amber-200 bg-amber-50'
+                      : ''
+                }`}>
+                  <div className="flex items-start gap-3">
+                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-md ${
+                      isExpired(selectedVehicle.inspectionExpiry)
+                        ? 'bg-red-100 text-red-700'
+                        : isMaintenanceDueSoon(selectedVehicle.nextServiceDate) || isExpiringSoon(selectedVehicle.inspectionExpiry)
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-emerald-100 text-emerald-700'
+                    }`}>
+                      <span className="material-symbols-outlined text-[21px]">
+                        {isExpired(selectedVehicle.inspectionExpiry) ? 'block' : isMaintenanceDueSoon(selectedVehicle.nextServiceDate) ? 'build_circle' : 'verified'}
+                      </span>
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-slate-950">
+                        {isExpired(selectedVehicle.inspectionExpiry)
+                          ? 'Không đủ điều kiện đặt lịch/check-in'
+                          : isMaintenanceDueSoon(selectedVehicle.nextServiceDate)
+                            ? 'Cần lên kế hoạch bảo trì'
+                            : 'Đủ điều kiện vận hành'}
+                      </p>
+                      <p className="mt-0.5 text-xs font-semibold text-slate-600">
+                        {isExpired(selectedVehicle.inspectionExpiry)
+                          ? 'Xe đã hết hạn đăng kiểm nên hệ thống sẽ chặn đặt lịch và AI Camera check-in.'
+                          : isMaintenanceDueSoon(selectedVehicle.nextServiceDate)
+                            ? `Ngày bảo trì tiếp theo: ${formatDate(selectedVehicle.nextServiceDate)}.`
+                            : 'Không có cảnh báo đăng kiểm hoặc bảo trì trong 30 ngày tới.'}
+                      </p>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+                <DetailSection title="Thông tin phương tiện" icon="local_shipping">
+                  <DetailRow label="Biển số rơ-moóc" value={selectedVehicle.trailerPlate || '-'} />
+                  <DetailRow label="Tải trọng tối đa" value={`${selectedVehicle.maxWeightTon} tấn`} />
+                  <DetailRow label="Chủ xe" value={selectedVehicle.ownerName || '-'} />
+                  <DetailRow label="Điện thoại chủ xe" value={selectedVehicle.ownerPhone || '-'} />
+                  <DetailRow label="Thiết bị GPS" value={selectedVehicle.gpsDeviceId || '-'} />
+                </DetailSection>
+
+                <DetailSection title="Kiểm định và bảo trì" icon="fact_check">
+                  <DetailRow label="Hạn đăng kiểm" value={formatDate(selectedVehicle.inspectionExpiry)} warning={isExpired(selectedVehicle.inspectionExpiry) || isExpiringSoon(selectedVehicle.inspectionExpiry)} />
+                  <DetailRow label="Bảo trì tiếp theo" value={formatDate(selectedVehicle.nextServiceDate)} warning={isMaintenanceDueSoon(selectedVehicle.nextServiceDate)} />
+                  <DetailRow label="Có thể đặt lịch" value={selectedVehicle.isActive && !selectedVehicle.isBlacklisted && !isExpired(selectedVehicle.inspectionExpiry) ? 'Có' : 'Không'} warning={!selectedVehicle.isActive || selectedVehicle.isBlacklisted || isExpired(selectedVehicle.inspectionExpiry)} />
+                </DetailSection>
+
+                <DetailSection title="Tài xế phụ trách" icon="badge">
+                  <div className="flex gap-2">
+                    <select
+                      value={assignDriverId}
+                      onChange={(event) => setAssignDriverId(event.target.value)}
+                      className="fleet-control min-w-0 flex-1 rounded-md px-3 py-2 text-sm font-semibold outline-none"
+                    >
+                      <option value="">Chọn tài xế</option>
+                      {eligibleDrivers.map((driver) => (
+                        <option key={driver.driverId} value={driver.driverId}>
+                          {driver.driverCode} - {driver.fullName}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => assignDriver(selectedVehicle)}
+                      disabled={selectedVehicle.isBlacklisted || !selectedVehicle.isActive}
+                      className="grid h-10 w-10 place-items-center rounded-md bg-[#0f3554] text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                      title="Gán tài xế"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">person_add</span>
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs font-semibold text-slate-500">
+                    Hiện tại: {selectedVehicle.defaultDriverName || 'Chưa có tài xế phụ trách'}
+                  </p>
+                </DetailSection>
+
+                <DetailSection title="Blacklist" icon="gavel">
+                  {selectedVehicle.isBlacklisted ? (
+                    <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">
+                      {selectedVehicle.blacklistReason || 'Xe đang nằm trong danh sách hạn chế.'}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <textarea
+                        value={blacklistReason}
+                        onChange={(event) => setBlacklistReason(event.target.value)}
+                        rows={3}
+                        className="fleet-control w-full resize-none rounded-md px-3 py-2 text-sm font-semibold outline-none focus:ring-red-100"
+                        placeholder="Nhập lý do hạn chế xe..."
+                      />
+                      <button
+                        type="button"
+                        onClick={() => blacklistVehicle(selectedVehicle)}
+                        className="flex h-9 w-full items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 text-sm font-black text-red-700 hover:bg-red-100"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">block</span>
+                        Đưa vào blacklist
+                      </button>
+                    </div>
+                  )}
+                </DetailSection>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 border-t border-slate-200 p-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('Vehicle Tracking')}
+                  className="flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50"
+                >
+                  <span className="material-symbols-outlined text-[18px]">history_toggle_off</span>
+                  Lịch sử
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deactivateVehicle(selectedVehicle)}
+                  className="flex h-10 items-center justify-center gap-2 rounded-md border border-amber-200 bg-amber-50 text-sm font-black text-amber-800 hover:bg-amber-100"
+                >
+                  <span className="material-symbols-outlined text-[18px]">pause_circle</span>
+                  Vô hiệu hóa
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid h-full place-items-center p-8 text-center text-sm font-semibold text-slate-500">
+              Chọn một xe để xem chi tiết.
             </div>
           )}
-        </div>
+        </aside>
       </div>
 
-      {/* RIGHT: Detail HUD Panel */}
-      <aside className="w-full md:w-[320px] lg:w-[380px] shrink-0 glass-panel rounded-xl flex flex-col overflow-hidden h-full">
-        {/* Header */}
-        <div className="p-5 border-b border-outline-variant/10 bg-surface-container-low/50 text-left">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-display-lg text-display-lg text-on-surface text-xl font-bold">{focusedVehicle.id}</h3>
-            
-            {focusedVehicle.status === 'Alert' ? (
-              <span className="bg-error/15 text-error border border-error/20 px-2.5 py-0.5 rounded text-[10px] font-label-caps text-label-caps uppercase flex items-center gap-1 font-bold animate-pulse">
-                <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span> Cảnh báo nguy hiểm
-              </span>
-            ) : focusedVehicle.status === 'Active' ? (
-              <span className="bg-secondary/15 text-secondary border border-secondary/20 px-2.5 py-0.5 rounded text-[10px] font-label-caps text-label-caps uppercase flex items-center gap-1 font-bold shadow-[0_0_10px_rgba(76,215,246,0.15)]">
-                <span className="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse shadow-[0_0_8px_#4cd7f6]" /> Đang di chuyển
-              </span>
-            ) : focusedVehicle.status === 'Pending' ? (
-              <span className="bg-amber-500/15 text-amber-500 border border-amber-500/20 px-2.5 py-0.5 rounded text-[10px] font-label-caps text-label-caps uppercase flex items-center gap-1 font-bold animate-pulse">
-                <span className="material-symbols-outlined text-[12px]">pending_actions</span> Chờ duyệt (ALPR)
-              </span>
-            ) : (
-              <span className="bg-surface-variant/50 text-on-surface-variant border border-outline-variant/20 px-2.5 py-0.5 rounded text-[10px] font-label-caps text-label-caps uppercase font-bold">
-                Đang rảnh
-              </span>
-            )}
-          </div>
-          <div className="font-body-md text-body-md text-on-surface-variant text-sm font-medium">{focusedVehicle.vehicleModel} • {focusedVehicle.type}</div>
-        </div>
-
-        {/* Scrollable Details */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
-          
-          {focusedVehicle.status === 'Pending' ? (
-            <div className="space-y-6 text-left">
-              {/* ALPR CAMERA DETECTED BANNER */}
-              <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl">
-                <div className="flex items-center gap-2 text-amber-500 mb-2 font-bold text-xs uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-[18px]">photo_camera</span>
-                  Phát hiện từ camera ALPR
-                </div>
-                <p className="text-sm text-on-surface leading-relaxed mb-4">
-                  Hệ thống ALPR phát hiện một phương tiện lạ ở lối vào kho. Dữ liệu này là tạm thời và sẽ bị xóa nếu không được phê duyệt.
-                </p>
-                <div className="flex items-center gap-2 text-error text-xs font-bold font-data-tabular bg-error/5 p-2 rounded border border-error/10">
-                  <span className="material-symbols-outlined text-[16px] animate-pulse">schedule</span>
-                  {getExpiryCountdown(focusedVehicle.insuranceExpiry)}
-                </div>
-              </div>
-
-              {/* TEMP SPECS */}
-              <div className="bg-surface-variant/15 border border-outline-variant/20 rounded-xl p-4">
-                <h4 className="text-[10px] font-label-caps text-on-surface-variant uppercase mb-3 font-bold tracking-wider">Thông tin nhận diện</h4>
-                
-                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-xs font-data-tabular">
-                  <div>
-                    <span className="text-[9px] text-on-surface-variant uppercase font-bold tracking-wider font-label-caps block mb-0.5">Biển số nhận diện</span>
-                    <span className="font-bold text-on-surface text-sm">{focusedVehicle.id}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-on-surface-variant uppercase font-bold tracking-wider font-label-caps block mb-0.5">Độ tin cậy AI</span>
-                    <span className="font-bold text-secondary">98.4%</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-on-surface-variant uppercase font-bold tracking-wider font-label-caps block mb-0.5">Mẫu xe AI gợi ý</span>
-                    <span className="font-bold text-on-surface">{focusedVehicle.vehicleModel}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-on-surface-variant uppercase font-bold tracking-wider font-label-caps block mb-0.5">Phân loại xe AI</span>
-                    <span className="font-bold text-on-surface">{focusedVehicle.type}</span>
-                  </div>
-                  <div className="col-span-2 border-t border-outline-variant/10 pt-2.5">
-                    <span className="text-[9px] text-on-surface-variant uppercase font-bold tracking-wider font-label-caps block mb-0.5">Địa điểm camera</span>
-                    <span className="font-bold text-on-surface-variant">Cổng Kiểm soát Cảng số 2 (Phía Bắc)</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ACTION CALLOUT */}
-              <p className="text-[11px] text-on-surface-variant leading-relaxed italic text-center">
-                Vui lòng click "PHÊ DUYỆT" để bổ sung các chỉ số tải trọng, thể tích, đăng kiểm bắt buộc của SQL Server để lưu vào Cơ sở dữ liệu.
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* GPS / Map Widget */}
-              <div className="text-left">
-                <h4 className="text-[10px] font-label-caps text-on-surface-variant uppercase mb-3 flex items-center gap-2 font-bold tracking-wider">
-                  <span className="material-symbols-outlined text-[14px]">my_location</span> Đo lường từ xa
-                </h4>
-                
-                <div className="h-32 rounded-lg border border-outline-variant/30 overflow-hidden relative bg-surface-variant/20 flex items-center justify-center select-none">
-                  <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at center, #2563eb 1.2px, transparent 1.2px)', backgroundSize: '12px 12px' }}></div>
-                  
-                  <div className="relative z-10 flex flex-col items-center">
-                    <span className={`material-symbols-outlined text-primary text-[26px] mb-1 ${focusedVehicle.status === 'Active' ? 'animate-bounce animate-[pulse_2s_infinite]' : ''}`}>
-                      near_me
-                    </span>
-                    <div className="bg-surface/90 backdrop-blur px-2.5 py-1 rounded font-data-tabular text-data-tabular text-[11px] border border-outline-variant/30 text-center font-bold">
-                      <div>{focusedVehicle.lat.toFixed(4)}° N, {Math.abs(focusedVehicle.lon).toFixed(4)}° W</div>
-                      <div className="text-secondary mt-0.5">Tốc độ: {focusedVehicle.speed} mph</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Diagnostics Grid */}
-              <div className="text-left">
-                <h4 className="text-[10px] font-label-caps text-on-surface-variant uppercase mb-3 flex items-center gap-2 font-bold tracking-wider">
-                  <span className="material-symbols-outlined text-[14px]">speed</span> Chẩn đoán Trực tiếp
-                </h4>
-                
-                <div className="grid grid-cols-2 gap-3 text-left font-data-tabular">
-                  <div className="bg-surface-variant/15 border border-outline-variant/20 rounded-lg p-3">
-                    <div className="text-[9px] text-on-surface-variant mb-1 uppercase font-bold tracking-wider font-label-caps">Nhiệt độ động cơ</div>
-                    <div className={`font-bold text-[16px] ${focusedVehicle.engineTemp >= 210 ? 'text-error animate-pulse' : 'text-on-surface'}`}>
-                      {focusedVehicle.engineTemp}°F
-                    </div>
-                  </div>
-                  
-                  <div className="bg-surface-variant/15 border border-outline-variant/20 rounded-lg p-3">
-                    <div className="text-[9px] text-on-surface-variant mb-1 uppercase font-bold tracking-wider font-label-caps">Áp suất dầu</div>
-                    <div className="font-bold text-[16px] text-on-surface">{focusedVehicle.oilPressure} PSI</div>
-                  </div>
-                  
-                  <div className="bg-surface-variant/15 border border-outline-variant/20 rounded-lg p-3">
-                    <div className="text-[9px] text-on-surface-variant mb-1 uppercase font-bold tracking-wider font-label-caps">Ắc quy</div>
-                    <div className="font-bold text-[16px] text-primary">{focusedVehicle.batteryVoltage}V</div>
-                  </div>
-                  
-                  <div className="bg-surface-variant/15 border border-outline-variant/20 rounded-lg p-3">
-                    <div className="text-[9px] text-on-surface-variant mb-1 uppercase font-bold tracking-wider font-label-caps">Mức DPF</div>
-                    <div className={`font-bold text-[16px] ${focusedVehicle.dpfLevel >= 70 ? 'text-error font-semibold' : 'text-on-surface'}`}>
-                      {focusedVehicle.dpfLevel}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Compliance / Specs Info */}
-              <div className="text-left">
-                <h4 className="text-[10px] font-label-caps text-on-surface-variant uppercase mb-3 flex items-center gap-2 font-bold tracking-wider">
-                  <span className="material-symbols-outlined text-[14px]">verified_user</span> Thông số kỹ thuật & Pháp lý
-                </h4>
-                
-                <ul className="space-y-2">
-                  <li className="flex items-center justify-between p-2.5 rounded bg-surface-variant/10 border border-outline-variant/10 select-none">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary text-[16px]">weight</span>
-                      <span className="font-data-tabular text-data-tabular text-[12px] text-on-surface font-semibold">Tải trọng tối đa</span>
-                    </div>
-                    <span className="text-on-surface text-[12px] font-bold font-data-tabular">{focusedVehicle.payloadKg} Kg</span>
-                  </li>
-
-                  <li className="flex items-center justify-between p-2.5 rounded bg-surface-variant/10 border border-outline-variant/10 select-none">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary text-[16px]">box</span>
-                      <span className="font-data-tabular text-data-tabular text-[12px] text-on-surface font-semibold">Thể tích thùng xe</span>
-                    </div>
-                    <span className="text-on-surface text-[12px] font-bold font-data-tabular">{focusedVehicle.volumeCbm} Cbm</span>
-                  </li>
-
-                  <li className="flex items-center justify-between p-2.5 rounded bg-surface-variant/10 border border-outline-variant/10 select-none">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary text-[16px]">local_gas_station</span>
-                      <span className="font-data-tabular text-data-tabular text-[12px] text-on-surface font-semibold">Định mức nhiên liệu</span>
-                    </div>
-                    <span className="text-on-surface text-[12px] font-bold font-data-tabular">{focusedVehicle.fuelConsumptionRate} L/100km</span>
-                  </li>
-
-                  <li className="flex items-center justify-between p-2.5 rounded bg-surface-variant/10 border border-outline-variant/10 select-none">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary text-[16px]">article</span>
-                      <span className="font-data-tabular text-data-tabular text-[12px] text-on-surface font-semibold">Hạn Đăng kiểm</span>
-                    </div>
-                    <span className="text-on-surface text-[11px] font-bold font-data-tabular">{focusedVehicle.registrationExpiry}</span>
-                  </li>
-                  
-                  <li className="flex items-center justify-between p-2.5 rounded bg-surface-variant/10 border border-outline-variant/10 select-none">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary text-[16px]">shield</span>
-                      <span className="font-data-tabular text-data-tabular text-[12px] text-on-surface font-semibold">Hạn Bảo hiểm</span>
-                    </div>
-                    <span className="text-on-surface text-[11px] font-bold font-data-tabular">{focusedVehicle.insuranceExpiry}</span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Blacklist Control */}
-              <div className="text-left border-t border-outline-variant/20 pt-4">
-                <h4 className="text-[10px] font-label-caps text-on-surface-variant uppercase mb-3 flex items-center gap-2 font-bold tracking-wider">
-                  <span className="material-symbols-outlined text-[14px]">gavel</span> Quản lý Blacklist
-                </h4>
-                <div className="flex items-center justify-between p-3 rounded bg-surface-variant/10 border border-outline-variant/10">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-on-surface font-semibold font-bold">Chặn phương tiện này</span>
-                    {focusedVehicle.isBlacklisted && (
-                      <span className="text-[10px] text-error mt-0.5 max-w-[200px] break-words font-semibold">
-                        Lý do: {focusedVehicle.blacklistReason || 'Không có'}
-                      </span>
-                    )}
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={focusedVehicle.isBlacklisted || false}
-                      disabled={!focusedVehicle.dbVehicleId}
-                      onChange={(e) => handleToggleVehicleBlacklist(focusedVehicle.id, e.target.checked)}
-                    />
-                    <div className="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:border-outline-variant after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-error peer-checked:after:bg-white"></div>
-                  </label>
-                </div>
-                {!focusedVehicle.dbVehicleId && (
-                  <span className="text-[9px] text-on-surface-variant/50 mt-1 block italic text-center">
-                    (Không khả dụng với phương tiện giả lập)
-                  </span>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="p-5 border-t border-outline-variant/10 bg-surface-container-low/50 grid grid-cols-2 gap-3 shrink-0">
-          {focusedVehicle.status === 'Pending' ? (
-            <>
-              <button
-                onClick={() => handleRejectPendingVehicle(focusedVehicle.id)}
-                className="bg-error/10 border border-error/35 text-error rounded-lg py-2 font-label-caps text-label-caps hover:bg-error/20 transition-colors text-xs font-bold active:scale-[0.98]"
-              >
-                TỪ CHỐI DUYỆT
-              </button>
-              
-              <button
-                onClick={() => {
-                  setNewId(focusedVehicle.id);
-                  setNewName(''); // Clear to force user to choose a real model
-                  setNewType(focusedVehicle.type === 'Xe tải hạng trung' ? 'Medium Duty Truck' : focusedVehicle.type === 'Xe van giao hàng' ? 'Delivery Van' : 'Heavy Duty Hauler');
-                  setNewStatus('Idle'); // Put into idle status in parking lot initially
-                  setNewCapacity(0);
-                  setNewFuel(100);
-                  
-                  // Initialize fields
-                  setNewPayloadKg(focusedVehicle.payloadKg || 1900);
-                  setNewVolumeCbm(focusedVehicle.volumeCbm || 10);
-                  setNewFuelConsumptionRate(focusedVehicle.fuelConsumptionRate || 12.5);
-                  setNewRegistrationExpiry('');
-                  setNewInsuranceExpiry('');
-                  
-                  setApprovingLicensePlate(focusedVehicle.id);
-                  setShowAddVehicleModal(true);
-                }}
-                className="bg-primary border border-primary text-on-primary rounded-lg py-2 font-label-caps text-label-caps shadow-[inset_0_0_10px_rgba(255,255,255,0.2)] hover:bg-primary-container transition-colors text-xs font-bold active:scale-[0.98]"
-              >
-                PHÊ DUYỆT
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setToastMessage(`Truyền thông vệ tinh: Đang mở kênh liên lạc an toàn với tài xế phương tiện ${focusedVehicle.id}.`)}
-                className="bg-surface-variant/40 border border-secondary text-secondary rounded-lg py-2 font-label-caps text-label-caps hover:bg-secondary/10 transition-colors text-xs font-bold active:scale-[0.98]"
-              >
-                LIÊN HỆ TÀI XẾ
-              </button>
-              
-              <button
-                onClick={() => {
-                  setActiveTab('Live Tracking');
-                  setToastMessage(`Khóa lộ trình: Chuyển màn hình điều phối sang theo dõi phương tiện ${focusedVehicle.id} trên bản đồ đo lường.`);
-                }}
-                className="bg-primary border border-primary text-on-primary rounded-lg py-2 font-label-caps text-label-caps shadow-[inset_0_0_10px_rgba(255,255,255,0.2)] hover:bg-primary-container transition-colors text-xs font-bold active:scale-[0.98]"
-              >
-                BẢN ĐỒ LỘ TRÌNH
-              </button>
-            </>
-          )}
-        </div>
-      </aside>
-
-      {/* DYNAMIC Add Vehicle Modal Drawer */}
-      {showAddVehicleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in pointer-events-auto">
-          <div className="w-full max-w-md glass-panel rounded-xl overflow-hidden border border-outline-variant/30 shadow-2xl animate-scale-up">
-            <div className="p-4 border-b border-white/10 flex justify-between items-center bg-primary-container/10">
-              <h3 className="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-2">
-                <span className="material-symbols-outlined text-[20px] text-primary">local_shipping</span>
-                {approvingLicensePlate ? 'Phê duyệt & Đăng ký Phương tiện ALPR' : 'Đăng ký Phương tiện Hạm đội'}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+          <div className="fleet-panel flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 p-4">
+              <h3 className="flex items-center gap-2 text-lg font-black text-slate-950">
+                <span className="material-symbols-outlined text-[#0f6b7d]">local_shipping</span>
+                {editingVehicle ? 'Cập nhật hồ sơ xe' : 'Thêm xe mới'}
               </h3>
-              
               <button
-                onClick={() => setShowAddVehicleModal(false)}
-                className="text-on-surface-variant hover:text-error transition-colors p-1"
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="grid h-9 w-9 place-items-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-red-600"
+                title="Đóng"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
-            <div className="p-5 flex flex-col gap-4 text-left font-body-md overflow-y-auto max-h-[75vh]">
-              {/* License Plate (Pre-fill and lock if in approval flow) */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Biển số xe (License Plate)</label>
+            <div className="grid min-h-0 gap-4 overflow-y-auto p-4 md:grid-cols-2">
+              <Field label="Biển số xe chính" value={form.truckPlate} onChange={(value) => updateForm('truckPlate', value)} required />
+              <Field label="Biển số rơ-moóc" value={form.trailerPlate} onChange={(value) => updateForm('trailerPlate', value)} />
+
+              <SelectField label="Loại xe" value={form.vehicleType} onChange={(value) => updateForm('vehicleType', value)}>
+                {vehicleTypes.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </SelectField>
+
+              <Field label="Tải trọng tối đa (tấn)" type="number" min="0.1" step="0.1" value={form.maxWeightTon} onChange={(value) => updateForm('maxWeightTon', value)} required />
+              <Field label="Chủ xe / Đơn vị vận tải" value={form.ownerName} onChange={(value) => updateForm('ownerName', value)} required />
+              <Field label="Điện thoại chủ xe" value={form.ownerPhone} onChange={(value) => updateForm('ownerPhone', value)} />
+
+              <SelectField label="Tài xế phụ trách" value={form.defaultDriverId} onChange={(value) => updateForm('defaultDriverId', value)}>
+                <option value="">Chưa gán</option>
+                {eligibleDrivers.map((driver) => (
+                  <option key={driver.driverId} value={driver.driverId}>
+                    {driver.driverCode} - {driver.fullName}
+                  </option>
+                ))}
+              </SelectField>
+
+              <SelectField label="Trạng thái" value={form.status} onChange={(value) => updateForm('status', value)}>
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>{statusLabels[status]}</option>
+                ))}
+              </SelectField>
+
+              <Field label="Hạn đăng kiểm" type="date" value={form.inspectionExpiry} onChange={(value) => updateForm('inspectionExpiry', value)} />
+              <Field label="Ngày bảo trì tiếp theo" type="date" value={form.nextServiceDate} onChange={(value) => updateForm('nextServiceDate', value)} />
+              <Field label="Mã thiết bị GPS" value={form.gpsDeviceId} onChange={(value) => updateForm('gpsDeviceId', value)} />
+
+              <label className="flex min-h-[42px] items-center gap-3 rounded-md border border-slate-300 bg-white px-3 text-sm font-bold text-slate-800">
                 <input
-                  type="text"
-                  disabled={!!approvingLicensePlate}
-                  className={`bg-black/30 border border-outline-variant/40 rounded-lg p-2.5 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all placeholder-on-surface-variant/45 ${
-                    approvingLicensePlate ? 'opacity-60 cursor-not-allowed bg-black/60' : ''
-                  }`}
-                  placeholder="Ví dụ: 29H-123.45, 51C-999.99..."
-                  value={newId}
-                  onChange={(e) => setNewId(e.target.value)}
+                  type="checkbox"
+                  checked={form.isInternal}
+                  onChange={(event) => updateForm('isInternal', event.target.checked)}
+                  className="h-4 w-4 accent-[#0f6b7d]"
                 />
-              </div>
+                Xe nội bộ SmartLog
+              </label>
+            </div>
 
-              {/* Vehicle Model */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Mẫu xe / Tên cabin (VehicleModel)</label>
-                <input
-                  type="text"
-                  className="bg-black/30 border border-outline-variant/40 rounded-lg p-2.5 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all placeholder-on-surface-variant/45"
-                  placeholder="Ví dụ: Isuzu 1.9 Tấn, Hino 5 Tấn..."
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Loại phương tiện</label>
-                  <select
-                    className="bg-black/40 border border-outline-variant/40 rounded-lg p-2.5 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all"
-                    value={newType}
-                    onChange={(e) => setNewType(e.target.value)}
-                  >
-                    <option value="Heavy Duty Hauler">Xe vận tải hạng nặng (Semi)</option>
-                    <option value="Delivery Van">Xe van thương mại</option>
-                    <option value="Medium Duty Truck">Xe tải hạng trung (Thùng hộp)</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Trạng thái ban đầu</label>
-                  <select
-                    className="bg-black/40 border border-outline-variant/40 rounded-lg p-2.5 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all"
-                    value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value as any)}
-                  >
-                    <option value="Active">Hoạt động (Làm nhiệm vụ)</option>
-                    <option value="Idle">Đang rảnh (Trong bãi)</option>
-                    <option value="Alert">Cảnh báo (Cảm biến báo lỗi)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* TECHNICAL SPECS REQUIRED BY SQL SERVER */}
-              <div className="border-t border-outline-variant/20 pt-4 flex flex-col gap-4">
-                <span className="text-[11px] font-bold text-primary uppercase tracking-wider">Thông số kỹ thuật bắt buộc (DB schema)</span>
-                
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Tải trọng (Kg)</label>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      className="bg-black/30 border border-outline-variant/40 rounded-lg p-2 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all font-data-tabular"
-                      value={newPayloadKg || ''}
-                      onChange={(e) => setNewPayloadKg(parseFloat(e.target.value) || 0)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Thể tích (Cbm)</label>
-                    <input
-                      type="number"
-                      required
-                      min="0.1"
-                      step="0.1"
-                      className="bg-black/30 border border-outline-variant/40 rounded-lg p-2 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all font-data-tabular"
-                      value={newVolumeCbm || ''}
-                      onChange={(e) => setNewVolumeCbm(parseFloat(e.target.value) || 0)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Hao phí (L/100km)</label>
-                    <input
-                      type="number"
-                      required
-                      min="0.1"
-                      step="0.1"
-                      className="bg-black/30 border border-outline-variant/40 rounded-lg p-2 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all font-data-tabular"
-                      value={newFuelConsumptionRate || ''}
-                      onChange={(e) => setNewFuelConsumptionRate(parseFloat(e.target.value) || 0)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Hạn đăng kiểm (Registration)</label>
-                    <input
-                      type="date"
-                      required
-                      className="bg-black/30 border border-outline-variant/40 rounded-lg p-2 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all text-left"
-                      value={newRegistrationExpiry}
-                      onChange={(e) => setNewRegistrationExpiry(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Hạn bảo hiểm (Insurance)</label>
-                    <input
-                      type="date"
-                      required
-                      className="bg-black/30 border border-outline-variant/40 rounded-lg p-2 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all text-left"
-                      value={newInsuranceExpiry}
-                      onChange={(e) => setNewInsuranceExpiry(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Capacity and Fuel defaults */}
-              {!approvingLicensePlate && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">% Tải trọng ban đầu</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      className="bg-black/30 border border-outline-variant/40 rounded-lg p-2.5 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all"
-                      value={newCapacity}
-                      onChange={(e) => setNewCapacity(parseInt(e.target.value) || 0)}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">% Nhiên liệu / Điện ban đầu</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      className="bg-black/30 border border-outline-variant/40 rounded-lg p-2.5 text-on-surface text-xs focus:outline-none focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all"
-                      value={newFuel}
-                      onChange={(e) => setNewFuel(parseInt(e.target.value) || 0)}
-                    />
-                  </div>
-                </div>
-              )}
-
+            <div className="flex justify-end gap-2 border-t border-slate-200 p-4">
               <button
-                onClick={handleAddVehicle}
-                className="mt-4 bg-primary-container text-white py-2.5 rounded-lg text-sm font-bold tracking-wider hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_0_15px_rgba(37,99,235,0.45)] flex items-center justify-center gap-1.5"
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="h-10 rounded-md border border-slate-300 px-4 text-sm font-black text-slate-700 hover:bg-slate-50"
               >
-                <span className="material-symbols-outlined text-[18px]">how_to_reg</span>
-                {approvingLicensePlate ? 'XÁC NHẬN PHÊ DUYỆT' : 'ĐĂNG KÝ VÀO HẠM ĐỘI'}
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={submitForm}
+                disabled={saving}
+                className="flex h-10 items-center gap-2 rounded-md bg-[#0f3554] px-4 text-sm font-black text-white disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
+                {saving ? 'Đang lưu...' : 'Lưu hồ sơ'}
               </button>
             </div>
           </div>
@@ -1194,5 +814,178 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
     </div>
   );
 };
+
+interface SummaryTileProps {
+  icon: string;
+  label: string;
+  value: number;
+  detail: string;
+  tone: 'primary' | 'success' | 'warning' | 'danger';
+}
+
+const SummaryTile = ({ icon, label, value, detail, tone }: SummaryTileProps) => {
+  const toneClass = {
+    primary: 'bg-cyan-50 text-cyan-800 border-cyan-200',
+    success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    warning: 'bg-amber-50 text-amber-800 border-amber-200',
+    danger: 'bg-red-50 text-red-800 border-red-200',
+  }[tone];
+
+  return (
+    <div className="fleet-kpi ops-kpi rounded-lg p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-black uppercase text-slate-500">{label}</p>
+          <p className="mt-2 font-data-tabular text-3xl font-black text-slate-950">{value}</p>
+          <p className="mt-1 text-xs font-semibold text-slate-500">{detail}</p>
+        </div>
+        <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-md border ${toneClass}`}>
+          <span className="material-symbols-outlined text-[22px]">{icon}</span>
+        </span>
+      </div>
+    </div>
+  );
+};
+
+interface FilterSelectProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}
+
+const FilterSelect = ({ label, value, onChange, children }: FilterSelectProps) => (
+  <label className="flex flex-col gap-1 text-[10px] font-black uppercase text-slate-500">
+    {label}
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className="fleet-control h-10 rounded-md px-3 text-sm font-bold normal-case outline-none"
+    >
+      {children}
+    </select>
+  </label>
+);
+
+interface FieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  required?: boolean;
+  min?: string;
+  step?: string;
+}
+
+const Field = ({ label, value, onChange, type = 'text', required, min, step }: FieldProps) => (
+  <label className="flex flex-col gap-1.5 text-xs font-black uppercase text-slate-500">
+    {label}{required ? ' *' : ''}
+    <input
+      type={type}
+      value={value}
+      min={min}
+      step={step}
+      onChange={(event) => onChange(event.target.value)}
+      className="fleet-control rounded-md px-3 py-2 text-sm font-bold normal-case outline-none"
+    />
+  </label>
+);
+
+interface SelectFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}
+
+const SelectField = ({ label, value, onChange, children }: SelectFieldProps) => (
+  <label className="flex flex-col gap-1.5 text-xs font-black uppercase text-slate-500">
+    {label}
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className="fleet-control rounded-md px-3 py-2 text-sm font-bold normal-case outline-none"
+    >
+      {children}
+    </select>
+  </label>
+);
+
+const EmptyRow = ({ icon, text }: { icon: string; text: string }) => (
+  <tr>
+    <td colSpan={9} className="px-4 py-12 text-center">
+      <span className="material-symbols-outlined mb-2 block text-[34px] text-slate-300">{icon}</span>
+      <span className="text-sm font-bold text-slate-500">{text}</span>
+    </td>
+  </tr>
+);
+
+interface StatusBadgeProps {
+  status: string;
+  blacklisted: boolean;
+}
+
+const StatusBadge = ({ status, blacklisted }: StatusBadgeProps) => {
+  const effectiveStatus = blacklisted ? 'BLACKLISTED' : status;
+  const className = effectiveStatus === 'ACTIVE' || effectiveStatus === 'AVAILABLE'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : effectiveStatus === 'BLACKLISTED'
+      ? 'border-red-200 bg-red-50 text-red-700'
+      : effectiveStatus === 'MAINTENANCE'
+        ? 'border-amber-200 bg-amber-50 text-amber-800'
+        : 'border-slate-200 bg-slate-100 text-slate-600';
+
+  return (
+    <span className={`inline-flex min-h-7 items-center rounded-md border px-2.5 py-1 text-xs font-black ${className}`}>
+      {statusLabels[effectiveStatus] ?? effectiveStatus}
+    </span>
+  );
+};
+
+interface IconButtonProps {
+  title: string;
+  icon: string;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+const IconButton = ({ title, icon, onClick }: IconButtonProps) => (
+  <button
+    type="button"
+    title={title}
+    onClick={onClick}
+    className="fleet-icon-button grid h-8 w-8 place-items-center rounded-md transition-colors"
+  >
+    <span className="material-symbols-outlined text-[18px]">{icon}</span>
+  </button>
+);
+
+interface DetailSectionProps {
+  title: string;
+  icon: string;
+  children: React.ReactNode;
+}
+
+const DetailSection = ({ title, icon, children }: DetailSectionProps) => (
+  <section>
+    <h4 className="mb-3 flex items-center gap-2 text-xs font-black uppercase text-slate-500">
+      <span className="material-symbols-outlined text-[16px] text-[#0f6b7d]">{icon}</span>
+      {title}
+    </h4>
+    <div className="space-y-2">{children}</div>
+  </section>
+);
+
+interface DetailRowProps {
+  label: string;
+  value: string;
+  warning?: boolean;
+}
+
+const DetailRow = ({ label, value, warning }: DetailRowProps) => (
+  <div className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+    <span className="font-semibold text-slate-500">{label}</span>
+    <span className={`text-right font-black ${warning ? 'text-amber-700' : 'text-slate-900'}`}>{value}</span>
+  </div>
+);
 
 export default VehiclesTab;
