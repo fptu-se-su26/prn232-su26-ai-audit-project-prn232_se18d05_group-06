@@ -74,6 +74,10 @@ Sinh viên/nhóm cần ghi lại:
 
 ---
 
+| 21 | 08/07/2026 | Antigravity | Lỗi LINQ Translation 500 | So sánh biển số xe trong Entity Framework | Gợi ý dùng `.Replace().ToUpper()` trong truy vấn thay vì gọi hàm C# tự viết | Có | GateService.cs |
+| 22 | 09/07/2026 | ChatGPT/Codex | Full-stack nghiệp vụ xe | Chặn xe hết hạn đăng kiểm khi booking/check-in, cảnh báo bảo trì | Gợi ý vị trí kiểm tra trong BookingService, GateService và VehiclesTab | Có, sau khi sinh viên tự chỉnh sửa và kiểm thử | BookingService.cs, GateService.cs, VehiclesTab.tsx |
+| 23 | 09/07/2026 | ChatGPT/Codex | UI/UX & Layout Debug | Sửa bố cục danh sách phương tiện bị lấp, không kéo xuống được | Gợi ý kiểm tra `overflow`, `flex`, `min-height` và vùng scroll của tab | Có, sinh viên tự kiểm tra UI thực tế và chọn cách sửa | VehiclesTab.tsx, index.css |
+
 ## 5. Prompt chi tiết
 
 ## Prompt #01
@@ -550,6 +554,48 @@ Kết quả được kiểm chứng bằng SMTP test, API `/api/stockalerts/scan
 - Prompt: "Làm sao để so sánh biển số xe trong Entity Framework LINQ mà bỏ qua dấu gạch ngang và dấu chấm mà không bị lỗi translation 500?"
 - Expected Output: Một đoạn mã C# sử dụng EF.Functions hoặc các hàm tương đương được EF hỗ trợ.
 - Evaluation: AI đã gợi ý chuẩn xác việc áp dụng trực tiếp `.Replace("-", "")` và `.ToUpper()` vào truy vấn `FirstOrDefaultAsync`.
+
+---
+
+## Prompt #22
+
+- Date: 2026-07-09
+- AI Tool: ChatGPT/Codex
+- Author: Vũ Lê Duy (DE180104)
+- Purpose: Tham khảo cách triển khai nghiệp vụ quản lý thông tin xe cho Dispatcher
+
+### Prompt
+Xe hết hạn đăng kiểm thì không cho đặt lịch và không cho AI Camera check-in; xe sắp đến hạn bảo trì thì cảnh báo Dispatcher.
+
+### Expected Output
+- Gợi ý vị trí cần kiểm tra trong backend khi tạo booking và khi check-in bằng AI Camera.
+- Gợi ý cách hiển thị cảnh báo trên màn hình quản lý phương tiện.
+- Không yêu cầu AI làm thay toàn bộ, chỉ dùng để tham khảo hướng xử lý và debug.
+
+### Evaluation
+AI hỗ trợ chỉ ra các luồng liên quan như `BookingService`, `GateService` và `VehiclesTab`. Sinh viên tự đọc code hiện có, tự quyết định rule nghiệp vụ, chỉnh sửa thủ công, chạy `dotnet build`, `npm run build` và kiểm thử bằng localhost. Kết quả AI không được dùng nguyên văn mà được kiểm tra, rút gọn và điều chỉnh theo cấu trúc dự án.
+
+---
+
+| STT | Ngày | Công cụ AI | Mục đích | Prompt tóm tắt | Kết quả chính | Có sử dụng vào bài không? | Minh chứng |
+|---:|---|---|---|---|---|---|---|
+
+## Prompt #23
+
+- Date: 2026-07-09
+- AI Tool: ChatGPT/Codex
+- Author: Vũ Lê Duy (DE180104)
+- Purpose: Tham khảo cách sửa lỗi bố cục danh sách phương tiện bị lấp và không cuộn xuống được
+
+### Prompt
+Danh sách phương tiện tôi không thể kéo xuống để xem thông tin, nó bị lấp rồi. Hãy sửa bố cục UI phù hợp hơn.
+
+### Expected Output
+- Gợi ý kiểm tra container cha, `overflow-hidden`, `overflow-y-auto`, `flex-1`, `min-height`.
+- Gợi ý chỉnh lại bố cục để phần danh sách phương tiện có thể cuộn dọc và không bị KPI/filter che mất.
+
+### Evaluation
+AI hỗ trợ phân tích nguyên nhân layout. Sinh viên đối chiếu với ảnh chụp giao diện thực tế, tự chọn giải pháp cho `VehiclesTab` cuộn dọc trong vùng dashboard, giữ bảng có chiều cao tối thiểu và kiểm tra lại trên trình duyệt. Kết quả cuối cùng được kiểm thử bằng `npm run build` và reload trang Dispatcher.
 
 ---
 
