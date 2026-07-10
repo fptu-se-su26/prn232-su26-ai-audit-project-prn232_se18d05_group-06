@@ -304,6 +304,14 @@ Bài học rút ra là AI giúp tiết kiệm thời gian khi phân tích lỗi 
 
 ---
 
+## 21. Reflection bo sung - UC026 Flow Optimization - Tran Van Tung (DE180109)
+
+Trong phan toi uu luong xe cho Dispatcher, em su dung AI de tham khao cach doc lai lien ket giua dat lich xe, QR check-in va hang cho dieu phoi. AI goi y nen kiem tra `SlotBookings`, `GateLogs`, `Docks`, `ServiceOrders` va component `DispatchOptimizationTab.tsx`, nhung em tu quyet dinh cach seed du lieu va cach hien thi tren UI.
+
+Phan quan trong nhat la khong hien ma ky thuat UC tren giao dien, vi man hinh van hanh can hien thi thong tin nghiep vu nhu bien so, khach hang, tai xe, loai hang, diem uu tien va dock de xuat. Sau khi sua, em chay `npm run type-check` de dam bao frontend khong loi TypeScript.
+
+Bai hoc rut ra la AI co the ho tro nhanh trong viec tim file va goi y bo cuc, nhung nguoi lam van phai tu hieu du lieu that va luong nghiep vu de quyet dinh UI nao phu hop voi Dispatcher.
+---
 ## 17. Cam kết Reflection
 
 Em/nhóm cam kết rằng nội dung reflection này phản ánh trung thực quá trình sử dụng AI và quá trình học tập trong bài tập/project.
