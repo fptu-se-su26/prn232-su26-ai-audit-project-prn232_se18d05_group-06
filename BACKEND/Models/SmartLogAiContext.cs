@@ -132,6 +132,10 @@ public partial class SmartLogAiContext : DbContext
 
     public virtual DbSet<VehicleEvent> VehicleEvents { get; set; }
 
+    public virtual DbSet<WarehouseLayoutMap> WarehouseLayoutMaps { get; set; }
+
+    public virtual DbSet<WarehouseLayoutObject> WarehouseLayoutObjects { get; set; }
+
     public override int SaveChanges()
     {
         PreventVehicleEventModification();
@@ -1814,6 +1818,74 @@ public partial class SmartLogAiContext : DbContext
             entity.HasOne(d => d.Vehicle).WithMany(p => p.VehicleEvents)
                 .HasForeignKey(d => d.VehicleId)
                 .HasConstraintName("FK__VehicleEvents__Vehicles");
+        });
+
+        modelBuilder.Entity<WarehouseLayoutMap>(entity =>
+        {
+            entity.HasKey(e => e.MapId).HasName("PK__WarehouseLayoutMaps");
+
+            entity.ToTable("WarehouseLayoutMaps");
+
+            entity.Property(e => e.MapId).HasColumnName("MapID");
+            entity.Property(e => e.WarehouseId).HasColumnName("WarehouseID");
+            entity.Property(e => e.MapName).HasMaxLength(200);
+            entity.Property(e => e.BackgroundImageUrl)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("BackgroundImageURL");
+            entity.Property(e => e.ScaleMeterPerPixel).HasColumnType("decimal(10, 4)");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.CreatedBy).HasColumnName("CreatedBy");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Warehouse).WithMany()
+                .HasForeignKey(d => d.WarehouseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__WarehouseLayoutMaps__Warehouses");
+
+            entity.HasOne(d => d.CreatedByUser).WithMany()
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK__WarehouseLayoutMaps__Users");
+        });
+
+        modelBuilder.Entity<WarehouseLayoutObject>(entity =>
+        {
+            entity.HasKey(e => e.ObjectId).HasName("PK__WarehouseLayoutObjects");
+
+            entity.ToTable("WarehouseLayoutObjects");
+
+            entity.Property(e => e.ObjectId).HasColumnName("ObjectID");
+            entity.Property(e => e.MapId).HasColumnName("MapID");
+            entity.Property(e => e.ObjectType)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.RefType)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+            entity.Property(e => e.RefId).HasColumnName("RefID");
+            entity.Property(e => e.Label).HasMaxLength(100);
+            entity.Property(e => e.X).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.Y).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.Width).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.Height).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.RotationDeg).HasColumnType("decimal(8, 2)").HasDefaultValue(0m);
+            entity.Property(e => e.FillColor)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.StrokeColor)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.ZIndex).HasDefaultValue(0);
+            entity.Property(e => e.IsLocked).HasDefaultValue(false);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Map).WithMany(p => p.WarehouseLayoutObjects)
+                .HasForeignKey(d => d.MapId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__WarehouseLayoutObjects__Maps");
         });
 
         OnModelCreatingPartial(modelBuilder);
