@@ -108,6 +108,10 @@ public partial class SmartLogAiContext : DbContext
 
     public virtual DbSet<VehicleMaintenanceLog> VehicleMaintenanceLogs { get; set; }
 
+    public virtual DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; }
+
+    public virtual DbSet<InspectionRecord> InspectionRecords { get; set; }
+
     public virtual DbSet<Voucher> Vouchers { get; set; }
 
     public virtual DbSet<VwCustomerDebt> VwCustomerDebts { get; set; }
