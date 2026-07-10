@@ -1,12 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { useNavigate } from 'react-router-dom';
+import { getCustomerTier } from '../../lib/api/customerTier';
 
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
+  const [basePrice, setBasePrice] = useState(45000);
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [tierName, setTierName] = useState('');
   const [price, setPrice] = useState(45000);
+  
   const [isFragile, setIsFragile] = useState(false);
   const [isCOD, setIsCOD] = useState(true);
+
+  useEffect(() => {
+    const fetchTier = async () => {
+      try {
+        const userStr = localStorage.getItem('user');
+        let userId = 1;
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.id) userId = user.id;
+        }
+        const tier = await getCustomerTier(userId);
+        if (tier) {
+          setTierName(tier.tier || '');
+          // Since getCustomerTier returns CustomerTierDto, we don't have discount percent directly
+          // We need to fetch configs to get the exact discount, or hardcode it for demo based on tierCode
+          let discount = 0;
+          if (tier.tier === 'GOLD') discount = 10;
+          else if (tier.tier === 'SILVER') discount = 5;
+          setDiscountPercent(discount);
+        }
+      } catch (e) {
+        console.error('Failed to fetch tier', e);
+      }
+    };
+    fetchTier();
+  }, []);
+
+  useEffect(() => {
+    // Calculate final price whenever basePrice or discount changes
+    setPrice(basePrice * (1 - discountPercent / 100));
+  }, [basePrice, discountPercent]);
 
   const handleCreateOrder = () => {
     // Navigate to flow 2 (tracking) via success page
@@ -178,7 +214,21 @@ const CreateOrder: React.FC = () => {
                 <div className="space-y-5">
                   <div className="bg-purple-50/50 p-6 rounded-2xl border border-purple-100 hover:scale-[1.02] cursor-pointer transition-transform duration-300">
                     <span className="text-[10px] font-extrabold text-purple-600 uppercase tracking-widest block mb-1">Cước phí ước tính</span>
-                    <div className="flex items-baseline gap-2">
+                    
+                    {discountPercent > 0 && (
+                      <div className="flex flex-col gap-1 mb-2">
+                        <div className="flex justify-between text-sm text-slate-500 line-through">
+                          <span>Gốc:</span>
+                          <span>{basePrice.toLocaleString('vi-VN')} VNĐ</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-green-600 font-medium">
+                          <span>Ưu đãi hạng {tierName} (-{discountPercent}%):</span>
+                          <span>-{((basePrice * discountPercent) / 100).toLocaleString('vi-VN')} VNĐ</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-baseline gap-2 border-t border-purple-100 pt-2">
                       <span className="font-sans text-[48px] font-extrabold tracking-[-0.02em] text-slate-900">
                         {price.toLocaleString('vi-VN')}
                       </span>
@@ -187,7 +237,7 @@ const CreateOrder: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-1 gap-3">
-                    <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition-all cursor-pointer group">
+                    <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition-all cursor-pointer group" onClick={() => setBasePrice(32000)}>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
                           <span className="material-symbols-outlined text-slate-400 group-hover:text-amber-500 transition-colors">local_shipping</span>
@@ -197,9 +247,9 @@ const CreateOrder: React.FC = () => {
                           <p className="text-xs text-slate-500">3-5 ngày</p>
                         </div>
                       </div>
-                      <span className="font-bold text-slate-900">32.000đ</span>
+                      <span className="font-bold text-slate-900">{(32000 * (1 - discountPercent / 100)).toLocaleString('vi-VN')}đ</span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-purple-50/80 rounded-2xl border-2 border-purple-500 transition-all cursor-pointer relative overflow-hidden group">
+                    <div className="flex items-center justify-between p-4 bg-purple-50/80 rounded-2xl border-2 border-purple-500 transition-all cursor-pointer relative overflow-hidden group" onClick={() => setBasePrice(45000)}>
                       <div className="absolute top-0 right-0 px-4 py-1.5 bg-purple-600 text-white text-[10px] font-bold uppercase rounded-bl-xl shadow-lg shadow-purple-200">Recommend</div>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
@@ -210,7 +260,7 @@ const CreateOrder: React.FC = () => {
                           <p className="text-xs text-purple-400">Trong ngày</p>
                         </div>
                       </div>
-                      <span className="font-bold text-purple-600">45.000đ</span>
+                      <span className="font-bold text-purple-600">{(45000 * (1 - discountPercent / 100)).toLocaleString('vi-VN')}đ</span>
                     </div>
                   </div>
                 </div>

@@ -60,7 +60,7 @@ const AdminAnalytics: React.FC = () => {
       <AdminSidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-[280px] flex flex-col min-h-screen relative bg-surface">
+      <div className="flex-1 md:ml-[280px] flex flex-col min-h-screen relative bg-background">
         {/* Abstract Background Elements */}
         <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary-fixed/30 to-transparent pointer-events-none -z-10"></div>
         <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-tertiary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
@@ -69,7 +69,7 @@ const AdminAnalytics: React.FC = () => {
         <header className="bg-surface/70 backdrop-blur-md docked full-width top-0 sticky bg-transparent shadow-sm z-40">
           <div className="flex justify-between items-center w-full h-[72px] px-8 max-w-[1600px] ml-auto">
             <div className="flex items-center gap-6">
-              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Admin Dashboard</h2>
+              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">BI Analytics</h2>
               <div className="hidden lg:flex items-center gap-4 ml-4">
                 <nav className="flex gap-1">
                   <a className="px-4 py-2 text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md opacity-80" href="#">Analytics</a>
@@ -145,8 +145,8 @@ const AdminAnalytics: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{card.title}</p>
-                  <h3 className="font-headline-lg text-headline-lg text-on-surface mt-1">{card.value}</h3>
+                  <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-bold">{card.title}</p>
+                  <h3 className="font-headline-lg text-headline-lg text-on-surface mt-1 font-black">{card.value}</h3>
                 </div>
                 {/* Mini Sparkline Placeholder */}
                 {card.hasSparkline && (
@@ -161,7 +161,7 @@ const AdminAnalytics: React.FC = () => {
             {/* Revenue Trends Chart */}
             <div className="glass-panel rounded-xl p-6 xl:col-span-2 flex flex-col h-[400px]">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-headline-sm text-headline-sm font-semibold text-on-surface">Revenue &amp; Volume Forecasting</h3>
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Revenue &amp; Volume Forecasting</h3>
                 <div className="flex gap-2">
                   <button className="px-3 py-1 bg-surface-container-low rounded-md font-label-md text-label-md text-on-surface">Vol</button>
                   <button className="px-3 py-1 bg-primary text-on-primary rounded-md font-label-md text-label-md shadow-sm">Rev</button>
@@ -174,9 +174,9 @@ const AdminAnalytics: React.FC = () => {
 
             {/* Geography Heatmap Placeholder */}
             <div className="glass-panel rounded-xl p-0 flex flex-col h-[400px] overflow-hidden relative">
-              <div className="absolute top-0 left-0 w-full p-6 z-10 bg-gradient-to-b from-white/80 to-transparent">
-                <h3 className="font-headline-sm text-headline-sm font-semibold text-on-surface">Density Heatmap</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">High-volume delivery zones</p>
+              <div className="absolute top-0 left-0 w-full p-6 z-10 bg-gradient-to-b from-background/80 to-transparent">
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Density Heatmap</h3>
+                <p className="font-body-sm text-body-sm font-medium text-on-surface-variant">High-volume delivery zones</p>
               </div>
               <div className="flex-1 w-full h-full bg-surface-variant/30 relative">
                 {/* Abstract Map Visual */}
