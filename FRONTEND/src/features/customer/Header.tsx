@@ -11,7 +11,7 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState<{name: string, email: string} | null>(null);
+  const [userData, setUserData] = useState<{ name: string, email: string } | null>(null);
   const navigate = useNavigate();
 
   // Lấy data từ localStorage
@@ -68,7 +68,6 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
           {[
             { label: 'Trang chủ', path: '/' },
             { label: 'Dịch vụ', path: '/create-shipment' },
-            { label: 'Giá cước', path: '/shipping-quotation' },
             { label: 'Theo dõi đơn hàng', path: '/tracking' },
             { label: 'Đặt lịch xe', path: '/slot-booking' },
             { label: 'Giới thiệu', path: '/about' },

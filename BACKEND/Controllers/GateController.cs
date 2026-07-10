@@ -146,10 +146,19 @@ namespace BACKEND.Controllers
             }
         }
 
+        public class ScanLicensePlateDto
+        {
+            public Microsoft.AspNetCore.Http.IFormFile ImageFile { get; set; }
+            public string? EventType { get; set; }
+        }
+
         // POST: api/gate/scan
         [HttpPost("scan")]
-        public async Task<ActionResult> ScanLicensePlate([FromForm] Microsoft.AspNetCore.Http.IFormFile imageFile, [FromForm] string eventType = "")
+        public async Task<ActionResult> ScanLicensePlate([FromForm] ScanLicensePlateDto request)
         {
+            var imageFile = request.ImageFile;
+            var eventType = request.EventType ?? "";
+
             if (imageFile == null || imageFile.Length == 0)
             {
                 return BadRequest("No image provided.");

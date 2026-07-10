@@ -1,8 +1,7 @@
-﻿import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CustomerLandingPage from './features/customer/CustomerLandingPage';
 import AuthPage from './features/auth/AuthPage';
 import CreateOrder from './features/customer/CreateOrder';
-import ShippingQuotation from './features/customer/ShippingQuotation';
 import OrderSuccess from './features/customer/OrderSuccess';
 import OrderTracking from './features/customer/OrderTracking';
 import OrderHistory from './features/customer/OrderHistory';
@@ -84,7 +83,6 @@ const App: React.FC = () => {
 
         {/* Create Shipment Flow (Purple) */}
         <Route path="/create-shipment" element={<CreateOrder />} />
-        <Route path="/shipping-quotation" element={<ShippingQuotation />} />
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/payment" element={<PaymentPage />} />
 
@@ -142,7 +140,7 @@ const App: React.FC = () => {
         {/* Route for Dispatcher Control Room */}
         <Route path="/" element={<DispatcherDashboard />} />
         <Route path="/dispatcher" element={<DispatcherDashboard />} />
-        
+
         {/* Route for Driver Dashboard */}
         <Route path="/driver" element={<DriverDashboard />} />
 

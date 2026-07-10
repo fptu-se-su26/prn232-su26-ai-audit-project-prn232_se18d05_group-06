@@ -69,7 +69,12 @@ builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>(
 builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
 builder.Services.AddScoped<ISlottingService, SlottingService>();
 builder.Services.AddScoped<ICustomerOrderTrackingService, CustomerOrderTrackingService>();
+builder.Services.AddScoped<ILocationSuggestionService, LocationSuggestionService>();
+builder.Services.AddScoped<IPricingEngineService, PricingEngineService>();
+builder.Services.AddScoped<IInvoiceOcrService, InvoiceOcrService>();
 builder.Services.AddSingleton<ILprService, LprService>();
+
+builder.Services.AddHttpClient();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();
