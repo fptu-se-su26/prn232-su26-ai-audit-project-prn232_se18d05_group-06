@@ -54,6 +54,7 @@ namespace BACKEND.Controllers
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            await EnsureCustomerProfileAsync(user);
 
             return Ok(new { Message = "User registered successfully" });
         }
@@ -157,6 +158,7 @@ namespace BACKEND.Controllers
 
                     _context.Users.Add(user);
                     await _context.SaveChangesAsync();
+                    await EnsureCustomerProfileAsync(user);
                 }
 
                 if (user.IsActive == false)
@@ -192,6 +194,32 @@ namespace BACKEND.Controllers
             return GenerateJwtToken(user.UserId, user.Username, user.Email, user.Role.RoleCode);
         }
 
+        private async Task EnsureCustomerProfileAsync(User user)
+        {
+            var exists = await _context.Customers.AnyAsync(c => c.UserId == user.UserId);
+            if (exists)
+            {
+                return;
+            }
+
+            var customer = new Customer
+            {
+                CustomerCode = $"CUST{user.UserId:D8}",
+                CompanyName = string.IsNullOrWhiteSpace(user.FullName) ? user.Username : user.FullName,
+                ContactName = user.FullName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Tier = "BRONZE",
+                TotalOrders12M = 0,
+                UserId = user.UserId,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+        }
+
         private string GenerateJwtToken(int userId, string username, string email, string roleCode)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
@@ -200,6 +228,7 @@ namespace BACKEND.Controllers
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Role, roleCode)
