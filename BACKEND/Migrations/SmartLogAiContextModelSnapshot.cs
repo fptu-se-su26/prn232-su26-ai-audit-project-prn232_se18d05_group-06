@@ -1180,6 +1180,50 @@ namespace BACKEND.Migrations
                     b.ToTable("InboundOrderLines");
                 });
 
+            modelBuilder.Entity("BACKEND.Models.InspectionRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DocumentUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("InspectionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InspectorName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("InspectionRecords");
+                });
+
             modelBuilder.Entity("BACKEND.Models.Inventory", b =>
                 {
                     b.Property<int>("InventoryId")
@@ -1340,6 +1384,48 @@ namespace BACKEND.Migrations
                     b.ToTable("Invoices");
                 });
 
+            modelBuilder.Entity("BACKEND.Models.MaintenanceSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("MaintenanceSchedules");
+                });
+
             modelBuilder.Entity("BACKEND.Models.MasterCategory", b =>
                 {
                     b.Property<int>("CategoryId")
@@ -1429,6 +1515,62 @@ namespace BACKEND.Migrations
                         .HasName("PK__Notifica__C3BC333C1ACBF3C8");
 
                     b.ToTable("NotificationConfigs");
+                });
+
+            modelBuilder.Entity("BACKEND.Models.OperatingExpense", b =>
+                {
+                    b.Property<int>("ExpenseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ExpenseID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExpenseId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ExpenseCategory")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ExpenseCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<DateOnly>("ExpenseDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("APPROVED");
+
+                    b.HasKey("ExpenseId")
+                        .HasName("PK_OperatingExpenses");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex(new[] { "ExpenseCode" }, "UQ_OperatingExpenses_ExpenseCode")
+                        .IsUnique();
+
+                    b.ToTable("OperatingExpenses");
                 });
 
             modelBuilder.Entity("BACKEND.Models.OrderLine", b =>
@@ -2774,6 +2916,77 @@ namespace BACKEND.Migrations
                     b.ToTable("StocktakeOrders");
                 });
 
+            modelBuilder.Entity("BACKEND.Models.TierConfig", b =>
+                {
+                    b.Property<int>("TierId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("TierID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TierId"));
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasColumnType("decimal(5, 2)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("MinOrders")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MinRevenue")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<string>("TierCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("TierName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("TierId");
+
+                    b.ToTable("TierConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            TierId = 1,
+                            DiscountPercent = 0m,
+                            IsActive = true,
+                            MinOrders = 0,
+                            MinRevenue = 0m,
+                            TierCode = "BRONZE",
+                            TierName = "Đồng"
+                        },
+                        new
+                        {
+                            TierId = 2,
+                            DiscountPercent = 5m,
+                            IsActive = true,
+                            MinOrders = 50,
+                            MinRevenue = 50000000m,
+                            TierCode = "SILVER",
+                            TierName = "Bạc"
+                        },
+                        new
+                        {
+                            TierId = 3,
+                            DiscountPercent = 10m,
+                            IsActive = true,
+                            MinOrders = 100,
+                            MinRevenue = 100000000m,
+                            TierCode = "GOLD",
+                            TierName = "Vàng"
+                        });
+                });
+
             modelBuilder.Entity("BACKEND.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -3018,6 +3231,42 @@ namespace BACKEND.Migrations
                     b.HasIndex("DockId", "DockStartTime");
 
                     b.ToTable("VehicleDockSessions");
+                });
+
+            modelBuilder.Entity("BACKEND.Models.VehicleEvent", b =>
+                {
+                    b.Property<int>("EventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("EventID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"));
+
+                    b.Property<DateTime>("EventTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int")
+                        .HasColumnName("VehicleID");
+
+                    b.HasKey("EventId")
+                        .HasName("PK__VehicleEvents__EventID");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("VehicleEvents", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.VehicleMaintenanceLog", b =>
@@ -3837,6 +4086,17 @@ namespace BACKEND.Migrations
                     b.Navigation("Sku");
                 });
 
+            modelBuilder.Entity("BACKEND.Models.InspectionRecord", b =>
+                {
+                    b.HasOne("BACKEND.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("BACKEND.Models.Inventory", b =>
                 {
                     b.HasOne("BACKEND.Models.WarehouseBin", "Bin")
@@ -3880,6 +4140,27 @@ namespace BACKEND.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("BACKEND.Models.MaintenanceSchedule", b =>
+                {
+                    b.HasOne("BACKEND.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("BACKEND.Models.OperatingExpense", b =>
+                {
+                    b.HasOne("BACKEND.Models.User", "CreatedByNavigation")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .HasConstraintName("FK_OperatingExpenses_CreatedBy");
+
+                    b.Navigation("CreatedByNavigation");
                 });
 
             modelBuilder.Entity("BACKEND.Models.OrderLine", b =>
@@ -4374,6 +4655,18 @@ namespace BACKEND.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("BACKEND.Models.VehicleEvent", b =>
+                {
+                    b.HasOne("BACKEND.Models.Vehicle", "Vehicle")
+                        .WithMany("VehicleEvents")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__VehicleEvents__Vehicles");
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("BACKEND.Models.VehicleMaintenanceLog", b =>
                 {
                     b.HasOne("BACKEND.Models.Vehicle", "Vehicle")
@@ -4624,6 +4917,8 @@ namespace BACKEND.Migrations
                     b.Navigation("GateLogs");
 
                     b.Navigation("SlotBookings");
+
+                    b.Navigation("VehicleEvents");
 
                     b.Navigation("VehicleMaintenanceLogs");
                 });

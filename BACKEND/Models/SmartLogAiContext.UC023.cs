@@ -12,6 +12,8 @@ public partial class SmartLogAiContext
 
     public virtual DbSet<AiModelTrainingLog> AiModelTrainingLogs { get; set; }
 
+    public virtual DbSet<TierConfig> TierConfigs { get; set; }
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<VehicleDockSession>(entity =>
@@ -112,6 +114,23 @@ public partial class SmartLogAiContext
 
             entity.HasOne(d => d.TriggeredByNavigation).WithMany()
                 .HasForeignKey(d => d.TriggeredBy);
+        });
+
+        modelBuilder.Entity<TierConfig>(entity =>
+        {
+            entity.HasKey(e => e.TierId);
+            entity.Property(e => e.TierId).HasColumnName("TierID");
+            entity.Property(e => e.TierName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.TierCode).HasMaxLength(50).IsUnicode(false).IsRequired();
+            entity.Property(e => e.MinRevenue).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.DiscountPercent).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+
+            entity.HasData(
+                new TierConfig { TierId = 1, TierName = "Đồng", TierCode = "BRONZE", MinOrders = 0, MinRevenue = 0m, DiscountPercent = 0m, IsActive = true },
+                new TierConfig { TierId = 2, TierName = "Bạc", TierCode = "SILVER", MinOrders = 50, MinRevenue = 50000000m, DiscountPercent = 5m, IsActive = true },
+                new TierConfig { TierId = 3, TierName = "Vàng", TierCode = "GOLD", MinOrders = 100, MinRevenue = 100000000m, DiscountPercent = 10m, IsActive = true }
+            );
         });
     }
 }
