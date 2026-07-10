@@ -77,11 +77,13 @@ builder.Services.AddScoped<IVehicleDashboardService, VehicleDashboardService>();
 builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
 builder.Services.AddScoped<IDispatchOptimizationService, DispatchOptimizationService>();
 
+
 // Register Workers
 builder.Services.AddHostedService<TierRecalculationWorker>();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();
+builder.Services.AddHostedService<MaintenanceAlertWorker>();
 // builder.Services.AddHostedService<OverstayAlertWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
