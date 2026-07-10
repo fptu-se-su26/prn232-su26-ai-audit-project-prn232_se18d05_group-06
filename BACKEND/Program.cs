@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -73,6 +75,7 @@ builder.Services.AddScoped<ICustomerOrderTrackingService, CustomerOrderTrackingS
 builder.Services.AddSingleton<ILprService, LprService>();
 builder.Services.AddScoped<IVehicleDashboardService, VehicleDashboardService>();
 builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
+builder.Services.AddScoped<IDispatchOptimizationService, DispatchOptimizationService>();
 
 // Register Workers
 builder.Services.AddHostedService<TierRecalculationWorker>();
@@ -86,6 +89,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+if (args.Any(arg => string.Equals(arg, "--seed-dispatch-optimization", StringComparison.OrdinalIgnoreCase)))
+{
+    using var seedScope = app.Services.CreateScope();
+    var seedService = seedScope.ServiceProvider.GetRequiredService<IDispatchOptimizationService>();
+    var seedResult = await seedService.SeedDemoDataAsync();
+    var queue = await seedService.GetQueueAsync(null);
+
+    Console.WriteLine($"{seedResult.Status}: {seedResult.Message}");
+    Console.WriteLine($"Dispatch queue: {queue.TotalWaiting} vehicles waiting, {queue.Docks.Count} docks loaded.");
+    return;
+}
 
 // Apply pending EF Core migrations at startup
 using (var scope = app.Services.CreateScope())

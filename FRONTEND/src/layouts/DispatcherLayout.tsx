@@ -65,7 +65,7 @@ export const DispatcherLayout: React.FC<DispatcherLayoutProps> = ({
         onAiAssistantClick={onAiAssistantClick}
       />
 
-      <main className="relative z-10 mt-16 flex h-[calc(100vh-64px)] min-w-0 flex-1 flex-col gap-4 overflow-hidden p-4 md:ml-[264px] lg:p-5">
+      <main className="relative z-10 mt-16 flex h-[calc(100vh-64px)] min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 pb-8 md:ml-[264px] lg:p-5 lg:pb-10">
         {children}
       </main>
     </div>
