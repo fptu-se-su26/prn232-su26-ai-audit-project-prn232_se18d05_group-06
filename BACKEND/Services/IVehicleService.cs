@@ -18,5 +18,6 @@ namespace BACKEND.Services
         Task DeactivateDispatcherVehicleAsync(int id);
         Task BlacklistDispatcherVehicleAsync(int id, BlacklistVehicleRequestDto dto);
         Task<DispatcherVehicleDto> AssignDispatcherVehicleDriverAsync(int id, AssignVehicleDriverRequestDto dto);
+        Task<DashboardDataDto> GetDashboardDataAsync();
     }
 }

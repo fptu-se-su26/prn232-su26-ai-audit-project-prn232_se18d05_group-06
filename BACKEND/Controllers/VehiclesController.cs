@@ -83,6 +83,36 @@ namespace BACKEND.Controllers
             }
         }
 
+        // GET: api/vehicles
+        [HttpGet]
+        public async Task<ActionResult<List<DispatcherVehicleDto>>> GetAllVehicles()
+        {
+            try
+            {
+                var vehicles = await _vehicleService.GetDispatcherVehiclesAsync(null, null, null, null, null, null);
+                return Ok(vehicles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/vehicles/dashboard
+        [HttpGet("dashboard")]
+        public async Task<ActionResult<DashboardDataDto>> GetDashboardData()
+        {
+            try
+            {
+                var data = await _vehicleService.GetDashboardDataAsync();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         // DELETE: api/vehicles/reject/{id}
         [HttpDelete("reject/{id}")]
         public async Task<IActionResult> RejectVehicle(int id)
