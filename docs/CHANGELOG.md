@@ -546,3 +546,43 @@ Author: Vu Le Duy (DE180104)
 ### AI-assisted
 - Dùng AI để tra cứu cú pháp cấu hình Mapbox/Goong và thuật toán nội suy điểm trên đường thẳng (Interpolation). Sinh viên tự thiết kế cấu trúc code, tự debug lỗi lệch toạ độ và tự thiết kế giao diện xe tải.
 
+
+## [1.7.0] - 2026-07-11
+Author: Vu Le Duy (DE180104)
+
+### Added
+- Tính năng Bản đồ tương tác (Interactive Route MiniMap) sử dụng Leaflet và OpenStreetMap để hiển thị tuyến đường nối Điểm lấy hàng và Điểm giao hàng trên form Tạo đơn.
+- Tự động lấy tọa độ thực từ backend để plot lên bản đồ.
+- Tự động nhận dạng Tên hàng hóa, Trị giá, Ghi chú và Loại dịch vụ (Hỏa tốc/Tiết kiệm) từ tính năng OCR (Quét AI) thông qua việc phân tích hóa đơn.
+
+### Changed
+- Gỡ bỏ giao diện ảnh bản đồ giả (mock tĩnh) trên trang CreateOrder.tsx.
+- Cải thiện độ nhạy của thuật toán Azure Vision OCR trong InvoiceOcrService.cs để match chính xác các từ khóa trong hóa đơn vận chuyển Việt Nam.
+- Tối ưu hóa UI/UX: Ẩn bớt các mục nhập liệu thừa (như Pallets), bổ sung ô ghi chú lớn và thay đổi menu ngang (xóa Giá cước).
+
+### Fixed
+- Khắc phục lỗi Quét AI không nhận dạng được đầy đủ chi tiết tên hàng hóa nếu hóa đơn xuống dòng đột ngột.
+- Sửa lỗi hiển thị UI của phần MiniMap bị chớp nhoáng (flickering) khi cập nhật tọa độ.
+
+### AI-assisted
+- Antigravity đã hỗ trợ thiết kế thuật toán substring trong C# để parse file text từ OCR và hỗ trợ thay thế thư viện bản đồ tương tác Leaflet vào React Component.
+
+## [1.7.0] - 2026-07-11
+Author: Vu Le Duy (DE180104)
+
+### Added
+- Tính năng Bản đồ tương tác (Interactive Route MiniMap) sử dụng Leaflet và OpenStreetMap để hiển thị tuyến đường nối Điểm lấy hàng và Điểm giao hàng trên form Tạo đơn.
+- Tự động lấy tọa độ thực từ backend để plot lên bản đồ.
+- Tự động nhận dạng Tên hàng hóa, Trị giá, Ghi chú và Loại dịch vụ (Hỏa tốc/Tiết kiệm) từ tính năng OCR (Quét AI) thông qua việc phân tích hóa đơn.
+
+### Changed
+- Gỡ bỏ giao diện ảnh bản đồ giả (mock tĩnh) trên trang CreateOrder.tsx.
+- Cải thiện độ nhạy của thuật toán Azure Vision OCR trong InvoiceOcrService.cs để match chính xác các từ khóa trong hóa đơn vận chuyển Việt Nam.
+- Tối ưu hóa UI/UX: Ẩn bớt các mục nhập liệu thừa (như Pallets), bổ sung ô ghi chú lớn và thay đổi menu ngang (xóa Giá cước).
+
+### Fixed
+- Khắc phục lỗi Quét AI không nhận dạng được đầy đủ chi tiết tên hàng hóa nếu hóa đơn xuống dòng đột ngột.
+- Sửa lỗi hiển thị UI của phần MiniMap bị chớp nhoáng (flickering) khi cập nhật tọa độ.
+
+### AI-assisted
+- Antigravity đã hỗ trợ thiết kế thuật toán substring trong C# để parse file text từ OCR và hỗ trợ thay thế thư viện bản đồ tương tác Leaflet vào React Component.

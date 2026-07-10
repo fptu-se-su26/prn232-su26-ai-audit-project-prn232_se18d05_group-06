@@ -808,3 +808,24 @@ Làm sao để nhúng Goong Map vào React, gọi API Direction để lấy đư
 ### Evaluation
 AI đưa ra hướng dẫn sử dụng thư viện `goongjs` và thuật toán nội suy điểm. Nhóm quyết định không copy toàn bộ logic mà tự viết hàm `getRoutePoint`, tự thiết kế SVG Marker hình xe tải theo phong cách Glassmorphism và tự mapping % tiến độ từ dữ liệu đơn hàng vào lộ trình trên bản đồ thực, thay thế hoàn toàn giao diện SVG giả trước đó.
 
+
+| 25 | 11/07/2026 | Antigravity | Thuật toán OCR C# | Nâng cấp InvoiceOcrService.cs để bóc tách thông tin Tên Hàng và Loại giao hàng | Gợi ý thuật toán substring và regex. | Có | InvoiceOcrService.cs |
+| 26 | 11/07/2026 | Antigravity | UI Bản đồ tĩnh | Khắc phục ảnh GIF đứt nét đứng yên ở CreateOrder | Gợi ý sử dụng thư viện Leaflet thay cho bản đồ mô phỏng | Có | RouteMiniMap.tsx |
+
+## Prompt #28
+- Date: 2026-07-11
+- AI Tool: Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo thuật toán trích xuất dữ liệu nâng cao cho Azure OCR
+- Prompt: "Hệ thống chưa lấy được tên hàng hóa và loại giao hàng khi quét hóa đơn. Azure OCR trả về file text nhưng cần thuật toán chia tách dòng hợp lý hơn. Làm sao để bóc tách?"
+- Expected Output: Đoạn mã C# sử dụng Regex hoặc IndexOf để trích xuất dựa trên format cố định.
+- Evaluation: AI đã gợi ý phương pháp kiểm tra điều kiện dòng liền kề (next line) khi phát hiện từ khóa 'Tên hàng:'. Nhóm đã tự test và điều chỉnh cho C# backend.
+
+## Prompt #29
+- Date: 2026-07-11
+- AI Tool: Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo cài đặt bản đồ tương tác thay thế
+- Prompt: "Đường nét đứt ở minimap trong giao diện tạo đơn hàng hãy cho nó đứng yên đi."
+- Expected Output: Một React Component dùng Leaflet vẽ map thật.
+- Evaluation: AI gợi ý sử dụng React-Leaflet để lấy Polyline giữa 2 tọa độ thay cho ảnh tĩnh, nhóm tự gắn key mapbox/osm.

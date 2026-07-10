@@ -419,3 +419,47 @@ Sinh viên/nhóm cam kết rằng:
 - Applied To: FRONTEND/src/features/customer/OrderTracking.tsx
 - Verification: Test giao dien tren trinh duyet thanh cong, xe tai va lo trinh the hien dung % mapping voi timeline don hang.
 
+
+## Log #25
+- Date: 2026-07-11
+- Author: Vu Le Duy (DE180104)
+- AI Tool: Antigravity
+- Purpose: Cải thiện thuật toán trích xuất dữ liệu từ Azure Vision OCR cho module Quét Hóa Đơn.
+- Prompt Reference: PROMPTS.md#prompt-28
+- AI Output Summary: Gợi ý các kỹ thuật nhận diện chuỗi dựa trên substring, regex và xử lý mảng (lines array) để tách chi tiết Số điện thoại, Loại giao hàng, Tên hàng hóa, Giá trị, và Ghi chú từ ảnh hóa đơn thực tế.
+- Human Decision: Sinh viên kiểm thử và tinh chỉnh lại các từ khóa điều kiện (vd: 'hỏa tốc', 'nội dung:') cho phù hợp với định dạng hóa đơn vận chuyển tại Việt Nam.
+- Applied To: BACKEND/Services/InvoiceOcrService.cs, FRONTEND/src/features/customer/CreateOrder.tsx
+- Verification: Đã test upload ảnh hóa đơn qua giao diện React, thông tin được tự động điền đầy đủ và đúng chuẩn vào form tạo đơn hàng.
+
+## Log #26
+- Date: 2026-07-11
+- Author: Vu Le Duy (DE180104)
+- AI Tool: Antigravity
+- Purpose: Biến bản đồ mô phỏng tuyến đường thành bản đồ tương tác (Interactive Route MiniMap).
+- Prompt Reference: PROMPTS.md#prompt-29
+- AI Output Summary: Gợi ý loại bỏ ảnh GIF nét đứt đứng yên (static dashed line map) và sử dụng Leaflet kết hợp OpenStreetMap để render toạ độ trực tiếp của điểm lấy hàng và giao hàng.
+- Human Decision: Tích hợp thư viện Leaflet vào Frontend thay thế UI tĩnh trước đó, tạo cảm giác trực quan hơn cho khách hàng.
+- Applied To: FRONTEND/src/features/customer/components/RouteMiniMap.tsx, FRONTEND/src/features/customer/CreateOrder.tsx
+- Verification: Nhập địa chỉ lấy và giao hàng, bản đồ tự động vẽ đường chim bay kết nối 2 điểm.
+
+## Log #25
+- Date: 2026-07-11
+- Author: Vu Le Duy (DE180104)
+- AI Tool: Antigravity
+- Purpose: Cải thiện thuật toán trích xuất dữ liệu từ Azure Vision OCR cho module Quét Hóa Đơn.
+- Prompt Reference: PROMPTS.md#prompt-28
+- AI Output Summary: Gợi ý các kỹ thuật nhận diện chuỗi dựa trên substring, regex và xử lý mảng (lines array) để tách chi tiết Số điện thoại, Loại giao hàng, Tên hàng hóa, Giá trị, và Ghi chú từ ảnh hóa đơn thực tế.
+- Human Decision: Sinh viên kiểm thử và tinh chỉnh lại các từ khóa điều kiện (vd: 'hỏa tốc', 'nội dung:') cho phù hợp với định dạng hóa đơn vận chuyển tại Việt Nam.
+- Applied To: BACKEND/Services/InvoiceOcrService.cs, FRONTEND/src/features/customer/CreateOrder.tsx
+- Verification: Đã test upload ảnh hóa đơn qua giao diện React, thông tin được tự động điền đầy đủ và đúng chuẩn vào form tạo đơn hàng.
+
+## Log #26
+- Date: 2026-07-11
+- Author: Vu Le Duy (DE180104)
+- AI Tool: Antigravity
+- Purpose: Biến bản đồ mô phỏng tuyến đường thành bản đồ tương tác (Interactive Route MiniMap).
+- Prompt Reference: PROMPTS.md#prompt-29
+- AI Output Summary: Gợi ý loại bỏ ảnh GIF nét đứt đứng yên (static dashed line map) và sử dụng Leaflet kết hợp OpenStreetMap để render toạ độ trực tiếp của điểm lấy hàng và giao hàng.
+- Human Decision: Tích hợp thư viện Leaflet vào Frontend thay thế UI tĩnh trước đó, tạo cảm giác trực quan hơn cho khách hàng.
+- Applied To: FRONTEND/src/features/customer/components/RouteMiniMap.tsx, FRONTEND/src/features/customer/CreateOrder.tsx
+- Verification: Nhập địa chỉ lấy và giao hàng, bản đồ tự động vẽ đường chim bay kết nối 2 điểm.
