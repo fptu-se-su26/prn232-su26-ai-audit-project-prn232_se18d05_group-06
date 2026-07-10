@@ -517,6 +517,21 @@ Author: Tran Van Tung (DE180109)
 - `dotnet build`: thanh cong, 0 warning, 0 error.
 ---
 
+## [2026-07-10]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them seed du lieu cho Flow Optimization gom warehouse, dock, vehicle, driver, service order, slot booking da check-in va gate log.
+- Them mapping label tieng Viet cho trang thai, do uu tien, loai hang, loai chuyen va kha nang dock trong Dispatcher Flow Optimization.
+
+### Changed
+- Cai thien UI tab Flow Optimization de hien thi tieng Viet dung font, khong hien ma UC ky thuat tren giao dien.
+- Bo cuc lai cum diem uu tien va nut hanh dong thanh action card gon hon.
+- Dong bo `smartlogAI.sql` va `setup-dispatch-optimization.sql` voi du lieu demo UC026.
+
+### Verification
+- `npm run type-check`: thanh cong.
+---
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
