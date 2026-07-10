@@ -500,6 +500,25 @@ Author: Vu Le Duy (DE180104)
 
 ---
 
+## [1.6.0] - 2026-07-10
+Author: Vu Le Duy (DE180104)
+
+### Added
+- Feature: Hoàn thiện Bản đồ theo dõi đơn hàng trực tuyến (Order Tracking Map) kết hợp thư viện Goong Map.
+- Vẽ tuyến đường giao thông thực tế giữa Điểm lấy hàng và Điểm giao hàng thông qua API Direction.
+- Đánh dấu các mốc (Checkpoints) tương ứng với 6 trạng thái xử lý đơn hàng trên lộ trình bản đồ.
+
+### Changed
+- Refactored UI: Gỡ bỏ hoàn toàn giao diện SVG giả lập (fake SVG overlay) che lấp bản đồ thật.
+- Đồng bộ % tiến trình của đơn hàng để vị trí xe tải (Truck Marker) khớp chính xác với điểm checkpoint thực tế trên bản đồ.
+
+### Fixed
+- Sửa lỗi giới hạn (clamp) phần trăm tiến độ khiến xe tải không bao giờ dừng đúng điểm đầu và điểm cuối của lộ trình.
+- Sửa lỗi hiển thị Marker mặc định (text "Xe") thành một SVG Icon xe tải được custom theo thiết kế thống nhất của hệ thống.
+
+### AI-assisted
+- Dùng AI để tra cứu cú pháp cấu hình Mapbox/Goong và thuật toán nội suy điểm trên đường thẳng (Interpolation). Sinh viên tự thiết kế cấu trúc code, tự debug lỗi lệch toạ độ và tự thiết kế giao diện xe tải.
+
 ## [2026-07-10 ]
 Author: Tran Van Tung (DE180109)
 
