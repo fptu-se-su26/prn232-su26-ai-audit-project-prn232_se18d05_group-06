@@ -112,7 +112,7 @@ export default function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
-    <main className="flex min-h-screen flex-col md:flex-row font-sans">
+    <main className="auth-page light-surface flex min-h-screen flex-col md:flex-row font-sans text-slate-900">
       {/* Left Section: Visual Branding */}
       <section className="hidden md:flex md:w-1/2 lg:w-3/5 bg-[#151A2B] relative items-center justify-center p-8 md:p-12 overflow-hidden">
         <div className="absolute inset-0 opacity-40">
@@ -123,7 +123,7 @@ export default function AuthPage() {
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
               SmartLog AI
             </h1>
-            <p className="text-lg text-white/70 max-w-md leading-relaxed">
+            <p className="text-lg text-white/85 max-w-md leading-relaxed">
               Giải pháp quản lý logistics thông minh dựa trên AI, tối ưu hóa mọi hành trình vận tải
               toàn cầu.
             </p>
@@ -137,7 +137,7 @@ export default function AuthPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#151A2B]/90 via-[#151A2B]/20 to-transparent flex flex-col justify-end p-6 md:p-8">
               <div className="flex items-center gap-3">
-                <Network className="text-[#B4C5FF] w-6 h-6" />
+                <Network className="text-blue-200 w-6 h-6" />
                 <span className="text-sm font-semibold text-white uppercase tracking-widest">
                   Hệ thống thời gian thực
                 </span>
@@ -159,21 +159,21 @@ export default function AuthPage() {
           </div>
 
           {/* Auth Card */}
-          <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 relative overflow-hidden transition-all duration-500 flex-shrink-0">
+          <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 relative overflow-hidden transition-all duration-500 flex-shrink-0">
             <div className="p-8 sm:p-10 pb-0">
               {/* Form Header */}
               <div className="flex items-start justify-between mb-8">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                  <h2 className="text-2xl font-bold text-slate-950 mb-2">
                     {isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản mới'}
                   </h2>
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-slate-700 text-sm font-medium">
                     {isLogin
                       ? 'Vui lòng đăng nhập để tiếp tục.'
                       : 'Bắt đầu hành trình logistics của bạn.'}
                   </p>
                 </div>
-                <div className="hidden sm:flex items-center justify-center w-12 h-12 text-[#B4C5FF]">
+                <div className="hidden sm:flex items-center justify-center w-12 h-12 text-blue-700">
                   {isLogin ? (
                     <LogIn className="w-8 h-8" strokeWidth={2.5} />
                   ) : (
@@ -198,7 +198,7 @@ export default function AuthPage() {
                         id="login-email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
+                        className="peer w-full h-[52px] bg-slate-50 rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-slate-200 focus:bg-white focus:border-blue-700 outline-none transition-all placeholder-transparent text-slate-950 font-medium"
                         placeholder="Email hoặc tên đăng nhập"
                         autoCapitalize="none"
                         autoComplete="username"
@@ -206,7 +206,7 @@ export default function AuthPage() {
                       />
                       <label
                         htmlFor="login-email"
-                        className="absolute left-4 top-2 text-[11px] text-slate-500 font-medium transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-600 cursor-text"
+                        className="absolute left-4 top-2 text-[11px] text-slate-700 font-semibold transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-700 cursor-text"
                       >
                         Email / Tên đăng nhập
                       </label>
@@ -217,13 +217,13 @@ export default function AuthPage() {
                         id="login-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
+                        className="peer w-full h-[52px] bg-slate-50 rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-slate-200 focus:bg-white focus:border-blue-700 outline-none transition-all placeholder-transparent text-slate-950 font-medium"
                         placeholder="Mật khẩu"
                         required
                       />
                       <label
                         htmlFor="login-password"
-                        className="absolute left-4 top-2 text-[11px] text-slate-500 font-medium transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-600 cursor-text"
+                        className="absolute left-4 top-2 text-[11px] text-slate-700 font-semibold transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-700 cursor-text"
                       >
                         Mật khẩu
                       </label>
@@ -247,7 +247,7 @@ export default function AuthPage() {
                         type="checkbox"
                         className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600/20 transition-all cursor-pointer"
                       />
-                      <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
+                      <span className="text-sm text-slate-700 group-hover:text-slate-950 transition-colors">
                         Ghi nhớ đăng nhập
                       </span>
                     </label>
@@ -272,7 +272,7 @@ export default function AuthPage() {
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-slate-200/60"></div>
                     </div>
-                    <span className="relative bg-white px-4 text-xs text-slate-500">
+                    <span className="relative bg-white px-4 text-xs text-slate-600 font-medium">
                       Hoặc tiếp tục với
                     </span>
                   </div>
@@ -299,13 +299,13 @@ export default function AuthPage() {
                         id="reg-name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
+                        className="peer w-full h-[52px] bg-slate-50 rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-slate-200 focus:bg-white focus:border-blue-700 outline-none transition-all placeholder-transparent text-slate-950 font-medium"
                         placeholder="Họ và tên"
                         required
                       />
                       <label
                         htmlFor="reg-name"
-                        className="absolute left-4 top-2 text-[11px] text-slate-500 font-medium transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-600 cursor-text"
+                        className="absolute left-4 top-2 text-[11px] text-slate-700 font-semibold transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-700 cursor-text"
                       >
                         Họ và tên
                       </label>
@@ -316,13 +316,13 @@ export default function AuthPage() {
                         id="reg-email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
+                        className="peer w-full h-[52px] bg-slate-50 rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-slate-200 focus:bg-white focus:border-blue-700 outline-none transition-all placeholder-transparent text-slate-950 font-medium"
                         placeholder="Email"
                         required
                       />
                       <label
                         htmlFor="reg-email"
-                        className="absolute left-4 top-2 text-[11px] text-slate-500 font-medium transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-600 cursor-text"
+                        className="absolute left-4 top-2 text-[11px] text-slate-700 font-semibold transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-700 cursor-text"
                       >
                         Email
                       </label>
@@ -333,13 +333,13 @@ export default function AuthPage() {
                         id="reg-phone"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
+                        className="peer w-full h-[52px] bg-slate-50 rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-slate-200 focus:bg-white focus:border-blue-700 outline-none transition-all placeholder-transparent text-slate-950 font-medium"
                         placeholder="Số điện thoại"
                         required
                       />
                       <label
                         htmlFor="reg-phone"
-                        className="absolute left-4 top-2 text-[11px] text-slate-500 font-medium transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-600 cursor-text"
+                        className="absolute left-4 top-2 text-[11px] text-slate-700 font-semibold transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-700 cursor-text"
                       >
                         Số điện thoại
                       </label>
@@ -351,13 +351,13 @@ export default function AuthPage() {
                           id="reg-pass"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
+                          className="peer w-full h-[52px] bg-slate-50 rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-slate-200 focus:bg-white focus:border-blue-700 outline-none transition-all placeholder-transparent text-slate-950 font-medium"
                           placeholder="Mật khẩu"
                           required
                         />
                         <label
                           htmlFor="reg-pass"
-                          className="absolute left-4 top-2 text-[11px] text-slate-500 font-medium transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-600 cursor-text"
+                          className="absolute left-4 top-2 text-[11px] text-slate-700 font-semibold transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-700 cursor-text"
                         >
                           Mật khẩu
                         </label>
@@ -379,13 +379,13 @@ export default function AuthPage() {
                           id="reg-confirm"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="peer w-full h-[52px] bg-[#F2F4F6] rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all placeholder-transparent text-slate-900"
+                          className="peer w-full h-[52px] bg-slate-50 rounded-lg px-4 pt-5 pb-1 text-sm border-2 border-slate-200 focus:bg-white focus:border-blue-700 outline-none transition-all placeholder-transparent text-slate-950 font-medium"
                           placeholder="Xác nhận"
                           required
                         />
                         <label
                           htmlFor="reg-confirm"
-                          className="absolute left-4 top-2 text-[11px] text-slate-500 font-medium transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-600 cursor-text"
+                          className="absolute left-4 top-2 text-[11px] text-slate-700 font-semibold transition-all peer-placeholder-shown:top-[16px] peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-blue-700 cursor-text"
                         >
                           Xác nhận
                         </label>
@@ -411,7 +411,7 @@ export default function AuthPage() {
                       className="mt-[3px] w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600/20 cursor-pointer transition-all"
                       required
                     />
-                    <label htmlFor="terms" className="text-sm text-slate-600 leading-tight">
+                    <label htmlFor="terms" className="text-sm text-slate-700 leading-tight font-medium">
                       Tôi đồng ý với{' '}
                       <a href="#" className="text-[#0050C8] font-semibold hover:underline">
                         Điều khoản dịch vụ
@@ -438,7 +438,7 @@ export default function AuthPage() {
 
             {/* Switch Link Container (Footer of Card) */}
             <div className="text-center py-5 border-t border-slate-100 bg-white">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-700">
                 {isLogin ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'}
                 <button
                   onClick={() => setIsLogin(!isLogin)}
@@ -451,7 +451,7 @@ export default function AuthPage() {
           </div>
 
           {/* Bottom Support Info */}
-          <div className="mt-8 flex justify-center gap-8 text-slate-500 text-sm">
+          <div className="mt-8 flex justify-center gap-8 text-slate-700 text-sm">
             <a href="#" className="hover:text-blue-600 font-medium transition-colors">
               Trung tâm hỗ trợ
             </a>

@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@goongmaps/goong-js": "^1.0.9",
     "@hookform/resolvers": "^3.3.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@react-oauth/google": "^0.13.5",

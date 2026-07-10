@@ -68,6 +68,7 @@ builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
 builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>();
 builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
 builder.Services.AddScoped<ISlottingService, SlottingService>();
+builder.Services.AddScoped<ICustomerOrderTrackingService, CustomerOrderTrackingService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
