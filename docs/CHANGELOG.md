@@ -433,62 +433,6 @@ Author: Tran Van Tung (DE180109)
 
 ---
 
-## 4. Tổng kết thay đổi cuối project
-
-### 4.1. Các chức năng đã hoàn thành
-
-| STT | Chức năng | Trạng thái | Minh chứng | Ghi chú |
-|---:|---|---|---|---|
-| 1 | Giao diện Phòng điều phối | Completed | DispatcherDashboard | Giao diện tĩnh |
-| 2 | Giao diện màn hình Tài xế | Completed | DriverDashboard | Giao diện tĩnh |
-| 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
-| 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
-| 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
-| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
-| 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
-
-
----
-
-### 4.2. Các chức năng chưa hoàn thành
-
-| STT | Chức năng | Lý do chưa hoàn thành | Hướng cải thiện |
-|---:|---|---|---|
-| 1 | Kết nối API thật cho các chức năng còn lại | Giới hạn thời gian | Đã kết nối API thật cho các chức năng quan trọng (Vận đơn, Phê duyệt xe ALPR, Đặt lịch kho, Theo dõi hành trình xe). Sẽ tiếp tục mở rộng cho các tab phụ. |
-
----
-
-### 4.3. Tổng hợp AI hỗ trợ trong project
-
-| Hạng mục | AI có hỗ trợ không? | Mức độ hỗ trợ | Ghi chú |
-|---|---|---|---|
-| Requirement | Có | Ít | Tìm hiểu khái niệm |
-| Design | Có | Ít | Gợi ý bố cục |
-| Database | Không | Ít | Không dùng |
-| Coding | Có | Ít | Tra cứu cú pháp |
-| Debug | Có | Ít | Sửa lỗi CSS nhỏ |
-| Testing | Không | Ít | Tự test tay |
-| Report | Có | Ít | Định dạng văn bản |
-| Presentation | Không | Ít | Không dùng |
-
----
-
-### 4.4. Bài học rút ra
-
-```text
-Nhóm đã hiểu rõ hơn cách tổ chức một ứng dụng React chia theo component nhỏ và cách sử dụng CSS Tailwind để lập trình giao diện nhanh chóng.
-```
-
----
-
-### 4.5. Hướng cải thiện tiếp theo
-
-```text
-Lập trình phần Backend bằng .NET Core để kết nối cơ sở dữ liệu SQL Server, hoàn thiện chức năng đăng nhập và lưu trữ đơn hàng thực tế.
-```
-
----
-
 ## [1.2.0] - 2026-07-08
 Author: Vũ Lê Duy (DE180104)
 
@@ -531,17 +475,6 @@ Author: Vũ Lê Duy (DE180104)
 - `dotnet build BACKEND/BACKEND.csproj`: thành công.
 - `npm run build`: thành công.
 - Kiểm tra thủ công backend Swagger và frontend Dispatcher trên localhost.
-
----
-
-## 5. Cam kết cập nhật Changelog
-
-Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các thay đổi đã thực hiện trong quá trình làm bài tập/project.
-
-| Đại diện sinh viên/nhóm | Ngày xác nhận |
-|---|---|
-| Nhóm trưởng | 02/06/2026 |
-
 ---
 
 ## [1.5.0] - 2026-07-10
@@ -564,3 +497,83 @@ Author: Vu Le Duy (DE180104)
 ### AI-assisted
 - AI duoc dung de tham khao cach kiem tra router, auth flow, role redirect va van de UI button bi chim mau.
 - Sinh vien tu doi chieu code hien co, tu chon cach sua, tu chay build va kiem thu dang nhap bang tai khoan mau.
+
+---
+
+## [2026-07-10 ]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them floor plan 2D moi cho Admin Warehouses gom wall, main aisle, cross aisle, dock lane, gate, zone, bin va dock.
+- Them KPI/legend trong tab 2D Layout de nhin nhanh so zone, bin, dock va trang thai busy.
+
+### Changed
+- Cai thien renderer SVG de map responsive hon, nhan object ro hon va moi loai object co style rieng.
+- Cai thien auto-generate layout backend de sinh so do kho co cau truc ro rang hon.
+- Cap nhat `2d_layout_setup.sql` de seed du lieu layout mau dong bo voi UI moi.
+
+### Verification
+- `npx tsc --noEmit`: thanh cong.
+- `dotnet build`: thanh cong, 0 warning, 0 error.
+---
+
+## 4. Tổng kết thay đổi cuối project
+
+### 4.1. Các chức năng đã hoàn thành
+
+| STT | Chức năng | Trạng thái | Minh chứng | Ghi chú |
+|---:|---|---|---|---|
+| 1 | Giao diện Phòng điều phối | Completed | DispatcherDashboard | Giao diện tĩnh |
+| 2 | Giao diện màn hình Tài xế | Completed | DriverDashboard | Giao diện tĩnh |
+| 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
+| 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
+| 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
+| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
+| 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
+
+
+---
+
+### 4.2. Các chức năng chưa hoàn thành
+
+| STT | Chức năng | Lý do chưa hoàn thành | Hướng cải thiện |
+|---:|---|---|---|
+| 1 | Kết nối API thật cho các chức năng còn lại | Giới hạn thời gian | Đã kết nối API thật cho các chức năng quan trọng (Vận đơn, Phê duyệt xe ALPR, Đặt lịch kho, Theo dõi hành trình xe). Sẽ tiếp tục mở rộng cho các tab phụ. |
+
+---
+
+### 4.3. Tổng hợp AI hỗ trợ trong project
+
+| Hạng mục | AI có hỗ trợ không? | Mức độ hỗ trợ | Ghi chú |
+|---|---|---|---|
+| Requirement | Có | Ít | Tìm hiểu khái niệm |
+| Design | Có | Ít | Gợi ý bố cục |
+| Database | Không | Ít | Không dùng |
+| Coding | Có | Ít | Tra cứu cú pháp |
+| Debug | Có | Ít | Sửa lỗi CSS nhỏ |
+| Testing | Không | Ít | Tự test tay |
+| Report | Có | Ít | Định dạng văn bản |
+| Presentation | Không | Ít | Không dùng |
+
+---
+
+### 4.4. Bài học rút ra
+
+Nhóm đã hiểu rõ hơn cách tổ chức một ứng dụng React chia theo component nhỏ và cách sử dụng CSS Tailwind để lập trình giao diện nhanh chóng.
+
+---
+
+### 4.5. Hướng cải thiện tiếp theo
+
+Lập trình phần Backend bằng .NET Core để kết nối cơ sở dữ liệu SQL Server, hoàn thiện chức năng đăng nhập và lưu trữ đơn hàng thực tế.
+
+
+---
+
+## 5. Cam kết cập nhật Changelog
+
+Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các thay đổi đã thực hiện trong quá trình làm bài tập/project.
+
+| Đại diện sinh viên/nhóm | Ngày xác nhận |
+|---|---|
+| Nhóm trưởng | 02/06/2026 |
