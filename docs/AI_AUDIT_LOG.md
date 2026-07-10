@@ -387,6 +387,39 @@ Ghi lại các trường hợp AI trả lời sai, thiếu, chưa phù hợp ho�
 - Applied To: BACKEND/Services/DispatchOptimizationService.cs, FRONTEND/src/features/dispatcher/components/tabs/DispatchOptimizationTab.tsx, smartlogAI.sql, setup-dispatch-optimization.sql
 - Verification: Chay `npm run type-check` frontend, ket qua khong loi.
 ---
+
+## Log #25
+- Date: 2026-07-10
+- Author: Vu Le Duy (DE180104)
+- AI Tool: ChatGPT/Codex
+- Purpose: Tham khao hoan thien luong dang nhap theo role va cap nhat UI nghiep vu AI goi y vi tri luu kho.
+- Prompt Reference: PROMPTS.md#prompt-25
+- AI Output Summary: AI goi y kiem tra `AuthPage.tsx`, `RoleGuard.tsx`, router trong `App.tsx`, API login response va nguyen nhan input email khong cho nhap username.
+- Human Decision: Sinh vien tu doc code hien co, quyet dinh dieu huong theo role `ADMIN`, `WAREHOUSE`, `DISPATCHER`, `DRIVER`, sua input login thanh text va cai thien nut goi y vi tri bang style ro rang hon.
+- Applied To: FRONTEND/src/features/auth/AuthPage.tsx, FRONTEND/src/App.tsx, FRONTEND/src/features/warehouse/ImportGoods.tsx
+- Verification: Test API login voi tai khoan `warehouse` va `dispatcher`, chay `npm run build`, mo frontend localhost de kiem tra luong dang nhap va nut goi y vi tri.
+
+## Log #26
+- Date: 2026-07-10
+- Author: Vu Le Duy (DE180104)
+- AI Tool: ChatGPT/Codex
+- Purpose: Tham khao cach cau hinh moi truong local va bao ve thong tin nhay cam trong appsettings.
+- Prompt Reference: PROMPTS.md#prompt-26
+- AI Output Summary: AI ho tro kiem tra connection string SQL Server local, loi certificate va viec luu cau hinh Azure Vision theo section rieng.
+- Human Decision: Sinh vien tu quyet dinh chi ghi nhan cach cau hinh, khong dua secret/key day du vao tai lieu, va kiem tra backend/frontend tren localhost.
+- Applied To: BACKEND/appsettings.json, BACKEND/Program.cs, tai lieu docs
+- Verification: Backend Swagger tra 200, frontend tra 200, API `/api/inbound` tra 200 trong qua trinh test local.
+## Log #27
+- Date: 2026-07-10
+- Author: Vu Le Duy (DE180104)
+- AI Tool: ChatGPT/Codex/Antigravity
+- Purpose: Tham khao tich hop Ban do theo doi don hang (Order Tracking Map) voi thu vien Goong Map.
+- Prompt Reference: PROMPTS.md#prompt-27
+- AI Output Summary: AI ho tro goi y cu phap su dung `rsapi.goong.io/Direction` va cach khoi tao Marker/Polyline bang Mapbox GL JS.
+- Human Decision: Sinh vien da tu doc hieu va chi su dung AI nhu tai lieu tham khao. Toan bo logic ve % tiến trình (progress), cat duong di (slice route) va thiet ke Marker xe tai (Truck SVG) deu do nhom tu quyet dinh va trien khai. Xem chi tiet tai folder `docs/order_tracking_ai_reference`.
+- Applied To: FRONTEND/src/features/customer/OrderTracking.tsx
+- Verification: Test giao dien tren trinh duyet thanh cong, xe tai va lo trinh the hien dung % mapping voi timeline don hang.
+
 ## 7. Kiểm chứng kết quả AI
 
 ### Nội dung kiểm chứng

@@ -77,6 +77,7 @@ Sinh viên/nhóm cần ghi lại:
 | 21 | 08/07/2026 | Antigravity | Lỗi LINQ Translation 500 | So sánh biển số xe trong Entity Framework | Gợi ý dùng `.Replace().ToUpper()` trong truy vấn thay vì gọi hàm C# tự viết | Có | GateService.cs |
 | 22 | 09/07/2026 | ChatGPT/Codex | Full-stack nghiệp vụ xe | Chặn xe hết hạn đăng kiểm khi booking/check-in, cảnh báo bảo trì | Gợi ý vị trí kiểm tra trong BookingService, GateService và VehiclesTab | Có, sau khi sinh viên tự chỉnh sửa và kiểm thử | BookingService.cs, GateService.cs, VehiclesTab.tsx |
 | 23 | 09/07/2026 | ChatGPT/Codex | UI/UX & Layout Debug | Sửa bố cục danh sách phương tiện bị lấp, không kéo xuống được | Gợi ý kiểm tra `overflow`, `flex`, `min-height` và vùng scroll của tab | Có, sinh viên tự kiểm tra UI thực tế và chọn cách sửa | VehiclesTab.tsx, index.css |
+| 24 | 10/07/2026 | Antigravity | Front-end & Map Integration | Tích hợp và đồng bộ Bản đồ theo dõi đơn hàng (Order Tracking Map) | Gợi ý thuật toán nội suy toạ độ và cách custom SVG Marker trên Goong Map | Có, nhóm tự thiết kế thuật toán và mapping với timeline thực tế | OrderTracking.tsx |
 
 ## 5. Prompt chi tiết
 
@@ -695,6 +696,65 @@ Lam chuc nang toi uu luong xuat nhap, giam un tac. Ket noi voi du lieu dat lich 
 ### Evaluation
 AI ho tro goi y vi tri file va cach map label. Sinh vien tu chinh code, kiem tra UI va chay `npm run type-check` de xac nhan khong loi.
 ---
+
+## Prompt #29
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao sua luong dang nhap va dieu huong theo vai tro nguoi dung
+
+### Prompt
+Khi dang nhap thanh cong, toi muon he thong dua vao role de hien thi dung man hinh cua role do. Ngoai ra o dang nhap dang bao loi vi bat buoc email co dau @ khi nhap username.
+
+### Expected Output
+- Xac dinh file frontend chiu trach nhiem xu ly login.
+- Goi y cach doc `role` tu response API va dieu huong den dashboard tuong ung.
+- Sua input login de chap nhan username binh thuong.
+
+### Evaluation
+AI ho tro chi ra cac vi tri can kiem tra nhu `AuthPage.tsx`, router va `RoleGuard`. Sinh vien tu quyet dinh mapping role sang route, tu chinh code va chay `npm run build` de xac nhan khong loi TypeScript.
+
+---
+
+## Prompt #30
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao cau hinh appsettings, Azure Vision va backend local
+
+### Prompt
+Kiem tra appsettings da luu Azure Vision chua, chay du an frontend/backend va sua loi backend local neu bi loi certificate SQL Server.
+
+### Expected Output
+- Kiem tra co section `AzureVision` trong `appsettings.json` hay khong.
+- Khong hien thi lai secret/key day du trong tai lieu.
+- Goi y them `TrustServerCertificate=True` cho moi truong local neu SQL Server dung certificate tu ky.
+
+### Evaluation
+AI chi ho tro huong kiem tra va canh bao bao mat. Sinh vien tu xem file cau hinh hien tai, tu chay backend/frontend va tu xac nhan endpoint localhost hoat dong.
+
+---
+
+## Prompt #31
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex/Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo tích hợp Bản đồ theo dõi đơn hàng (Order Tracking Map) với thư viện Goong Map
+
+### Prompt
+Làm sao để nhúng Goong Map vào React, gọi API Direction để lấy đường đi và tự custom icon xe tải chạy trên đường đó theo đúng phần trăm tiến độ của đơn hàng?
+
+### Expected Output
+- Cách gọi API `rsapi.goong.io/Direction` và vẽ lộ trình.
+- Thuật toán tìm tọa độ trên đường dưa theo phần trăm (Interpolation).
+- Cách tạo Marker bằng HTML/CSS/SVG tùy chỉnh.
+
+### Evaluation
+AI đưa ra hướng dẫn sử dụng thư viện `goongjs` và thuật toán nội suy điểm. Nhóm quyết định không copy toàn bộ logic mà tự viết hàm `getRoutePoint`, tự thiết kế SVG Marker hình xe tải theo phong cách Glassmorphism và tự mapping % tiến độ từ dữ liệu đơn hàng vào lộ trình trên bản đồ thực, thay thế hoàn toàn giao diện SVG giả trước đó.
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -842,3 +902,5 @@ Sinh viên/nhóm cam kết rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 02/06/2026 |
+
+---
