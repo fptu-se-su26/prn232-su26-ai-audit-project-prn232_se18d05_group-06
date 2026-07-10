@@ -20,7 +20,7 @@ Nguyên tắc ghi changelog:
 |---|---|
 | Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
-| Lớp | SE18D05 |
+| Lá»›p | SE18D05 |
 | Học kỳ | 8 |
 | Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
 | Tên sinh viên / Nhóm | Nhóm 6 |
@@ -519,95 +519,65 @@ Author: Vu Le Duy (DE180104)
 ### AI-assisted
 - Dùng AI để tra cứu cú pháp cấu hình Mapbox/Goong và thuật toán nội suy điểm trên đường thẳng (Interpolation). Sinh viên tự thiết kế cấu trúc code, tự debug lỗi lệch toạ độ và tự thiết kế giao diện xe tải.
 
-## [2026-07-10 ]
-Author: Tran Van Tung (DE180109)
+
+
+## [1.7.0] - 2026-07-11
+Author: Vu Le Duy (DE180104)
 
 ### Added
-- Them floor plan 2D moi cho Admin Warehouses gom wall, main aisle, cross aisle, dock lane, gate, zone, bin va dock.
-- Them KPI/legend trong tab 2D Layout de nhin nhanh so zone, bin, dock va trang thai busy.
+- Tính năng Bản đồ tương tác (Interactive Route MiniMap) sử dụng Leaflet và OpenStreetMap để hiển thị tuyến đường nối Điểm lấy hàng và Điểm giao hàng trên form Tạo đơn.
+- Tự động lấy tọa độ thực từ backend để plot lên bản đồ.
+- Tự động nhận dạng Tên hàng hóa, Trị giá, Ghi chú và Loại dịch vụ (Hỏa tốc/Tiết kiệm) từ tính năng OCR (Quét AI) thông qua việc phân tích hóa đơn.
 
 ### Changed
-- Cai thien renderer SVG de map responsive hon, nhan object ro hon va moi loai object co style rieng.
-- Cai thien auto-generate layout backend de sinh so do kho co cau truc ro rang hon.
-- Cap nhat `2d_layout_setup.sql` de seed du lieu layout mau dong bo voi UI moi.
+- Gỡ bỏ giao diện ảnh bản đồ giả (mock tĩnh) trên trang CreateOrder.tsx.
+- Cải thiện độ nhạy của thuật toán Azure Vision OCR trong InvoiceOcrService.cs để match chính xác các từ khóa trong hóa đơn vận chuyển Việt Nam.
+- Tối ưu hóa UI/UX: Ẩn bớt các mục nhập liệu thừa (như Pallets), bổ sung ô ghi chú lớn và thay đổi menu ngang (xóa Giá cước).
 
-### Verification
-- `npx tsc --noEmit`: thanh cong.
-- `dotnet build`: thanh cong, 0 warning, 0 error.
----
+### Fixed
+- Khắc phục lỗi Quét AI không nhận dạng được đầy đủ chi tiết tên hàng hóa nếu hóa đơn xuống dòng đột ngột.
+- Sửa lỗi hiển thị UI của phần MiniMap bị chớp nhoáng (flickering) khi cập nhật tọa độ.
 
-## [2026-07-10]
-Author: Tran Van Tung (DE180109)
+### AI-assisted
+- Antigravity đã hỗ trợ thiết kế thuật toán substring trong C# để parse file text từ OCR và hỗ trợ thay thế thư viện bản đồ tương tác Leaflet vào React Component.
+
+
+## [1.7.0] - 2026-07-11
+Author: Vu Le Duy (DE180104)
 
 ### Added
-- Them seed du lieu cho Flow Optimization gom warehouse, dock, vehicle, driver, service order, slot booking da check-in va gate log.
-- Them mapping label tieng Viet cho trang thai, do uu tien, loai hang, loai chuyen va kha nang dock trong Dispatcher Flow Optimization.
+- Tính năng Bản đồ tương tác (Interactive Route MiniMap) sử dụng Leaflet và OpenStreetMap để hiển thị tuyến đường nối Điểm lấy hàng và Điểm giao hàng trên form Tạo đơn.
+- Tự động lấy tọa độ thực từ backend để plot lên bản đồ.
+- Tự động nhận dạng Tên hàng hóa, Trị giá, Ghi chú và Loại dịch vụ (Hỏa tốc/Tiết kiệm) từ tính năng OCR (Quét AI) thông qua việc phân tích hóa đơn.
 
 ### Changed
-- Cai thien UI tab Flow Optimization de hien thi tieng Viet dung font, khong hien ma UC ky thuat tren giao dien.
-- Bo cuc lai cum diem uu tien va nut hanh dong thanh action card gon hon.
-- Dong bo `smartlogAI.sql` va `setup-dispatch-optimization.sql` voi du lieu demo UC026.
+- Gỡ bỏ giao diện ảnh bản đồ giả (mock tĩnh) trên trang CreateOrder.tsx.
+- Cải thiện độ nhạy của thuật toán Azure Vision OCR trong InvoiceOcrService.cs để match chính xác các từ khóa trong hóa đơn vận chuyển Việt Nam.
+- Tối ưu hóa UI/UX: Ẩn bớt các mục nhập liệu thừa (như Pallets), bổ sung ô ghi chú lớn và thay đổi menu ngang (xóa Giá cước).
 
-### Verification
-- `npm run type-check`: thanh cong.
----
-## 4. Tổng kết thay đổi cuối project
+### Fixed
+- Khắc phục lỗi Quét AI không nhận dạng được đầy đủ chi tiết tên hàng hóa nếu hóa đơn xuống dòng đột ngột.
+- Sửa lỗi hiển thị UI của phần MiniMap bị chớp nhoáng (flickering) khi cập nhật tọa độ.
 
-### 4.1. Các chức năng đã hoàn thành
+### AI-assisted
+- Antigravity đã hỗ trợ thiết kế thuật toán substring trong C# để parse file text từ OCR và hỗ trợ thay thế thư viện bản đồ tương tác Leaflet vào React Component.
 
-| STT | Chức năng | Trạng thái | Minh chứng | Ghi chú |
-|---:|---|---|---|---|
-| 1 | Giao diện Phòng điều phối | Completed | DispatcherDashboard | Giao diện tĩnh |
-| 2 | Giao diện màn hình Tài xế | Completed | DriverDashboard | Giao diện tĩnh |
-| 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
-| 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
-| 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
-| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
-| 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
+## [1.7.0] - 2026-07-11
+Author: Vu Le Duy (DE180104)
 
+### Added
+- Tính năng Bản đồ tương tác (Interactive Route MiniMap) sử dụng Leaflet và OpenStreetMap để hiển thị tuyến đường nối Điểm lấy hàng và Điểm giao hàng trên form Tạo đơn.
+- Tự động lấy tọa độ thực từ backend để plot lên bản đồ.
+- Tự động nhận dạng Tên hàng hóa, Trị giá, Ghi chú và Loại dịch vụ (Hỏa tốc/Tiết kiệm) từ tính năng OCR (Quét AI) thông qua việc phân tích hóa đơn.
 
----
+### Changed
+- Gỡ bỏ giao diện ảnh bản đồ giả (mock tĩnh) trên trang CreateOrder.tsx.
+- Cải thiện độ nhạy của thuật toán Azure Vision OCR trong InvoiceOcrService.cs để match chính xác các từ khóa trong hóa đơn vận chuyển Việt Nam.
+- Tối ưu hóa UI/UX: Ẩn bớt các mục nhập liệu thừa (như Pallets), bổ sung ô ghi chú lớn và thay đổi menu ngang (xóa Giá cước).
 
-### 4.2. Các chức năng chưa hoàn thành
+### Fixed
+- Khắc phục lỗi Quét AI không nhận dạng được đầy đủ chi tiết tên hàng hóa nếu hóa đơn xuống dòng đột ngột.
+- Sửa lỗi hiển thị UI của phần MiniMap bị chớp nhoáng (flickering) khi cập nhật tọa độ.
 
-| STT | Chức năng | Lý do chưa hoàn thành | Hướng cải thiện |
-|---:|---|---|---|
-| 1 | Kết nối API thật cho các chức năng còn lại | Giới hạn thời gian | Đã kết nối API thật cho các chức năng quan trọng (Vận đơn, Phê duyệt xe ALPR, Đặt lịch kho, Theo dõi hành trình xe). Sẽ tiếp tục mở rộng cho các tab phụ. |
-
----
-
-### 4.3. Tổng hợp AI hỗ trợ trong project
-
-| Hạng mục | AI có hỗ trợ không? | Mức độ hỗ trợ | Ghi chú |
-|---|---|---|---|
-| Requirement | Có | Ít | Tìm hiểu khái niệm |
-| Design | Có | Ít | Gợi ý bố cục |
-| Database | Không | Ít | Không dùng |
-| Coding | Có | Ít | Tra cứu cú pháp |
-| Debug | Có | Ít | Sửa lỗi CSS nhỏ |
-| Testing | Không | Ít | Tự test tay |
-| Report | Có | Ít | Định dạng văn bản |
-| Presentation | Không | Ít | Không dùng |
-
----
-
-### 4.4. Bài học rút ra
-
-Nhóm đã hiểu rõ hơn cách tổ chức một ứng dụng React chia theo component nhỏ và cách sử dụng CSS Tailwind để lập trình giao diện nhanh chóng.
-
----
-
-### 4.5. Hướng cải thiện tiếp theo
-
-Lập trình phần Backend bằng .NET Core để kết nối cơ sở dữ liệu SQL Server, hoàn thiện chức năng đăng nhập và lưu trữ đơn hàng thực tế.
-
-
----
-
-## 5. Cam kết cập nhật Changelog
-
-Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các thay đổi đã thực hiện trong quá trình làm bài tập/project.
-
-| Đại diện sinh viên/nhóm | Ngày xác nhận |
-|---|---|
-| Nhóm trưởng | 02/06/2026 |
+### AI-assisted
+- Antigravity đã hỗ trợ thiết kế thuật toán substring trong C# để parse file text từ OCR và hỗ trợ thay thế thư viện bản đồ tương tác Leaflet vào React Component.

@@ -6,7 +6,7 @@
 |---|---|
 | Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
-| Lớp | SE18D05 |
+| Lá»›p | SE18D05 |
 | Học kỳ | 8 |
 | Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
 | Tên sinh viên / Nhóm | Nhóm 6 |
@@ -422,7 +422,7 @@ Nhóm giữ nguyên routing và cấu trúc tab chính, chỉ đổi giao diện
 - Date: 2026-07-01
 - AI Tool: Antigravity
 - Author: Trần Văn Tùng (DE180109)
-- Purpose: Gộp SQL Overstay Alert
+- Purpose: Gá»™p SQL Overstay Alert
 
 ### Bối cảnh
 ```text
@@ -755,6 +755,108 @@ Làm sao để nhúng Goong Map vào React, gọi API Direction để lấy đư
 ### Evaluation
 AI đưa ra hướng dẫn sử dụng thư viện `goongjs` và thuật toán nội suy điểm. Nhóm quyết định không copy toàn bộ logic mà tự viết hàm `getRoutePoint`, tự thiết kế SVG Marker hình xe tải theo phong cách Glassmorphism và tự mapping % tiến độ từ dữ liệu đơn hàng vào lộ trình trên bản đồ thực, thay thế hoàn toàn giao diện SVG giả trước đó.
 
+## Prompt #25
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao sua luong dang nhap va dieu huong theo vai tro nguoi dung
+
+### Prompt
+Khi dang nhap thanh cong, toi muon he thong dua vao role de hien thi dung man hinh cua role do. Ngoai ra o dang nhap dang bao loi vi bat buoc email co dau @ khi nhap username.
+
+### Expected Output
+- Xac dinh file frontend chiu trach nhiem xu ly login.
+- Goi y cach doc `role` tu response API va dieu huong den dashboard tuong ung.
+- Sua input login de chap nhan username binh thuong.
+
+### Evaluation
+AI ho tro chi ra cac vi tri can kiem tra nhu `AuthPage.tsx`, router va `RoleGuard`. Sinh vien tu quyet dinh mapping role sang route, tu chinh code va chay `npm run build` de xac nhan khong loi TypeScript.
+
+---
+
+## Prompt #26
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao cau hinh appsettings, Azure Vision va backend local
+
+### Prompt
+Kiem tra appsettings da luu Azure Vision chua, chay du an frontend/backend va sua loi backend local neu bi loi certificate SQL Server.
+
+### Expected Output
+- Kiem tra co section `AzureVision` trong `appsettings.json` hay khong.
+- Khong hien thi lai secret/key day du trong tai lieu.
+- Goi y them `TrustServerCertificate=True` cho moi truong local neu SQL Server dung certificate tu ky.
+
+### Evaluation
+AI chi ho tro huong kiem tra va canh bao bao mat. Sinh vien tu xem file cau hinh hien tai, tu chay backend/frontend va tu xac nhan endpoint localhost hoat dong.
+
+---
+
+## Prompt #27
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex/Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo tích hợp Bản đồ theo dõi đơn hàng (Order Tracking Map) với thư viện Goong Map
+
+### Prompt
+Làm sao để nhúng Goong Map vào React, gọi API Direction để lấy đường đi và tự custom icon xe tải chạy trên đường đó theo đúng phần trăm tiến độ của đơn hàng?
+
+### Expected Output
+- Cách gọi API `rsapi.goong.io/Direction` và vẽ lộ trình.
+- Thuật toán tìm tọa độ trên đường dưa theo phần trăm (Interpolation).
+- Cách tạo Marker bằng HTML/CSS/SVG tùy chỉnh.
+
+### Evaluation
+AI đưa ra hướng dẫn sử dụng thư viện `goongjs` và thuật toán nội suy điểm. Nhóm quyết định không copy toàn bộ logic mà tự viết hàm `getRoutePoint`, tự thiết kế SVG Marker hình xe tải theo phong cách Glassmorphism và tự mapping % tiến độ từ dữ liệu đơn hàng vào lộ trình trên bản đồ thực, thay thế hoàn toàn giao diện SVG giả trước đó.
+
+
+
+| 25 | 11/07/2026 | Antigravity | Thuật toán OCR C# | Nâng cấp InvoiceOcrService.cs để bóc tách thông tin Tên Hàng và Loại giao hàng | Gợi ý thuật toán substring và regex. | Có | InvoiceOcrService.cs |
+| 26 | 11/07/2026 | Antigravity | UI Bản đồ tĩnh | Khắc phục ảnh GIF đứt nét đứng yên ở CreateOrder | Gợi ý sử dụng thư viện Leaflet thay cho bản đồ mô phỏng | Có | RouteMiniMap.tsx |
+
+## Prompt #28
+- Date: 2026-07-11
+- AI Tool: Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo thuật toán trích xuất dữ liệu nâng cao cho Azure OCR
+- Prompt: "Hệ thống chưa lấy được tên hàng hóa và loại giao hàng khi quét hóa đơn. Azure OCR trả về file text nhưng cần thuật toán chia tách dòng hợp lý hơn. Làm sao để bóc tách?"
+- Expected Output: Đoạn mã C# sử dụng Regex hoặc IndexOf để trích xuất dựa trên format cố định.
+- Evaluation: AI đã gợi ý phương pháp kiểm tra điều kiện dòng liền kề (next line) khi phát hiện từ khóa 'Tên hàng:'. Nhóm đã tự test và điều chỉnh cho C# backend.
+
+## Prompt #29
+- Date: 2026-07-11
+- AI Tool: Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo cài đặt bản đồ tương tác thay thế
+- Prompt: "Đường nét đứt ở minimap trong giao diện tạo đơn hàng hãy cho nó đứng yên đi."
+- Expected Output: Một React Component dùng Leaflet vẽ map thật.
+- Evaluation: AI gợi ý sử dụng React-Leaflet để lấy Polyline giữa 2 tọa độ thay cho ảnh tĩnh, nhóm tự gắn key mapbox/osm.
+
+
+| 25 | 11/07/2026 | Antigravity | Thuật toán OCR C# | Nâng cấp InvoiceOcrService.cs để bóc tách thông tin Tên Hàng và Loại giao hàng | Gợi ý thuật toán substring và regex. | Có | InvoiceOcrService.cs |
+| 26 | 11/07/2026 | Antigravity | UI Bản đồ tĩnh | Khắc phục ảnh GIF đứt nét đứng yên ở CreateOrder | Gợi ý sử dụng thư viện Leaflet thay cho bản đồ mô phỏng | Có | RouteMiniMap.tsx |
+
+## Prompt #28
+- Date: 2026-07-11
+- AI Tool: Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo thuật toán trích xuất dữ liệu nâng cao cho Azure OCR
+- Prompt: "Hệ thống chưa lấy được tên hàng hóa và loại giao hàng khi quét hóa đơn. Azure OCR trả về file text nhưng cần thuật toán chia tách dòng hợp lý hơn. Làm sao để bóc tách?"
+- Expected Output: Đoạn mã C# sử dụng Regex hoặc IndexOf để trích xuất dựa trên format cố định.
+- Evaluation: AI đã gợi ý phương pháp kiểm tra điều kiện dòng liền kề (next line) khi phát hiện từ khóa 'Tên hàng:'. Nhóm đã tự test và điều chỉnh cho C# backend.
+
+## Prompt #29
+- Date: 2026-07-11
+- AI Tool: Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo cài đặt bản đồ tương tác thay thế
+- Prompt: "Đường nét đứt ở minimap trong giao diện tạo đơn hàng hãy cho nó đứng yên đi."
+- Expected Output: Một React Component dùng Leaflet vẽ map thật.
+- Evaluation: AI gợi ý sử dụng React-Leaflet để lấy Polyline giữa 2 tọa độ thay cho ảnh tĩnh, nhóm tự gắn key mapbox/osm.
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -860,7 +962,7 @@ Không nên hỏi AI làm hộ toàn bộ dự án mà nên chia nhỏ từng vi
 | Prompt thiết kế giải pháp | 1 | "Hãy thiết kế một GateService chạy trong IDbContextTransaction..." |
 | Prompt thiết kế database | 1 | "Hãy thiết kế bảng VehicleEvents..." |
 | Prompt sinh code mẫu | 2 | "Cách sử dụng React Router v6..." |
-| Prompt debug lỗi | 0 |  |
+| Prompt debug lá»—i | 0 |  |
 | Prompt viết test case | 0 |  |
 | Prompt review code | 0 |  |
 | Prompt tối ưu code | 0 |  |
@@ -904,3 +1006,4 @@ Sinh viên/nhóm cam kết rằng:
 | Nhóm trưởng | 02/06/2026 |
 
 ---
+
