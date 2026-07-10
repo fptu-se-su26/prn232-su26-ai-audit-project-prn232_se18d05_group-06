@@ -28,7 +28,7 @@ const CreateShipment: React.FC = () => {
     e.preventDefault();
     // Save shipment data to localStorage
     localStorage.setItem('shipmentData', JSON.stringify(formData));
-    navigate('/shipping-quotation');
+    navigate('/create-order');
   };
 
   return (

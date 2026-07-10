@@ -1,4 +1,4 @@
-﻿using BACKEND.DTOs;
+using BACKEND.DTOs;
 using BACKEND.Models;
 using BACKEND.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -210,14 +210,23 @@ namespace BACKEND.Controllers
             }
         }
 
+        public class UploadPhotoDto
+        {
+            public IFormFile File { get; set; }
+            public string? PhotoAngle { get; set; }
+            public bool IsDamaged { get; set; } = false;
+            public int? TakenBy { get; set; }
+        }
+
         [HttpPost("lines/{lineId}/photos")]
         public async Task<ActionResult<CargoPhotoDto>> UploadPhoto(
             int lineId,
-            [FromForm] IFormFile file,
-            [FromForm] string? photoAngle,
-            [FromForm] bool isDamaged = false,
-            [FromForm] int? takenBy = null)
+            [FromForm] UploadPhotoDto request)
         {
+            var file = request.File;
+            var photoAngle = request.PhotoAngle;
+            var isDamaged = request.IsDamaged;
+            var takenBy = request.TakenBy;
             try
             {
                 var line = await _context.InboundOrderLines.FirstOrDefaultAsync(l => l.LineId == lineId);
