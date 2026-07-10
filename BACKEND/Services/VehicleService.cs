@@ -483,5 +483,73 @@ namespace BACKEND.Services
                 BlacklistReason = vehicle.BlacklistReason
             };
         }
+
+        public async Task<DashboardDataDto> GetDashboardDataAsync()
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var in30Days = today.AddDays(30);
+
+            var activeVehicles = await _context.Vehicles
+                .Where(v => v.Status == "ACTIVE" || v.Status == "AVAILABLE")
+                .CountAsync();
+
+            var maintenanceAlerts = await _context.MaintenanceSchedules
+                .Where(m => m.Status == "PENDING" && m.DueDate <= DateTime.UtcNow.AddDays(7))
+                .CountAsync();
+
+            var expiringInspections = await _context.Vehicles
+                .Where(v => v.InspectionExpiry.HasValue
+                         && v.InspectionExpiry.Value >= today
+                         && v.InspectionExpiry.Value <= in30Days)
+                .CountAsync();
+
+            var priorityVehicles = await _context.Vehicles
+                .Include(v => v.DefaultDriver)
+                .Where(v => v.Status == "ACTIVE" || v.Status == "AVAILABLE" || v.IsBlacklisted == true || v.Status == "PENDING")
+                .OrderBy(v => v.InspectionExpiry)
+                .Take(5)
+                .Select(v => new DashboardVehicleDto
+                {
+                    VehicleId = v.VehicleId,
+                    TruckPlate = v.TruckPlate,
+                    VehicleType = v.VehicleType,
+                    Status = v.Status ?? "ACTIVE",
+                    InspectionExpiry = v.InspectionExpiry.HasValue ? v.InspectionExpiry.Value.ToString("yyyy-MM-dd") : null,
+                    NextServiceDate = v.NextServiceDate.HasValue ? v.NextServiceDate.Value.ToString("yyyy-MM-dd") : null,
+                    IsBlacklisted = v.IsBlacklisted ?? false,
+                    DriverName = v.DefaultDriver != null ? v.DefaultDriver.FullName : null
+                })
+                .ToListAsync();
+
+            var drivers = await _context.Drivers
+                .Where(d => d.IsActive == true)
+                .OrderBy(d => d.FullName)
+                .Take(10)
+                .Select(d => new DashboardDriverDto
+                {
+                    DriverId = d.DriverId,
+                    DriverCode = d.DriverCode,
+                    FullName = d.FullName,
+                    Phone = d.Phone,
+                    LicenseNo = d.LicenseNo,
+                    LicenseExpiry = d.LicenseExpiry.HasValue ? d.LicenseExpiry.Value.ToString("yyyy-MM-dd") : null,
+                    IsActive = d.IsActive ?? false,
+                    IsBlacklisted = d.IsBlacklisted ?? false
+                })
+                .ToListAsync();
+
+            return new DashboardDataDto
+            {
+                Kpi = new DashboardKpiDto
+                {
+                    TotalActiveVehicles = activeVehicles,
+                    MaintenanceAlerts = maintenanceAlerts,
+                    ExpiringInspections = expiringInspections,
+                    FuelEfficiency = 2.4m
+                },
+                PriorityVehicles = priorityVehicles,
+                Drivers = drivers
+            };
+        }
     }
 }

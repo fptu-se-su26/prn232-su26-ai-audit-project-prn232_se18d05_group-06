@@ -600,6 +600,161 @@ AI hỗ trợ phân tích nguyên nhân layout. Sinh viên đối chiếu với 
 
 ---
 
+## Prompt #24
+
+- Date: 2026-07-09
+- AI Tool: Antigravity
+- Author: Tran Van Tung (DE180109)
+- Purpose: Cai tien UI/UX trang Finance Reports.
+
+### Prompt Summary
+Tach Finance Reports thanh cac tab Overview, Revenue, Expenses, Profit, Reconciliation, Forecast, Exports. Dua action dung pham vi, tao Overview mac dinh va lam gon bang doi soat bang modal Manual Match.
+
+### Result
+Da cap nhat Finance.tsx thanh workspace tab, them Exports tab, chuyen Generate/Retrain vao Forecast va doi Manual Match tu input trong bang sang modal.
+
+---
+
+## Prompt #25
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao sua luong dang nhap va dieu huong theo vai tro nguoi dung
+
+### Prompt
+Khi dang nhap thanh cong, toi muon he thong dua vao role de hien thi dung man hinh cua role do. Ngoai ra o dang nhap dang bao loi vi bat buoc email co dau @ khi nhap username.
+
+### Expected Output
+- Xac dinh file frontend chiu trach nhiem xu ly login.
+- Goi y cach doc `role` tu response API va dieu huong den dashboard tuong ung.
+- Sua input login de chap nhan username binh thuong.
+
+### Evaluation
+AI ho tro chi ra cac vi tri can kiem tra nhu `AuthPage.tsx`, router va `RoleGuard`. Sinh vien tu quyet dinh mapping role sang route, tu chinh code va chay `npm run build` de xac nhan khong loi TypeScript.
+
+---
+
+## Prompt #26
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao cau hinh appsettings, Azure Vision va backend local
+
+### Prompt
+Kiem tra appsettings da luu Azure Vision chua, chay du an frontend/backend va sua loi backend local neu bi loi certificate SQL Server.
+
+### Expected Output
+- Kiem tra co section `AzureVision` trong `appsettings.json` hay khong.
+- Khong hien thi lai secret/key day du trong tai lieu.
+- Goi y them `TrustServerCertificate=True` cho moi truong local neu SQL Server dung certificate tu ky.
+
+### Evaluation
+AI chi ho tro huong kiem tra va canh bao bao mat. Sinh vien tu xem file cau hinh hien tai, tu chay backend/frontend va tu xac nhan endpoint localhost hoat dong.
+
+---
+
+## Prompt #27
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Tran Van Tung (DE180109)
+- Purpose: Tham khao cai thien UI/UX mo hinh 2D Warehouse Layout
+
+### Prompt
+Mo hinh 2D trong trang Admin Warehouses dang xau va khong hien thi ro rang. Hay lam lai mo hinh 2D sao cho dep hon, co cau truc ro rang, giu duoc logic layout backend/frontend hien co.
+
+### Expected Output
+- Phan tich vi tri render 2D layout trong frontend.
+- Cai thien giao dien SVG cho zone, bin, dock, aisle, gate.
+- Cai thien auto-generate layout va seed SQL neu can.
+- Kiem tra frontend/backend build khong loi.
+
+### Evaluation
+AI ho tro goi y cau truc floor plan va cach giu drag/drop trong SVG responsive. Sinh vien tu chinh code, chay `npx tsc --noEmit` va `dotnet build` de xac nhan ket qua.
+
+---
+
+## Prompt #28
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Tran Van Tung (DE180109)
+- Purpose: Tham khao hoan thien UC026 Flow Optimization cho Dispatcher
+
+### Prompt
+Lam chuc nang toi uu luong xuat nhap, giam un tac. Ket noi voi du lieu dat lich xe, QR check-in, dock va database. Sua UI Flow Optimization sang tieng Viet dung font va bo cuc lai cac nut hanh dong cho dep hon.
+
+### Expected Output
+- Seed du lieu mau phu hop cho queue dieu phoi.
+- UI lay du lieu tu API/database, khong hien ma UC ky thuat.
+- Dich nhan trang thai, do uu tien, loai hang sang tieng Viet.
+- Bo cuc lai action card trong bang uu tien xe.
+- Kiem tra TypeScript frontend.
+
+### Evaluation
+AI ho tro goi y vi tri file va cach map label. Sinh vien tu chinh code, kiem tra UI va chay `npm run type-check` de xac nhan khong loi.
+---
+
+## Prompt #29
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao sua luong dang nhap va dieu huong theo vai tro nguoi dung
+
+### Prompt
+Khi dang nhap thanh cong, toi muon he thong dua vao role de hien thi dung man hinh cua role do. Ngoai ra o dang nhap dang bao loi vi bat buoc email co dau @ khi nhap username.
+
+### Expected Output
+- Xac dinh file frontend chiu trach nhiem xu ly login.
+- Goi y cach doc `role` tu response API va dieu huong den dashboard tuong ung.
+- Sua input login de chap nhan username binh thuong.
+
+### Evaluation
+AI ho tro chi ra cac vi tri can kiem tra nhu `AuthPage.tsx`, router va `RoleGuard`. Sinh vien tu quyet dinh mapping role sang route, tu chinh code va chay `npm run build` de xac nhan khong loi TypeScript.
+
+---
+
+## Prompt #30
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khao cau hinh appsettings, Azure Vision va backend local
+
+### Prompt
+Kiem tra appsettings da luu Azure Vision chua, chay du an frontend/backend va sua loi backend local neu bi loi certificate SQL Server.
+
+### Expected Output
+- Kiem tra co section `AzureVision` trong `appsettings.json` hay khong.
+- Khong hien thi lai secret/key day du trong tai lieu.
+- Goi y them `TrustServerCertificate=True` cho moi truong local neu SQL Server dung certificate tu ky.
+
+### Evaluation
+AI chi ho tro huong kiem tra va canh bao bao mat. Sinh vien tu xem file cau hinh hien tai, tu chay backend/frontend va tu xac nhan endpoint localhost hoat dong.
+
+---
+
+## Prompt #31
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex/Antigravity
+- Author: Vu Le Duy (DE180104)
+- Purpose: Tham khảo tích hợp Bản đồ theo dõi đơn hàng (Order Tracking Map) với thư viện Goong Map
+
+### Prompt
+Làm sao để nhúng Goong Map vào React, gọi API Direction để lấy đường đi và tự custom icon xe tải chạy trên đường đó theo đúng phần trăm tiến độ của đơn hàng?
+
+### Expected Output
+- Cách gọi API `rsapi.goong.io/Direction` và vẽ lộ trình.
+- Thuật toán tìm tọa độ trên đường dưa theo phần trăm (Interpolation).
+- Cách tạo Marker bằng HTML/CSS/SVG tùy chỉnh.
+
+### Evaluation
+AI đưa ra hướng dẫn sử dụng thư viện `goongjs` và thuật toán nội suy điểm. Nhóm quyết định không copy toàn bộ logic mà tự viết hàm `getRoutePoint`, tự thiết kế SVG Marker hình xe tải theo phong cách Glassmorphism và tự mapping % tiến độ từ dữ liệu đơn hàng vào lộ trình trên bản đồ thực, thay thế hoàn toàn giao diện SVG giả trước đó.
+
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -749,62 +904,3 @@ Sinh viên/nhóm cam kết rằng:
 | Nhóm trưởng | 02/06/2026 |
 
 ---
-
-## Prompt #25
-
-- Date: 2026-07-10
-- AI Tool: ChatGPT/Codex
-- Author: Vu Le Duy (DE180104)
-- Purpose: Tham khao sua luong dang nhap va dieu huong theo vai tro nguoi dung
-
-### Prompt
-Khi dang nhap thanh cong, toi muon he thong dua vao role de hien thi dung man hinh cua role do. Ngoai ra o dang nhap dang bao loi vi bat buoc email co dau @ khi nhap username.
-
-### Expected Output
-- Xac dinh file frontend chiu trach nhiem xu ly login.
-- Goi y cach doc `role` tu response API va dieu huong den dashboard tuong ung.
-- Sua input login de chap nhan username binh thuong.
-
-### Evaluation
-AI ho tro chi ra cac vi tri can kiem tra nhu `AuthPage.tsx`, router va `RoleGuard`. Sinh vien tu quyet dinh mapping role sang route, tu chinh code va chay `npm run build` de xac nhan khong loi TypeScript.
-
----
-
-## Prompt #26
-
-- Date: 2026-07-10
-- AI Tool: ChatGPT/Codex
-- Author: Vu Le Duy (DE180104)
-- Purpose: Tham khao cau hinh appsettings, Azure Vision va backend local
-
-### Prompt
-Kiem tra appsettings da luu Azure Vision chua, chay du an frontend/backend va sua loi backend local neu bi loi certificate SQL Server.
-
-### Expected Output
-- Kiem tra co section `AzureVision` trong `appsettings.json` hay khong.
-- Khong hien thi lai secret/key day du trong tai lieu.
-- Goi y them `TrustServerCertificate=True` cho moi truong local neu SQL Server dung certificate tu ky.
-
-### Evaluation
-AI chi ho tro huong kiem tra va canh bao bao mat. Sinh vien tu xem file cau hinh hien tai, tu chay backend/frontend va tu xac nhan endpoint localhost hoat dong.
-
----
-
-## Prompt #27
-
-- Date: 2026-07-10
-- AI Tool: ChatGPT/Codex/Antigravity
-- Author: Vu Le Duy (DE180104)
-- Purpose: Tham khảo tích hợp Bản đồ theo dõi đơn hàng (Order Tracking Map) với thư viện Goong Map
-
-### Prompt
-Làm sao để nhúng Goong Map vào React, gọi API Direction để lấy đường đi và tự custom icon xe tải chạy trên đường đó theo đúng phần trăm tiến độ của đơn hàng?
-
-### Expected Output
-- Cách gọi API `rsapi.goong.io/Direction` và vẽ lộ trình.
-- Thuật toán tìm tọa độ trên đường dưa theo phần trăm (Interpolation).
-- Cách tạo Marker bằng HTML/CSS/SVG tùy chỉnh.
-
-### Evaluation
-AI đưa ra hướng dẫn sử dụng thư viện `goongjs` và thuật toán nội suy điểm. Nhóm quyết định không copy toàn bộ logic mà tự viết hàm `getRoutePoint`, tự thiết kế SVG Marker hình xe tải theo phong cách Glassmorphism và tự mapping % tiến độ từ dữ liệu đơn hàng vào lộ trình trên bản đồ thực, thay thế hoàn toàn giao diện SVG giả trước đó.
-

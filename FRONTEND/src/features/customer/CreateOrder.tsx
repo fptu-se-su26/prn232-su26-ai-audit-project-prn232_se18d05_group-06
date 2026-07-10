@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 import { AddressAutocomplete } from '@/components/customer/AddressAutocomplete';
@@ -397,7 +397,21 @@ const CreateOrder: React.FC = () => {
                 <div className="space-y-5">
                   <div className="bg-purple-50/50 p-6 rounded-2xl border border-purple-100 cursor-default transition-all duration-300">
                     <span className="text-[10px] font-extrabold text-purple-600 uppercase tracking-widest block mb-1">Cước phí ước tính</span>
-                    <div className="flex items-baseline gap-2">
+                    
+                    {discountPercent > 0 && (
+                      <div className="flex flex-col gap-1 mb-2">
+                        <div className="flex justify-between text-sm text-slate-500 line-through">
+                          <span>Gốc:</span>
+                          <span>{basePrice.toLocaleString('vi-VN')} VNĐ</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-green-600 font-medium">
+                          <span>Ưu đãi hạng {tierName} (-{discountPercent}%):</span>
+                          <span>-{((basePrice * discountPercent) / 100).toLocaleString('vi-VN')} VNĐ</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-baseline gap-2 border-t border-purple-100 pt-2">
                       <span className="font-sans text-[48px] font-extrabold tracking-[-0.02em] text-slate-900">
                         {price > 0 ? price.toLocaleString('vi-VN') : '--'}
                       </span>

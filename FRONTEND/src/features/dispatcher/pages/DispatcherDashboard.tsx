@@ -11,6 +11,7 @@ import { DispatchersTab } from '../components/tabs/DispatchersTab';
 import { VehiclesTab } from '../components/tabs/VehiclesTab';
 import { FleetMonitoringTab } from '../components/tabs/FleetMonitoringTab';
 import { AlertsTab } from '../components/tabs/AlertsTab';
+import { DispatchOptimizationTab } from '../components/tabs/DispatchOptimizationTab';
 import { ReportsTab } from '../components/tabs/ReportsTab';
 import { VehicleTrackingDashboard } from './VehicleTrackingDashboard';
 
@@ -574,6 +575,12 @@ export const DispatcherDashboard = () => {
         />
       )}
 
+      {activeTab === 'Flow Optimization' && (
+        <DispatchOptimizationTab
+          searchQuery={searchQuery}
+          setToastMessage={setToastMessage}
+        />
+      )}
       {/* =========================================================================
           VIEW E5: Reports & Analytics View (Integrated tab ReportsTab)
           ========================================================================= */}
@@ -588,7 +595,7 @@ export const DispatcherDashboard = () => {
       {/* =========================================================================
           VIEW F: Placeholder views for non-integrated modules
           ========================================================================= */}
-      {activeTab !== 'Dashboard' && activeTab !== 'Orders' && activeTab !== 'Assign Driver' && activeTab !== 'Live Tracking' && activeTab !== 'Drivers' && activeTab !== 'Vehicles' && activeTab !== 'Fleet Monitoring' && activeTab !== 'Alerts Center' && activeTab !== 'Reports' && activeTab !== 'Delivery Analytics' && (
+      {activeTab !== 'Dashboard' && activeTab !== 'Orders' && activeTab !== 'Assign Driver' && activeTab !== 'Live Tracking' && activeTab !== 'Drivers' && activeTab !== 'Vehicles' && activeTab !== 'Fleet Monitoring' && activeTab !== 'Alerts Center' && activeTab !== 'Flow Optimization' && activeTab !== 'Reports' && activeTab !== 'Delivery Analytics' && (
         <div className="flex-1 glass-panel rounded-lg flex flex-col items-center justify-center text-center p-8 select-none relative z-10">
           <span className="material-symbols-outlined text-[64px] text-primary animate-pulse mb-4">
             construction
