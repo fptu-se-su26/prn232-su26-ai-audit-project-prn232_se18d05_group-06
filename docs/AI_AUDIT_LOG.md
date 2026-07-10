@@ -408,3 +408,14 @@ Sinh viên/nhóm cam kết rằng:
 - Human Decision: Sinh vien tu quyet dinh chi ghi nhan cach cau hinh, khong dua secret/key day du vao tai lieu, va kiem tra backend/frontend tren localhost.
 - Applied To: BACKEND/appsettings.json, BACKEND/Program.cs, tai lieu docs
 - Verification: Backend Swagger tra 200, frontend tra 200, API `/api/inbound` tra 200 trong qua trinh test local.
+## Log #24
+- Date: 2026-07-10
+- Author: Vu Le Duy (DE180104)
+- AI Tool: ChatGPT/Codex/Antigravity
+- Purpose: Tham khao tich hop Ban do theo doi don hang (Order Tracking Map) voi thu vien Goong Map.
+- Prompt Reference: PROMPTS.md#prompt-27
+- AI Output Summary: AI ho tro goi y cu phap su dung `rsapi.goong.io/Direction` va cach khoi tao Marker/Polyline bang Mapbox GL JS.
+- Human Decision: Sinh vien da tu doc hieu va chi su dung AI nhu tai lieu tham khao. Toan bo logic ve % tiến trình (progress), cat duong di (slice route) va thiet ke Marker xe tai (Truck SVG) deu do nhom tu quyet dinh va trien khai. Xem chi tiet tai folder `docs/order_tracking_ai_reference`.
+- Applied To: FRONTEND/src/features/customer/OrderTracking.tsx
+- Verification: Test giao dien tren trinh duyet thanh cong, xe tai va lo trinh the hien dung % mapping voi timeline don hang.
+
