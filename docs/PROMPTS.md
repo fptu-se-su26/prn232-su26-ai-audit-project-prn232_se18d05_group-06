@@ -675,6 +675,26 @@ AI ho tro goi y cau truc floor plan va cach giu drag/drop trong SVG responsive. 
 
 ---
 
+## Prompt #28
+
+- Date: 2026-07-10
+- AI Tool: ChatGPT/Codex
+- Author: Tran Van Tung (DE180109)
+- Purpose: Tham khao hoan thien UC026 Flow Optimization cho Dispatcher
+
+### Prompt
+Lam chuc nang toi uu luong xuat nhap, giam un tac. Ket noi voi du lieu dat lich xe, QR check-in, dock va database. Sua UI Flow Optimization sang tieng Viet dung font va bo cuc lai cac nut hanh dong cho dep hon.
+
+### Expected Output
+- Seed du lieu mau phu hop cho queue dieu phoi.
+- UI lay du lieu tu API/database, khong hien ma UC ky thuat.
+- Dich nhan trang thai, do uu tien, loai hang sang tieng Viet.
+- Bo cuc lai action card trong bang uu tien xe.
+- Kiem tra TypeScript frontend.
+
+### Evaluation
+AI ho tro goi y vi tri file va cach map label. Sinh vien tu chinh code, kiem tra UI va chay `npm run type-check` de xac nhan khong loi.
+---
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
