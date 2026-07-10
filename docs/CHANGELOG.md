@@ -1,149 +1,149 @@
-﻿# Changelog
+# Changelog
 
-## 1. Quy Ä‘á»‹nh ghi Changelog
+## 1. Quy định ghi Changelog
 
-File nÃ y dÃ¹ng Ä‘á»ƒ ghi láº¡i cÃ¡c thay Ä‘á»•i quan trá»ng trong quÃ¡ trÃ¬nh thá»±c hiá»‡n bÃ i táº­p, lab, assignment hoáº·c project.
+File này dùng để ghi lại các thay đổi quan trọng trong quá trình thực hiện bài tập, lab, assignment hoặc project.
 
-NguyÃªn táº¯c ghi changelog:
-- Chá»‰ ghi nhá»¯ng gÃ¬ Ä‘Ã£ hoÃ n thÃ nh tháº­t sá»±.
-- KhÃ´ng ghi káº¿ hoáº¡ch náº¿u chÆ°a thá»±c hiá»‡n.
-- Má»—i thay Ä‘á»•i nÃªn cÃ³ ngÃ y, ná»™i dung, ngÆ°á»i thá»±c hiá»‡n vÃ  minh chá»©ng.
-- Náº¿u cÃ³ AI há»— trá»£, cáº§n ghi rÃµ AI Ä‘Ã£ há»— trá»£ pháº§n nÃ o.
-- Náº¿u cÃ³ commit GitHub, cáº§n ghi link commit.
-- Náº¿u cÃ³ lá»—i Ä‘Ã£ sá»­a, cáº§n ghi rÃµ lá»—i, nguyÃªn nhÃ¢n vÃ  cÃ¡ch xá»­ lÃ½.
+Nguyên tắc ghi changelog:
+- Chỉ ghi những gì đã hoàn thành thật sự.
+- Không ghi kế hoạch nếu chưa thực hiện.
+- Mỗi thay đổi nên có ngày, nội dung, người thực hiện và minh chứng.
+- Nếu có AI hỗ trợ, cần ghi rõ AI đã hỗ trợ phần nào.
+- Nếu có commit GitHub, cần ghi link commit.
+- Nếu có lỗi đã sửa, cần ghi rõ lỗi, nguyên nhân và cách xử lý.
 
 ---
 
-## 2. ThÃ´ng tin project
+## 2. Thông tin project
 
-| ThÃ´ng tin | Ná»™i dung |
+| Thông tin | Nội dung |
 |---|---|
-| MÃ´n há»c | Building Cross-Platform Back-End Application With .NET |
-| MÃ£ mÃ´n há»c | PRN232 |
+| Môn học | Building Cross-Platform Back-End Application With .NET |
+| Mã môn học | PRN232 |
 | Lá»›p | SE18D05 |
-| Há»c ká»³ | 8 |
-| TÃªn bÃ i táº­p / Project | FleetNova - Há»‡ thá»‘ng Quáº£n trá»‹ Logistics ThÃ´ng minh |
-| TÃªn sinh viÃªn / NhÃ³m | NhÃ³m 6 |
-| MSSV / Danh sÃ¡ch MSSV | DE180071,DE180096,DE180088,DE180109,DE180104 |
-| Giáº£ng viÃªn hÆ°á»›ng dáº«n | LÃª Thiá»‡n Nháº­t Quang |
+| Học kỳ | 8 |
+| Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
+| Tên sinh viên / Nhóm | Nhóm 6 |
+| MSSV / Danh sách MSSV | DE180071,DE180096,DE180088,DE180109,DE180104 |
+| Giảng viên hướng dẫn | Lê Thiện Nhật Quang |
 | Repository URL |  |
-| NgÃ y báº¯t Ä‘áº§u | 17/05/2026 |
-| NgÃ y hoÃ n thÃ nh |  |
+| Ngày bắt đầu | 17/05/2026 |
+| Ngày hoàn thành |  |
 
 ---
 
-## 3. Tá»•ng quan cÃ¡c phiÃªn báº£n/giai Ä‘oáº¡n
+## 3. Tổng quan các phiên bản/giai đoạn
 
-| PhiÃªn báº£n/Giai Ä‘oáº¡n | Thá»i gian | Ná»™i dung chÃ­nh | Tráº¡ng thÃ¡i |
+| Phiên bản/Giai đoạn | Thời gian | Nội dung chính | Trạng thái |
 |---|---|---|---|
-| Phase 01 | 17/05/2026 - 19/05/2026 | Khá»Ÿi táº¡o project vÃ  cáº¥u trÃºc thÆ° má»¥c | Completed |
-| Phase 02 | 20/05/2026 - 22/05/2026 | PhÃ¢n tÃ­ch yÃªu cáº§u vÃ  phÃ¢n vai ngÆ°á»i dÃ¹ng | Completed |
-| Phase 03 | 23/05/2026 - 25/05/2026 | Thiáº¿t káº¿ giao diá»‡n cÆ¡ báº£n | Completed |
-| Phase 04 | 26/05/2026 - 29/05/2026 | Implementation (Láº­p trÃ¬nh giao diá»‡n Frontend) | Completed |
-| Phase 05 | 30/05/2026 - 31/05/2026 | Testing & Sá»­a lá»—i giao diá»‡n | Completed |
-| Phase 06 | 01/06/2026 - 02/06/2026 | HoÃ n thiá»‡n bÃ¡o cÃ¡o vÃ  tÃ i liá»‡u | Completed |
+| Phase 01 | 17/05/2026 - 19/05/2026 | Khởi tạo project và cấu trúc thư mục | Completed |
+| Phase 02 | 20/05/2026 - 22/05/2026 | Phân tích yêu cầu và phân vai người dùng | Completed |
+| Phase 03 | 23/05/2026 - 25/05/2026 | Thiết kế giao diện cơ bản | Completed |
+| Phase 04 | 26/05/2026 - 29/05/2026 | Implementation (Lập trình giao diện Frontend) | Completed |
+| Phase 05 | 30/05/2026 - 31/05/2026 | Testing & Sửa lỗi giao diện | Completed |
+| Phase 06 | 01/06/2026 - 02/06/2026 | Hoàn thiện báo cáo và tài liệu | Completed |
 
 ---
 
 ## [2026-05-24]
-Author: VÅ© LÃª Duy (DE180104)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
-- Khá»Ÿi táº¡o khung dá»± Ã¡n Frontend sá»­ dá»¥ng thÆ° viá»‡n React vÃ  Vite.
-- XÃ¢y dá»±ng bá»‘ cá»¥c giao diá»‡n chÃ­nh vá»›i tá»‡p DispatcherLayout.tsx vÃ  cÃ¡c Tab menu Ä‘iá»u phá»‘i.
+- Khởi tạo khung dự án Frontend sử dụng thư viện React và Vite.
+- Xây dựng bố cục giao diện chính với tệp DispatcherLayout.tsx và các Tab menu điều phối.
 
 ### Changed
-- Cáº­p nháº­t cáº¥u hÃ¬nh tá»‡p tailwind.config.js Ä‘á»ƒ Ä‘á»‹nh nghÄ©a cÃ¡c dáº£i mÃ u, khoáº£ng cÃ¡ch Ä‘áº·c trÆ°ng cho FleetNova.
+- Cập nhật cấu hình tệp tailwind.config.js để định nghĩa các dải màu, khoảng cách đặc trưng cho FleetNova.
 
 ### Fixed
-- Sá»­a lá»—i trÃ n khung hiá»ƒn thá»‹ trÃªn cÃ¡c mÃ n hÃ¬nh cÃ³ Ä‘á»™ phÃ¢n giáº£i nhá» vÃ  trung bÃ¬nh báº±ng cÃ¡c thuá»™c tÃ­nh scroll linh hoáº¡t.
+- Sửa lỗi tràn khung hiển thị trên các màn hình có độ phân giải nhỏ và trung bình bằng các thuộc tính scroll linh hoạt.
 
 ### AI-assisted
-- Sá»­ dá»¥ng ChatGPT Ä‘á»ƒ gá»£i Ã½ cÃ¡c class CSS Flexbox dá»±ng thanh Sidebar cá»‘ Ä‘á»‹nh.
-- MÃ£ nguá»“n máº«u Ä‘Æ°á»£c nhÃ³m rÃ  soÃ¡t, kiá»ƒm tra kháº£ nÄƒng Ä‘Ã¡p á»©ng thiáº¿t bá»‹ trÆ°á»›c khi Ä‘Æ°a vÃ o á»©ng dá»¥ng.
+- Sử dụng ChatGPT để gợi ý các class CSS Flexbox dựng thanh Sidebar cố định.
+- Mã nguồn mẫu được nhóm rà soát, kiểm tra khả năng đáp ứng thiết bị trước khi đưa vào ứng dụng.
 
 ---
 
 ## [2026-05-25]
-Author: VÅ© LÃª Duy (DE180104)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
-- Thiáº¿t láº­p tá»‡p Ä‘á»‹nh tuyáº¿n chÃ­nh App.tsx káº¿t ná»‘i trang Ä‘iá»u hÃ nh vÃ  trang tÃ i xáº¿.
+- Thiết lập tệp định tuyến chính App.tsx kết nối trang điều hành và trang tài xế.
 
 ### Changed
-- Cáº¥u hÃ¬nh láº¡i cÃ¡c tá»‡p import Ä‘Æ°á»ng dáº«n trong App.tsx Ä‘á»ƒ Ä‘á»‹nh vá»‹ chÃ­nh xÃ¡c vá»‹ trÃ­ cÃ¡c components.
+- Cấu hình lại các tệp import đường dẫn trong App.tsx để định vị chính xác vị trí các components.
 
 ### Fixed
-- Sá»­a lá»—i catch-all route Ä‘á»ƒ chuyá»ƒn hÆ°á»›ng an toÃ n vá» trang chá»§ Ä‘iá»u hÃ nh khi ngÆ°á»i dÃ¹ng nháº­p sai Ä‘á»‹a chá»‰ URL.
+- Sửa lỗi catch-all route để chuyển hướng an toàn về trang chủ điều hành khi người dùng nhập sai địa chỉ URL.
 
 ### AI-assisted
-- Sá»­ dá»¥ng Gemini Ä‘á»ƒ tham kháº£o cáº¥u trÃºc Ä‘á»‹nh tuyáº¿n cá»§a react-router-dom v6.
-- NhÃ³m Ä‘Ã£ phÃ¡t hiá»‡n AI Ä‘á» xuáº¥t phiÃªn báº£n cÅ© vÃ  chá»§ Ä‘á»™ng viáº¿t láº¡i theo cÃº phÃ¡p tháº» Route má»›i nháº¥t.
+- Sử dụng Gemini để tham khảo cấu trúc định tuyến của react-router-dom v6.
+- Nhóm đã phát hiện AI đề xuất phiên bản cũ và chủ động viết lại theo cú pháp thẻ Route mới nhất.
 
 ---
 
 ## [2026-05-27]
-Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+Author: Trần Văn Tùng (DE180109)
 
 ### Added
-- XÃ¢y dá»±ng giao diá»‡n AuthPage vá»›i tÃ­nh nÄƒng chuyá»ƒn Ä‘á»•i ÄÄƒng nháº­p/ÄÄƒng kÃ½ mÆ°á»£t mÃ .
-- Triá»ƒn khai trang Profile khÃ¡ch hÃ ng vá»›i bá»‘ cá»¥c khoa há»c vÃ  Ä‘áº¹p máº¯t.
+- Xây dựng giao diện AuthPage với tính năng chuyển đổi Đăng nhập/Đăng ký mượt mà.
+- Triển khai trang Profile khách hàng với bố cục khoa học và đẹp mắt.
 
 ### Changed
-- TÃ­ch há»£p phong cÃ¡ch thiáº¿t káº¿ Glassmorphism (hiá»‡u á»©ng kÃ­nh má») cho toÃ n bá»™ card UI trong trang Auth vÃ  Profile.
+- Tích hợp phong cách thiết kế Glassmorphism (hiệu ứng kính mờ) cho toàn bộ card UI trong trang Auth và Profile.
 
 ### AI-assisted
-- Sá»­ dá»¥ng Antigravity Ä‘á»ƒ gá»£i Ã½ cÃ¡c class Tailwind cho hiá»‡u á»©ng backdrop-blur vÃ  border má».
+- Sử dụng Antigravity để gợi ý các class Tailwind cho hiệu ứng backdrop-blur và border mờ.
 
 ---
 
 ## [2026-05-29]
-Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+Author: Trần Văn Tùng (DE180109)
 
 ### Added
-- PhÃ¡t triá»ƒn trang OrderHistory vÃ  PaymentHistory hiá»ƒn thá»‹ danh sÃ¡ch giao dá»‹ch cá»§a khÃ¡ch hÃ ng.
-- ThÃªm cÃ¡c Badge tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng (Äang xá»­ lÃ½, Äang giao, ÄÃ£ hoÃ n thÃ nh) vá»›i mÃ u sáº¯c phÃ¢n biá»‡t.
+- Phát triển trang OrderHistory và PaymentHistory hiển thị danh sách giao dịch của khách hàng.
+- Thêm các Badge trạng thái đơn hàng (Đang xử lý, Đang giao, Đã hoàn thành) với màu sắc phân biệt.
 
 ### Changed
-- Refactor code hiá»ƒn thá»‹ danh sÃ¡ch sá»­ dá»¥ng hÃ m .map() Ä‘á»ƒ tá»‘i Æ°u hÃ³a viá»‡c quáº£n lÃ½ dá»¯ liá»‡u.
+- Refactor code hiển thị danh sách sử dụng hàm .map() để tối ưu hóa việc quản lý dữ liệu.
 
 ### AI-assisted
-- Sá»­ dá»¥ng ChatGPT Ä‘á»ƒ tá»‘i Æ°u cáº¥u trÃºc vÃ²ng láº·p hiá»ƒn thá»‹ danh sÃ¡ch vÃ  xá»­ lÃ½ logic render theo Ä‘iá»u kiá»‡n tráº¡ng thÃ¡i.
+- Sử dụng ChatGPT để tối ưu cấu trúc vòng lặp hiển thị danh sách và xử lý logic render theo điều kiện trạng thái.
 
 ---
 
 ## [2026-05-31]
-Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+Author: Trần Văn Tùng (DE180109)
 
 ### Added
-- HoÃ n thiá»‡n trang OrderTracking vá»›i báº£n Ä‘á»“ lá»™ trÃ¬nh di chuyá»ƒn (OrderTrackingMap).
-- TÃ­ch há»£p animation SVG cho biá»ƒu tÆ°á»£ng xe táº£i di chuyá»ƒn theo thá»i gian thá»±c trÃªn báº£n Ä‘á»“ mockup.
+- Hoàn thiện trang OrderTracking với bản đồ lộ trình di chuyển (OrderTrackingMap).
+- Tích hợp animation SVG cho biểu tượng xe tải di chuyển theo thời gian thực trên bản đồ mockup.
 
 ### Changed
-- Cáº£i thiá»‡n UX cho cÃ¡c trang CreateOrder vÃ  CreateShipment báº±ng cÃ¡c bÆ°á»›c nháº­p liá»‡u (Steppers).
+- Cải thiện UX cho các trang CreateOrder và CreateShipment bằng các bước nhập liệu (Steppers).
 
 ### AI-assisted
-- Sá»­ dá»¥ng Antigravity Ä‘á»ƒ há»— trá»£ viáº¿t CSS Animation cho icon SVG xe táº£i di chuyá»ƒn mÆ°á»£t mÃ  trÃªn lá»™ trÃ¬nh.
+- Sử dụng Antigravity để hỗ trợ viết CSS Animation cho icon SVG xe tải di chuyển mượt mà trên lộ trình.
 
 ---
 
 ## [2026-06-01]
-Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+Author: Trần Văn Tùng (DE180109)
 
 ### Added
-- XÃ¢y dá»±ng trung tÃ¢m khuyáº¿n mÃ£i VoucherCenter vá»›i giao diá»‡n tháº» quÃ  táº·ng hiá»‡n Ä‘áº¡i.
-- Triá»ƒn khai SupportChat vÃ  SupportPage há»— trá»£ khÃ¡ch hÃ ng gá»­i khiáº¿u náº¡i vÃ  chat trá»±c tuyáº¿n.
+- Xây dựng trung tâm khuyến mãi VoucherCenter với giao diện thẻ quà tặng hiện đại.
+- Triển khai SupportChat và SupportPage hỗ trợ khách hàng gửi khiếu nại và chat trực tuyến.
 
 ### Changed
-- Cáº­p nháº­t Header vÃ  Footer Ä‘á»“ng nháº¥t trÃªn toÃ n bá»™ cÃ¡c trang chá»©c nÄƒng cá»§a khÃ¡ch hÃ ng.
+- Cập nhật Header và Footer đồng nhất trên toàn bộ các trang chức năng của khách hàng.
 
 ### AI-assisted
-- Sá»­ dá»¥ng Gemini Ä‘á»ƒ gá»£i Ã½ bá»‘ cá»¥c Grid linh hoáº¡t cho danh sÃ¡ch voucher vÃ  khung chat responsive.
+- Sử dụng Gemini để gợi ý bố cục Grid linh hoạt cho danh sách voucher và khung chat responsive.
 
 ---
 
 ## [2026-06-10]
-Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+Author: Lê Quốc Hùng (DE180096)
 
 ### Added
 - Feature: Full-stack integration of UC015 - Automatically create new vehicle profile from AI ALPR detection.
@@ -155,193 +155,193 @@ Author: LÃª Quá»‘c HÃ¹ng (DE180096)
 - Resolved Permission denied during staging phase by bypassing the IDE's locked system directory (BACKEND/.vs/) and targeting explicit codebase paths instead.
 
 ### AI-assisted
-- DÃ¹ng AI Ä‘á»ƒ tra cá»©u cÃº phÃ¡p cáº¥u hÃ¬nh Background Worker trong .NET vÃ  logic khÃ³a UI React. NhÃ³m tá»± triá»ƒn khai mÃ£ nguá»“n.
+- Dùng AI để tra cứu cú pháp cấu hình Background Worker trong .NET và logic khóa UI React. Nhóm tự triển khai mã nguồn.
 
 ---
 
 ## [2026-06-15]
-Author: VÅ© LÃª Duy (DE180104)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
-- Frontend: TÃ­ch há»£p nÃºt ÄÄƒng nháº­p báº±ng Google trÃªn trang AuthPage.
-- Backend: Má»Ÿ thÃªm endpoint `[HttpPost("google")]` xá»­ lÃ½ giáº£i mÃ£ token cá»§a Google. Cáº¥u hÃ¬nh cáº¥p JWT ná»™i bá»™.
+- Frontend: Tích hợp nút Đăng nhập bằng Google trên trang AuthPage.
+- Backend: Mở thêm endpoint `[HttpPost("google")]` xử lý giải mã token của Google. Cấu hình cấp JWT nội bộ.
 
 ### Changed
-- Cáº­p nháº­t cÆ¡ cháº¿ Ä‘Äƒng nháº­p, há»— trá»£ láº¥y thÃ´ng tin User Profile tá»± Ä‘á»™ng tá»« Google.
+- Cập nhật cơ chế đăng nhập, hỗ trợ lấy thông tin User Profile tự động từ Google.
 
 ### Fixed
-- Xá»­ lÃ½ lá»—i Token háº¿t háº¡n báº±ng interceptor 401 Unauthorized tá»« Axios.
+- Xử lý lỗi Token hết hạn bằng interceptor 401 Unauthorized từ Axios.
 
 ### AI-assisted
-- DÃ¹ng AI Ä‘á»ƒ tham kháº£o cÃ¡ch giáº£i mÃ£ Token cá»§a thÆ° viá»‡n Google.Apis.Auth. ToÃ n bá»™ logic lÆ°u DB vÃ  cáº¥p phÃ¡t JWT Ä‘Æ°á»£c code báº±ng tay.
+- Dùng AI để tham khảo cách giải mã Token của thư viện Google.Apis.Auth. Toàn bộ logic lưu DB và cấp phát JWT được code bằng tay.
 
 ---
 
 ## [2026-05-24]
-Author: VÅ© LÃª Duy (DE180104)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
-- Khá»Ÿi táº¡o khung dá»± Ã¡n Frontend sá»­ dá»¥ng thÆ° viá»‡n React vÃ  Vite.
-- XÃ¢y dá»±ng bá»‘ cá»¥c giao diá»‡n chÃ­nh vá»›i tá»‡p DispatcherLayout.tsx vÃ  cÃ¡c Tab menu Ä‘iá»u phá»‘i.
+- Khởi tạo khung dự án Frontend sử dụng thư viện React và Vite.
+- Xây dựng bố cục giao diện chính với tệp DispatcherLayout.tsx và các Tab menu điều phối.
 
 ### Changed
-- Cáº­p nháº­t cáº¥u hÃ¬nh tá»‡p tailwind.config.js Ä‘á»ƒ Ä‘á»‹nh nghÄ©a cÃ¡c dáº£i mÃ u, khoáº£ng cÃ¡ch Ä‘áº·c trÆ°ng cho FleetNova.
+- Cập nhật cấu hình tệp tailwind.config.js để định nghĩa các dải màu, khoảng cách đặc trưng cho FleetNova.
 
 ### Fixed
-- Sá»­a lá»—i trÃ n khung hiá»ƒn thá»‹ trÃªn cÃ¡c mÃ n hÃ¬nh cÃ³ Ä‘á»™ phÃ¢n giáº£i nhá» vÃ  trung bÃ¬nh báº±ng cÃ¡c thuá»™c tÃ­nh scroll linh hoáº¡t.
+- Sửa lỗi tràn khung hiển thị trên các màn hình có độ phân giải nhỏ và trung bình bằng các thuộc tính scroll linh hoạt.
 
 ### AI-assisted
-- Sá»­ dá»¥ng ChatGPT Ä‘á»ƒ gá»£i Ã½ cÃ¡c class CSS Flexbox dá»±ng thanh Sidebar cá»‘ Ä‘á»‹nh.
-- MÃ£ nguá»“n máº«u Ä‘Æ°á»£c nhÃ³m rÃ  soÃ¡t, kiá»ƒm tra kháº£ nÄƒng Ä‘Ã¡p á»©ng thiáº¿t bá»‹ trÆ°á»›c khi Ä‘Æ°a vÃ o á»©ng dá»¥ng.
+- Sử dụng ChatGPT để gợi ý các class CSS Flexbox dựng thanh Sidebar cố định.
+- Mã nguồn mẫu được nhóm rà soát, kiểm tra khả năng đáp ứng thiết bị trước khi đưa vào ứng dụng.
 
 ---
 
 ## [2026-05-25]
-Author: VÅ© LÃª Duy (DE180104)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
-- Thiáº¿t láº­p tá»‡p Ä‘á»‹nh tuyáº¿n chÃ­nh App.tsx káº¿t ná»‘i trang Ä‘iá»u hÃ nh vÃ  trang tÃ i xáº¿.
+- Thiết lập tệp định tuyến chính App.tsx kết nối trang điều hành và trang tài xế.
 
 ### Changed
-- Cáº¥u hÃ¬nh láº¡i cÃ¡c tá»‡p import Ä‘Æ°á»ng dáº«n trong App.tsx Ä‘á»ƒ Ä‘á»‹nh vá»‹ chÃ­nh xÃ¡c vá»‹ trÃ­ cÃ¡c components.
+- Cấu hình lại các tệp import đường dẫn trong App.tsx để định vị chính xác vị trí các components.
 
 ### Fixed
-- Sá»­a lá»—i catch-all route Ä‘á»ƒ chuyá»ƒn hÆ°á»›ng an toÃ n vá» trang chá»§ Ä‘iá»u hÃ nh khi ngÆ°á»i dÃ¹ng nháº­p sai Ä‘á»‹a chá»‰ URL.
+- Sửa lỗi catch-all route để chuyển hướng an toàn về trang chủ điều hành khi người dùng nhập sai địa chỉ URL.
 
 ### AI-assisted
-- Sá»­ dá»¥ng Gemini Ä‘á»ƒ tham kháº£o cáº¥u trÃºc Ä‘á»‹nh tuyáº¿n cá»§a react-router-dom v6.
-- NhÃ³m Ä‘Ã£ phÃ¡t hiá»‡n AI Ä‘á» xuáº¥t phiÃªn báº£n cÅ© vÃ  chá»§ Ä‘á»™ng viáº¿t láº¡i theo cÃº phÃ¡p tháº» Route má»›i nháº¥t.
+- Sử dụng Gemini để tham khảo cấu trúc định tuyến của react-router-dom v6.
+- Nhóm đã phát hiện AI đề xuất phiên bản cũ và chủ động viết lại theo cú pháp thẻ Route mới nhất.
 
 ---
 
 ## [2026-06-21]
-Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+Author: Trần Văn Tùng (DE180109)
 
 ### Added
-- Feature: HoÃ n thiá»‡n há»‡ thá»‘ng cáº£nh bÃ¡o Email tá»± Ä‘á»™ng cho Warehouse.
-- Backend: Triá»ƒn khai `EmailService` (SMTP/Gmail), tÃ­ch há»£p logic Debounce 12h vÃ o `StockAlertService`.
-- Database: Táº¡o script [seed_warehouse_data.sql] tá»•ng há»£p dá»¯ liá»‡u máº«u vÃ  ká»‹ch báº£n test.
-- Frontend: NÃ¢ng cáº¥p [StockAlerts.tsx] vá»›i bá»™ lá»c tÃ¬m kiáº¿m SKU/Sáº£n pháº©m vÃ  Filter loáº¡i cáº£nh bÃ¡o.
+- Feature: Hoàn thiện hệ thống cảnh báo Email tự động cho Warehouse.
+- Backend: Triển khai `EmailService` (SMTP/Gmail), tích hợp logic Debounce 12h vào `StockAlertService`.
+- Database: Tạo script [seed_warehouse_data.sql] tổng hợp dữ liệu mẫu và kịch bản test.
+- Frontend: Nâng cấp [StockAlerts.tsx] với bộ lọc tìm kiếm SKU/Sản phẩm và Filter loại cảnh báo.
 
 ### Changed
-- Refactored UI: Chuyá»ƒn Ä‘á»•i layout sang Grid 4 cá»™t (Báº£ng chiáº¿m 3/4, AI chiáº¿m 1/4) Ä‘á»ƒ tá»‘i Æ°u khÃ´ng gian hiá»ƒn thá»‹ danh sÃ¡ch.
-- Styling: TÄƒng cÆ°á»ng padding, bo gÃ³c `rounded-2xl` vÃ  hiá»‡u á»©ng `shadow-2xl` cho giao diá»‡n hiá»‡n Ä‘áº¡i.
+- Refactored UI: Chuyển đổi layout sang Grid 4 cột (Bảng chiếm 3/4, AI chiếm 1/4) để tối ưu không gian hiển thị danh sách.
+- Styling: Tăng cường padding, bo góc `rounded-2xl` và hiệu ứng `shadow-2xl` cho giao diện hiện đại.
 
 ### Fixed
-- Sá»­a lá»—i text-wrapping (nháº£y dÃ²ng) trong báº£ng cáº£nh bÃ¡o báº±ng thuá»™c tÃ­nh `whitespace-nowrap`.
-- Sá»­a logic Backend: Chá»‰ cáº­p nháº­t thá»i gian gá»­i email khi SMTP client pháº£n há»“i thÃ nh cÃ´ng (trÃ¡nh log áº£o).
+- Sửa lỗi text-wrapping (nhảy dòng) trong bảng cảnh báo bằng thuộc tính `whitespace-nowrap`.
+- Sửa logic Backend: Chỉ cập nhật thời gian gửi email khi SMTP client phản hồi thành công (tránh log ảo).
 
 ### AI-assisted
-- Sá»­ dá»¥ng Antigravity Ä‘á»ƒ tham kháº£o cáº¥u trÃºc SMTP vÃ  gá»£i Ã½ layout Grid tá»‘i Æ°u cho dashboard cáº£nh bÃ¡o. NhÃ³m tá»± viáº¿t láº¡i template HTML vÃ  bá»™ lá»c React.
+- Sử dụng Antigravity để tham khảo cấu trúc SMTP và gợi ý layout Grid tối ưu cho dashboard cảnh báo. Nhóm tự viết lại template HTML và bộ lọc React.
 
 ---
 
 ## [2026-06-21]
-Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+Author: Lê Quốc Hùng (DE180096)
 
 ### Added
-- Feature: Thá»±c hiá»‡n trá»n gÃ³i "UC018: Track Vehicle Entry/Exit History and Trip Count" (Theo dÃµi lá»‹ch sá»­ vÃ o/ra vÃ  Ä‘áº¿m chuyáº¿n xe).
-- Database: Cáº­p nháº­t tá»‡p [smartlogAI.sql] bá»• sung báº£ng `VehicleEvents` chá»©a váº¿t di chuyá»ƒn vÃ  chá»‰ má»¥c tá»‘i Æ°u hÃ³a truy váº¥n `IX_VehicleEvents_Vehicle`.
+- Feature: Thực hiện trọn gói "UC018: Track Vehicle Entry/Exit History and Trip Count" (Theo dõi lịch sử vào/ra và đếm chuyến xe).
+- Database: Cập nhật tệp [smartlogAI.sql] bổ sung bảng `VehicleEvents` chứa vết di chuyển và chỉ mục tối ưu hóa truy vấn `IX_VehicleEvents_Vehicle`.
 - Backend:
-  - Cáº¥u hÃ¬nh lá»›p Entity `VehicleEvent` vÃ  thiáº¿t láº­p quan há»‡ trong DbContext.
-  - Cháº·n tuyá»‡t Ä‘á»‘i viá»‡c chá»‰nh sá»­a/xÃ³a váº¿t di chuyá»ƒn (Audit Trail Immutability) táº¡i database context báº±ng cÃ¡ch ghi Ä‘Ã¨ `SaveChanges` & `SaveChangesAsync`, nÃ©m lá»—i `InvalidOperationException`.
-  - XÃ¢y dá»±ng `TrackingService` chá»©a thuáº­t toÃ¡n Ä‘áº¿m chuyáº¿n dá»±a trÃªn cÃ¡c cáº·p check-in/check-out liÃªn tiáº¿p.
-  - Triá»ƒn khai `TrackingController` cung cáº¥p cÃ¡c API láº¥y danh sÃ¡ch xe, ghi nháº­n sá»± kiá»‡n, tra cá»©u lá»‹ch sá»­ hÃ nh trÃ¬nh vÃ  láº¥y sá»‘ lÆ°á»£ng chuyáº¿n xe.
+  - Cấu hình lớp Entity `VehicleEvent` và thiết lập quan hệ trong DbContext.
+  - Chặn tuyệt đối việc chỉnh sửa/xóa vết di chuyển (Audit Trail Immutability) tại database context bằng cách ghi đè `SaveChanges` & `SaveChangesAsync`, ném lỗi `InvalidOperationException`.
+  - Xây dựng `TrackingService` chứa thuật toán đếm chuyến dựa trên các cặp check-in/check-out liên tiếp.
+  - Triển khai `TrackingController` cung cấp các API lấy danh sách xe, ghi nhận sự kiện, tra cứu lịch sử hành trình và lấy số lượng chuyến xe.
 - Frontend:
-  - Thiáº¿t káº¿ trang `VehicleTrackingDashboard.tsx` hiá»ƒn thá»‹ cÃ¡c tháº» KPI (Chuyáº¿n xe, Tá»•ng sá»± kiá»‡n, Tráº¡ng thÃ¡i) vÃ  form ghi nháº­n sá»± kiá»‡n kÃ¨m dÃ²ng thá»i gian hÃ nh trÃ¬nh.
-  - TÃ­ch há»£p trang vÃ o há»‡ thá»‘ng Ä‘iá»u phá»‘i thÃ´ng qua thanh Ä‘iá»u hÆ°á»›ng `Sidebar.tsx`, router Ä‘á»‹nh tuyáº¿n vÃ  phÃ¢n loáº¡i hiá»ƒn thá»‹.
+  - Thiết kế trang `VehicleTrackingDashboard.tsx` hiển thị các thẻ KPI (Chuyến xe, Tổng sự kiện, Trạng thái) và form ghi nhận sự kiện kèm dòng thời gian hành trình.
+  - Tích hợp trang vào hệ thống điều phối thông qua thanh điều hướng `Sidebar.tsx`, router định tuyến và phân loại hiển thị.
 
 ### Changed
-- Refactored UI Contrast: Thay Ä‘á»•i mÃ£ mÃ u cá»§a cÃ¡c class text `text-on-surface` vÃ  `text-on-surface-variant` táº¡i trang `VehicleTrackingDashboard.tsx` sang cÃ¡c tÃ´ng mÃ u sÃ¡ng rÃµ rá»‡t nhÆ° `text-[#d4e4fa]`, `text-slate-300`, `text-slate-400` Ä‘á»ƒ Ä‘áº£m báº£o vÄƒn báº£n hiá»ƒn thá»‹ rÃµ rÃ ng trÃªn ná»n tá»‘i cá»§a giao diá»‡n Ä‘iá»u phá»‘i.
+- Refactored UI Contrast: Thay đổi mã màu của các class text `text-on-surface` và `text-on-surface-variant` tại trang `VehicleTrackingDashboard.tsx` sang các tông màu sáng rõ rệt như `text-[#d4e4fa]`, `text-slate-300`, `text-slate-400` để đảm bảo văn bản hiển thị rõ ràng trên nền tối của giao diện điều phối.
 
 ### AI-assisted
-- Sá»­ dá»¥ng Antigravity Ä‘á»ƒ há»— trá»£ thiáº¿t káº¿ cáº¥u trÃºc database, viáº¿t logic Ä‘Ã¨ SaveChanges Ä‘á»ƒ cháº·n chá»‰nh sá»­a dá»¯ liá»‡u, thiáº¿t káº¿ giao diá»‡n timeline dÃ²ng thá»i gian vÃ  Ä‘á» xuáº¥t cÃ¡c lá»›p mÃ u thay tháº¿ nÃ¢ng cao Ä‘á»™ tÆ°Æ¡ng pháº£n hiá»ƒn thá»‹ chá»¯. NhÃ³m Ä‘Ã£ tá»± kiá»ƒm tra vÃ  chá»‰nh sá»­a chi tiáº¿t giao diá»‡n Ä‘á»ƒ Ä‘áº¡t tháº©m má»¹ cao nháº¥t.
+- Sử dụng Antigravity để hỗ trợ thiết kế cấu trúc database, viết logic đè SaveChanges để chặn chỉnh sửa dữ liệu, thiết kế giao diện timeline dòng thời gian và đề xuất các lớp màu thay thế nâng cao độ tương phản hiển thị chữ. Nhóm đã tự kiểm tra và chỉnh sửa chi tiết giao diện để đạt thẩm mỹ cao nhất.
 
 ---
 
 ## [2026-06-21]
-Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+Author: Lê Quốc Hùng (DE180096)
 
 ### Added
-- Feature: Triá»ƒn khai toÃ n diá»‡n "UC020: Confirm Check-out & Exit Gate Control" (XÃ¡c nháº­n Check-out & Äiá»u khiá»ƒn Cá»•ng ra).
+- Feature: Triển khai toàn diện "UC020: Confirm Check-out & Exit Gate Control" (Xác nhận Check-out & Điều khiển Cổng ra).
 - Backend:
-  - XÃ¢y dá»±ng cÃ¡c lá»›p DTO (`CheckoutRequestDto`, `CheckoutResponseDto`, `ActiveBookingSummaryDto`).
-  - Triá»ƒn khai `GateService` xá»­ lÃ½ nghiá»‡p vá»¥ giao dá»‹ch check-out trong `IDbContextTransaction`: cáº­p nháº­t tráº¡ng thÃ¡i Ä‘áº·t chá»— sang `COMPLETED`, cáº­p nháº­t thá»i gian check-out, giáº£i phÃ³ng Dock Ä‘á»— vá» `AVAILABLE`, ghi nháº­n nháº­t kÃ½ cá»•ng `GateLogs` (`CHECKOUT`), vÃ  thÃªm sá»± kiá»‡n lá»‹ch sá»­ xe `VehicleEvents` (`CheckOut`).
-  - Thiáº¿t láº­p `GateController` cung cáº¥p API tra cá»©u thÃ´ng tin Ä‘áº·t chá»— hoáº¡t Ä‘á»™ng (`GET /api/gate/active-booking`) vÃ  API thá»±c hiá»‡n thá»§ tá»¥c check-out (`POST /api/gate/checkout`).
-  - ÄÄƒng kÃ½ dá»‹ch vá»¥ trong `Program.cs`.
+  - Xây dựng các lớp DTO (`CheckoutRequestDto`, `CheckoutResponseDto`, `ActiveBookingSummaryDto`).
+  - Triển khai `GateService` xử lý nghiệp vụ giao dịch check-out trong `IDbContextTransaction`: cập nhật trạng thái đặt chỗ sang `COMPLETED`, cập nhật thời gian check-out, giải phóng Dock đỗ về `AVAILABLE`, ghi nhận nhật ký cổng `GateLogs` (`CHECKOUT`), và thêm sự kiện lịch sử xe `VehicleEvents` (`CheckOut`).
+  - Thiết lập `GateController` cung cấp API tra cứu thông tin đặt chỗ hoạt động (`GET /api/gate/active-booking`) và API thực hiện thủ tục check-out (`POST /api/gate/checkout`).
+  - Đăng ký dịch vụ trong `Program.cs`.
 - Frontend:
-  - PhÃ¡t triá»ƒn dashboard Ä‘iá»u phá»‘i cá»•ng ra `GateCheckoutDashboard.tsx` cho nhÃ¢n viÃªn báº£o vá»‡.
-  - Thiáº¿t káº¿ giao diá»‡n camera ALPR mÃ´ phá»ng quÃ©t biá»ƒn sá»‘ xe, báº£ng Ä‘iá»u khiá»ƒn thÃ´ng tin chi tiáº¿t xe/tÃ i xáº¿, vÃ  bá»™ kiá»ƒm thá»­ giáº£ láº­p nhanh cÃ¡c biá»ƒn sá»‘ xe máº«u.
-  - Táº¡o mÃ´ phá»ng Ä‘á»“ há»a Ä‘á»™ng SVG Barrier Arm Gate hoáº¡t Ä‘á»™ng trá»±c quan (xoay Ä‘á»©ng thanh cháº¯n cá»•ng 90 Ä‘á»™, Ä‘Ã¨n tÃ­n hiá»‡u nháº¥p nhÃ¡y xanh lÃ¡, Ä‘áº¿m ngÆ°á»£c tá»± Ä‘Ã³ng sau 8 giÃ¢y).
-  - TÃ­ch há»£p liÃªn káº¿t Sidebar Ä‘iá»u hÆ°á»›ng vÃ  khai bÃ¡o Route trong `App.tsx`.
+  - Phát triển dashboard điều phối cổng ra `GateCheckoutDashboard.tsx` cho nhân viên bảo vệ.
+  - Thiết kế giao diện camera ALPR mô phỏng quét biển số xe, bảng điều khiển thông tin chi tiết xe/tài xế, và bộ kiểm thử giả lập nhanh các biển số xe mẫu.
+  - Tạo mô phỏng đồ họa động SVG Barrier Arm Gate hoạt động trực quan (xoay đứng thanh chắn cổng 90 độ, đèn tín hiệu nhấp nháy xanh lá, đếm ngược tự đóng sau 8 giây).
+  - Tích hợp liên kết Sidebar điều hướng và khai báo Route trong `App.tsx`.
 
 ### Changed
-- Tá»‘i Æ°u mÃ£ nguá»“n Frontend: Äiá»u chá»‰nh Ä‘Æ°á»ng dáº«n import kiá»ƒu dá»¯ liá»‡u `InventoryAudit.types` bá»‹ sai trong hai component `AuditSidebarPanel.tsx` vÃ  `InventoryComparisonTable.tsx` Ä‘á»ƒ sá»­a triá»‡t Ä‘á»ƒ lá»—i biÃªn dá»‹ch TypeScript.
+- Tối ưu mã nguồn Frontend: Điều chỉnh đường dẫn import kiểu dữ liệu `InventoryAudit.types` bị sai trong hai component `AuditSidebarPanel.tsx` và `InventoryComparisonTable.tsx` để sửa triệt để lỗi biên dịch TypeScript.
 
 ### AI-assisted
-- Sá»­ dá»¥ng Antigravity Ä‘á»ƒ tÆ° váº¥n thiáº¿t káº¿ giao dá»‹ch ACID báº±ng `IDbContextTransaction` báº£o vá»‡ toÃ n váº¹n lá»‹ch sá»­ váº¿t di chuyá»ƒn cá»§a xe vÃ  thiáº¿t káº¿ giao diá»‡n mÃ´ phá»ng SVG Barrier Gate. NhÃ³m tá»± thá»±c hiá»‡n kiá»ƒm thá»­ tÃ­ch há»£p trÃªn Swagger vÃ  Ä‘iá»u chá»‰nh giao diá»‡n hiá»ƒn thá»‹.
+- Sử dụng Antigravity để tư vấn thiết kế giao dịch ACID bằng `IDbContextTransaction` bảo vệ toàn vẹn lịch sử vết di chuyển của xe và thiết kế giao diện mô phỏng SVG Barrier Gate. Nhóm tự thực hiện kiểm thử tích hợp trên Swagger và điều chỉnh giao diện hiển thị.
 
 ---
 
 ## [2026-06-29]
-Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+Author: Lê Quốc Hùng (DE180096)
 
 ### Added
-- Feature: Triá»ƒn khai toÃ n diá»‡n "UC021: Quáº£n lÃ½ Danh sÃ¡ch Äen PhÆ°Æ¡ng tiá»‡n & TÃ i xáº¿" (Blacklist Management).
+- Feature: Triển khai toàn diện "UC021: Quản lý Danh sách Đen Phương tiện & Tài xế" (Blacklist Management).
 - Backend:
-  - Táº­n dá»¥ng cÃ¡c trÆ°á»ng `IsBlacklisted` vÃ  `BlacklistReason` sáºµn cÃ³ trong `Vehicles` vÃ  `Drivers` models â€” **KhÃ´ng táº¡o migration hay thay Ä‘á»•i schema database**.
-  - Bá»• sung phÆ°Æ¡ng thá»©c `ToggleBlacklistAsync` vÃ o `VehicleService.cs` vá»›i kiá»ƒm tra business: báº¯t buá»™c nháº­p lÃ½ do khi blacklist, xÃ³a lÃ½ do khi unblacklist.
-  - Bá»• sung phÆ°Æ¡ng thá»©c `ToggleBlacklistAsync` vÃ o `DriverService.cs` vá»›i cÃ¹ng quy táº¯c business validation.
-  - TÃ­ch há»£p kiá»ƒm tra blacklist vÃ o `GateService.ProcessCheckInAsync` nhÆ° guard clause **nguyÃªn tá»­** trÆ°á»›c má»i thay Ä‘á»•i tráº¡ng thÃ¡i booking/dock/log â€” Ä‘áº£m báº£o rejection khÃ´ng ghi log thÃ nh cÃ´ng, khÃ´ng má»Ÿ barrier, khÃ´ng chiáº¿m dock.
-  - `GateController.cs` tráº£ vá» HTTP 403 Forbidden kÃ¨m payload `BlacklistAlertDto` cÃ³ cÃ¡c trÆ°á»ng: `alertType`, `alarmLevel`, `blockedEntity`, `licensePlate`, `driverName`, `reason`.
+  - Tận dụng các trường `IsBlacklisted` và `BlacklistReason` sẵn có trong `Vehicles` và `Drivers` models — **Không tạo migration hay thay đổi schema database**.
+  - Bổ sung phương thức `ToggleBlacklistAsync` vào `VehicleService.cs` với kiểm tra business: bắt buộc nhập lý do khi blacklist, xóa lý do khi unblacklist.
+  - Bổ sung phương thức `ToggleBlacklistAsync` vào `DriverService.cs` với cùng quy tắc business validation.
+  - Tích hợp kiểm tra blacklist vào `GateService.ProcessCheckInAsync` như guard clause **nguyên tử** trước mọi thay đổi trạng thái booking/dock/log — đảm bảo rejection không ghi log thành công, không mở barrier, không chiếm dock.
+  - `GateController.cs` trả về HTTP 403 Forbidden kèm payload `BlacklistAlertDto` có các trường: `alertType`, `alarmLevel`, `blockedEntity`, `licensePlate`, `driverName`, `reason`.
 - Frontend:
-  - `VehiclesTab.tsx`: TÃ­ch há»£p toggle switch "Kiá»ƒm soÃ¡t Danh sÃ¡ch Äen" trong HUD panel chi tiáº¿t xe vá»›i UI glassmorphism. Hiá»ƒn thá»‹ tráº¡ng thÃ¡i, lÃ½ do blacklist vÃ  xá»­ lÃ½ prompt nháº­p lÃ½ do.
-  - `DispatchersTab.tsx`: TÃ­ch há»£p toggle switch "Kiá»ƒm soÃ¡t Danh sÃ¡ch Äen" trong panel chi tiáº¿t tÃ i xáº¿. Chá»‰ hoáº¡t Ä‘á»™ng vá»›i driver thá»±c tá»« backend (khÃ´ng mock).
-  - `GateCheckoutDashboard.tsx`: ThÃªm xá»­ lÃ½ 403 Forbidden, parse payload `accessDenied`, vÃ  hiá»ƒn thá»‹ **Red Critical Security Alert Modal** â€” mÃ u Ä‘á» nháº¥p nhÃ¡y, hiá»ƒn thá»‹ entity bá»‹ cháº·n, lÃ½ do tá»« chá»‘i, má»©c Ä‘á»™ nghiÃªm trá»ng. Barrier khÃ´ng má»Ÿ khi bá»‹ tá»« chá»‘i.
+  - `VehiclesTab.tsx`: Tích hợp toggle switch "Kiểm soát Danh sách Đen" trong HUD panel chi tiết xe với UI glassmorphism. Hiển thị trạng thái, lý do blacklist và xử lý prompt nhập lý do.
+  - `DispatchersTab.tsx`: Tích hợp toggle switch "Kiểm soát Danh sách Đen" trong panel chi tiết tài xế. Chỉ hoạt động với driver thực từ backend (không mock).
+  - `GateCheckoutDashboard.tsx`: Thêm xử lý 403 Forbidden, parse payload `accessDenied`, và hiển thị **Red Critical Security Alert Modal** — màu đỏ nhấp nháy, hiển thị entity bị chặn, lý do từ chối, mức độ nghiêm trọng. Barrier không mở khi bị từ chối.
 
 ### Fixed
-- Sá»­a lá»—i UI Contrast toÃ n diá»‡n trong Dispatcher Dashboard: Tailwind `surface`, `on-surface`, `on-surface-variant`, `surface-variant`, `outline-variant`, `error` Ä‘á»u bá»‹ trá» Ä‘áº¿n mÃ u light theme (#191c1e) do trÃ¹ng key trong `tailwind.config.js`.
-- Chuyá»ƒn Ä‘á»•i cÃ¡c token mÃ u nÃ y sang CSS custom properties (`var(--on-surface)`, v.v.) trong `tailwind.config.js`.
-- Äá»‹nh nghÄ©a dark overrides trong `index.css` dÆ°á»›i `.dark, .dispatcher-dark-theme`.
-- ThÃªm class `dark dispatcher-dark-theme` vÃ o container gá»‘c trong `DispatcherLayout.tsx`.
+- Sửa lỗi UI Contrast toàn diện trong Dispatcher Dashboard: Tailwind `surface`, `on-surface`, `on-surface-variant`, `surface-variant`, `outline-variant`, `error` đều bị trỏ đến màu light theme (#191c1e) do trùng key trong `tailwind.config.js`.
+- Chuyển đổi các token màu này sang CSS custom properties (`var(--on-surface)`, v.v.) trong `tailwind.config.js`.
+- Định nghĩa dark overrides trong `index.css` dưới `.dark, .dispatcher-dark-theme`.
+- Thêm class `dark dispatcher-dark-theme` vào container gốc trong `DispatcherLayout.tsx`.
 
 ### AI-assisted
-- Sá»­ dá»¥ng Antigravity (Claude Sonnet 4.6) Ä‘á»ƒ thiáº¿t káº¿ luá»“ng guard clause blacklist nguyÃªn tá»­ trong GateService, cáº¥u trÃºc 403 payload, thiáº¿t káº¿ UI Red Alarm Modal, phÃ¢n tÃ­ch nguyÃªn nhÃ¢n lá»—i tÆ°Æ¡ng pháº£n mÃ u sáº¯c Tailwind CSS vÃ  Ä‘á» xuáº¥t giáº£i phÃ¡p CSS variable mapping. NhÃ³m tá»± kiá»ƒm tra toÃ n bá»™ 3 ká»‹ch báº£n nghiá»‡m vá»¥ (blacklist xe, blacklist tÃ i xáº¿, unblacklist rá»“i check-in láº¡i) vÃ  tá»± tinh chá»‰nh giao diá»‡n.
+- Sử dụng Antigravity (Claude Sonnet 4.6) để thiết kế luồng guard clause blacklist nguyên tử trong GateService, cấu trúc 403 payload, thiết kế UI Red Alarm Modal, phân tích nguyên nhân lỗi tương phản màu sắc Tailwind CSS và đề xuất giải pháp CSS variable mapping. Nhóm tự kiểm tra toàn bộ 3 kịch bản nghiệm vụ (blacklist xe, blacklist tài xế, unblacklist rồi check-in lại) và tự tinh chỉnh giao diện.
 
 ---
 
 ## [2026-07-01]
-Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+Author: Trần Văn Tùng (DE180109)
 
 ### Added
-- Backend: ThÃªm luá»“ng Overstay Alert gá»“m model `VehicleDockSession`, model `OverstayAlert`, DTO, controller API `/api/fleet/overstay-alerts`, service tÃ­nh SLA vÃ  worker quÃ©t tá»± Ä‘á»™ng.
-- Database: Bá»• sung báº£ng `VehicleDockSessions` vÃ  `OverstayAlerts` trong `smartlogAI.sql`.
-- Database seed: ThÃªm dá»¯ liá»‡u máº«u xe Ä‘ang á»Ÿ Dock gá»“m tráº¡ng thÃ¡i sáº¯p quÃ¡ SLA, quÃ¡ SLA vÃ  kháº©n cáº¥p Ä‘á»ƒ UI Dispatcher cÃ³ dá»¯ liá»‡u hiá»ƒn thá»‹.
-- Frontend: Táº¡o mÃ n hÃ¬nh `Overstay Alert` trong Dispatcher, hiá»ƒn thá»‹ xe, dock, tÃ i xáº¿, booking, SLA quy Ä‘á»‹nh, thá»i gian thá»±c táº¿, sá»‘ phÃºt vÆ°á»£t SLA vÃ  hÃ nh Ä‘á»™ng xá»­ lÃ½.
+- Backend: Thêm luồng Overstay Alert gồm model `VehicleDockSession`, model `OverstayAlert`, DTO, controller API `/api/fleet/overstay-alerts`, service tính SLA và worker quét tự động.
+- Database: Bổ sung bảng `VehicleDockSessions` và `OverstayAlerts` trong `smartlogAI.sql`.
+- Database seed: Thêm dữ liệu mẫu xe đang ở Dock gồm trạng thái sắp quá SLA, quá SLA và khẩn cấp để UI Dispatcher có dữ liệu hiển thị.
+- Frontend: Tạo màn hình `Overstay Alert` trong Dispatcher, hiển thị xe, dock, tài xế, booking, SLA quy định, thời gian thực tế, số phút vượt SLA và hành động xử lý.
 
 ### Changed
-- UI/UX: LÃ m má»›i Dispatcher thÃ nh operations console sÃ¡ng, gá»n, phÃ¹ há»£p há»‡ thá»‘ng logistics thay vÃ¬ giao diá»‡n tá»‘i/glow.
-- Navigation: Äá»•i tab cáº£nh bÃ¡o trong Dispatcher thÃ nh nhÃ£n nghiá»‡p vá»¥ `Overstay Alert`, khÃ´ng hiá»ƒn thá»‹ mÃ£ use case trÃªn UI.
-- Dashboard: ThÃªm báº£ng `Äiá»u phá»‘i Dock & SLA`, KPI `Nguy cÆ¡ Overstay`, queue Ä‘iá»u phá»‘i vÃ  pháº§n nháº­t kÃ½ váº­n hÃ nh dá»… Ä‘á»c hÆ¡n.
-- SQL: Gá»™p ná»™i dung `setup-overstay-alert.sql` vÃ o `smartlogAI.sql`, giá»¯ má»™t file SQL chÃ­nh duy nháº¥t cho schema vÃ  sample data.
+- UI/UX: Làm mới Dispatcher thành operations console sáng, gọn, phù hợp hệ thống logistics thay vì giao diện tối/glow.
+- Navigation: Đổi tab cảnh báo trong Dispatcher thành nhãn nghiệp vụ `Overstay Alert`, không hiển thị mã use case trên UI.
+- Dashboard: Thêm bảng `Điều phối Dock & SLA`, KPI `Nguy cơ Overstay`, queue điều phối và phần nhật ký vận hành dễ đọc hơn.
+- SQL: Gộp nội dung `setup-overstay-alert.sql` vào `smartlogAI.sql`, giữ một file SQL chính duy nhất cho schema và sample data.
 
 ### Fixed
-- Backend: Sá»­a lá»—i endpoint Overstay Alert tráº£ 500 khi database chÆ°a cÃ³ báº£ng báº±ng cÃ¡ch bá»• sung schema vÃ  dá»¯ liá»‡u máº«u vÃ o SQL chÃ­nh.
-- Backend: Xá»­ lÃ½ lá»—i SMTP authentication trong `EmailService` theo hÆ°á»›ng simulated email, trÃ¡nh StockAlertWorker spam lá»—i Ä‘á» khi test chá»©c nÄƒng khÃ¡c.
-- Frontend: Loáº¡i bá» toÃ n bá»™ chá»¯ `UC023/UC23` khá»i giao diá»‡n Dispatcher Ä‘á»ƒ UI tháº©m má»¹ vÃ  gáº§n nghiá»‡p vá»¥ hÆ¡n.
+- Backend: Sửa lỗi endpoint Overstay Alert trả 500 khi database chưa có bảng bằng cách bổ sung schema và dữ liệu mẫu vào SQL chính.
+- Backend: Xử lý lỗi SMTP authentication trong `EmailService` theo hướng simulated email, tránh StockAlertWorker spam lỗi đỏ khi test chức năng khác.
+- Frontend: Loại bỏ toàn bộ chữ `UC023/UC23` khỏi giao diện Dispatcher để UI thẩm mỹ và gần nghiệp vụ hơn.
 
 ### Verification
-- `GET http://localhost:5184/api/fleet/overstay-alerts` tráº£ HTTP 200.
-- `dotnet build` backend sang thÆ° má»¥c kiá»ƒm tra thÃ nh cÃ´ng.
-- RÃ  text frontend xÃ¡c nháº­n khÃ´ng cÃ²n `UC023/UC23` trong UI Dispatcher.
+- `GET http://localhost:5184/api/fleet/overstay-alerts` trả HTTP 200.
+- `dotnet build` backend sang thư mục kiểm tra thành công.
+- Rà text frontend xác nhận không còn `UC023/UC23` trong UI Dispatcher.
 
 ### Known issues
-- Frontend type-check toÃ n project váº«n cÃ²n lá»—i cÅ© ngoÃ i pháº¡m vi Overstay Alert: thiáº¿u `InventoryAudit.types` á»Ÿ `AuditSidebarPanel.tsx` vÃ  `InventoryComparisonTable.tsx`.
+- Frontend type-check toàn project vẫn còn lỗi cũ ngoài phạm vi Overstay Alert: thiếu `InventoryAudit.types` ở `AuditSidebarPanel.tsx` và `InventoryComparisonTable.tsx`.
 
 ---
 
 ## [2026-07-02]
-Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+Author: Trần Văn Tùng (DE180109)
 
 ### Added
 - Backend: Them AI Financial Trend Forecasting cho Admin voi controller `FinancialForecastController` va cac endpoint `/api/finance/forecast`, `/generate`, `/retrain`, `/history`.
@@ -367,140 +367,140 @@ Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
 
 ---
 ## [2026-07-08]
-Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+Author: Trần Văn Tùng (DE180109)
 
 ### Added
-- HoÃ n thiá»‡n chá»©c nÄƒng Cáº£nh bÃ¡o tá»“n kho gá»­i email tháº­t qua Gmail SMTP.
-- ThÃªm cÆ¡ cháº¿ gá»­i email vá» ngÆ°á»i dÃ¹ng Ä‘ang Ä‘Äƒng nháº­p; náº¿u khÃ´ng cÃ³ email trong JWT thÃ¬ fallback vá» `tungtvde180109@fpt.edu.vn`.
+- Hoàn thiện chức năng Cảnh báo tồn kho gửi email thật qua Gmail SMTP.
+- Thêm cơ chế gửi email về người dùng đang đăng nhập; nếu không có email trong JWT thì fallback về `tungtvde180109@fpt.edu.vn`.
 
 ### Changed
-- Cáº­p nháº­t `EmailSettings` trong `appsettings.json` theo Ä‘Ãºng key backend sá»­ dá»¥ng vÃ  cáº¥u hÃ¬nh Gmail App Password.
-- TÃ¡ch luá»“ng quÃ©t ná»n vÃ  quÃ©t thá»§ cÃ´ng: worker ná»n váº«n Ã¡p dá»¥ng debounce, nÃºt QuÃ©t ngay dÃ¹ng `force=true` Ä‘á»ƒ há»— trá»£ test gá»­i láº¡i email.
-- Thiáº¿t káº¿ láº¡i UI Stock Alerts vá»›i tÆ°Æ¡ng pháº£n tá»‘t hÆ¡n, tiáº¿ng Viá»‡t Ä‘Ãºng font, báº£ng rÃµ rÃ ng, responsive mobile vÃ  hiá»ƒn thá»‹ email gáº§n nháº¥t.
+- Cập nhật `EmailSettings` trong `appsettings.json` theo đúng key backend sử dụng và cấu hình Gmail App Password.
+- Tách luồng quét nền và quét thủ công: worker nền vẫn áp dụng debounce, nút Quét ngay dùng `force=true` để hỗ trợ test gửi lại email.
+- Thiết kế lại UI Stock Alerts với tương phản tốt hơn, tiếng Việt đúng font, bảng rõ ràng, responsive mobile và hiển thị email gần nhất.
 
 ### Fixed
-- Sá»­a lá»—i SMTP `5.7.0 Authentication Required` báº±ng App Password há»£p lá»‡.
-- Sá»­a lá»—i `/api/stockalerts/scan` tráº£ 500 khi SMTP lá»—i, chuyá»ƒn sang thÃ´ng bÃ¡o rÃµ tráº¡ng thÃ¡i gá»­i email.
-- Sá»­a lá»—i build backend do process `BACKEND.exe` Ä‘ang khÃ³a file khi cháº¡y láº¡i `dotnet run`.
+- Sửa lỗi SMTP `5.7.0 Authentication Required` bằng App Password hợp lệ.
+- Sửa lỗi `/api/stockalerts/scan` trả 500 khi SMTP lỗi, chuyển sang thông báo rõ trạng thái gửi email.
+- Sửa lỗi build backend do process `BACKEND.exe` đang khóa file khi chạy lại `dotnet run`.
 
 ### Verification
-- SMTP test gá»­i thÃ nh cÃ´ng tá»›i `tungtvde180109@fpt.edu.vn`.
-- API `/api/stockalerts/scan?force=true` tráº£ vá» `ÄÃ£ gá»­i 3 email`.
-- `dotnet build` backend thÃ nh cÃ´ng 0 warning/0 error.
-- `npm run build` frontend thÃ nh cÃ´ng.
+- SMTP test gửi thành công tới `tungtvde180109@fpt.edu.vn`.
+- API `/api/stockalerts/scan?force=true` trả về `Đã gửi 3 email`.
+- `dotnet build` backend thành công 0 warning/0 error.
+- `npm run build` frontend thành công.
 
 ---
 
 ---
 
-## 4. Tá»•ng káº¿t thay Ä‘á»•i cuá»‘i project
+## 4. Tổng kết thay đổi cuối project
 
-### 4.1. CÃ¡c chá»©c nÄƒng Ä‘Ã£ hoÃ n thÃ nh
+### 4.1. Các chức năng đã hoàn thành
 
-| STT | Chá»©c nÄƒng | Tráº¡ng thÃ¡i | Minh chá»©ng | Ghi chÃº |
+| STT | Chức năng | Trạng thái | Minh chứng | Ghi chú |
 |---:|---|---|---|---|
-| 1 | Giao diá»‡n PhÃ²ng Ä‘iá»u phá»‘i | Completed | DispatcherDashboard | Giao diá»‡n tÄ©nh |
-| 2 | Giao diá»‡n mÃ n hÃ¬nh TÃ i xáº¿ | Completed | DriverDashboard | Giao diá»‡n tÄ©nh |
-| 3 | Äiá»u phá»‘i vÃ  gÃ¡n Ä‘Æ¡n hÃ ng | Completed | AssignDispatcherTab | Giao diá»‡n tÆ°Æ¡ng tÃ¡c tÄ©nh |
-| 4 | Äiá»u hÆ°á»›ng Router chÃ­nh | Completed | App.tsx | Äá»‹nh tuyáº¿n chÃ­nh xÃ¡c |
-| 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | HoÃ n thÃ nh toÃ n diá»‡n backend & frontend, cháº·n chá»‰nh sá»­a logs |
-| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | HoÃ n thÃ nh há»‡ thá»‘ng check-out giao dá»‹ch nguyÃªn tá»­, giáº£i phÃ³ng Dock, ghi nháº­n logs, vÃ  thiáº¿t káº¿ hoáº¡t há»a mÃ´ phá»ng SVG Barrier Gate |
-| 7 | UC021: Quáº£n lÃ½ Danh sÃ¡ch Äen PhÆ°Æ¡ng tiá»‡n & TÃ i xáº¿ | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triá»ƒn khai blacklist/whitelist khÃ´ng thay Ä‘á»•i schema DB, guard clause nguyÃªn tá»­ táº¡i gate check-in, 403 alarm modal Ä‘á» trÃªn frontend, vÃ  sá»­a UI contrast toÃ n bá»™ Dispatcher Dashboard |
+| 1 | Giao diện Phòng điều phối | Completed | DispatcherDashboard | Giao diện tĩnh |
+| 2 | Giao diện màn hình Tài xế | Completed | DriverDashboard | Giao diện tĩnh |
+| 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
+| 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
+| 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
+| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
+| 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
 
 
 ---
 
-### 4.2. CÃ¡c chá»©c nÄƒng chÆ°a hoÃ n thÃ nh
+### 4.2. Các chức năng chưa hoàn thành
 
-| STT | Chá»©c nÄƒng | LÃ½ do chÆ°a hoÃ n thÃ nh | HÆ°á»›ng cáº£i thiá»‡n |
+| STT | Chức năng | Lý do chưa hoàn thành | Hướng cải thiện |
 |---:|---|---|---|
-| 1 | Káº¿t ná»‘i API tháº­t cho cÃ¡c chá»©c nÄƒng cÃ²n láº¡i | Giá»›i háº¡n thá»i gian | ÄÃ£ káº¿t ná»‘i API tháº­t cho cÃ¡c chá»©c nÄƒng quan trá»ng (Váº­n Ä‘Æ¡n, PhÃª duyá»‡t xe ALPR, Äáº·t lá»‹ch kho, Theo dÃµi hÃ nh trÃ¬nh xe). Sáº½ tiáº¿p tá»¥c má»Ÿ rá»™ng cho cÃ¡c tab phá»¥. |
+| 1 | Kết nối API thật cho các chức năng còn lại | Giới hạn thời gian | Đã kết nối API thật cho các chức năng quan trọng (Vận đơn, Phê duyệt xe ALPR, Đặt lịch kho, Theo dõi hành trình xe). Sẽ tiếp tục mở rộng cho các tab phụ. |
 
 ---
 
-### 4.3. Tá»•ng há»£p AI há»— trá»£ trong project
+### 4.3. Tổng hợp AI hỗ trợ trong project
 
-| Háº¡ng má»¥c | AI cÃ³ há»— trá»£ khÃ´ng? | Má»©c Ä‘á»™ há»— trá»£ | Ghi chÃº |
+| Hạng mục | AI có hỗ trợ không? | Mức độ hỗ trợ | Ghi chú |
 |---|---|---|---|
-| Requirement | CÃ³ | Ãt | TÃ¬m hiá»ƒu khÃ¡i niá»‡m |
-| Design | CÃ³ | Ãt | Gá»£i Ã½ bá»‘ cá»¥c |
-| Database | KhÃ´ng | Ãt | KhÃ´ng dÃ¹ng |
-| Coding | CÃ³ | Ãt | Tra cá»©u cÃº phÃ¡p |
-| Debug | CÃ³ | Ãt | Sá»­a lá»—i CSS nhá» |
-| Testing | KhÃ´ng | Ãt | Tá»± test tay |
-| Report | CÃ³ | Ãt | Äá»‹nh dáº¡ng vÄƒn báº£n |
-| Presentation | KhÃ´ng | Ãt | KhÃ´ng dÃ¹ng |
+| Requirement | Có | Ít | Tìm hiểu khái niệm |
+| Design | Có | Ít | Gợi ý bố cục |
+| Database | Không | Ít | Không dùng |
+| Coding | Có | Ít | Tra cứu cú pháp |
+| Debug | Có | Ít | Sửa lỗi CSS nhỏ |
+| Testing | Không | Ít | Tự test tay |
+| Report | Có | Ít | Định dạng văn bản |
+| Presentation | Không | Ít | Không dùng |
 
 ---
 
-### 4.4. BÃ i há»c rÃºt ra
+### 4.4. Bài học rút ra
 
 ```text
-NhÃ³m Ä‘Ã£ hiá»ƒu rÃµ hÆ¡n cÃ¡ch tá»• chá»©c má»™t á»©ng dá»¥ng React chia theo component nhá» vÃ  cÃ¡ch sá»­ dá»¥ng CSS Tailwind Ä‘á»ƒ láº­p trÃ¬nh giao diá»‡n nhanh chÃ³ng.
+Nhóm đã hiểu rõ hơn cách tổ chức một ứng dụng React chia theo component nhỏ và cách sử dụng CSS Tailwind để lập trình giao diện nhanh chóng.
 ```
 
 ---
 
-### 4.5. HÆ°á»›ng cáº£i thiá»‡n tiáº¿p theo
+### 4.5. Hướng cải thiện tiếp theo
 
 ```text
-Láº­p trÃ¬nh pháº§n Backend báº±ng .NET Core Ä‘á»ƒ káº¿t ná»‘i cÆ¡ sá»Ÿ dá»¯ liá»‡u SQL Server, hoÃ n thiá»‡n chá»©c nÄƒng Ä‘Äƒng nháº­p vÃ  lÆ°u trá»¯ Ä‘Æ¡n hÃ ng thá»±c táº¿.
+Lập trình phần Backend bằng .NET Core để kết nối cơ sở dữ liệu SQL Server, hoàn thiện chức năng đăng nhập và lưu trữ đơn hàng thực tế.
 ```
 
 ---
 
 ## [1.2.0] - 2026-07-08
-Author: VÅ© LÃª Duy (DE180104)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
-- ThÃªm cÆ¡ cháº¿ Strict Check-in logic Ä‘a táº§ng cho AI Camera (Kiá»ƒm tra xe láº¡, Xe Inactive, Xe Blacklist, Lá»‹ch Booking).
-- ThÃªm Overlay UI lá»›n trÃªn React hiá»ƒn thá»‹ lá»—i cáº£nh bÃ¡o Ä‘á», dá»… quan sÃ¡t khi xe vi pháº¡m quy táº¯c cá»•ng.
-- ThÃªm API `POST /api/gate/check-plate` há»— trá»£ nháº­n diá»‡n vÃ  xá»­ lÃ½ biá»ƒn sá»‘ riÃªng biá»‡t vá»›i Active Bookings.
+- Thêm cơ chế Strict Check-in logic đa tầng cho AI Camera (Kiểm tra xe lạ, Xe Inactive, Xe Blacklist, Lịch Booking).
+- Thêm Overlay UI lớn trên React hiển thị lỗi cảnh báo đỏ, dễ quan sát khi xe vi phạm quy tắc cổng.
+- Thêm API `POST /api/gate/check-plate` hỗ trợ nhận diện và xử lý biển số riêng biệt với Active Bookings.
 
 ### Changed
-- Sá»­a Ä‘á»•i truy váº¥n LINQ to Entities: Thay hÃ m C# `NormalizePlate()` báº±ng `.Replace().ToUpper()` Ä‘á»ƒ Entity Framework biÃªn dá»‹ch thÃ nh cÃ´ng sang SQL Server, trÃ¡nh lá»—i 500.
+- Sửa đổi truy vấn LINQ to Entities: Thay hàm C# `NormalizePlate()` bằng `.Replace().ToUpper()` để Entity Framework biên dịch thành công sang SQL Server, tránh lỗi 500.
 
 ### Fixed
-- Sá»­a lá»—i console log bá»‹ spam AxiosError 404 khi khÃ´ng tÃ¬m tháº¥y xe trong kho.
+- Sửa lỗi console log bị spam AxiosError 404 khi không tìm thấy xe trong kho.
 
 ---
 
 ## [1.3.0] - 2026-07-09
-Author: VÅ© LÃª Duy (DE180104)
+Author: Vũ Lê Duy (DE180104)
 
 ### Added
-- Bá»• sung nghiá»‡p vá»¥ kiá»ƒm tra háº¡n Ä‘Äƒng kiá»ƒm cá»§a phÆ°Æ¡ng tiá»‡n khi táº¡o lá»‹ch booking kho.
-- Bá»• sung rule cháº·n AI Camera check-in náº¿u xe Ä‘Ã£ háº¿t háº¡n Ä‘Äƒng kiá»ƒm.
-- Bá»• sung cáº£nh bÃ¡o Dispatcher cho xe sáº¯p Ä‘áº¿n háº¡n báº£o trÃ¬ trong mÃ n Há»“ sÆ¡ xe.
-- ThÃªm KPI, bá»™ lá»c rá»§i ro vÃ  nhÃ£n cáº£nh bÃ¡o trá»±c tiáº¿p trÃªn danh sÃ¡ch phÆ°Æ¡ng tiá»‡n.
+- Bổ sung nghiệp vụ kiểm tra hạn đăng kiểm của phương tiện khi tạo lịch booking kho.
+- Bổ sung rule chặn AI Camera check-in nếu xe đã hết hạn đăng kiểm.
+- Bổ sung cảnh báo Dispatcher cho xe sắp đến hạn bảo trì trong màn Hồ sơ xe.
+- Thêm KPI, bộ lọc rủi ro và nhãn cảnh báo trực tiếp trên danh sách phương tiện.
 
 ### Changed
-- Cáº£i thiá»‡n UI mÃ n quáº£n lÃ½ phÆ°Æ¡ng tiá»‡n theo hÆ°á»›ng dashboard váº­n hÃ nh: tháº» thá»‘ng kÃª rÃµ hÆ¡n, cáº£nh bÃ¡o Ä‘Äƒng kiá»ƒm/báº£o trÃ¬ ná»•i báº­t hÆ¡n, báº£ng phÆ°Æ¡ng tiá»‡n dá»… quÃ©t thÃ´ng tin hÆ¡n.
-- Äiá»u chá»‰nh layout `VehiclesTab` Ä‘á»ƒ vÃ¹ng danh sÃ¡ch phÆ°Æ¡ng tiá»‡n cÃ³ thá»ƒ cuá»™n dá»c, trÃ¡nh bá»‹ che/láº¥p bá»Ÿi pháº§n KPI vÃ  bá»™ lá»c phÃ­a trÃªn.
-- Chuáº©n hÃ³a viá»‡c so sÃ¡nh biá»ƒn sá»‘ xe khi Ä‘áº·t lá»‹ch báº±ng cÃ¡ch bá» dáº¥u gáº¡ch ngang, dáº¥u cháº¥m vÃ  khoáº£ng tráº¯ng trÆ°á»›c khi truy váº¥n.
+- Cải thiện UI màn quản lý phương tiện theo hướng dashboard vận hành: thẻ thống kê rõ hơn, cảnh báo đăng kiểm/bảo trì nổi bật hơn, bảng phương tiện dễ quét thông tin hơn.
+- Điều chỉnh layout `VehiclesTab` để vùng danh sách phương tiện có thể cuộn dọc, tránh bị che/lấp bởi phần KPI và bộ lọc phía trên.
+- Chuẩn hóa việc so sánh biển số xe khi đặt lịch bằng cách bỏ dấu gạch ngang, dấu chấm và khoảng trắng trước khi truy vấn.
 
 ### Fixed
-- Sá»­a lá»—i danh sÃ¡ch phÆ°Æ¡ng tiá»‡n bá»‹ láº¥p á»Ÿ cuá»‘i mÃ n hÃ¬nh, khÃ´ng kÃ©o xuá»‘ng xem Ä‘áº§y Ä‘á»§ thÃ´ng tin Ä‘Æ°á»£c.
-- Sá»­a nguy cÆ¡ xe háº¿t háº¡n Ä‘Äƒng kiá»ƒm váº«n Ä‘áº·t lá»‹ch hoáº·c check-in Ä‘Æ°á»£c náº¿u ngÆ°á»i dÃ¹ng nháº­p biá»ƒn sá»‘ khÃ¡c Ä‘á»‹nh dáº¡ng.
+- Sửa lỗi danh sách phương tiện bị lấp ở cuối màn hình, không kéo xuống xem đầy đủ thông tin được.
+- Sửa nguy cơ xe hết hạn đăng kiểm vẫn đặt lịch hoặc check-in được nếu người dùng nhập biển số khác định dạng.
 
 ### AI-assisted
-- CÃ³ sá»­ dá»¥ng AI á»Ÿ má»©c tham kháº£o Ä‘á»ƒ gá»£i Ã½ vá»‹ trÃ­ kiá»ƒm tra logic, cÃ¡ch Ä‘á»c lá»—i layout scroll vÃ  cÃ¡ch tá»• chá»©c láº¡i UI.
-- Sinh viÃªn tá»± kiá»ƒm tra code hiá»‡n cÃ³, tá»± quyáº¿t Ä‘á»‹nh nghiá»‡p vá»¥, chá»‰nh sá»­a thá»§ cÃ´ng, cháº¡y build vÃ  kiá»ƒm thá»­ trÃªn localhost trÆ°á»›c khi ghi nháº­n vÃ o changelog.
+- Có sử dụng AI ở mức tham khảo để gợi ý vị trí kiểm tra logic, cách đọc lỗi layout scroll và cách tổ chức lại UI.
+- Sinh viên tự kiểm tra code hiện có, tự quyết định nghiệp vụ, chỉnh sửa thủ công, chạy build và kiểm thử trên localhost trước khi ghi nhận vào changelog.
 
 ### Verification
-- `dotnet build BACKEND/BACKEND.csproj`: thÃ nh cÃ´ng.
-- `npm run build`: thÃ nh cÃ´ng.
-- Kiá»ƒm tra thá»§ cÃ´ng backend Swagger vÃ  frontend Dispatcher trÃªn localhost.
+- `dotnet build BACKEND/BACKEND.csproj`: thành công.
+- `npm run build`: thành công.
+- Kiểm tra thủ công backend Swagger và frontend Dispatcher trên localhost.
 
 ---
 
-## 5. Cam káº¿t cáº­p nháº­t Changelog
+## 5. Cam kết cập nhật Changelog
 
-Sinh viÃªn/nhÃ³m cam káº¿t ráº±ng ná»™i dung changelog pháº£n Ã¡nh Ä‘Ãºng cÃ¡c thay Ä‘á»•i Ä‘Ã£ thá»±c hiá»‡n trong quÃ¡ trÃ¬nh lÃ m bÃ i táº­p/project.
+Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các thay đổi đã thực hiện trong quá trình làm bài tập/project.
 
-| Äáº¡i diá»‡n sinh viÃªn/nhÃ³m | NgÃ y xÃ¡c nháº­n |
+| Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-| NhÃ³m trÆ°á»Ÿng | 02/06/2026 |
+| Nhóm trưởng | 02/06/2026 |
 
 ---
 
@@ -531,20 +531,20 @@ Author: Vu Le Duy (DE180104)
 Author: Vu Le Duy (DE180104)
 
 ### Added
-- Feature: HoÃ n thiá»‡n Báº£n Ä‘á»“ theo dÃµi Ä‘Æ¡n hÃ ng trá»±c tuyáº¿n (Order Tracking Map) káº¿t há»£p thÆ° viá»‡n Goong Map.
-- Váº½ tuyáº¿n Ä‘Æ°á»ng giao thÃ´ng thá»±c táº¿ giá»¯a Äiá»ƒm láº¥y hÃ ng vÃ  Äiá»ƒm giao hÃ ng thÃ´ng qua API Direction.
-- ÄÃ¡nh dáº¥u cÃ¡c má»‘c (Checkpoints) tÆ°Æ¡ng á»©ng vá»›i 6 tráº¡ng thÃ¡i xá»­ lÃ½ Ä‘Æ¡n hÃ ng trÃªn lá»™ trÃ¬nh báº£n Ä‘á»“.
+- Feature: Hoàn thiện Bản đồ theo dõi đơn hàng trực tuyến (Order Tracking Map) kết hợp thư viện Goong Map.
+- Vẽ tuyến đường giao thông thực tế giữa Điểm lấy hàng và Điểm giao hàng thông qua API Direction.
+- Đánh dấu các mốc (Checkpoints) tương ứng với 6 trạng thái xử lý đơn hàng trên lộ trình bản đồ.
 
 ### Changed
-- Refactored UI: Gá»¡ bá» hoÃ n toÃ n giao diá»‡n SVG giáº£ láº­p (fake SVG overlay) che láº¥p báº£n Ä‘á»“ tháº­t.
-- Äá»“ng bá»™ % tiáº¿n trÃ¬nh cá»§a Ä‘Æ¡n hÃ ng Ä‘á»ƒ vá»‹ trÃ­ xe táº£i (Truck Marker) khá»›p chÃ­nh xÃ¡c vá»›i Ä‘iá»ƒm checkpoint thá»±c táº¿ trÃªn báº£n Ä‘á»“.
+- Refactored UI: Gỡ bỏ hoàn toàn giao diện SVG giả lập (fake SVG overlay) che lấp bản đồ thật.
+- Đồng bộ % tiến trình của đơn hàng để vị trí xe tải (Truck Marker) khớp chính xác với điểm checkpoint thực tế trên bản đồ.
 
 ### Fixed
-- Sá»­a lá»—i giá»›i háº¡n (clamp) pháº§n trÄƒm tiáº¿n Ä‘á»™ khiáº¿n xe táº£i khÃ´ng bao giá» dá»«ng Ä‘Ãºng Ä‘iá»ƒm Ä‘áº§u vÃ  Ä‘iá»ƒm cuá»‘i cá»§a lá»™ trÃ¬nh.
-- Sá»­a lá»—i hiá»ƒn thá»‹ Marker máº·c Ä‘á»‹nh (text "Xe") thÃ nh má»™t SVG Icon xe táº£i Ä‘Æ°á»£c custom theo thiáº¿t káº¿ thá»‘ng nháº¥t cá»§a há»‡ thá»‘ng.
+- Sửa lỗi giới hạn (clamp) phần trăm tiến độ khiến xe tải không bao giờ dừng đúng điểm đầu và điểm cuối của lộ trình.
+- Sửa lỗi hiển thị Marker mặc định (text "Xe") thành một SVG Icon xe tải được custom theo thiết kế thống nhất của hệ thống.
 
 ### AI-assisted
-- DÃ¹ng AI Ä‘á»ƒ tra cá»©u cÃº phÃ¡p cáº¥u hÃ¬nh Mapbox/Goong vÃ  thuáº­t toÃ¡n ná»™i suy Ä‘iá»ƒm trÃªn Ä‘Æ°á»ng tháº³ng (Interpolation). Sinh viÃªn tá»± thiáº¿t káº¿ cáº¥u trÃºc code, tá»± debug lá»—i lá»‡ch toáº¡ Ä‘á»™ vÃ  tá»± thiáº¿t káº¿ giao diá»‡n xe táº£i.
+- Dùng AI để tra cứu cú pháp cấu hình Mapbox/Goong và thuật toán nội suy điểm trên đường thẳng (Interpolation). Sinh viên tự thiết kế cấu trúc code, tự debug lỗi lệch toạ độ và tự thiết kế giao diện xe tải.
 
 
 

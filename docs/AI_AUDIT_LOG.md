@@ -1,25 +1,25 @@
-﻿# AI Audit Log
+# AI Audit Log
 
-## 1. ThÃ´ng tin chung
+## 1. Thông tin chung
 
-| ThÃ´ng tin | Ná»™i dung |
+| Thông tin | Nội dung |
 |---|---|
-| MÃ´n há»c |Building Cross-Platform Back-End Application With .NET  |
-| MÃ£ mÃ´n há»c | PRN232 |
+| Môn học |Building Cross-Platform Back-End Application With .NET  |
+| Mã môn học | PRN232 |
 | Lá»›p |	SE18D05  |
-| Há»c ká»³ | 8 |
-| TÃªn bÃ i táº­p / Project | FleetNova - Há»‡ thá»‘ng Quáº£n trá»‹ Logistics ThÃ´ng minh  |
-| TÃªn sinh viÃªn / NhÃ³m | NhÃ³m 6 |
-| MSSV / Danh sÃ¡ch MSSV | DE180071,DE180096,DE180088,DE180109,DE180104 |
-| Giáº£ng viÃªn hÆ°á»›ng dáº«n | LÃª Thiá»‡n Nháº­t Quang |
-| NgÃ y báº¯t Ä‘áº§u | 17/05/2026 |
-| NgÃ y hoÃ n thÃ nh | 09/06/2026 |
+| Học kỳ | 8 |
+| Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh  |
+| Tên sinh viên / Nhóm | Nhóm 6 |
+| MSSV / Danh sách MSSV | DE180071,DE180096,DE180088,DE180109,DE180104 |
+| Giảng viên hướng dẫn | Lê Thiện Nhật Quang |
+| Ngày bắt đầu | 17/05/2026 |
+| Ngày hoàn thành | 09/06/2026 |
 
 ---
 
-## 2. CÃ´ng cá»¥ AI Ä‘Ã£ sá»­ dá»¥ng
+## 2. Công cụ AI đã sử dụng
 
-ÄÃ¡nh dáº¥u cÃ¡c cÃ´ng cá»¥ AI Ä‘Ã£ sá»­ dá»¥ng trong quÃ¡ trÃ¬nh thá»±c hiá»‡n bÃ i táº­p/project.
+Đánh dấu các công cụ AI đã sử dụng trong quá trình thực hiện bài tập/project.
 
 - [x] ChatGPT
 - [x] Gemini
@@ -29,198 +29,198 @@
 - [x] Antigravity
 - [ ] Perplexity
 - [ ] Microsoft Copilot
-- [ ] CÃ´ng cá»¥ khÃ¡c: ....................................
+- [ ] Công cụ khác: ....................................
 
 ---
 
-## 3. Má»¥c tiÃªu sá»­ dá»¥ng AI
+## 3. Mục tiêu sử dụng AI
 
-### MÃ´ táº£ má»¥c tiÃªu sá»­ dá»¥ng AI
+### Mô tả mục tiêu sử dụng AI
 
-NhÃ³m sá»­ dá»¥ng AI lÃ m trá»£ lÃ½ ká»¹ thuáº­t xuyÃªn suá»‘t dá»± Ã¡n FleetNova nháº±m tá»‘i Æ°u hÃ³a thá»i gian nghiÃªn cá»©u cÃ´ng nghá»‡, xÃ¢y dá»±ng nhanh cÃ¡c module lÃµi cÃ³ yáº¿u tá»‘ thÃ´ng minh (AI/ML) nhÆ° tá»‘i Æ°u tuyáº¿n Ä‘Æ°á»ng giao hÃ ng, nháº­n diá»‡n hÃ³a Ä‘Æ¡n vÃ  dá»± bÃ¡o tÃ i chÃ­nh. Äá»“ng thá»i, AI há»— trá»£ kiá»ƒm tra tÃ­nh Ä‘Ãºng Ä‘áº¯n cá»§a mÃ£ nguá»“n, phÃ¡t hiá»‡n lá»— há»•ng logic trong khÃ¢u Ä‘á»‘i soÃ¡t tÃ i chÃ­nh COD vÃ  dá»‹ch thuáº­t/chuáº©n hÃ³a cÃ¡c thuáº­t ngá»¯ chuyÃªn ngÃ nh Logistics.
+Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNova nhằm tối ưu hóa thời gian nghiên cứu công nghệ, xây dựng nhanh các module lõi có yếu tố thông minh (AI/ML) như tối ưu tuyến đường giao hàng, nhận diện hóa đơn và dự báo tài chính. Đồng thời, AI hỗ trợ kiểm tra tính đúng đắn của mã nguồn, phát hiện lỗ hổng logic trong khâu đối soát tài chính COD và dịch thuật/chuẩn hóa các thuật ngữ chuyên ngành Logistics.
 
 ---
 
-## 4. Nháº­t kÃ½ sá»­ dá»¥ng AI chi tiáº¿t
+## 4. Nhật ký sử dụng AI chi tiết
 
 ## Log #01
 - Date: 2026-05-24
-- Author: VÅ© LÃª Duy (DE180104)
+- Author: Vũ Lê Duy (DE180104)
 - AI Tool: ChatGPT
-- Purpose: Táº¡o layout cho Sidebar Ä‘iá»u phá»‘i
+- Purpose: Tạo layout cho Sidebar điều phối
 - Prompt Reference: PROMPTS.md#prompt-01
-- AI Output Summary: Gá»£i Ã½ sá»­ dá»¥ng CSS Flexbox `h-screen` vÃ  `overflow-y-auto`
-- Human Decision: Thay Ä‘á»•i tÃ´ng mÃ u ná»n xÃ¡m máº·c Ä‘á»‹nh sang mÃ u xanh navy vÃ  bo gÃ³c cÃ¡c Ã´ (glass-panel)
+- AI Output Summary: Gợi ý sử dụng CSS Flexbox `h-screen` và `overflow-y-auto`
+- Human Decision: Thay đổi tông màu nền xám mặc định sang màu xanh navy và bo góc các ô (glass-panel)
 - Applied To: FRONTEND/src/layouts/DispatcherLayout.tsx
-- Verification: Cháº¡y localhost:5173 vÃ  co dÃ£n mÃ n hÃ¬nh Ä‘á»ƒ xem hiá»ƒn thá»‹ layout.
+- Verification: Chạy localhost:5173 và co dãn màn hình để xem hiển thị layout.
 
 ## Log #02
 - Date: 2026-05-25
-- Author: VÅ© LÃª Duy (DE180104)
+- Author: Vũ Lê Duy (DE180104)
 - AI Tool: Gemini
-- Purpose: Cáº¥u hÃ¬nh Router Ä‘á»‹nh tuyáº¿n
+- Purpose: Cấu hình Router định tuyến
 - Prompt Reference: PROMPTS.md#prompt-02
-- AI Output Summary: Gá»£i Ã½ sá»­ dá»¥ng react-router-dom v6 vá»›i Routes vÃ  Route
-- Human Decision: Thay Ä‘á»•i import tÆ°Æ¡ng Ä‘á»‘i vÃ  thÃªm Catch-all Route
+- AI Output Summary: Gợi ý sử dụng react-router-dom v6 với Routes và Route
+- Human Decision: Thay đổi import tương đối và thêm Catch-all Route
 - Applied To: FRONTEND/src/App.tsx
-- Verification: Click chuyá»ƒn trang giá»¯a /dispatcher vÃ  /driver thÃ nh cÃ´ng.
+- Verification: Click chuyển trang giữa /dispatcher và /driver thành công.
 
 ## Log #03
 - Date: 2026-05-27
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
-- Purpose: TÃ­ch há»£p thiáº¿t káº¿ Glassmorphism cho AuthPage vÃ  Profile
+- Purpose: Tích hợp thiết kế Glassmorphism cho AuthPage và Profile
 - Prompt Reference: PROMPTS.md#prompt-03
-- AI Output Summary: Gá»£i Ã½ cÃ¡c class `backdrop-blur-md` vÃ  `bg-white/10` cho card UI.
-- Human Decision: Tinh chá»‰nh Ä‘á»™ má» cá»§a card vÃ  mÃ u border Ä‘á»ƒ ná»•i báº­t trÃªn ná»n tá»‘i (navy).
+- AI Output Summary: Gợi ý các class `backdrop-blur-md` và `bg-white/10` cho card UI.
+- Human Decision: Tinh chỉnh độ mờ của card và màu border để nổi bật trên nền tối (navy).
 - Applied To: FRONTEND/src/features/auth/AuthPage.tsx, FRONTEND/src/features/customer/CustomerProfile.tsx
-- Verification: Kiá»ƒm tra hiá»ƒn thá»‹ trÃªn trÃ¬nh duyá»‡t, Ä‘áº£m báº£o chá»¯ rÃµ rÃ ng trÃªn ná»n má».
+- Verification: Kiểm tra hiển thị trên trình duyệt, đảm bảo chữ rõ ràng trên nền mờ.
 
 ## Log #04
 - Date: 2026-05-29
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: ChatGPT
-- Purpose: Xá»­ lÃ½ hiá»ƒn thá»‹ danh sÃ¡ch Ä‘Æ¡n hÃ ng Ä‘á»™ng
+- Purpose: Xử lý hiển thị danh sách đơn hàng động
 - Prompt Reference: PROMPTS.md#prompt-04
-- AI Output Summary: Gá»£i Ã½ dÃ¹ng `.map()` Ä‘á»ƒ render danh sÃ¡ch tháº» Ä‘Æ¡n hÃ ng tá»« máº£ng dá»¯ liá»‡u.
-- Human Decision: ThÃªm logic phÃ¢n loáº¡i tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng (Äang giao, HoÃ n thÃ nh) báº±ng mÃ u sáº¯c badge riÃªng biá»‡t.
+- AI Output Summary: Gợi ý dùng `.map()` để render danh sách thẻ đơn hàng từ mảng dữ liệu.
+- Human Decision: Thêm logic phân loại trạng thái đơn hàng (Đang giao, Hoàn thành) bằng màu sắc badge riêng biệt.
 - Applied To: FRONTEND/src/features/customer/OrderHistory.tsx, FRONTEND/src/features/customer/CustomerDashboard.tsx
-- Verification: ThÃªm dá»¯ liá»‡u giáº£ vÃ o máº£ng vÃ  xem danh sÃ¡ch cÃ³ hiá»ƒn thá»‹ Ä‘Ãºng vÃ  Ä‘á»“ng nháº¥t khÃ´ng.
+- Verification: Thêm dữ liệu giả vào mảng và xem danh sách có hiển thị đúng và đồng nhất không.
 
 ## Log #05
 - Date: 2026-05-31
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
-- Purpose: Váº½ lá»™ trÃ¬nh trÃªn báº£n Ä‘á»“ theo dÃµi (OrderTrackingMap)
+- Purpose: Vẽ lộ trình trên bản đồ theo dõi (OrderTrackingMap)
 - Prompt Reference: PROMPTS.md#prompt-05
-- AI Output Summary: Gá»£i Ã½ cáº¥u trÃºc SVG vÃ  cÃ¡c animation CSS cho icon xe táº£i di chuyá»ƒn theo Ä‘Æ°á»ng káº».
-- Human Decision: Thay Ä‘á»•i icon xe táº£i sang SVG cao cáº¥p hÆ¡n vÃ  chá»‰nh láº¡i tá»‘c Ä‘á»™ animation cho mÆ°á»£t mÃ .
+- AI Output Summary: Gợi ý cấu trúc SVG và các animation CSS cho icon xe tải di chuyển theo đường kẻ.
+- Human Decision: Thay đổi icon xe tải sang SVG cao cấp hơn và chỉnh lại tốc độ animation cho mượt mà.
 - Applied To: FRONTEND/src/features/customer/OrderTrackingMap.tsx
-- Verification: Quan sÃ¡t xe táº£i di chuyá»ƒn trÃªn lá»™ trÃ¬nh khi load trang trÃªn Chrome.
+- Verification: Quan sát xe tải di chuyển trên lộ trình khi load trang trên Chrome.
 
 ## Log #06
 - Date: 2026-06-01
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: Gemini
-- Purpose: Thiáº¿t káº¿ Voucher Center vÃ  Support Chat
+- Purpose: Thiết kế Voucher Center và Support Chat
 - Prompt Reference: PROMPTS.md#prompt-06
-- AI Output Summary: Gá»£i Ã½ layout lÆ°á»›i (Grid) cho cÃ¡c tháº» khuyáº¿n mÃ£i vÃ  cáº¥u trÃºc khung chat box.
-- Human Decision: TÃ¹y chá»‰nh hiá»‡u á»©ng hover cho voucher vÃ  phá»‘i há»£p mÃ u sáº¯c tin nháº¯n chat theo theme chung.
+- AI Output Summary: Gợi ý layout lưới (Grid) cho các thẻ khuyến mãi và cấu trúc khung chat box.
+- Human Decision: Tùy chỉnh hiệu ứng hover cho voucher và phối hợp màu sắc tin nhắn chat theo theme chung.
 - Applied To: FRONTEND/src/features/voucher/VoucherCenter.tsx, FRONTEND/src/features/support/SupportChat.tsx
-- Verification: Kiá»ƒm tra tÆ°Æ¡ng tÃ¡c hover voucher vÃ  nháº­p tin nháº¯n vÃ o khung chat thÃ nh cÃ´ng.
+- Verification: Kiểm tra tương tác hover voucher và nhập tin nhắn vào khung chat thành công.
 
 ## Log #07
 - Date: 2026-06-09
-- Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+- Author: Lê Quốc Hùng (DE180096)
 - AI Tool: Antigravity
-- Purpose: Tham kháº£o thiáº¿t káº¿ DB cho In váº­n Ä‘Æ¡n (UC004)
+- Purpose: Tham khảo thiết kế DB cho In vận đơn (UC004)
 - Prompt Reference: PROMPTS.md#prompt-07
-- AI Output Summary: Gá»£i Ã½ cÃ¡c trÆ°á»ng dá»¯ liá»‡u cáº§n thiáº¿t cho báº£ng Waybill vÃ  Picking List.
-- Human Decision: NhÃ³m tá»± thiáº¿t káº¿ báº£ng `Waybills` thÃ´ng qua Entity Framework Core, Ã¡nh xáº¡ cÃ¡c trÆ°á»ng cho phÃ¹ há»£p vá»›i yÃªu cáº§u thá»±c táº¿ cá»§a dá»± Ã¡n vÃ  tá»± code cÃ¡c API CRUD liÃªn quan.
+- AI Output Summary: Gợi ý các trường dữ liệu cần thiết cho bảng Waybill và Picking List.
+- Human Decision: Nhóm tự thiết kế bảng `Waybills` thông qua Entity Framework Core, ánh xạ các trường cho phù hợp với yêu cầu thực tế của dự án và tự code các API CRUD liên quan.
 - Applied To: BACKEND/DTOs/OutboundRequestDto.cs, BACKEND/Models/Entities.cs, BACKEND/Controllers/OutboundController.cs
-- Verification: Cháº¡y lá»‡nh add-migration vÃ  update-database thÃ nh cÃ´ng.
+- Verification: Chạy lệnh add-migration và update-database thành công.
 
 ## Log #08
 - Date: 2026-06-10
-- Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+- Author: Lê Quốc Hùng (DE180096)
 - AI Tool: Antigravity
-- Purpose: CÃº phÃ¡p Axios gá»i API cÃ³ Token
+- Purpose: Cú pháp Axios gọi API có Token
 - Prompt Reference: PROMPTS.md#prompt-08
-- AI Output Summary: Cung cáº¥p Ä‘oáº¡n code máº«u gá»i Axios POST vá»›i Header Authorization.
-- Human Decision: NhÃ³m tá»± tÃ­ch há»£p vÃ o file cáº¥u hÃ¬nh API, viáº¿t thÃªm interceptor Ä‘á»ƒ báº¯t lá»—i token háº¿t háº¡n vÃ  refresh láº¡i token tá»± Ä‘á»™ng.
+- AI Output Summary: Cung cấp đoạn code mẫu gọi Axios POST với Header Authorization.
+- Human Decision: Nhóm tự tích hợp vào file cấu hình API, viết thêm interceptor để bắt lỗi token hết hạn và refresh lại token tự động.
 - Applied To: FRONTEND/src/lib/api.ts, FRONTEND/src/features/auth/AuthPage.tsx
-- Verification: ÄÄƒng nháº­p thÃ nh cÃ´ng vÃ  console log tráº£ vá» thÃ´ng tin user chÃ­nh xÃ¡c.
+- Verification: Đăng nhập thành công và console log trả về thông tin user chính xác.
 
 ## Log #09
 - Date: 2026-06-15
-- Author: VÅ© LÃª Duy (DE180104)
+- Author: Vũ Lê Duy (DE180104)
 - AI Tool: Antigravity
-- Purpose: Tham kháº£o quy trÃ¬nh xÃ¡c thá»±c Google Login vÃ  JWT
+- Purpose: Tham khảo quy trình xác thực Google Login và JWT
 - Prompt Reference: PROMPTS.md#prompt-09
-- AI Output Summary: Cung cáº¥p tÃ i liá»‡u cáº¥u hÃ¬nh `Google.Apis.Auth` vÃ  code máº«u sinh token JWT.
-- Human Decision: NhÃ³m chá»‰ dÃ¹ng code máº«u Ä‘á»ƒ kiá»ƒm tra token Google. Sau Ä‘Ã³ tá»± viáº¿t Endpoint `[HttpPost("google")]` vÃ  tá»± cáº¥u hÃ¬nh JWT Claims Ä‘á»ƒ phÃ¢n quyá»n dá»±a vÃ o Database thá»±c táº¿.
+- AI Output Summary: Cung cấp tài liệu cấu hình `Google.Apis.Auth` và code mẫu sinh token JWT.
+- Human Decision: Nhóm chỉ dùng code mẫu để kiểm tra token Google. Sau đó tự viết Endpoint `[HttpPost("google")]` và tự cấu hình JWT Claims để phân quyền dựa vào Database thực tế.
 - Applied To: BACKEND/Controllers/AuthController.cs, BACKEND/DTOs/AuthDTOs.cs
-- Verification: ÄÄƒng nháº­p báº±ng tÃ i khoáº£n Google thÃ nh cÃ´ng, láº¥y Ä‘Æ°á»£c JWT token vÃ  giáº£i
+- Verification: Đăng nhập bằng tài khoản Google thành công, lấy được JWT token và giải
 ## Log #11
 - Date: 2026-06-21
-- Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+- Author: Lê Quốc Hùng (DE180096)
 - AI Tool: Antigravity
-- Purpose: Triá»ƒn khai UC018 (Track Vehicle Entry/Exit) vÃ  tá»‘i Æ°u Ä‘á»™ tÆ°Æ¡ng pháº£n vÄƒn báº£n UI
+- Purpose: Triển khai UC018 (Track Vehicle Entry/Exit) và tối ưu độ tương phản văn bản UI
 - Prompt Reference: PROMPTS.md#prompt-11
-- AI Output Summary: Gá»£i Ã½ cÃ¡ch cháº·n thao tÃ¡c UPDATE/DELETE á»Ÿ SaveChanges, thuáº­t toÃ¡n Ä‘áº¿m cáº·p CheckIn/CheckOut, vÃ  thay tháº¿ class mÃ u text-on-surface-variant.
-- Human Decision: Tá»± phÃ¡t triá»ƒn hoÃ n thiá»‡n giao diá»‡n Ä‘iá»u hÃ nh dÃ²ng thá»i gian di chuyá»ƒn, vÃ  thay Ä‘á»•i linh hoáº¡t cÃ¡c class mÃ u text sang slate-300, slate-400 vÃ  xanh dÆ°Æ¡ng Ä‘á»ƒ Ä‘á»“ng bá»™ vá»›i theme.
+- AI Output Summary: Gợi ý cách chặn thao tác UPDATE/DELETE ở SaveChanges, thuật toán đếm cặp CheckIn/CheckOut, và thay thế class màu text-on-surface-variant.
+- Human Decision: Tự phát triển hoàn thiện giao diện điều hành dòng thời gian di chuyển, và thay đổi linh hoạt các class màu text sang slate-300, slate-400 và xanh dương để đồng bộ với theme.
 - Applied To: BACKEND/Models/SmartLogAiContext.cs, BACKEND/Services/TrackingService.cs, FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx
-- Verification: Thá»±c hiá»‡n ghi nháº­n chuá»—i sá»± kiá»‡n check-in â†” load â†” check-out, kiá»ƒm tra sá»‘ lÆ°á»£ng chuyáº¿n xe tÄƒng lÃªn Ä‘Ãºng ká»‹ch báº£n, cá»‘ tÃ¬nh gá»­i yÃªu cáº§u PUT cáº­p nháº­t thÃ¬ bá»‹ database cháº·n thÃ nh cÃ´ng.
+- Verification: Thực hiện ghi nhận chuỗi sự kiện check-in ↔ load ↔ check-out, kiểm tra số lượng chuyến xe tăng lên đúng kịch bản, cố tình gửi yêu cầu PUT cập nhật thì bị database chặn thành công.
 
 ## Log #12
 - Date: 2026-06-21
-- Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+- Author: Lê Quốc Hùng (DE180096)
 - AI Tool: Antigravity
-- Purpose: Triá»ƒn khai UC020 (Confirm Check-out & Exit Gate Control) vÃ  hoÃ n hoáº¡t SVG Barrier Gate
+- Purpose: Triển khai UC020 (Confirm Check-out & Exit Gate Control) và hoàn hoạt SVG Barrier Gate
 - Prompt Reference: PROMPTS.md#prompt-12
-- AI Output Summary: Gá»£i Ã½ cáº¥u trÃºc GateService cháº¡y trong giao dá»‹ch ACID vÃ  code SVG/React mÃ´ phá»ng Barrier Gate xoay.
-- Human Decision: Tá»± phÃ¡t triá»ƒn hoÃ n thiá»‡n giao diá»‡n Ä‘iá»u hÃ nh cá»•ng ra, thiáº¿t káº¿ báº£ng Ä‘iá»u khiá»ƒn báº£o vá»‡ vÃ  tÃ­ch há»£p cÃ¡c bá»™ giáº£ láº­p kiá»ƒm thá»­ nhanh cÃ¡c biá»ƒn sá»‘ xe.
+- AI Output Summary: Gợi ý cấu trúc GateService chạy trong giao dịch ACID và code SVG/React mô phỏng Barrier Gate xoay.
+- Human Decision: Tự phát triển hoàn thiện giao diện điều hành cổng ra, thiết kế bảng điều khiển bảo vệ và tích hợp các bộ giả lập kiểm thử nhanh các biển số xe.
 - Applied To: BACKEND/Services/GateService.cs, BACKEND/Controllers/GateController.cs, FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx
-- Verification: Sá»­ dá»¥ng Swagger thá»±c hiá»‡n check-out thÃ nh cÃ´ng cho xe 51C-88888, kiá»ƒm tra DB tháº¥y tráº¡ng thÃ¡i SlotBookings Ä‘Ã£ COMPLETED, DockID 1 vá» AVAILABLE, GateLogs ghi nháº­n sá»± kiá»‡n, vÃ  VehicleEvents ghi nháº­n check-out thÃ nh cÃ´ng.
+- Verification: Sử dụng Swagger thực hiện check-out thành công cho xe 51C-88888, kiểm tra DB thấy trạng thái SlotBookings đã COMPLETED, DockID 1 về AVAILABLE, GateLogs ghi nhận sự kiện, và VehicleEvents ghi nhận check-out thành công.
 
 ## Log #13
 - Date: 2026-06-29
-- Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+- Author: Lê Quốc Hùng (DE180096)
 - AI Tool: Antigravity (Claude Sonnet 4.6)
-- Purpose: Triá»ƒn khai UC021 - Quáº£n lÃ½ Danh sÃ¡ch Äen PhÆ°Æ¡ng tiá»‡n & TÃ i xáº¿ (Blacklist Management)
+- Purpose: Triển khai UC021 - Quản lý Danh sách Đen Phương tiện & Tài xế (Blacklist Management)
 - Prompt Reference: PROMPTS.md#prompt-13
-- AI Output Summary: Gá»£i Ã½ thiáº¿t káº¿ guard clause blacklist nguyÃªn tá»­ trong GateService trÆ°á»›c má»i thao tÃ¡c booking, cáº¥u trÃºc BlacklistAlertDto Ä‘á»ƒ tráº£ vá» HTTP 403 Forbidden, thiáº¿t káº¿ toggle UI glassmorphism cho VehiclesTab & DispatchersTab, vÃ  Red Critical Security Alert Modal cho GateCheckoutDashboard.
-- Human Decision: Tá»± kiá»ƒm tra nghiÃªm ngáº·t cÃ¡c rÃ ng buá»™c business: khÃ´ng táº¡o migration, khÃ´ng cho blacklist náº¿u thiáº¿u lÃ½ do, khÃ´ng gá»­i API náº¿u ngÆ°á»i dÃ¹ng há»§y prompt. Tá»± cháº¡y 3 ká»‹ch báº£n Ä‘áº§u cuá»‘i (blacklist xe, blacklist tÃ i xáº¿, unblacklist + check-in láº¡i) Ä‘á»ƒ xÃ¡c nháº­n tÃ­nh Ä‘Ãºng Ä‘áº¯n.
+- AI Output Summary: Gợi ý thiết kế guard clause blacklist nguyên tử trong GateService trước mọi thao tác booking, cấu trúc BlacklistAlertDto để trả về HTTP 403 Forbidden, thiết kế toggle UI glassmorphism cho VehiclesTab & DispatchersTab, và Red Critical Security Alert Modal cho GateCheckoutDashboard.
+- Human Decision: Tự kiểm tra nghiêm ngặt các ràng buộc business: không tạo migration, không cho blacklist nếu thiếu lý do, không gửi API nếu người dùng hủy prompt. Tự chạy 3 kịch bản đầu cuối (blacklist xe, blacklist tài xế, unblacklist + check-in lại) để xác nhận tính đúng đắn.
 - Applied To: BACKEND/Services/VehicleService.cs, BACKEND/Services/DriverService.cs, BACKEND/Services/GateService.cs, BACKEND/Controllers/GateController.cs, FRONTEND/src/features/dispatcher/components/tabs/VehiclesTab.tsx, FRONTEND/src/features/dispatcher/components/tabs/DispatchersTab.tsx, FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx
-- Verification: Test 3 case: (1) Blacklist xe â†’ check-in â†’ nháº­n 403 + modal Ä‘á» + barrier khÃ´ng má»Ÿ. (2) Blacklist tÃ i xáº¿ â†’ check-in â†’ nháº­n 403 + modal Ä‘á». (3) Unblacklist â†’ check-in láº¡i â†’ thÃ nh cÃ´ng bÃ¬nh thÆ°á»ng.
+- Verification: Test 3 case: (1) Blacklist xe → check-in → nhận 403 + modal đỏ + barrier không mở. (2) Blacklist tài xế → check-in → nhận 403 + modal đỏ. (3) Unblacklist → check-in lại → thành công bình thường.
 
 ## Log #14
 - Date: 2026-06-29
-- Author: LÃª Quá»‘c HÃ¹ng (DE180096)
+- Author: Lê Quốc Hùng (DE180096)
 - AI Tool: Antigravity (Claude Sonnet 4.6)
-- Purpose: Sá»­a lá»—i UI Contrast tá»‘i toÃ n diá»‡n trong Dispatcher Dashboard (Vehicles & Dispatchers Tabs)
+- Purpose: Sửa lỗi UI Contrast tối toàn diện trong Dispatcher Dashboard (Vehicles & Dispatchers Tabs)
 - Prompt Reference: PROMPTS.md#prompt-14
-- AI Output Summary: PhÃ¢n tÃ­ch nguyÃªn nhÃ¢n gá»‘c rá»…: `tailwind.config.js` Ä‘á»‹nh nghÄ©a trÃ¹ng key `on-surface`, `surface-variant`, v.v. khiáº¿n mÃ u light theme override mÃ u dark theme. Gá»£i Ã½ chuyá»ƒn cÃ¡c token mÃ u sang CSS custom properties vÃ  Ã¡p dá»¥ng `.dark` class override.
-- Human Decision: Ãp dá»¥ng giáº£i phÃ¡p vÃ  kiá»ƒm tra láº¡i giao diá»‡n trÃªn trÃ¬nh duyá»‡t, xÃ¡c nháº­n Ä‘á»™ tÆ°Æ¡ng pháº£n vÃ  kháº£ nÄƒng Ä‘á»c cá»§a text trong cÃ¡c panel chi tiáº¿t xe, tÃ i xáº¿ vÃ  cÃ¡c Ä‘iá»u khiá»ƒn blacklist.
+- AI Output Summary: Phân tích nguyên nhân gốc rễ: `tailwind.config.js` định nghĩa trùng key `on-surface`, `surface-variant`, v.v. khiến màu light theme override màu dark theme. Gợi ý chuyển các token màu sang CSS custom properties và áp dụng `.dark` class override.
+- Human Decision: Áp dụng giải pháp và kiểm tra lại giao diện trên trình duyệt, xác nhận độ tương phản và khả năng đọc của text trong các panel chi tiết xe, tài xế và các điều khiển blacklist.
 - Applied To: FRONTEND/tailwind.config.js, FRONTEND/src/index.css, FRONTEND/src/layouts/DispatcherLayout.tsx
-- Verification: Cháº¡y `npm run build` thÃ nh cÃ´ng (0 lá»—i). Quan sÃ¡t trá»±c tiáº¿p cÃ¡c text trong panel chi tiáº¿t xe/tÃ i xáº¿ hiá»ƒn thá»‹ rÃµ rÃ ng, sÃ¡ng Ä‘á»§ trÃªn ná»n tá»‘i glassmorphism.
+- Verification: Chạy `npm run build` thành công (0 lỗi). Quan sát trực tiếp các text trong panel chi tiết xe/tài xế hiển thị rõ ràng, sáng đủ trên nền tối glassmorphism.
 
 ## Log #15
 - Date: 2026-07-01
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
-- Purpose: Cáº£i thiá»‡n toÃ n bá»™ UI/UX Dispatcher theo hÆ°á»›ng mÃ n hÃ¬nh váº­n hÃ nh logistics.
+- Purpose: Cải thiện toàn bộ UI/UX Dispatcher theo hướng màn hình vận hành logistics.
 - Prompt Reference: PROMPTS.md#prompt-12
-- AI Output Summary: Gá»£i Ã½ chuyá»ƒn tá»« giao diá»‡n tá»‘i/glow sang operations console sÃ¡ng, cÃ³ sidebar nhÃ³m chá»©c nÄƒng, header tÃ¬m kiáº¿m booking/biá»ƒn sá»‘/dock, KPI Dock & SLA, queue Ä‘iá»u phá»‘i, AI insight vÃ  nháº­t kÃ½ váº­n hÃ nh.
-- Human Decision: NhÃ³m giá»¯ cáº¥u trÃºc tab Dispatcher hiá»‡n cÃ³, chá»‰ thay Ä‘á»•i UI/UX vÃ  nhÃ£n hiá»ƒn thá»‹ Ä‘á»ƒ phÃ¹ há»£p mÃ´ táº£ dá»± Ã¡n SmartLog AI.
+- AI Output Summary: Gợi ý chuyển từ giao diện tối/glow sang operations console sáng, có sidebar nhóm chức năng, header tìm kiếm booking/biển số/dock, KPI Dock & SLA, queue điều phối, AI insight và nhật ký vận hành.
+- Human Decision: Nhóm giữ cấu trúc tab Dispatcher hiện có, chỉ thay đổi UI/UX và nhãn hiển thị để phù hợp mô tả dự án SmartLog AI.
 - Applied To: FRONTEND/src/layouts/DispatcherLayout.tsx, FRONTEND/src/features/dispatcher/components/Sidebar.tsx, FRONTEND/src/features/dispatcher/components/Header.tsx, FRONTEND/src/features/dispatcher/components/tabs/DashboardTab.tsx, FRONTEND/src/index.css
-- Verification: Kiá»ƒm tra route `/dispatcher`; trong mÃ n hÃ¬nh Dispatcher.
+- Verification: Kiểm tra route `/dispatcher`; trong màn hình Dispatcher.
 
 ## Log #16
 - Date: 2026-07-01
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
-- Purpose: Gá»™p script SQL Overstay Alert vÃ o file SQL chÃ­nh.
+- Purpose: Gộp script SQL Overstay Alert vào file SQL chính.
 - Prompt Reference: PROMPTS.md#prompt-13
-- AI Output Summary: Äá» xuáº¥t loáº¡i bá» file setup rá»i, Ä‘Æ°a schema vÃ  seed Overstay Alert vÃ o `smartlogAI.sql` Ä‘á»ƒ trÃ¡nh lá»‡ch dá»¯ liá»‡u giá»¯a hai script.
-- Human Decision: NhÃ³m giá»¯ `smartlogAI.sql` lÃ  nguá»“n chÃ­nh cho database, dÃ¹ng dá»¯ liá»‡u máº«u tá»± chá»n Vehicle/Dock/Booking cÃ³ sáºµn thay vÃ¬ hard-code phá»¥ thuá»™c mÃ´i trÆ°á»ng.
+- AI Output Summary: Đề xuất loại bỏ file setup rời, đưa schema và seed Overstay Alert vào `smartlogAI.sql` để tránh lệch dữ liệu giữa hai script.
+- Human Decision: Nhóm giữ `smartlogAI.sql` là nguồn chính cho database, dùng dữ liệu mẫu tự chọn Vehicle/Dock/Booking có sẵn thay vì hard-code phụ thuộc môi trường.
 - Applied To: smartlogAI.sql
-- Verification: RÃ  `rg` xÃ¡c nháº­n chá»‰ cÃ²n má»™t file SQL chÃ­nh chá»©a `VehicleDockSessions` vÃ  `OverstayAlerts`; khÃ´ng cháº¡y láº¡i script vÃ¬ cÃ³ lá»‡nh `DROP DATABASE`.
+- Verification: Rà `rg` xác nhận chỉ còn một file SQL chính chứa `VehicleDockSessions` và `OverstayAlerts`; không chạy lại script vì có lệnh `DROP DATABASE`.
 
 ## Log #17
 - Date: 2026-07-01
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
-- Purpose: Giáº£m lá»—i console do SMTP khi StockAlertWorker cháº¡y ná»n.
+- Purpose: Giảm lỗi console do SMTP khi StockAlertWorker chạy nền.
 - Prompt Reference: PROMPTS.md#prompt-14
-- AI Output Summary: Gá»£i Ã½ báº¯t riÃªng lá»—i SMTP authentication Ä‘á»ƒ chuyá»ƒn sang simulated email thay vÃ¬ throw exception gÃ¢y spam log Ä‘á».
-- Human Decision: NhÃ³m chá»‰ thay Ä‘á»•i hÃ nh vi khi SMTP tá»« chá»‘i xÃ¡c thá»±c; cÃ¡c lá»—i email khÃ¡c váº«n giá»¯ cÆ¡ cháº¿ log error vÃ  throw Ä‘á»ƒ khÃ´ng che lá»—i tháº­t.
+- AI Output Summary: Gợi ý bắt riêng lỗi SMTP authentication để chuyển sang simulated email thay vì throw exception gây spam log đỏ.
+- Human Decision: Nhóm chỉ thay đổi hành vi khi SMTP từ chối xác thực; các lỗi email khác vẫn giữ cơ chế log error và throw để không che lỗi thật.
 - Applied To: BACKEND/Services/EmailService.cs
-- Verification: Build backend sang thÆ° má»¥c kiá»ƒm tra thÃ nh cÃ´ng vÃ  endpoint Overstay Alert váº«n tráº£ HTTP 200.
+- Verification: Build backend sang thư mục kiểm tra thành công và endpoint Overstay Alert vẫn trả HTTP 200.
 
 ## Log #18
 - Date: 2026-07-02
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
 - Purpose: AI Financial Trend Forecasting cho role Admin.
 - Prompt Reference: PROMPTS.md#prompt-15
@@ -231,159 +231,159 @@ NhÃ³m sá»­ dá»¥ng AI lÃ m trá»£ lÃ½ ká»¹ thuáº­t xuyÃªn s
 
 ## Log #15
 - Date: 2026-07-08
-- Author: Tráº§n VÄƒn TÃ¹ng (DE180109)
+- Author: Trần Văn Tùng (DE180109)
 - AI Tool: Antigravity
-- Purpose: HoÃ n thiá»‡n chá»©c nÄƒng Cáº£nh bÃ¡o tá»“n kho vÃ  gá»­i Email cho nhÃ¢n viÃªn phá»¥ trÃ¡ch.
+- Purpose: Hoàn thiện chức năng Cảnh báo tồn kho và gửi Email cho nhân viên phụ trách.
 - Prompt Reference: PROMPTS.md#prompt-20
-- AI Output Summary: Gá»£i Ã½ kiá»ƒm tra chuá»—i lá»—i SMTP, cáº¥u hÃ¬nh Gmail App Password, sá»­a service gá»­i email tháº­t, thÃªm dá»¯ liá»‡u test tá»“n kho tháº¥p, cáº£i thiá»‡n luá»“ng quÃ©t thá»§ cÃ´ng vÃ  quÃ©t ná»n, Ä‘á»“ng thá»i lÃ m rÃµ tráº¡ng thÃ¡i gá»­i email trÃªn UI Stock Alerts.
-- Human Decision: NhÃ³m Ã¡p dá»¥ng luá»“ng gá»­i email tháº­t báº±ng SMTP Gmail, Æ°u tiÃªn gá»­i vá» email cá»§a ngÆ°á»i Ä‘ang Ä‘Äƒng nháº­p thÃ´ng qua JWT claim, náº¿u khÃ´ng cÃ³ email thÃ¬ fallback vá» `tungtvde180109@fpt.edu.vn`. NÃºt QuÃ©t ngay Ä‘Æ°á»£c dÃ¹ng cho test thá»§ cÃ´ng nÃªn cho phÃ©p gá»­i láº¡i email, cÃ²n worker ná»n váº«n giá»¯ debounce Ä‘á»ƒ trÃ¡nh spam.
+- AI Output Summary: Gợi ý kiểm tra chuỗi lỗi SMTP, cấu hình Gmail App Password, sửa service gửi email thật, thêm dữ liệu test tồn kho thấp, cải thiện luồng quét thủ công và quét nền, đồng thời làm rõ trạng thái gửi email trên UI Stock Alerts.
+- Human Decision: Nhóm áp dụng luồng gửi email thật bằng SMTP Gmail, ưu tiên gửi về email của người đang đăng nhập thông qua JWT claim, nếu không có email thì fallback về `tungtvde180109@fpt.edu.vn`. Nút Quét ngay được dùng cho test thủ công nên cho phép gửi lại email, còn worker nền vẫn giữ debounce để tránh spam.
 - Applied To: BACKEND/appsettings.json, BACKEND/Services/EmailService.cs, BACKEND/Services/StockAlertService.cs, BACKEND/Services/IStockAlertService.cs, BACKEND/Services/StockAlertWorker.cs, BACKEND/Controllers/StockAlertsController.cs, FRONTEND/src/features/warehouse/StockAlerts.tsx, insert-stock-alert-email-test.sql
-- Verification: Test SMTP gá»­i thÃ nh cÃ´ng báº±ng Gmail App Password; gá»i `/api/stockalerts/scan?force=true` tráº£ vá» `ÄÃ£ gá»­i 3 email`; `dotnet build` backend thÃ nh cÃ´ng 0 warning/0 error; `npm run build` frontend thÃ nh cÃ´ng.
+- Verification: Test SMTP gửi thành công bằng Gmail App Password; gọi `/api/stockalerts/scan?force=true` trả về `Đã gửi 3 email`; `dotnet build` backend thành công 0 warning/0 error; `npm run build` frontend thành công.
 ## Log #16
 - Date: 2026-07-08
-- Author: VÅ© LÃª Duy (DE180104)
+- Author: Vũ Lê Duy (DE180104)
 - AI Tool: Antigravity
-- Purpose: Kháº¯c phá»¥c lá»—i 500 khi Entity Framework Core khÃ´ng dá»‹ch Ä‘Æ°á»£c hÃ m C# sang SQL trong tÃ­nh nÄƒng ALPR Gate In/Out.
+- Purpose: Khắc phục lỗi 500 khi Entity Framework Core không dịch được hàm C# sang SQL trong tính năng ALPR Gate In/Out.
 - Prompt Reference: PROMPTS.md#prompt-21
-- AI Output Summary: PhÃ¡t hiá»‡n hÃ m `NormalizePlate()` gÃ¢y lá»—i `IQueryable` translation, gá»£i Ã½ dÃ¹ng `.Replace()` vÃ  `.ToUpper()` lá»“ng nhau Ä‘á»ƒ xá»­ lÃ½ chuá»—i trÃªn database server.
-- Human Decision: XÃ¡c nháº­n thay Ä‘á»•i Ä‘Ãºng Ä‘áº¯n, Ã¡p dá»¥ng ngay vÃ o backend. NgoÃ i ra quyáº¿t Ä‘á»‹nh lÃ m Modal Pop-up Ä‘á» chÃ³t cho dá»… nhÃ¬n thay vÃ¬ in lá»—i 404 xuá»‘ng Console.
+- AI Output Summary: Phát hiện hàm `NormalizePlate()` gây lỗi `IQueryable` translation, gợi ý dùng `.Replace()` và `.ToUpper()` lồng nhau để xử lý chuỗi trên database server.
+- Human Decision: Xác nhận thay đổi đúng đắn, áp dụng ngay vào backend. Ngoài ra quyết định làm Modal Pop-up đỏ chót cho dễ nhìn thay vì in lỗi 404 xuống Console.
 - Applied To: BACKEND/Services/GateService.cs, FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx
-- Verification: ÄÃ£ cháº¡y thá»­ AI Camera quÃ©t biá»ƒn sá»‘ trÃªn trÃ¬nh duyá»‡t. Backend khÃ´ng cÃ²n vÄƒng lá»—i HTTP 500, Frontend hiá»‡n Ä‘Ãºng cáº£nh bÃ¡o UI Ä‘á».
+- Verification: Đã chạy thử AI Camera quét biển số trên trình duyệt. Backend không còn văng lỗi HTTP 500, Frontend hiện đúng cảnh báo UI đỏ.
 
 --
 
-## 5. Báº£ng tá»•ng há»£p má»©c Ä‘á»™ sá»­ dá»¥ng AI
+## 5. Bảng tổng hợp mức độ sử dụng AI
 
-ÄÃ¡nh dáº¥u má»©c Ä‘á»™ AI há»— trá»£ á»Ÿ tá»«ng háº¡ng má»¥c.
+Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
 
-| Háº¡ng má»¥c | KhÃ´ng dÃ¹ng AI | AI há»— trá»£ Ã­t | AI há»— trá»£ nhiá»u | AI sinh chÃ­nh | Ghi chÃº |
+| Hạng mục | Không dùng AI | AI hỗ trợ ít | AI hỗ trợ nhiều | AI sinh chính | Ghi chú |
 |---|:---:|:---:|:---:|:---:|---|
-| PhÃ¢n tÃ­ch yÃªu cáº§u |  | [x] |  |  |  |
-| Viáº¿t user story/use case | [x] |  |  |  |  |
-| Thiáº¿t káº¿ database | [x] |  |  |  |  |
-| Thiáº¿t káº¿ kiáº¿n trÃºc há»‡ thá»‘ng | [x] |  |  |  |  |
-| Thiáº¿t káº¿ giao diá»‡n |  | [x] |  |  |  |
+| Phân tích yêu cầu |  | [x] |  |  |  |
+| Viết user story/use case | [x] |  |  |  |  |
+| Thiết kế database | [x] |  |  |  |  |
+| Thiết kế kiến trúc hệ thống | [x] |  |  |  |  |
+| Thiết kế giao diện |  | [x] |  |  |  |
 | Code frontend |  | [x] |  |  |  |
 | Code backend | [x] |  |  |  |  |
 | Debug lá»—i |  | [x] |  |  |  |
-| Viáº¿t test case | [x] |  |  |  |  |
-| Kiá»ƒm thá»­ sáº£n pháº©m | [x] |  |  |  |  |
-| Tá»‘i Æ°u code |  | [x] |  |  |  |
-| Viáº¿t bÃ¡o cÃ¡o |  | [x] |  |  |  |
-| LÃ m slide thuyáº¿t trÃ¬nh | [x] |  |  |  |  |
+| Viết test case | [x] |  |  |  |  |
+| Kiểm thử sản phẩm | [x] |  |  |  |  |
+| Tối ưu code |  | [x] |  |  |  |
+| Viết báo cáo |  | [x] |  |  |  |
+| Làm slide thuyết trình | [x] |  |  |  |  |
 
 ---
 
-## 6. CÃ¡c lá»—i hoáº·c háº¡n cháº¿ tá»« AI
+## 6. Các lỗi hoặc hạn chế từ AI
 
-Ghi láº¡i cÃ¡c trÆ°á»ng há»£p AI tráº£ lá»i sai, thiáº¿u, chÆ°a phÃ¹ há»£p hoáº·c sinh code khÃ´ng cháº¡y.
+Ghi lại các trường hợp AI trả lời sai, thiếu, chưa phù hợp hoặc sinh code không chạy.
 
-| STT | Lá»—i/háº¡n cháº¿ tá»« AI | CÃ¡ch phÃ¡t hiá»‡n | CÃ¡ch xá»­ lÃ½/cáº£i tiáº¿n |
+| STT | Lỗi/hạn chế từ AI | Cách phát hiện | Cách xử lý/cải tiến |
 |---:|---|---|---|
-| 1 | Sá»­ dá»¥ng class CSS Tailwind cÅ© khÃ´ng cÃ²n há»— trá»£ | TrÃ¬nh duyá»‡t khÃ´ng nháº­n diá»‡n Ä‘Æ°á»£c style vÃ  hiá»ƒn thá»‹ lá»‡ch | Tra cá»©u láº¡i tÃ i liá»‡u chÃ­nh thá»©c cá»§a Tailwind Ä‘á»ƒ cáº­p nháº­t láº¡i class Ä‘Ãºng |
-| 2 | Code gá»£i Ã½ thiáº¿u import thÆ° viá»‡n Router | ChÆ°Æ¡ng trÃ¬nh bÃ¡o lá»—i compile thiáº¿u Ä‘á»‹nh nghÄ©a | Tá»± bá»• sung thá»§ cÃ´ng dÃ²ng import á»Ÿ Ä‘áº§u file |
+| 1 | Sử dụng class CSS Tailwind cũ không còn hỗ trợ | Trình duyệt không nhận diện được style và hiển thị lệch | Tra cứu lại tài liệu chính thức của Tailwind để cập nhật lại class đúng |
+| 2 | Code gợi ý thiếu import thư viện Router | Chương trình báo lỗi compile thiếu định nghĩa | Tự bổ sung thủ công dòng import ở đầu file |
 
 ---
 
 ## Log #19
 - Date: 2026-07-09
-- Author: VÅ© LÃª Duy (DE180104)
+- Author: Vũ Lê Duy (DE180104)
 - AI Tool: ChatGPT/Codex
-- Purpose: Tham kháº£o hÆ°á»›ng triá»ƒn khai nghiá»‡p vá»¥ quáº£n lÃ½ há»“ sÆ¡ phÆ°Æ¡ng tiá»‡n cho Dispatcher
+- Purpose: Tham khảo hướng triển khai nghiệp vụ quản lý hồ sơ phương tiện cho Dispatcher
 - Prompt Reference: PROMPTS.md#prompt-22
-- AI Output Summary: AI gá»£i Ã½ cÃ¡c Ä‘iá»ƒm cáº§n kiá»ƒm tra á»Ÿ backend/frontend nhÆ° DTO phÆ°Æ¡ng tiá»‡n, service Ä‘áº·t lá»‹ch, service check-in cá»•ng vÃ  UI danh sÃ¡ch phÆ°Æ¡ng tiá»‡n.
-- Human Decision: Sinh viÃªn tá»± xÃ¡c Ä‘á»‹nh láº¡i yÃªu cáº§u nghiá»‡p vá»¥, chá»n cÃ¡ch giá»¯ dá»¯ liá»‡u Ä‘Äƒng kiá»ƒm/báº£o trÃ¬ trong báº£ng Vehicle, khÃ´ng táº¡o báº£ng má»›i; tá»± rÃ  soÃ¡t luá»“ng Ä‘áº·t lá»‹ch vÃ  check-in Ä‘á»ƒ Ä‘áº·t rule Ä‘Ãºng vá»‹ trÃ­.
+- AI Output Summary: AI gợi ý các điểm cần kiểm tra ở backend/frontend như DTO phương tiện, service đặt lịch, service check-in cổng và UI danh sách phương tiện.
+- Human Decision: Sinh viên tự xác định lại yêu cầu nghiệp vụ, chọn cách giữ dữ liệu đăng kiểm/bảo trì trong bảng Vehicle, không tạo bảng mới; tự rà soát luồng đặt lịch và check-in để đặt rule đúng vị trí.
 - Applied To: BACKEND/Services/BookingService.cs, BACKEND/Services/GateService.cs, FRONTEND/src/features/dispatcher/components/tabs/VehiclesTab.tsx
-- Verification: Cháº¡y `dotnet build`, `npm run build`, cháº¡y backend/frontend trÃªn localhost vÃ  kiá»ƒm tra thá»§ cÃ´ng mÃ n Dispatcher.
+- Verification: Chạy `dotnet build`, `npm run build`, chạy backend/frontend trên localhost và kiểm tra thủ công màn Dispatcher.
 
 ## Log #20
 - Date: 2026-07-09
-- Author: VÅ© LÃª Duy (DE180104)
+- Author: Vũ Lê Duy (DE180104)
 - AI Tool: ChatGPT/Codex
-- Purpose: Tham kháº£o cáº£i thiá»‡n UI/UX vÃ  sá»­a lá»—i cuá»™n danh sÃ¡ch phÆ°Æ¡ng tiá»‡n
+- Purpose: Tham khảo cải thiện UI/UX và sửa lỗi cuộn danh sách phương tiện
 - Prompt Reference: PROMPTS.md#prompt-23
-- AI Output Summary: AI gá»£i Ã½ nguyÃªn nhÃ¢n layout bá»‹ láº¥p do container cha `overflow-hidden`, vÃ¹ng báº£ng dÃ¹ng chiá»u cao chÆ°a Ä‘Ãºng vÃ  pháº§n KPI/filter chiáº¿m nhiá»u viewport.
-- Human Decision: Sinh viÃªn tá»± kiá»ƒm tra láº¡i giao diá»‡n thá»±c táº¿, quyáº¿t Ä‘á»‹nh cho tab Vehicles cÃ³ scroll dá»c riÃªng, giá»¯ báº£ng trong panel riÃªng vÃ  chá»‰ dÃ¹ng AI nhÆ° cÃ´ng cá»¥ gá»£i Ã½ cÃ¡ch debug layout.
+- AI Output Summary: AI gợi ý nguyên nhân layout bị lấp do container cha `overflow-hidden`, vùng bảng dùng chiều cao chưa đúng và phần KPI/filter chiếm nhiều viewport.
+- Human Decision: Sinh viên tự kiểm tra lại giao diện thực tế, quyết định cho tab Vehicles có scroll dọc riêng, giữ bảng trong panel riêng và chỉ dùng AI như công cụ gợi ý cách debug layout.
 - Applied To: FRONTEND/src/features/dispatcher/components/tabs/VehiclesTab.tsx, FRONTEND/src/index.css
-- Verification: Cháº¡y `npm run build`, má»Ÿ `http://127.0.0.1:3000/dispatcher`, kiá»ƒm tra kÃ©o xuá»‘ng xem danh sÃ¡ch phÆ°Æ¡ng tiá»‡n.
+- Verification: Chạy `npm run build`, mở `http://127.0.0.1:3000/dispatcher`, kiểm tra kéo xuống xem danh sách phương tiện.
 
 ---
 
-## 7. Kiá»ƒm chá»©ng káº¿t quáº£ AI
+## 7. Kiểm chứng kết quả AI
 
-### Ná»™i dung kiá»ƒm chá»©ng
+### Nội dung kiểm chứng
 
 ```text
-NhÃ³m cháº¡y thá»­ chÆ°Æ¡ng trÃ¬nh trÃªn mÃ´i trÆ°á»ng phÃ¡t triá»ƒn cá»¥c bá»™ báº±ng lá»‡nh npm run dev. Sau Ä‘Ã³, cÃ¡c thÃ nh viÃªn trá»±c tiáº¿p nháº¥p chuá»™t tÆ°Æ¡ng tÃ¡c trÃªn cÃ¡c tab Ä‘á»ƒ kiá»ƒm tra hiá»ƒn thá»‹ giao diá»‡n, kiá»ƒm tra xem cÃ³ phÃ¡t sinh lá»—i Ä‘á» trÃªn Console cá»§a trÃ¬nh duyá»‡t hay khÃ´ng.
+Nhóm chạy thử chương trình trên môi trường phát triển cục bộ bằng lệnh npm run dev. Sau đó, các thành viên trực tiếp nhấp chuột tương tác trên các tab để kiểm tra hiển thị giao diện, kiểm tra xem có phát sinh lỗi đỏ trên Console của trình duyệt hay không.
 ```
 
 ---
 
-## 8. ÄÃ³ng gÃ³p cÃ¡ nhÃ¢n hoáº·c Ä‘Ã³ng gÃ³p nhÃ³m
+## 8. Đóng góp cá nhân hoặc đóng góp nhóm
 
-### 8.2. Äá»‘i vá»›i bÃ i nhÃ³m
+### 8.2. Đối với bài nhóm
 
-| ThÃ nh viÃªn | MSSV | Nhiá»‡m vá»¥ chÃ­nh | CÃ³ sá»­ dá»¥ng AI khÃ´ng? | Minh chá»©ng Ä‘Ã³ng gÃ³p |
+| Thành viên | MSSV | Nhiệm vụ chính | Có sử dụng AI không? | Minh chứng đóng góp |
 |---|---|---|---|---|
-| VÅ© LÃª Duy | DE180104 | Cáº¥u trÃºc dá»± Ã¡n, Ä‘iá»u hÆ°á»›ng Router chÃ­nh | CÃ³ | [App.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
-| LÃª Quá»‘c HÃ¹ng | DE180096 | Thiáº¿t láº­p Driver UI, Thá»±c hiá»‡n UC004, UC015, UC018, UC020, UC021 (Full-stack) vÃ  tá»‘i Æ°u Ä‘á»™ tÆ°Æ¡ng pháº£n giao diá»‡n Dispatcher Dashboard | CÃ³ | [Orders.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx), [VehicleTrackingDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx), [GateCheckoutDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx), [VehiclesTab.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/components/tabs/VehiclesTab.tsx) |
-| Tráº§n VÄƒn TÃ¹ng | DE180109 | XÃ¢y dá»±ng toÃ n bá»™ giao diá»‡n khÃ¡ch hÃ ng (Customer), há»‡ thá»‘ng xÃ¡c thá»±c (Auth), trung tÃ¢m há»— trá»£ vÃ  voucher | CÃ³ | [AuthPage.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
+| Vũ Lê Duy | DE180104 | Cấu trúc dự án, điều hướng Router chính | Có | [App.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/App.tsx) |
+| Lê Quốc Hùng | DE180096 | Thiết lập Driver UI, Thực hiện UC004, UC015, UC018, UC020, UC021 (Full-stack) và tối ưu độ tương phản giao diện Dispatcher Dashboard | Có | [Orders.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/admin/Orders.tsx), [VehicleTrackingDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/pages/VehicleTrackingDashboard.tsx), [GateCheckoutDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/warehouse/GateCheckoutDashboard.tsx), [VehiclesTab.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/dispatcher/components/tabs/VehiclesTab.tsx) |
+| Trần Văn Tùng | DE180109 | Xây dựng toàn bộ giao diện khách hàng (Customer), hệ thống xác thực (Auth), trung tâm hỗ trợ và voucher | Có | [AuthPage.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/auth/AuthPage.tsx), [CustomerDashboard.tsx](prn232-su26-ai-audit-project-prn232_se18d05_group-06/FRONTEND/src/features/customer/CustomerDashboard.tsx) |
 
 ---
 
-## 9. Reflection cuá»‘i bÃ i
+## 9. Reflection cuối bài
 
-### 9.1. AI Ä‘Ã£ há»— trá»£ em/nhÃ³m á»Ÿ Ä‘iá»ƒm nÃ o?
+### 9.1. AI đã hỗ trợ em/nhóm ở điểm nào?
 
 ```text
-AI há»— trá»£ nhÃ³m tÃ¬m hiá»ƒu nhanh cÃ¡c class CSS Tailwind Ä‘á»ƒ dá»±ng giao diá»‡n tÄ©nh vÃ  thiáº¿t láº­p khung layout tá»•ng thá»ƒ.
+AI hỗ trợ nhóm tìm hiểu nhanh các class CSS Tailwind để dựng giao diện tĩnh và thiết lập khung layout tổng thể.
 ```
 
-### 9.2. Pháº§n nÃ o em/nhÃ³m khÃ´ng sá»­ dá»¥ng theo gá»£i Ã½ cá»§a AI? VÃ¬ sao?
+### 9.2. Phần nào em/nhóm không sử dụng theo gợi ý của AI? Vì sao?
 
 ```text
-NhÃ³m khÃ´ng copy cÃ¡c Ä‘oáº¡n code logic Ä‘iá»u phá»‘i phá»©c táº¡p cá»§a AI do khÃ´ng phÃ¹ há»£p vá»›i thiáº¿t káº¿ tá»‘i giáº£n hiá»‡n táº¡i vÃ  gÃ¢y khÃ³ khÄƒn khi tá»± debug lá»—i.
+Nhóm không copy các đoạn code logic điều phối phức tạp của AI do không phù hợp với thiết kế tối giản hiện tại và gây khó khăn khi tự debug lỗi.
 ```
 
-### 9.3. Em/nhÃ³m Ä‘Ã£ kiá»ƒm tra tÃ­nh Ä‘Ãºng Ä‘áº¯n cá»§a káº¿t quáº£ AI nhÆ° tháº¿ nÃ o?
+### 9.3. Em/nhóm đã kiểm tra tính đúng đắn của kết quả AI như thế nào?
 
 ```text
-Cháº¡y dá»± Ã¡n trÃªn localhost vÃ  trá»±c tiáº¿p nháº¥p chuá»™t thá»­ nghiá»‡m chá»©c nÄƒng trÃªn mÃ n hÃ¬nh.
+Chạy dự án trên localhost và trực tiếp nhấp chuột thử nghiệm chức năng trên màn hình.
 ```
 
-### 9.4. Náº¿u khÃ´ng cÃ³ AI, pháº§n nÃ o sáº½ khÃ³ khÄƒn nháº¥t?
+### 9.4. Nếu không có AI, phần nào sẽ khó khăn nhất?
 
 ```text
-Viá»‡c tra cá»©u cÃ¡c class Tailwind cá»¥ thá»ƒ Ä‘á»ƒ lÃ m giao diá»‡n sáº½ máº¥t nhiá»u thá»i gian hÆ¡n.
+Việc tra cứu các class Tailwind cụ thể để làm giao diện sẽ mất nhiều thời gian hơn.
 ```
 
-### 9.5. Sau bÃ i táº­p/project nÃ y, em/nhÃ³m há»c Ä‘Æ°á»£c gÃ¬ vá» mÃ´n há»c?
+### 9.5. Sau bài tập/project này, em/nhóm học được gì về môn học?
 
 ```text
-Hiá»ƒu vá» cÃ¡ch bá»‘ trÃ­ luá»“ng Ä‘iá»u hÆ°á»›ng cá»§a má»™t trang web quáº£n trá»‹ vÃ  cÃ¡ch lÃ m viá»‡c nhÃ³m trÃªn git.
+Hiểu về cách bố trí luồng điều hướng của một trang web quản trị và cách làm việc nhóm trên git.
 ```
 
-### 9.6. Sau bÃ i táº­p/project nÃ y, em/nhÃ³m há»c Ä‘Æ°á»£c gÃ¬ vá» cÃ¡ch sá»­ dá»¥ng AI cÃ³ trÃ¡ch nhiá»‡m?
+### 9.6. Sau bài tập/project này, em/nhóm học được gì về cách sử dụng AI có trách nhiệm?
 
 ```text
-Nháº­n ra AI chá»‰ lÃ  trá»£ lÃ½ tham kháº£o, má»i Ä‘oáº¡n code do AI gá»£i Ã½ cáº§n Ä‘Æ°á»£c hiá»ƒu rÃµ báº£n cháº¥t trÆ°á»›c khi Ä‘Æ°a vÃ o dá»± Ã¡n Ä‘á»ƒ trÃ¡nh phÃ¡t sinh lá»—i há»‡ thá»‘ng.
+Nhận ra AI chỉ là trợ lý tham khảo, mọi đoạn code do AI gợi ý cần được hiểu rõ bản chất trước khi đưa vào dự án để tránh phát sinh lỗi hệ thống.
 ```
 
 ---
 
-## 10. Cam káº¿t há»c thuáº­t
+## 10. Cam kết học thuật
 
-Sinh viÃªn/nhÃ³m cam káº¿t ráº±ng:
+Sinh viên/nhóm cam kết rằng:
 
-- Ná»™i dung AI há»— trá»£ Ä‘Ã£ Ä‘Æ°á»£c ghi nháº­n trung thá»±c.
-- KhÃ´ng ná»™p nguyÃªn vÄƒn káº¿t quáº£ AI mÃ  khÃ´ng kiá»ƒm tra.
-- CÃ³ kháº£ nÄƒng giáº£i thÃ­ch cÃ¡c pháº§n Ä‘Ã£ ná»™p.
-- Chá»‹u trÃ¡ch nhiá»‡m vá» tÃ­nh Ä‘Ãºng Ä‘áº¯n cá»§a sáº£n pháº©m cuá»‘i cÃ¹ng.
-- Hiá»ƒu ráº±ng viá»‡c sá»­ dá»¥ng AI khÃ´ng khai bÃ¡o cÃ³ thá»ƒ áº£nh hÆ°á»Ÿng Ä‘áº¿n káº¿t quáº£ Ä‘Ã¡nh giÃ¡.
+- Nội dung AI hỗ trợ đã được ghi nhận trung thực.
+- Không nộp nguyên văn kết quả AI mà không kiểm tra.
+- Có khả năng giải thích các phần đã nộp.
+- Chịu trách nhiệm về tính đúng đắn của sản phẩm cuối cùng.
+- Hiểu rằng việc sử dụng AI không khai báo có thể ảnh hưởng đến kết quả đánh giá.
 
-| Äáº¡i diá»‡n sinh viÃªn/nhÃ³m | NgÃ y xÃ¡c nháº­n |
+| Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-| NhÃ³m trÆ°á»Ÿng | 21/06/2026 |
+| Nhóm trưởng | 21/06/2026 |
 
 ---
 
@@ -415,7 +415,7 @@ Sinh viÃªn/nhÃ³m cam káº¿t ráº±ng:
 - Purpose: Tham khao tich hop Ban do theo doi don hang (Order Tracking Map) voi thu vien Goong Map.
 - Prompt Reference: PROMPTS.md#prompt-27
 - AI Output Summary: AI ho tro goi y cu phap su dung `rsapi.goong.io/Direction` va cach khoi tao Marker/Polyline bang Mapbox GL JS.
-- Human Decision: Sinh vien da tu doc hieu va chi su dung AI nhu tai lieu tham khao. Toan bo logic ve % tiáº¿n trÃ¬nh (progress), cat duong di (slice route) va thiet ke Marker xe tai (Truck SVG) deu do nhom tu quyet dinh va trien khai. Xem chi tiet tai folder `docs/order_tracking_ai_reference`.
+- Human Decision: Sinh vien da tu doc hieu va chi su dung AI nhu tai lieu tham khao. Toan bo logic ve % tiến trình (progress), cat duong di (slice route) va thiet ke Marker xe tai (Truck SVG) deu do nhom tu quyet dinh va trien khai. Xem chi tiet tai folder `docs/order_tracking_ai_reference`.
 - Applied To: FRONTEND/src/features/customer/OrderTracking.tsx
 - Verification: Test giao dien tren trinh duyet thanh cong, xe tai va lo trinh the hien dung % mapping voi timeline don hang.
 
