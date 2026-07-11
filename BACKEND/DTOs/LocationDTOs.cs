@@ -39,5 +39,7 @@ namespace BACKEND.DTOs
         public decimal? TotalWeightKg { get; set; }
         public decimal? TotalCBM { get; set; }
         public int TotalPallets { get; set; }
+        public string? DeliverySpeed { get; set; }
+        public decimal? EstimatedCost { get; set; }
     }
 }

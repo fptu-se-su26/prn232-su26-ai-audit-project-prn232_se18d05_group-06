@@ -50,7 +50,7 @@ interface BookingResponseDto {
   qrCodeBase64: string;
 }
 
-const API_BASE_URL = 'http://localhost:5184/api'; // Use active ASP.NET Core port 5184
+const API_BASE_URL = 'http://localhost:5200/api';
 
 const SlotBooking: React.FC = () => {
   const navigate = useNavigate();
@@ -108,7 +108,7 @@ const SlotBooking: React.FC = () => {
         }
       } catch (err: any) {
         console.error('Error fetching warehouses:', err);
-        setErrorMessage('Không thể kết nối đến máy chủ. Vui lòng kiểm tra API backend đang chạy ở cổng 5000.');
+        setErrorMessage('Không thể kết nối đến máy chủ. Vui lòng kiểm tra API backend đang chạy ở cổng 5200.');
       } finally {
         setLoadingWarehouses(false);
       }

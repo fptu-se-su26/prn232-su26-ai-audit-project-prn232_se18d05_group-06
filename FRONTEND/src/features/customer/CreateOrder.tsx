@@ -54,7 +54,8 @@ const CreateOrder: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       const payload = {
-        ServiceType: selectedSpeed,
+        WarehouseID: 1,
+        ServiceType: serviceType,
         PickupAddress: pickupAddress,
         PickupLat: pickupLat,
         PickupLng: pickupLng,
@@ -62,7 +63,9 @@ const CreateOrder: React.FC = () => {
         DeliveryLat: deliveryLat,
         DeliveryLng: deliveryLng,
         TotalWeightKg: weightKg,
-        TotalCBM: cbm
+        TotalCBM: cbm,
+        DeliverySpeed: selectedSpeed,
+        EstimatedCost: price
       };
 
       const response = await fetch('http://localhost:5200/api/customer/orders', {

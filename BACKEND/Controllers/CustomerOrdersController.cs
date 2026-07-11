@@ -84,15 +84,26 @@ namespace BACKEND.Controllers
                 return Unauthorized(new { Message = "Missing or invalid user id claim." });
             }
 
-            // Find customer ID for this user
-            var customer = _context.Customers.FirstOrDefault(c => c.UserId == userId.Value);
-            if (customer == null)
+            Customer customer;
+            try
             {
-                return BadRequest(new { Message = "User is not associated with any customer." });
+                customer = await EnsureCustomerForUserAsync(userId.Value);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
             }
 
-            // Validations based on requirement
-            if (request.ServiceType == "TRANSPORT")
+            var serviceType = string.IsNullOrWhiteSpace(request.ServiceType)
+                ? "TRANSPORT"
+                : request.ServiceType.Trim().ToUpperInvariant();
+
+            if (serviceType == "STANDARD" || serviceType == "EXPRESS")
+            {
+                serviceType = "TRANSPORT";
+            }
+
+            if (serviceType == "TRANSPORT")
             {
                 if (string.IsNullOrWhiteSpace(request.PickupAddress))
                     return BadRequest(new { Message = "Vui lòng nhập điểm lấy hàng." });
@@ -100,12 +111,27 @@ namespace BACKEND.Controllers
                     return BadRequest(new { Message = "Vui lòng nhập điểm giao hàng." });
             }
 
+            var warehouseId = request.WarehouseID;
+            var warehouseExists = warehouseId > 0 && await _context.Warehouses.AnyAsync(w => w.WarehouseId == warehouseId);
+            if (!warehouseExists)
+            {
+                warehouseId = await _context.Warehouses
+                    .OrderBy(w => w.WarehouseId)
+                    .Select(w => w.WarehouseId)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (warehouseId <= 0)
+            {
+                return BadRequest(new { Message = "Chưa có kho trong hệ thống để tạo đơn hàng." });
+            }
+
             var order = new BACKEND.Models.ServiceOrder
             {
                 OrderCode = "SO" + DateTime.Now.ToString("yyyyMMddHHmmss"),
                 CustomerId = customer.CustomerId,
-                WarehouseId = request.WarehouseID,
-                ServiceType = request.ServiceType,
+                WarehouseId = warehouseId,
+                ServiceType = serviceType,
                 PickupAddress = request.PickupAddress,
                 PickupLat = request.PickupLat,
                 PickupLng = request.PickupLng,
@@ -115,6 +141,8 @@ namespace BACKEND.Controllers
                 TotalWeightKg = request.TotalWeightKg,
                 TotalCbm = request.TotalCBM,
                 TotalPallets = request.TotalPallets,
+                EstimatedCost = request.EstimatedCost,
+                FinalCost = request.EstimatedCost,
                 Status = "DRAFT",
                 CreatedBy = userId.Value,
                 CreatedAt = DateTime.Now
@@ -177,6 +205,52 @@ namespace BACKEND.Controllers
             return int.TryParse(raw, out var userId) ? userId : null;
         }
 
+        private async Task<Customer> EnsureCustomerForUserAsync(int userId)
+        {
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.UserId == userId && c.IsActive != false);
+
+            if (customer != null)
+            {
+                return customer;
+            }
+
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.UserId == userId && u.IsActive != false);
+
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("Current user is not active.");
+            }
+
+            var isCustomerRole = string.Equals(user.Role?.RoleCode, "CUSTOMER", StringComparison.OrdinalIgnoreCase)
+                || user.RoleId == 4;
+
+            if (!isCustomerRole)
+            {
+                throw new UnauthorizedAccessException("Current user is not linked to a customer role.");
+            }
+
+            customer = new Customer
+            {
+                CustomerCode = $"CUST{user.UserId:D8}",
+                CompanyName = string.IsNullOrWhiteSpace(user.FullName) ? user.Username : user.FullName,
+                ContactName = user.FullName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Tier = "BRONZE",
+                TotalOrders12M = 0,
+                UserId = user.UserId,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
+            return customer;
+        }
         [HttpPost("{orderId:int}/feedback")]
         public async Task<IActionResult> SubmitFeedback(int orderId, [FromBody] SubmitFeedbackDto request)
         {
