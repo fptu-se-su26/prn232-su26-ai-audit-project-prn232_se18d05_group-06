@@ -15,18 +15,27 @@ namespace BACKEND.Services
     public class InvoiceOcrService : IInvoiceOcrService
     {
         private readonly ILogger<InvoiceOcrService> _logger;
-        private readonly string _azureEndpoint;
-        private readonly string _azureKey;
+        private readonly string? _azureEndpoint;
+        private readonly string? _azureKey;
 
         public InvoiceOcrService(ILogger<InvoiceOcrService> logger, IConfiguration config)
         {
             _logger = logger;
-            _azureEndpoint = config["AzureComputerVision:Endpoint"] ?? throw new InvalidOperationException("Missing AzureComputerVision:Endpoint");
-            _azureKey = config["AzureComputerVision:ApiKey"] ?? throw new InvalidOperationException("Missing AzureComputerVision:ApiKey");
+            _azureEndpoint = config["AzureComputerVision:Endpoint"];
+            _azureKey = config["AzureComputerVision:ApiKey"];
         }
 
         public async Task<InvoiceOcrResultDto> ScanInvoiceAsync(IFormFile imageFile)
         {
+            if (string.IsNullOrWhiteSpace(_azureEndpoint) || string.IsNullOrWhiteSpace(_azureKey))
+            {
+                return new InvoiceOcrResultDto
+                {
+                    IsInvoice = false,
+                    Message = "Chưa cấu hình Azure Computer Vision để quét hóa đơn."
+                };
+            }
+
             using var ms = new MemoryStream();
             await imageFile.CopyToAsync(ms);
             var imageBytes = ms.ToArray();

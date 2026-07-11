@@ -176,7 +176,7 @@ const AdminOrders: React.FC = () => {
 
     setOutboundLoading(true);
     try {
-      const response = await axios.post<OutboundResponse>('http://localhost:5184/api/outbound/create', {
+      const response = await axios.post<OutboundResponse>('http://localhost:5200/api/outbound/create', {
         orderId: orderId
       });
 

@@ -77,6 +77,8 @@ builder.Services.AddScoped<ICustomerOrderTrackingService, CustomerOrderTrackingS
 builder.Services.AddScoped<ILocationSuggestionService, LocationSuggestionService>();
 builder.Services.AddScoped<IPricingEngineService, PricingEngineService>();
 builder.Services.AddScoped<IInvoiceOcrService, InvoiceOcrService>();
+builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
+builder.Services.AddScoped<IDispatchOptimizationService, DispatchOptimizationService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 
 builder.Services.AddHttpClient();
