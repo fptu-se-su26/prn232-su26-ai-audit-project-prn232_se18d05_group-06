@@ -6,7 +6,7 @@
 |---|---|
 | Môn học |Building Cross-Platform Back-End Application With .NET  |
 | Mã môn học | PRN232 |
-| Lớp |	SE18D05  |
+| Lá»›p |	SE18D05  |
 | Học kỳ | 8 |
 | Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh  |
 | Tên sinh viên / Nhóm | Nhóm 6 |
@@ -296,7 +296,7 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 | Thiết kế giao diện |  | [x] |  |  |  |
 | Code frontend |  | [x] |  |  |  |
 | Code backend | [x] |  |  |  |  |
-| Debug lỗi |  | [x] |  |  |  |
+| Debug lá»—i |  | [x] |  |  |  |
 | Viết test case | [x] |  |  |  |  |
 | Kiểm thử sản phẩm | [x] |  |  |  |  |
 | Tối ưu code |  | [x] |  |  |  |
@@ -495,3 +495,6 @@ Sinh viên/nhóm cam kết rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 21/06/2026 |
+
+
+

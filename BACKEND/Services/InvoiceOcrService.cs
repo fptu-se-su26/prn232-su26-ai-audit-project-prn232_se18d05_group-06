@@ -21,8 +21,14 @@ namespace BACKEND.Services
         public InvoiceOcrService(ILogger<InvoiceOcrService> logger, IConfiguration config)
         {
             _logger = logger;
-            _azureEndpoint = config["AzureComputerVision:Endpoint"];
-            _azureKey = config["AzureComputerVision:ApiKey"];
+            _azureEndpoint = config["AzureComputerVision:Endpoint"]
+                ?? config["AzureVision:Endpoint"]
+                ?? throw new InvalidOperationException("Missing AzureComputerVision:Endpoint or AzureVision:Endpoint");
+            _azureKey = config["AzureComputerVision:ApiKey"]
+                ?? config["AzureComputerVision:Key"]
+                ?? config["AzureVision:ApiKey"]
+                ?? config["AzureVision:Key"]
+                ?? throw new InvalidOperationException("Missing AzureComputerVision:ApiKey or AzureVision:Key");
         }
 
         public async Task<InvoiceOcrResultDto> ScanInvoiceAsync(IFormFile imageFile)
