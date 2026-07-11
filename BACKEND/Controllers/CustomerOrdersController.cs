@@ -4,6 +4,7 @@ using BACKEND.DTOs;
 using BACKEND.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BACKEND.Controllers
 {
@@ -82,15 +83,15 @@ namespace BACKEND.Controllers
                 return Unauthorized(new { Message = "Missing or invalid user id claim." });
             }
 
-            // Find customer ID for this user
-            var customer = _context.Customers.FirstOrDefault(c => c.UserId == userId.Value);
+            // Find or bootstrap customer profile for this user.
+            var customer = await ResolveCustomerAsync(userId.Value);
             if (customer == null)
             {
                 return BadRequest(new { Message = "User is not associated with any customer." });
             }
 
             // Validations based on requirement
-            if (request.ServiceType == "TRANSPORT")
+            if (!string.IsNullOrWhiteSpace(request.ServiceType))
             {
                 if (string.IsNullOrWhiteSpace(request.PickupAddress))
                     return BadRequest(new { Message = "Vui lòng nhập điểm lấy hàng." });
@@ -98,11 +99,36 @@ namespace BACKEND.Controllers
                     return BadRequest(new { Message = "Vui lòng nhập điểm giao hàng." });
             }
 
+            var finalCost = request.QuotedPrice;
+            if (!finalCost.HasValue || finalCost.Value <= 0)
+            {
+                var quote = await _pricingEngine.CalculateQuoteAsync(new QuoteRequestDto
+                {
+                    PickupLat = (double)(request.PickupLat ?? 0),
+                    PickupLng = (double)(request.PickupLng ?? 0),
+                    DeliveryLat = (double)(request.DeliveryLat ?? 0),
+                    DeliveryLng = (double)(request.DeliveryLng ?? 0),
+                    WeightKg = (double)(request.TotalWeightKg ?? 1),
+                    Cbm = (double)(request.TotalCBM ?? 0),
+                    ServiceType = request.ServiceType
+                });
+
+                finalCost = string.Equals(request.ServiceType, "EXPRESS", StringComparison.OrdinalIgnoreCase)
+                    ? quote.ExpressPrice
+                    : quote.StandardPrice;
+            }
+
+            var warehouseId = await ResolveWarehouseIdAsync(request.WarehouseID);
+            if (warehouseId == null)
+            {
+                return BadRequest(new { Message = "Chưa có kho hoạt động để tạo đơn hàng. Vui lòng tạo kho trước." });
+            }
+
             var order = new BACKEND.Models.ServiceOrder
             {
                 OrderCode = "SO" + DateTime.Now.ToString("yyyyMMddHHmmss"),
                 CustomerId = customer.CustomerId,
-                WarehouseId = request.WarehouseID,
+                WarehouseId = warehouseId.Value,
                 ServiceType = request.ServiceType,
                 PickupAddress = request.PickupAddress,
                 PickupLat = request.PickupLat,
@@ -113,7 +139,9 @@ namespace BACKEND.Controllers
                 TotalWeightKg = request.TotalWeightKg,
                 TotalCbm = request.TotalCBM,
                 TotalPallets = request.TotalPallets,
-                Status = "DRAFT",
+                EstimatedCost = finalCost,
+                FinalCost = finalCost,
+                Status = "PENDING_PAYMENT",
                 CreatedBy = userId.Value,
                 CreatedAt = DateTime.Now
             };
@@ -125,7 +153,10 @@ namespace BACKEND.Controllers
             {
                 success = true,
                 message = "Tạo đơn hàng thành công.",
-                orderId = order.OrderId
+                orderId = order.OrderId,
+                orderCode = order.OrderCode,
+                amount = finalCost,
+                nextAction = "PAYMENT_REQUIRED"
             });
         }
 
@@ -173,6 +204,80 @@ namespace BACKEND.Controllers
                 ?? User.FindFirst("sub")?.Value;
 
             return int.TryParse(raw, out var userId) ? userId : null;
+        }
+
+        private async Task<int?> ResolveWarehouseIdAsync(int requestedWarehouseId)
+        {
+            if (requestedWarehouseId > 0)
+            {
+                var requestedWarehouseExists = await _context.Warehouses
+                    .AnyAsync(w => w.WarehouseId == requestedWarehouseId);
+
+                if (requestedWarehouseExists)
+                {
+                    return requestedWarehouseId;
+                }
+            }
+
+            var existingWarehouseId = await _context.Warehouses
+                .Where(w => w.IsActive != false)
+                .OrderBy(w => w.WarehouseId)
+                .Select(w => (int?)w.WarehouseId)
+                .FirstOrDefaultAsync();
+
+            if (existingWarehouseId.HasValue)
+            {
+                return existingWarehouseId;
+            }
+
+            var defaultWarehouse = new BACKEND.Models.Warehouse
+            {
+                WarehouseCode = "WH-DEMO",
+                WarehouseName = "Kho demo SmartLog",
+                Address = "TP. Hồ Chí Minh",
+                TotalCapacity = 10000,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Warehouses.Add(defaultWarehouse);
+            await _context.SaveChangesAsync();
+
+            return defaultWarehouse.WarehouseId;
+        }
+
+        private async Task<BACKEND.Models.Customer?> ResolveCustomerAsync(int userId)
+        {
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId);
+            if (customer != null)
+            {
+                return customer;
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId && u.IsActive != false);
+            if (user == null)
+            {
+                return null;
+            }
+
+            customer = new BACKEND.Models.Customer
+            {
+                CustomerCode = $"CUST{user.UserId:D8}",
+                CompanyName = string.IsNullOrWhiteSpace(user.FullName) ? user.Username : user.FullName,
+                ContactName = user.FullName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Tier = "BRONZE",
+                TotalOrders12M = 0,
+                UserId = user.UserId,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
+            return customer;
         }
     }
 }

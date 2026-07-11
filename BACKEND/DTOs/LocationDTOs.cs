@@ -39,5 +39,6 @@ namespace BACKEND.DTOs
         public decimal? TotalWeightKg { get; set; }
         public decimal? TotalCBM { get; set; }
         public int TotalPallets { get; set; }
+        public decimal? QuotedPrice { get; set; }
     }
 }

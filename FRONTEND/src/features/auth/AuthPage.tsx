@@ -5,6 +5,9 @@ import { GoogleLogin } from '@react-oauth/google';
 import api from '../../lib/api';
 
 const bgImage = "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80";
+const hasCustomGoogleClient = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+const isGoogleOriginAllowed =
+  typeof window !== 'undefined' && (window.location.origin === 'http://localhost:3000' || hasCustomGoogleClient);
 
 const getHomeRouteByRole = (role: string | number | undefined) => {
   const value = String(role ?? '').trim().toUpperCase();
@@ -268,6 +271,8 @@ export default function AuthPage() {
                     {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                   </button>
 
+                  {isGoogleOriginAllowed && (
+                    <>
                   <div className="relative py-3 flex items-center justify-center">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-slate-200/60"></div>
@@ -289,6 +294,8 @@ export default function AuthPage() {
                       />
                     </div>
                   </div>
+                    </>
+                  )}
                 </form>
               ) : (
                 <form className="space-y-4 pb-8" onSubmit={handleSubmit}>

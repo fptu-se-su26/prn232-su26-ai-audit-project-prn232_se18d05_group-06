@@ -33,6 +33,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     const [suggestions, setSuggestions] = useState<LocationSuggestionDto[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -49,19 +50,22 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         const fetchSuggestions = async () => {
             if (!value || value.length < 2) {
                 setSuggestions([]);
+                setHasSearched(false);
                 return;
             }
             setIsLoading(true);
             try {
-                // Adjust URL based on actual API configuration
                 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200/api';
                 const response = await fetch(`${API_URL}/locations/suggestions?keyword=${encodeURIComponent(value)}`);
                 const data = await response.json();
                 if (data.success) {
                     setSuggestions(data.data);
+                    setHasSearched(true);
                 }
             } catch (error) {
                 console.error("Error fetching suggestions:", error);
+                setSuggestions([]);
+                setHasSearched(true);
             } finally {
                 setIsLoading(false);
             }
@@ -124,9 +128,21 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
                 )}
             </div>
 
-            {isOpen && suggestions.length > 0 && (
+            {isOpen && (suggestions.length > 0 || isLoading || hasSearched) && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-slate-100 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                    {suggestions.map((suggestion) => (
+                    {isLoading && (
+                        <div className="px-4 py-3 text-sm font-semibold text-slate-500">
+                            Đang tìm địa chỉ...
+                        </div>
+                    )}
+
+                    {!isLoading && suggestions.length === 0 && hasSearched && (
+                        <div className="px-4 py-3 text-sm font-semibold text-slate-500">
+                            Không tìm thấy địa chỉ phù hợp. Bạn có thể nhập thủ công.
+                        </div>
+                    )}
+
+                    {!isLoading && suggestions.map((suggestion) => (
                         <div 
                             key={suggestion.placeId} 
                             className="px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-b-0"

@@ -50,7 +50,11 @@ const CreateOrder: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+      }
       const payload = {
+        WarehouseID: 1,
         ServiceType: selectedSpeed,
         PickupAddress: pickupAddress,
         PickupLat: pickupLat,
@@ -59,7 +63,9 @@ const CreateOrder: React.FC = () => {
         DeliveryLat: deliveryLat,
         DeliveryLng: deliveryLng,
         TotalWeightKg: weightKg,
-        TotalCBM: cbm
+        TotalCBM: cbm,
+        TotalPallets: 0,
+        QuotedPrice: price
       };
 
       const response = await fetch('http://localhost:5200/api/customer/orders', {
@@ -73,13 +79,45 @@ const CreateOrder: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.Message || 'Có lỗi xảy ra khi tạo đơn hàng');
+        const validationErrors = errorData.errors
+          ? Object.values(errorData.errors).flat().join(' ')
+          : '';
+        throw new Error(errorData.message || errorData.Message || validationErrors || 'Có lỗi xảy ra khi tạo đơn hàng.');
       }
 
       const data = await response.json();
 
-      // Navigate to tracking via success page
-      navigate('/order-success', { state: { orderId: data.orderId } });
+      let paymentLink = null;
+      let paymentError = '';
+
+      try {
+        const payResponse = await fetch('http://localhost:5200/api/payments/payos/create-link', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ orderId: data.orderId })
+        });
+
+        if (payResponse.ok) {
+          paymentLink = await payResponse.json();
+        } else {
+          const payErrorData = await payResponse.json().catch(() => ({}));
+          paymentError = payErrorData.message || payErrorData.Message || 'Khong the tao link thanh toan PayOS.';
+        }
+      } catch (paymentLinkError: any) {
+        paymentError = paymentLinkError.message || 'Khong the tao link thanh toan PayOS.';
+      }
+
+      navigate(`/payment?orderId=${data.orderId}`, {
+        state: {
+          orderId: data.orderId,
+          amount: data.amount,
+          paymentLink,
+          paymentError
+        }
+      });
     } catch (error: any) {
       toast.error(error.message, {
         style: {
