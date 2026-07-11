@@ -10,7 +10,7 @@ public interface IMaintenanceService
     // Maintenance Schedules
     Task<IEnumerable<MaintenanceSchedule>> GetMaintenanceSchedulesAsync(int vehicleId);
     Task<MaintenanceSchedule> CreateMaintenanceScheduleAsync(CreateMaintenanceScheduleDto dto);
-    Task<MaintenanceSchedule> UpdateMaintenanceScheduleAsync(int id, UpdateMaintenanceScheduleDto dto);
+    Task<MaintenanceSchedule?> UpdateMaintenanceScheduleAsync(int id, UpdateMaintenanceScheduleDto dto);
     Task<bool> DeleteMaintenanceScheduleAsync(int id);
 
     // Inspection Records
@@ -21,3 +21,4 @@ public interface IMaintenanceService
     Task<object> GetMaintenanceAnalyticsAsync();
     Task<object> GetMaintenancePredictionsAsync();
 }
+

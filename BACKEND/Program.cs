@@ -58,6 +58,8 @@ builder.Services.AddScoped<IOutboundService, OutboundService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<ITrackingService, TrackingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IGateService, GateService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
@@ -125,6 +127,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 app.UseCors("AllowAll");
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

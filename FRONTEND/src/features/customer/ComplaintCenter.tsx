@@ -28,7 +28,7 @@ const ComplaintCenter: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-coral-100">
+    <div className="min-h-screen bg-white font-sans light-surface selection:bg-coral-100">
       <Header />
       
       <main className="pt-32 pb-20 px-8">

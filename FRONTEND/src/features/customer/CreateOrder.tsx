@@ -17,6 +17,9 @@ const CreateOrder: React.FC = () => {
   const [distanceKm, setDistanceKm] = useState<number>(0);
   const [standardPrice, setStandardPrice] = useState<number>(0);
   const [expressPrice, setExpressPrice] = useState<number>(0);
+  const [basePrice, setBasePrice] = useState<number>(0);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [tierName, setTierName] = useState<string>('Tiêu chuẩn');
   const [standardTime, setStandardTime] = useState<string>('');
   const [expressTime, setExpressTime] = useState<string>('');
   const [selectedSpeed, setSelectedSpeed] = useState<'STANDARD' | 'EXPRESS'>('STANDARD');
@@ -123,6 +126,9 @@ const CreateOrder: React.FC = () => {
         setDistanceKm(data.distanceKm);
         setStandardPrice(data.standardPrice);
         setExpressPrice(data.expressPrice);
+        setBasePrice(data.basePrice ?? data.standardPrice ?? 0);
+        setDiscountPercent(data.discountPercent ?? 0);
+        setTierName(data.tierName ?? 'Tiêu chuẩn');
         setStandardTime(data.standardTime);
         setExpressTime(data.expressTime);
 
@@ -198,7 +204,7 @@ const CreateOrder: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans text-[#191c1e] overflow-x-hidden">
+    <div className="bg-white min-h-screen font-sans text-[#191c1e] light-surface overflow-x-hidden">
       <Header />
 
       {/* Main Content Area */}
