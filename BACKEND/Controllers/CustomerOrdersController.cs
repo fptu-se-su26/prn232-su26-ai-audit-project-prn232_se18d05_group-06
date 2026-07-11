@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using BACKEND.DTOs;
+using BACKEND.Models;
 using BACKEND.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +17,13 @@ namespace BACKEND.Controllers
         private readonly ICustomerOrderTrackingService _trackingService;
         private readonly IPricingEngineService _pricingEngine;
         private readonly IInvoiceOcrService _invoiceOcr;
-        private readonly BACKEND.Models.SmartLogAiContext _context;
+        private readonly SmartLogAiContext _context;
 
         public CustomerOrdersController(
-            ICustomerOrderTrackingService trackingService, 
-            IPricingEngineService pricingEngine, 
+            ICustomerOrderTrackingService trackingService,
+            IPricingEngineService pricingEngine,
             IInvoiceOcrService invoiceOcr,
-            BACKEND.Models.SmartLogAiContext context)
+            SmartLogAiContext context)
         {
             _trackingService = trackingService;
             _pricingEngine = pricingEngine;
@@ -87,7 +88,7 @@ namespace BACKEND.Controllers
             var customer = await ResolveCustomerAsync(userId.Value);
             if (customer == null)
             {
-                return BadRequest(new { Message = "User is not associated with any customer." });
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
             }
 
             // Validations based on requirement
@@ -188,7 +189,7 @@ namespace BACKEND.Controllers
             }
 
             var result = await _invoiceOcr.ScanInvoiceAsync(imageFile);
-            
+
             if (!result.IsInvoice)
             {
                 return BadRequest(new { Message = result.Message });

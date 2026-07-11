@@ -15,7 +15,7 @@ const SupportPage: React.FC = () => {
     ];
 
     return (
-        <div className="bg-slate-50 min-h-screen">
+        <div className="bg-white min-h-screen light-surface">
             <Header scrollY={100} />
             
             <main className="pt-32 pb-24 max-w-7xl mx-auto px-8">

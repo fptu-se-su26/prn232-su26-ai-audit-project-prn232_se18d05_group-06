@@ -15,8 +15,8 @@ namespace BACKEND.Services
     public class InvoiceOcrService : IInvoiceOcrService
     {
         private readonly ILogger<InvoiceOcrService> _logger;
-        private readonly string _azureEndpoint;
-        private readonly string _azureKey;
+        private readonly string? _azureEndpoint;
+        private readonly string? _azureKey;
 
         public InvoiceOcrService(ILogger<InvoiceOcrService> logger, IConfiguration config)
         {
@@ -33,6 +33,15 @@ namespace BACKEND.Services
 
         public async Task<InvoiceOcrResultDto> ScanInvoiceAsync(IFormFile imageFile)
         {
+            if (string.IsNullOrWhiteSpace(_azureEndpoint) || string.IsNullOrWhiteSpace(_azureKey))
+            {
+                return new InvoiceOcrResultDto
+                {
+                    IsInvoice = false,
+                    Message = "Chưa cấu hình Azure Computer Vision để quét hóa đơn."
+                };
+            }
+
             using var ms = new MemoryStream();
             await imageFile.CopyToAsync(ms);
             var imageBytes = ms.ToArray();

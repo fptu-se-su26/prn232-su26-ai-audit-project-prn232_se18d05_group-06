@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using BACKEND.Models;
 using BACKEND.Services;
+using BACKEND.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -26,9 +28,7 @@ var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnec
 
 builder.Services.AddDbContext<SmartLogAiContext>(options =>
     options.UseSqlServer(defaultConnection, sqlOptions =>
-        sqlOptions.EnableRetryOnFailure())
-    .ConfigureWarnings(warnings =>
-        warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
+        sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is missing");
@@ -58,6 +58,8 @@ builder.Services.AddScoped<IOutboundService, OutboundService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<ITrackingService, TrackingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IGateService, GateService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
@@ -66,6 +68,9 @@ builder.Services.AddScoped<IS3StorageService, S3StorageService>();
 builder.Services.AddScoped<IStockAlertService, StockAlertService>();
 builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
 builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>();
+builder.Services.AddScoped<IFinanceReportService, FinanceReportService>();
+builder.Services.AddScoped<IFinanceReconciliationService, FinanceReconciliationService>();
+builder.Services.AddScoped<IFinanceReportExportService, FinanceReportExportService>();
 builder.Services.AddScoped<IReconciliationService, ReconciliationService>();
 builder.Services.AddScoped<ISlottingService, SlottingService>();
 builder.Services.AddScoped<ICustomerOrderTrackingService, CustomerOrderTrackingService>();
@@ -79,6 +84,7 @@ builder.Services.AddHttpClient();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();
+builder.Services.AddHostedService<MaintenanceAlertWorker>();
 // builder.Services.AddHostedService<OverstayAlertWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -87,33 +93,23 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+if (args.Any(arg => string.Equals(arg, "--seed-dispatch-optimization", StringComparison.OrdinalIgnoreCase)))
+{
+    using var seedScope = app.Services.CreateScope();
+    var seedService = seedScope.ServiceProvider.GetRequiredService<IDispatchOptimizationService>();
+    var seedResult = await seedService.SeedDemoDataAsync();
+    var queue = await seedService.GetQueueAsync(null);
+
+    Console.WriteLine($"{seedResult.Status}: {seedResult.Message}");
+    Console.WriteLine($"Dispatch queue: {queue.TotalWaiting} vehicles waiting, {queue.Docks.Count} docks loaded.");
+    return;
+}
+
 // Apply pending EF Core migrations at startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SmartLogAiContext>();
-    if (!db.Database.CanConnect())
-    {
-        db.Database.Migrate();
-    }
-    else
-    {
-        db.Database.OpenConnection();
-        try
-        {
-            using var command = db.Database.GetDbConnection().CreateCommand();
-            command.CommandText = "SELECT CASE WHEN OBJECT_ID(N'[dbo].[CompanyProfile]', N'U') IS NULL THEN 0 ELSE 1 END";
-            var hasExistingSchema = Convert.ToInt32(command.ExecuteScalar()) == 1;
-
-            if (!hasExistingSchema)
-            {
-                db.Database.Migrate();
-            }
-        }
-        finally
-        {
-            db.Database.CloseConnection();
-        }
-    }
+// db.Database.Migrate();
 }
 
 
@@ -127,8 +123,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowAll");
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

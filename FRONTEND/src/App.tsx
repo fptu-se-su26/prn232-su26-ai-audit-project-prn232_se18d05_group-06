@@ -34,6 +34,7 @@ import AdminRolePermission from '@features/admin/RolePermission';
 import AdminSmartLogAI from '@features/admin/SmartLogAI';
 import AdminWarehouses from '@features/admin/Warehouses';
 import AdminSettings from '@features/admin/Settings';
+import TierManagementPage from './features/admin/tier/TierManagementPage';
 import WarehouseDashboard from './features/warehouse/WarehouseDashboard';
 import WarehouseTransfer from './features/warehouse/WarehouseTransfer';
 import WarehouseInventory from './features/warehouse/Inventory';
@@ -66,6 +67,7 @@ const modules = [
   { path: '/admin/role-permission', name: 'Role & Permission', desc: 'Access Control, Permission Matrix', icon: 'admin_panel_settings', color: 'from-indigo-500 to-violet-600' },
   { path: '/admin/smart-log-ai', name: 'SmartLog AI', desc: 'AI Assistant Chat Interface', icon: 'psychology', color: 'from-fuchsia-500 to-pink-600' },
   { path: '/admin/warehouses', name: 'Warehouses', desc: 'Facilities, Live regional map, Inventory', icon: 'warehouse', color: 'from-sky-500 to-cyan-600' },
+  { path: '/admin/tier-management', name: 'Customer Tiers', desc: 'Tier rules, Reporting, Customers', icon: 'military_tech', color: 'from-orange-500 to-yellow-600' },
   { path: '/admin/settings', name: 'Settings', desc: 'General config, Branding, Engine config', icon: 'settings', color: 'from-gray-500 to-slate-600' },
 ];
 
@@ -112,6 +114,7 @@ const App: React.FC = () => {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/finance" element={<AdminFinance />} />
+        <Route path="/admin/invoices" element={<AdminFinance defaultTab="invoices" />} />
         <Route path="/admin/audit-log" element={<AdminAuditLog />} />
         <Route path="/admin/notifications" element={<AdminNotifications />} />
         <Route path="/admin/fleet-map" element={<AdminFleetMap />} />
@@ -121,6 +124,7 @@ const App: React.FC = () => {
         <Route path="/admin/smart-log-ai" element={<AdminSmartLogAI />} />
         <Route path="/admin/warehouses" element={<RoleGuard allow={WAREHOUSE_ROLES}><AdminWarehouses /></RoleGuard>} />
         <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/tier-management" element={<TierManagementPage />} />
 
         {/* Warehouse Management (Admin + Warehouse roles only) */}
         <Route path={ROUTE_PATHS.WAREHOUSE_DASHBOARD} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseDashboard /></RoleGuard>} />

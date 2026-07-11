@@ -21,7 +21,8 @@ const MENU_ITEMS: MenuItem[] = [
   { name: 'Route Planning', label: 'Lập lộ trình', icon: 'route', group: 'Vận hành' },
   { name: 'Assign Driver', label: 'Điều phối Dock', icon: 'assignment_ind', group: 'Vận hành' },
   { name: 'Live Tracking', label: 'Theo dõi realtime', icon: 'near_me', group: 'Vận hành' },
-  { name: 'Alerts Center', label: 'Overstay Alert', icon: 'release_alert', group: 'Vận hành', badge: 'SLA' },
+
+  { name: 'Flow Optimization', label: 'Toi uu luong xe', icon: 'conversion_path', group: 'Vận hành', badge: 'AI' },
   { name: 'Vehicles', label: 'Hồ sơ xe', icon: 'local_shipping', group: 'Đội xe' },
   { name: 'Drivers', label: 'Tài xế', icon: 'groups', group: 'Đội xe' },
   { name: 'Vehicle Tracking', label: 'Lịch sử & Chuyến xe', icon: 'history_toggle_off', group: 'Đội xe' },
