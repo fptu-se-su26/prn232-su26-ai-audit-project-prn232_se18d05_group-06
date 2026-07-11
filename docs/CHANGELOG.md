@@ -20,7 +20,7 @@ Nguyên tắc ghi changelog:
 |---|---|
 | Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
-| Lớp | SE18D05 |
+| Lá»›p | SE18D05 |
 | Học kỳ | 8 |
 | Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
 | Tên sinh viên / Nhóm | Nhóm 6 |

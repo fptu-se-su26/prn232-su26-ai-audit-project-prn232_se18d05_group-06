@@ -6,7 +6,7 @@
 |---|---|
 | Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
-| Lớp | SE18D05 |
+| Lá»›p | SE18D05 |
 | Học kỳ | 8 |
 | Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
 | Tên sinh viên / Nhóm | Nhóm 6 |
@@ -422,7 +422,7 @@ Nhóm giữ nguyên routing và cấu trúc tab chính, chỉ đổi giao diện
 - Date: 2026-07-01
 - AI Tool: Antigravity
 - Author: Trần Văn Tùng (DE180109)
-- Purpose: Gộp SQL Overstay Alert
+- Purpose: Gá»™p SQL Overstay Alert
 
 ### Bối cảnh
 ```text
@@ -860,7 +860,7 @@ Không nên hỏi AI làm hộ toàn bộ dự án mà nên chia nhỏ từng vi
 | Prompt thiết kế giải pháp | 1 | "Hãy thiết kế một GateService chạy trong IDbContextTransaction..." |
 | Prompt thiết kế database | 1 | "Hãy thiết kế bảng VehicleEvents..." |
 | Prompt sinh code mẫu | 2 | "Cách sử dụng React Router v6..." |
-| Prompt debug lỗi | 0 |  |
+| Prompt debug lá»—i | 0 |  |
 | Prompt viết test case | 0 |  |
 | Prompt review code | 0 |  |
 | Prompt tối ưu code | 0 |  |

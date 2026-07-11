@@ -85,7 +85,8 @@ namespace BACKEND.Services
                 return new List<LocationSuggestionDto>();
             }
 
-            bool useGoongMaps = _configuration.GetValue<bool>("LocationProvider:UseGoogleMaps"); // Currently false, can be toggled to true
+            bool useGoongMaps = _configuration.GetValue<bool>("LocationProvider:UseGoongMaps")
+                || _configuration.GetValue<bool>("LocationProvider:UseGoogleMaps");
 
             if (useGoongMaps)
             {
@@ -107,12 +108,17 @@ namespace BACKEND.Services
             var mockPlace = MockAddresses.FirstOrDefault(x => x.PlaceId == placeId);
             if (mockPlace != null) return mockPlace;
 
-            bool useGoongMaps = _configuration.GetValue<bool>("LocationProvider:UseGoogleMaps");
+            bool useGoongMaps = _configuration.GetValue<bool>("LocationProvider:UseGoongMaps")
+                || _configuration.GetValue<bool>("LocationProvider:UseGoogleMaps");
             if (useGoongMaps)
             {
                 try
                 {
                     var apiKey = _configuration.GetValue<string>("GoongMaps:ApiKey");
+                    if (string.IsNullOrWhiteSpace(apiKey))
+                    {
+                        return null;
+                    }
                     var url = $"https://rsapi.goong.io/Place/Detail?place_id={placeId}&api_key={apiKey}";
                     var response = await _httpClient.GetAsync(url);
                     response.EnsureSuccessStatusCode();
@@ -147,6 +153,11 @@ namespace BACKEND.Services
         private async Task<List<LocationSuggestionDto>> GetGoongSuggestionsAsync(string keyword)
         {
             var apiKey = _configuration.GetValue<string>("GoongMaps:ApiKey");
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                return GetMockSuggestions(keyword);
+            }
+
             var limit = _configuration.GetValue<int>("LocationProvider:Limit");
             if (limit <= 0) limit = 10;
             
