@@ -266,7 +266,7 @@ namespace BACKEND.Services
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.UserId == currentUserId && u.IsActive != false);
 
-            if (user == null || !IsStatus(user.Role.RoleCode, "CUSTOMER"))
+            if (user == null || !(IsStatus(user.Role?.RoleCode, "CUSTOMER") || user.RoleId == 4))
             {
                 throw new UnauthorizedAccessException("Current user is not linked to an active customer profile.");
             }
