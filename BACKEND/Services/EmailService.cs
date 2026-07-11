@@ -331,5 +331,56 @@ namespace BACKEND.Services
                 throw;
             }
         }
+
+        public async Task SendEmailWithAttachmentAsync(string toEmail, string subject, string body, byte[] attachmentBytes, string attachmentName)
+        {
+            var host = _configuration["EmailSettings:SmtpHost"];
+            var port = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
+            var user = _configuration["EmailSettings:SmtpUser"];
+            var pass = _configuration["EmailSettings:SmtpPass"];
+            var senderEmail = _configuration["EmailSettings:SenderEmail"];
+            var senderName = _configuration["EmailSettings:SenderName"];
+            var enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"] ?? "true");
+
+            if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(pass) || pass == "your_app_password_here")
+            {
+                throw new InvalidOperationException("SMTP credentials are not configured correctly in appsettings.json.");
+            }
+
+            try
+            {
+                using var client = new SmtpClient(host, port)
+                {
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(user, pass),
+                    EnableSsl = enableSsl,
+                    DeliveryMethod = SmtpDeliveryMethod.Network
+                };
+
+                using var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(senderEmail ?? user, senderName, Encoding.UTF8),
+                    Subject = subject,
+                    SubjectEncoding = Encoding.UTF8,
+                    Body = body,
+                    BodyEncoding = Encoding.UTF8,
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(toEmail);
+
+                // Add PDF attachment
+                using var stream = new MemoryStream(attachmentBytes);
+                var attachment = new Attachment(stream, attachmentName, "application/pdf");
+                mailMessage.Attachments.Add(attachment);
+
+                await client.SendMailAsync(mailMessage);
+                _logger.LogInformation("Email with PDF attachment '{AttachmentName}' sent successfully to {To}", attachmentName, toEmail);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send email with attachment to {To}", toEmail);
+                throw;
+            }
+        }
     }
 }

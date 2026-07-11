@@ -25,7 +25,7 @@ const Settings: React.FC = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-slate-200">
+    <div className="min-h-screen bg-white font-sans light-surface selection:bg-slate-200">
       <Header />
       
       <main className="pt-32 pb-20 px-8">

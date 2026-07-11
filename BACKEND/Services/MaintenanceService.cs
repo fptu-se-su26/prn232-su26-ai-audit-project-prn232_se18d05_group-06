@@ -47,7 +47,7 @@ public class MaintenanceService : IMaintenanceService
         return schedule;
     }
 
-    public async Task<MaintenanceSchedule> UpdateMaintenanceScheduleAsync(int id, UpdateMaintenanceScheduleDto dto)
+    public async Task<MaintenanceSchedule?> UpdateMaintenanceScheduleAsync(int id, UpdateMaintenanceScheduleDto dto)
     {
         var schedule = await _context.MaintenanceSchedules.FindAsync(id);
         if (schedule == null) return null;
@@ -82,7 +82,7 @@ public class MaintenanceService : IMaintenanceService
 
     public async Task<InspectionRecord> CreateInspectionRecordAsync(CreateInspectionRecordDto dto)
     {
-        string documentUrl = null;
+        string? documentUrl = null;
 
         if (dto.Document != null && dto.Document.Length > 0)
         {
@@ -177,3 +177,4 @@ public class MaintenanceService : IMaintenanceService
         };
     }
 }
+
