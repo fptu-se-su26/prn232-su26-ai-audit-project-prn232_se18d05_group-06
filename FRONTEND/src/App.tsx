@@ -116,6 +116,7 @@ const App: React.FC = () => {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/finance" element={<AdminFinance />} />
+        <Route path="/admin/invoices" element={<AdminFinance defaultTab="invoices" />} />
         <Route path="/admin/audit-log" element={<AdminAuditLog />} />
         <Route path="/admin/notifications" element={<AdminNotifications />} />
         <Route path="/admin/fleet-map" element={<AdminFleetMap />} />

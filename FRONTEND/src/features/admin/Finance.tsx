@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
   CartesianGrid,
@@ -17,9 +17,10 @@ import PaymentReconciliationPanel from './PaymentReconciliationPanel';
 import OperatingExpensePanel from './OperatingExpensePanel';
 import ProfitReportPanel from './ProfitReportPanel';
 import FinanceExportButtons from './FinanceExportButtons';
+import InvoicePanel from './InvoicePanel';
 
 type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | string;
-type FinanceTab = 'overview' | 'revenue' | 'expenses' | 'profit' | 'reconciliation' | 'forecast' | 'exports';
+type FinanceTab = 'overview' | 'revenue' | 'expenses' | 'profit' | 'reconciliation' | 'forecast' | 'exports' | 'invoices';
 
 interface FinancialHistoryPoint {
   month: string;
@@ -127,6 +128,7 @@ const financeTabs: Array<{ key: FinanceTab; label: string; icon: string; descrip
   { key: 'reconciliation', label: 'Reconciliation', icon: 'rule_settings', description: 'Doi soat thanh toan' },
   { key: 'forecast', label: 'Forecast', icon: 'auto_graph', description: 'Du bao tai chinh AI' },
   { key: 'exports', label: 'Exports', icon: 'file_download', description: 'Xuat Excel/PDF' },
+  { key: 'invoices', label: 'Invoices', icon: 'description', description: 'Quan ly hoa don thanh toan' },
 ];
 
 const exportReportOptions = [
@@ -154,13 +156,13 @@ const riskStyles: Record<string, string> = {
 const riskLabels: Record<string, string> = { LOW: 'Thap', MEDIUM: 'Trung binh', HIGH: 'Cao' };
 const statusStyles: Record<string, string> = { SUCCESS: 'bg-emerald-50 text-emerald-700', INSUFFICIENT_DATA: 'bg-amber-50 text-amber-700', FAILED: 'bg-rose-50 text-rose-700' };
 
-const AdminFinance: React.FC = () => {
+const AdminFinance: React.FC<{ defaultTab?: FinanceTab }> = ({ defaultTab }) => {
   const [dashboard, setDashboard] = useState<FinancialForecastDashboard>(fallbackDashboard);
   const [reconciliation, setReconciliation] = useState<ReconciliationSummary>({ total: 0, matched: 0, partial: 0, unmatched: 0 });
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<'generate' | 'retrain' | null>(null);
   const [forecastMonths, setForecastMonths] = useState<1 | 3 | 6>(3);
-  const [activeTab, setActiveTab] = useState<FinanceTab>('overview');
+  const [activeTab, setActiveTab] = useState<FinanceTab>(defaultTab || 'overview');
   const [notice, setNotice] = useState<string | null>(null);
   const [exportReportType, setExportReportType] = useState('revenue-by-service');
   const [exportFromDate, setExportFromDate] = useState('2025-05-01');
@@ -664,6 +666,8 @@ const AdminFinance: React.FC = () => {
         return renderForecast();
       case 'exports':
         return renderExports();
+      case 'invoices':
+        return <InvoicePanel />;
       default:
         return renderOverview();
     }

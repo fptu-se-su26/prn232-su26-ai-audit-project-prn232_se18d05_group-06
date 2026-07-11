@@ -67,7 +67,7 @@ const CreateOrder: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans text-[#191c1e] overflow-x-hidden">
+    <div className="bg-white min-h-screen font-sans text-[#191c1e] light-surface overflow-x-hidden">
       <Header />
 
       {/* Main Content Area */}

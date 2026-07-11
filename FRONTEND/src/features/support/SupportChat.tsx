@@ -33,7 +33,7 @@ const SupportChat: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+    <div className="min-h-screen bg-white text-on-surface light-surface">
       <Header scrollY={0} />
       <div className="pt-32 pb-20">
         <div className="max-w-2xl mx-auto px-8">

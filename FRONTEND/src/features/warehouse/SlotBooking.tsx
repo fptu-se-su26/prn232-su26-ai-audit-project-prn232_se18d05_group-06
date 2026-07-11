@@ -207,7 +207,7 @@ const SlotBooking: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-tr from-slate-50 via-blue-50/20 to-slate-50 min-h-screen flex flex-col font-sans">
+    <div className="bg-white min-h-screen flex flex-col font-sans text-on-surface light-surface">
       <Header scrollY={scrollY} />
 
       <main className="flex-1 pt-28 pb-16 px-4 max-w-7xl mx-auto w-full">
@@ -240,7 +240,7 @@ const SlotBooking: React.FC = () => {
         )}
 
         {/* Form Selection Card */}
-        <div className="bg-white/70 backdrop-blur-md border border-gray-100 rounded-3xl p-6 shadow-xl shadow-slate-100/50 mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
           <div>
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Chọn Kho Hàng</label>
             <div className="relative">

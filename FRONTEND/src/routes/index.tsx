@@ -27,6 +27,7 @@ export const ROUTE_PATHS = {
   WAREHOUSE_SETTINGS: '/warehouse/settings',
   WAREHOUSE_AI_OCR: '/warehouse/ai-ocr',
   ADMIN_WAREHOUSES: '/admin/warehouses',
+  ADMIN_INVOICES: '/admin/invoices',
   WAREHOUSE_GATE_CHECKOUT: '/warehouse/gate-checkout',
   WAREHOUSE_QR_SCANNER: '/warehouse/qr-scanner',
 };

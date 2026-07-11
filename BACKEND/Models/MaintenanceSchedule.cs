@@ -13,12 +13,12 @@ public partial class MaintenanceSchedule
 
     [Required]
     [MaxLength(100)]
-    public string Type { get; set; }
+    public string Type { get; set; } = string.Empty;
 
     public DateTime DueDate { get; set; }
 
     [MaxLength(20)]
-    public string Status { get; set; } = "PENDING"; // PENDING, COMPLETED, OVERDUE
+    public string Status { get; set; } = "PENDING";
 
     [MaxLength(500)]
     public string? Notes { get; set; }

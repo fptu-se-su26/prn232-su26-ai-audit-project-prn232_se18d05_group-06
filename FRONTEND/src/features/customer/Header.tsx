@@ -115,7 +115,7 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
                   <div className="p-2">
                     {[
                       { label: 'Order History', icon: History, path: '/order-history' },
-                      { label: 'Payment History', icon: DollarSign, path: '/payment-history' },
+                      { label: 'My Invoices', icon: DollarSign, path: '/payment-history' },
                       { label: 'Vouchers', icon: Bookmark, path: '/voucher-center' },
                       { label: 'Profile', icon: User, path: '/profile' },
                       { label: 'Settings', icon: Settings, path: '/settings' },
