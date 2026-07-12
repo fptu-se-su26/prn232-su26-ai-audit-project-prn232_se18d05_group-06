@@ -9,9 +9,17 @@ namespace BACKEND.DTOs
         public string CurrentDisplayStatus { get; set; } = null!;
         public string? PickupAddress { get; set; }
         public string? DeliveryAddress { get; set; }
+        public string? Destination { get; set; }
+        public string? WarehouseName { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? DeliveredAt { get; set; }
         public decimal? FinalCost { get; set; }
+        public bool HasInvoice { get; set; }
+        public int? InvoiceId { get; set; }
+        public string? InvoiceNo { get; set; }
+        public string? InvoiceStatus { get; set; }
+        public string? InvoicePdfPath { get; set; }
+        public bool HasFeedback { get; set; }
     }
 
     public class CustomerOrderTrackingResponse
