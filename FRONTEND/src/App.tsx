@@ -19,6 +19,7 @@ import PaymentPage from './features/customer/PaymentPage';
 import DispatcherDashboard from '@features/dispatcher/pages/DispatcherDashboard';
 import DriverDashboard from './features/driver/pages/DriverDashboard';
 import SlotBooking from './features/warehouse/SlotBooking';
+import FloatingAiChatbot from './components/customer/FloatingAiChatbot';
 
 
 // Import Admin Components
@@ -169,6 +170,7 @@ const App: React.FC = () => {
         {/* Catch-all redirect to Dispatcher */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <FloatingAiChatbot />
     </Router>
   )
 }
