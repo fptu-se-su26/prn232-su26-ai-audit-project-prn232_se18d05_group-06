@@ -9,6 +9,7 @@ namespace BACKEND.DTOs
         public string InvoiceNo { get; set; } = null!;
         public int OrderId { get; set; }
         public string OrderCode { get; set; } = null!;
+        public string? OrderStatus { get; set; }
         public int CustomerId { get; set; }
         public string CustomerName { get; set; } = null!;
         public string? CustomerEmail { get; set; }
@@ -44,6 +45,7 @@ namespace BACKEND.DTOs
     {
         public int OrderId { get; set; }
         public string OrderCode { get; set; } = null!;
+        public string? OrderStatus { get; set; }
         public string CustomerName { get; set; } = null!;
         public string? CustomerEmail { get; set; }
         public string ServiceType { get; set; } = null!;

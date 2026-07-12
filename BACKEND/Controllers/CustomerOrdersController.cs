@@ -211,6 +211,83 @@ namespace BACKEND.Controllers
             return Ok(result);
         }
 
+
+        [HttpPost("{orderId:int}/feedback")]
+        public async Task<IActionResult> SubmitFeedback(int orderId, [FromBody] CreateServiceFeedbackRequestDto request)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { Message = "Missing or invalid user id claim." });
+            }
+
+            if (!request.StarRating.HasValue || request.StarRating.Value < 1 || request.StarRating.Value > 5)
+            {
+                return BadRequest(new { Message = "Vui lòng chọn số sao đánh giá." });
+            }
+
+            var comment = request.Comment?.Trim();
+            if (!string.IsNullOrEmpty(comment) && comment.Length > 1000)
+            {
+                return BadRequest(new { Message = "Nội dung phản hồi không được vượt quá 1000 ký tự." });
+            }
+
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId.Value);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Bạn không có quyền đánh giá đơn hàng này." });
+            }
+
+            var order = await _context.ServiceOrders
+                .Include(o => o.ServiceFeedbacks)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null || order.CustomerId != customer.CustomerId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Bạn không có quyền đánh giá đơn hàng này." });
+            }
+
+            if (!string.Equals(order.Status, "DELIVERED", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { Message = "Bạn chỉ có thể đánh giá đơn hàng đã hoàn thành." });
+            }
+
+            var alreadyReviewed = await _context.ServiceFeedbacks
+                .AnyAsync(f => f.OrderId == orderId && f.CustomerId == customer.CustomerId);
+
+            if (alreadyReviewed)
+            {
+                return BadRequest(new { Message = "Bạn đã gửi đánh giá cho đơn hàng này." });
+            }
+
+            var feedback = new ServiceFeedback
+            {
+                CustomerId = customer.CustomerId,
+                OrderId = order.OrderId,
+                StarRating = (byte)request.StarRating.Value,
+                Comment = comment,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.ServiceFeedbacks.Add(feedback);
+            await _context.SaveChangesAsync();
+
+            return Ok(new ServiceFeedbackDto
+            {
+                FeedbackId = feedback.FeedbackId,
+                CustomerId = customer.CustomerId,
+                CustomerName = customer.CompanyName,
+                CustomerEmail = customer.Email,
+                OrderId = order.OrderId,
+                OrderCode = order.OrderCode,
+                OrderStatus = order.Status ?? string.Empty,
+                StarRating = feedback.StarRating ?? 0,
+                Comment = feedback.Comment,
+                CreatedAt = feedback.CreatedAt ?? DateTime.UtcNow,
+                NeedsFollowUp = feedback.StarRating <= 2,
+                FollowUpStatus = feedback.StarRating <= 2 ? "NEEDS_FOLLOW_UP" : "NORMAL"
+            });
+        }
         private int? GetCurrentUserId()
         {
             var raw = User.FindFirst(ClaimTypes.NameIdentifier)?.Value

@@ -34,6 +34,7 @@ import AdminRolePermission from '@features/admin/RolePermission';
 import AdminSmartLogAI from '@features/admin/SmartLogAI';
 import AdminWarehouses from '@features/admin/Warehouses';
 import AdminSettings from '@features/admin/Settings';
+import AdminServiceFeedback from '@features/admin/ServiceFeedback';
 import TierManagementPage from './features/admin/tier/TierManagementPage';
 import WarehouseDashboard from './features/warehouse/WarehouseDashboard';
 import WarehouseTransfer from './features/warehouse/WarehouseTransfer';
@@ -100,6 +101,7 @@ const App: React.FC = () => {
         {/* Profile & CRM (Pink) */}
         <Route path="/profile" element={<CustomerProfile />} />
         <Route path="/order-history" element={<OrderHistory />} />
+        <Route path="/customer/orders" element={<OrderHistory />} />
         <Route path="/voucher-center" element={<VoucherCenter />} />
 
         {/* Settings (Gray) */}
@@ -124,6 +126,7 @@ const App: React.FC = () => {
         <Route path="/admin/smart-log-ai" element={<AdminSmartLogAI />} />
         <Route path="/admin/warehouses" element={<RoleGuard allow={WAREHOUSE_ROLES}><AdminWarehouses /></RoleGuard>} />
         <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/feedback" element={<AdminServiceFeedback />} />
         <Route path="/admin/tier-management" element={<TierManagementPage />} />
 
         {/* Warehouse Management (Admin + Warehouse roles only) */}
