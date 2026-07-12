@@ -22,7 +22,8 @@ namespace BACKEND.Services
             SmartLogAiContext context,
             IConfiguration configuration,
             ILogger<PayOsPaymentService> logger,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            IPaymentService paymentService)
         {
             _context = context;
             _configuration = configuration;
@@ -161,11 +162,6 @@ namespace BACKEND.Services
             var paid = string.Equals(verifiedData.Code, "00", StringComparison.OrdinalIgnoreCase);
             await ApplyPaymentResultAsync(payment, paid, verifiedData.Reference, verifiedData.PaymentLinkId);
             await _context.SaveChangesAsync();
-
-            if (shouldSendBill)
-            {
-                await ConfirmAndSendBillAsync(payment.PaymentId);
-            }
         }
 
 
@@ -303,7 +299,7 @@ namespace BACKEND.Services
             if (!paid)
             {
                 payment.Status = "FAILED";
-                return false;
+                return;
             }
 
             var alreadyConfirmed = string.Equals(payment.Status, "CONFIRMED", StringComparison.OrdinalIgnoreCase)

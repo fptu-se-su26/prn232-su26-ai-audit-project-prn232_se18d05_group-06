@@ -17,7 +17,10 @@ const InventoryAudit = () => {
   const [stocktakeId, setStocktakeId] = useState<number | null>(null)
   const [stocktakeList, setStocktakeList] = useState<any[]>([])
   const [isReconciling, setIsReconciling] = useState(false)
+  const [selectedZone, setSelectedZone] = useState<string>('All')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const zones = ['All', 'A-1', 'A-2', 'B-1', 'B-2', 'B-3', 'B-4', 'C-1', 'C-2']
   // Load stocktake list on mount
   useEffect(() => {
     loadStocktakeList()
@@ -29,6 +32,11 @@ const InventoryAudit = () => {
       loadAuditData(stocktakeId)
     }
   }, [stocktakeId])
+
+  // Load comparison data when zone changes
+  useEffect(() => {
+    loadComparisonData()
+  }, [selectedZone])
 
   const loadStocktakeList = async () => {
     try {
@@ -60,6 +68,31 @@ const InventoryAudit = () => {
       setRows(auditData)
     } catch (error) {
       console.error('Error loading audit data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadComparisonData = async () => {
+    setLoading(true)
+    try {
+      const url = selectedZone && selectedZone !== 'All'
+        ? `http://localhost:5200/api/inventory-audit/comparison?zoneCode=${selectedZone}`
+        : 'http://localhost:5200/api/inventory-audit/comparison'
+      
+      const res = await fetch(url)
+      const data = await res.json()
+      const comparisonData = data.data.map((item: any) => ({
+        lineId: item.skuId,
+        sku: item.skuCode,
+        label: item.productName,
+        category: item.zoneCode,
+        systemQty: item.systemQty,
+        actualQty: item.actualQty
+      }))
+      setRows(comparisonData)
+    } catch (error) {
+      console.error('Error loading comparison data:', error)
     } finally {
       setLoading(false)
     }
@@ -183,8 +216,8 @@ const InventoryAudit = () => {
         <InventoryAuditHeader />
 
         <div className="p-8 space-y-6 animate-fade-in-up">
-          {/* Stocktake Selector */}
-          <div className="flex items-center gap-4">
+          {/* Stocktake Selector & Zone Filter */}
+          <div className="flex items-center gap-4 flex-wrap">
             <label className="text-sm font-medium text-slate-700">Select Stocktake:</label>
             <select
               value={stocktakeId || ''}
@@ -197,6 +230,27 @@ const InventoryAudit = () => {
                 </option>
               ))}
             </select>
+
+            <div className="w-px h-8 bg-slate-300 mx-2"></div>
+
+            <label className="text-sm font-medium text-slate-700">Zone:</label>
+            <select
+              value={selectedZone}
+              onChange={(e) => setSelectedZone(e.target.value)}
+              className="px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {zones.map((zone) => (
+                <option key={zone} value={zone}>{zone}</option>
+              ))}
+            </select>
+
+            <button
+              onClick={loadComparisonData}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? 'Loading...' : 'Refresh'}
+            </button>
           </div>
 
           {loading ? (

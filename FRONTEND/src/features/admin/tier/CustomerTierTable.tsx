@@ -82,9 +82,9 @@ export const CustomerTierTable: React.FC = () => {
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden transition-all" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}>
+    <div className="rounded-2xl overflow-hidden transition-all" style={{ background: 'rgba(15, 23, 42, 0.96)', border: '1px solid rgba(148, 163, 184, 0.14)', backdropFilter: 'blur(16px)' }}>
       {/* Header */}
-      <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.14)' }}>
         <div>
           <h3 className="text-xl font-bold text-white">Customer List</h3>
           <p className="text-sm text-slate-400 mt-1">Manage customer tiers and recalculate metrics.</p>
@@ -101,25 +101,25 @@ export const CustomerTierTable: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="p-4 flex flex-col sm:flex-row gap-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+      <div className="p-4 flex flex-col sm:flex-row gap-4" style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.14)', background: 'rgba(15, 23, 42, 0.78)' }}>
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-200" />
           <input
             type="text"
             placeholder="Search by name or code..."
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-            className="block w-full pl-10 pr-3 py-2.5 rounded-xl text-sm text-white outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
+            className="block w-full pl-10 pr-3 py-2.5 rounded-xl text-sm text-white outline-none focus:ring-2 focus:ring-indigo-500/60 transition-all"
+            style={{ background: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(148, 163, 184, 0.22)' }}
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-400" />
+          <Filter className="w-4 h-4 text-slate-200" />
           <select
             value={filterTier}
             onChange={(e) => { setFilterTier(e.target.value); setCurrentPage(1); }}
-            className="block w-full sm:w-40 pl-3 pr-8 py-2.5 text-sm text-white rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none"
-            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
+            className="block w-full sm:w-40 pl-3 pr-8 py-2.5 text-sm text-white rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/60 transition-all appearance-none"
+            style={{ background: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(148, 163, 184, 0.22)' }}
           >
             <option value="ALL" style={{ background: '#1e293b' }}>All Tiers</option>
             <option value="GOLD" style={{ background: '#1e293b' }}>Gold</option>
@@ -134,12 +134,12 @@ export const CustomerTierTable: React.FC = () => {
         <table className="min-w-full">
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Customer</th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Tier</th>
-              <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-widest">Orders (12M)</th>
-              <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-widest">Revenue (12M)</th>
-              <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">Last Updated</th>
-              <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-widest">Actions</th>
+              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-200 uppercase tracking-widest">Customer</th>
+              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-200 uppercase tracking-widest">Tier</th>
+              <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-200 uppercase tracking-widest">Orders (12M)</th>
+              <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-200 uppercase tracking-widest">Revenue (12M)</th>
+              <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-200 uppercase tracking-widest">Last Updated</th>
+              <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-200 uppercase tracking-widest">Actions</th>
             </tr>
           </thead>
           <tbody>
