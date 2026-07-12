@@ -1,4 +1,5 @@
 import Sidebar from '../../components/Sidebar'
+import WarehouseHeader from '../../components/WarehouseHeader'
 import ExportHeader from '../../components/ExportHeader'
 import ExportOrderSummary from '../../components/ExportOrderSummary'
 import ExportRoutePanel from '../../components/ExportRoutePanel'
@@ -12,6 +13,7 @@ const ExportGoods = () => {
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased overflow-hidden">
       <Sidebar />
+      <WarehouseHeader title="Xuất kho hàng hóa" subtitle="Quét mã QR hoặc sử dụng AI OCR để xác nhận hàng xuất." />
       <main className="ml-[280px] min-h-screen">
         <ExportHeader />
         <section className="pt-28 pb-10 px-8 space-y-8 animate-fade-in-up">

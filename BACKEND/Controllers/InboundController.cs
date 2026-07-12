@@ -18,21 +18,69 @@ namespace BACKEND.Controllers
         private readonly SmartLogAiContext _context;
         private readonly IS3StorageService _storage;
         private readonly ISlottingService _slottingService;
+        private readonly IInboundReceivingService _inboundReceivingService;
 
-        public InboundController(SmartLogAiContext context, IS3StorageService storage, ISlottingService slottingService)
+        public InboundController(SmartLogAiContext context, IS3StorageService storage, ISlottingService slottingService, IInboundReceivingService inboundReceivingService)
         {
             _context = context;
             _storage = storage;
             _slottingService = slottingService;
+            _inboundReceivingService = inboundReceivingService;
         }
 
+        [HttpPost("scan-code")]
+        public async Task<ActionResult<ApiResponse>> ScanCode([FromBody] ScanInboundCodeRequest request)
+        {
+            var userId = 1; // Giả lập user ID hoặc lấy từ Token
+            var result = await _inboundReceivingService.CreateInboundFromCodeAsync(request, userId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("ocr")]
+        public async Task<ActionResult<ApiResponse>> Ocr([FromForm] IFormFile file, [FromForm] int warehouseId, [FromForm] int customerId)
+        {
+            var userId = 1; // Giả lập
+            var result = await _inboundReceivingService.CreateInboundFromOcrAsync(file, warehouseId, customerId, userId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpGet("{inboundId}/ocr-review")]
+        public async Task<ActionResult<ApiResponse>> GetOcrReview(int inboundId)
+        {
+            var result = await _inboundReceivingService.GetOcrReviewAsync(inboundId);
+            return result.Success ? Ok(result) : NotFound(result);
+        }
+
+        [HttpPost("{inboundId}/confirm-ocr-review")]
+        public async Task<ActionResult<ApiResponse>> ConfirmOcrReview(int inboundId, [FromBody] ConfirmOcrReviewRequest request)
+        {
+            var userId = 1; // Giả lập
+            var result = await _inboundReceivingService.ConfirmOcrReviewAsync(inboundId, request, userId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("{inboundId}/confirm-receiving")]
+        public async Task<ActionResult<ApiResponse>> ConfirmReceiving(int inboundId, [FromBody] ConfirmReceivingRequest request)
+        {
+            var userId = 1; // Giả lập
+            var result = await _inboundReceivingService.ConfirmReceivingAsync(inboundId, request, userId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+
         [HttpGet]
-        public async Task<ActionResult<List<InboundOrderDto>>> GetInboundOrders()
+        public async Task<ActionResult<List<InboundOrderDto>>> GetInboundOrders([FromQuery] string[]? statuses = null)
         {
             try
             {
-                var orders = await _context.InboundOrders
-                    .AsNoTracking()
+                var query = _context.InboundOrders.AsNoTracking().AsQueryable();
+
+                if (statuses != null && statuses.Length > 0)
+                {
+                    query = query.Where(o => statuses.Contains(o.Status));
+                }
+
+                var orders = await query
                     .OrderByDescending(o => o.InboundId)
                     .Select(o => new InboundOrderDto
                     {
