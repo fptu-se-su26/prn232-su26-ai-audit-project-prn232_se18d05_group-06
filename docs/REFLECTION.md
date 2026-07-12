@@ -312,6 +312,15 @@ Phan quan trong nhat la khong hien ma ky thuat UC tren giao dien, vi man hinh va
 
 Bai hoc rut ra la AI co the ho tro nhanh trong viec tim file va goi y bo cuc, nhung nguoi lam van phai tu hieu du lieu that va luong nghiep vu de quyet dinh UI nao phu hop voi Dispatcher.
 ---
+## 22. Reflection bo sung - Invoice PDF va Email - Tran Van Tung (DE180109)
+
+Trong phan , em su dung AI de tham khao cach noi luong tao don, thanh toan PayOS, tao hoa don PDF va gui email cho customer. AI goi y nen tach ro hai truong hop: customer thanh toan ngay thi invoice chuyen PAID va gui bill PDF, con chua thanh toan thi invoice giu PENDING va gui email yeu cau thanh toan.
+
+Khi trien khai, em tu doc lai `PayOsPaymentService`, `PaymentService`, `InvoiceService`, `CustomerInvoicesController` va man `PaymentHistory.tsx` de dam bao khong pha vo luong hien co. Phan quan trong nhat la customer chi duoc xem hoa don cua minh, cac nut xem/tai PDF phai co thong bao thanh cong/that bai, va email/PDF phai co thong tin chuyen khoan ro rang de ho tro doi soat.
+
+Bai hoc rut ra la AI co the giup nhanh trong viec tim huong xu ly, nhung cac buoc nhu bao mat quyen xem hoa don, kiem tra SMTP, generate PDF va chay build/type-check van phai do sinh vien tu xac nhan.
+
+---
 ## 17. Cam kết Reflection
 
 Em/nhóm cam kết rằng nội dung reflection này phản ánh trung thực quá trình sử dụng AI và quá trình học tập trong bài tập/project.
