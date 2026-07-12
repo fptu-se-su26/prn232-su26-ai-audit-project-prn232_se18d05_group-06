@@ -19,6 +19,7 @@ const menuItems: MenuItem[] = [
   { label: 'BI Analytics', icon: 'analytics', path: '/admin/analytics', group: 'intelligence' },
   { label: 'SmartLog AI', icon: 'psychology', path: '/admin/smart-log-ai', group: 'intelligence' },
   { label: 'Customer Tiers', icon: 'military_tech', path: '/admin/tier-management', group: 'intelligence' },
+  { label: 'Service Feedback', icon: 'reviews', path: '/admin/feedback', group: 'intelligence' },
   { label: 'Notifications', icon: 'notifications', path: '/admin/notifications', group: 'system' },
   { label: 'Audit Logs', icon: 'history', path: '/admin/audit-log', group: 'system' },
   { label: 'Settings', icon: 'settings', path: '/admin/settings', group: 'system' },
@@ -33,7 +34,7 @@ const groupLabels: Record<MenuItem['group'], string> = {
 };
 
 const mobileItems = menuItems.filter((item) =>
-  ['/admin/dashboard', '/admin/orders', '/admin/finance', '/admin/analytics', '/admin/settings'].includes(item.path),
+  ['/admin/dashboard', '/admin/orders', '/admin/finance', '/admin/feedback', '/admin/settings'].includes(item.path),
 );
 
 const AdminSidebar: React.FC = () => {

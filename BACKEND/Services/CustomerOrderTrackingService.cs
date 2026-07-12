@@ -31,9 +31,17 @@ namespace BACKEND.Services
                     CurrentDisplayStatus = GetStatusDisplay(o.Status),
                     PickupAddress = o.PickupAddress,
                     DeliveryAddress = o.DeliveryAddress,
+                    Destination = string.IsNullOrWhiteSpace(o.DeliveryAddress) ? o.Warehouse.WarehouseName : o.DeliveryAddress,
+                    WarehouseName = o.Warehouse.WarehouseName,
                     CreatedAt = o.CreatedAt,
                     DeliveredAt = o.DeliveredAt,
-                    FinalCost = o.FinalCost
+                    FinalCost = o.FinalCost,
+                    HasInvoice = o.Invoices.Any(),
+                    InvoiceId = o.Invoices.OrderByDescending(i => i.InvoiceId).Select(i => (int?)i.InvoiceId).FirstOrDefault(),
+                    InvoiceNo = o.Invoices.OrderByDescending(i => i.InvoiceId).Select(i => i.InvoiceNo).FirstOrDefault(),
+                    InvoiceStatus = o.Invoices.OrderByDescending(i => i.InvoiceId).Select(i => i.Status).FirstOrDefault(),
+                    InvoicePdfPath = o.Invoices.OrderByDescending(i => i.InvoiceId).Select(i => i.Pdfpath).FirstOrDefault(),
+                    HasFeedback = o.ServiceFeedbacks.Any(f => f.CustomerId == customer.CustomerId)
                 })
                 .ToListAsync();
         }
@@ -295,10 +303,10 @@ namespace BACKEND.Services
         {
             if (IsStatus(status, "CANCELLED")) return "Đã hủy";
             if (IsStatus(status, "DELIVERED")) return "Hoàn thành";
-            if (IsStatus(status, "DISPATCHED")) return "Đã xuất kho";
+            if (IsStatus(status, "DISPATCHED")) return "Đang vận chuyển";
             if (IsAnyStatus(status, "PICKING", "IN_STORAGE")) return "Đang xử lý";
             if (IsStatus(status, "CONFIRMED")) return "Đã xác nhận";
-            if (IsAnyStatus(status, "PENDING", "CREATED")) return "Đã tạo đơn";
+            if (IsAnyStatus(status, "PENDING", "CREATED", "PENDING_PAYMENT")) return "Đã tạo đơn";
 
             return string.IsNullOrWhiteSpace(status) ? "Chưa có trạng thái" : status;
         }
