@@ -755,6 +755,26 @@ Làm sao để nhúng Goong Map vào React, gọi API Direction để lấy đư
 ### Evaluation
 AI đưa ra hướng dẫn sử dụng thư viện `goongjs` và thuật toán nội suy điểm. Nhóm quyết định không copy toàn bộ logic mà tự viết hàm `getRoutePoint`, tự thiết kế SVG Marker hình xe tải theo phong cách Glassmorphism và tự mapping % tiến độ từ dữ liệu đơn hàng vào lộ trình trên bản đồ thực, thay thế hoàn toàn giao diện SVG giả trước đó.
 
+## Prompt #32
+
+- Date: 2026-07-12
+- AI Tool: ChatGPT/Codex
+- Author: Tran Van Tung (DE180109)
+- Purpose: Hoan thien tao hoa don PDF tu dong va gui email cho customer sau thanh toan
+
+### Prompt
+Khi customer thanh toan thanh cong thi he thong tao Invoice PAID, generate bill PDF va gui bill PDF ve email customer. Neu chua thanh toan thi gui invoice PENDING. Can sua nut xem/tai PDF, gui lai email, them nut thanh toan lai va them thong tin QR, ten tai khoan, so tai khoan vao PDF/email.
+
+### Expected Output
+- Backend cap nhat luong PayOS, invoice, payment va email.
+- Frontend Payment History co toast bao thanh cong/that bai cho cac nut.
+- PDF/email co thong tin chuyen khoan va VietQR.
+- Customer chi xem duoc hoa don cua minh.
+
+### Evaluation
+AI ho tro tim vi tri file va goi y luong xu ly, nhung sinh vien tu doc code that, tu quyet dinh endpoint `/customer/invoices/{invoiceId}/pdf`, tu kiem tra quyen customer va tu build/type-check de xac nhan ket qua.
+
+---
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
