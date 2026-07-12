@@ -792,6 +792,23 @@ My Orders la man hinh Customer dung de xem don logistics, trang thai xu ly, hoa 
 ```text
 AI ho tro xac dinh cac field can bo sung trong DTO/API va goi y bo cuc UI. Ket qua duoc chinh sua lai theo code hien co cua project, dung endpoint invoice PDF va feedback da co.
 ```
+---
+
+## Prompt #34
+- Date: 2026-07-12
+- AI Tool: Antigravity
+- Author: Tran Van Tung (DE180109)
+- Purpose: Tich hop AI Chatbot ho tro Customer bang FAQ va Gemini, dong thoi tao chatbox noi.
+
+### Original Prompt Summary
+```text
+Can lam AI Chatbot ho tro khach hang, uu tien FAQ trong database, neu FAQ khong du thi goi Gemini API, fallback an toan khi Gemini loi. Chatbot can hien thi nhu bong chat o goc duoi phai, bam vao mo khung chat cho user hoi nhanh.
+```
+
+### Result
+```text
+AI ho tro xac dinh backend API, service FAQ/Gemini fallback va UI chatbox noi. Ket qua duoc chinh sua theo code hien co, them kiem tra quyen customer khi hoi ma don va sua UI de bot bot choi mau.
+```
 
 ---
 ## 6. Prompt quan trọng nhất
@@ -941,5 +958,3 @@ Sinh viên/nhóm cam kết rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 02/06/2026 |
-
----
