@@ -589,6 +589,27 @@ Author: Tran Van Tung (DE180109)
 
 ---
 
+## [2026-07-12]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them API chatbot Customer `POST /api/customer/chatbot/ask`.
+- Them API FAQ Customer `GET /api/customer/faqs`.
+- Them service chatbot uu tien FAQ, tra cuu don noi bo va fallback Gemini.
+- Them chatbox AI noi goc duoi phai tren Customer Portal.
+- Them trang Support Chat goi API chatbot that.
+
+### Changed
+- Cai thien UI chatbox voi mau nhe hon va icon hoi thoai.
+- Sua logic match FAQ tieng Viet, dac biet tu khoa danh gia.
+- Them ghi log goi Gemini vao APIIntegrationLogs.
+
+### Verification
+- npm run type-check: thanh cong.
+- dotnet build BACKEND/BACKEND.csproj --no-restore -p:UseAppHost=false -o .tmp-build/backend-check: thanh cong.
+
+---
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
