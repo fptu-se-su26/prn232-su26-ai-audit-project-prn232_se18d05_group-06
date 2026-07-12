@@ -94,7 +94,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "NoteCode" }, "UQ__Adjustme__BAD95CB5D6BBB0B5")
                         .IsUnique();
 
-                    b.ToTable("AdjustmentNotes");
+                    b.ToTable("AdjustmentNotes", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.AiModelTrainingLog", b =>
@@ -152,7 +152,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("TriggeredBy");
 
-                    b.ToTable("AiModelTrainingLogs");
+                    b.ToTable("AiModelTrainingLogs", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Aiparameter", b =>
@@ -359,7 +359,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "BankTxnRef" }, "UQ__BankReco__9AF5342B4F71853F")
                         .IsUnique();
 
-                    b.ToTable("BankReconciliations");
+                    b.ToTable("BankReconciliations", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.CargoPhoto", b =>
@@ -407,7 +407,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("TakenBy");
 
-                    b.ToTable("CargoPhotos");
+                    b.ToTable("CargoPhotos", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.CompanyProfile", b =>
@@ -548,7 +548,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "ComplaintCode" }, "UQ__Complain__8144A1BA72042D61")
                         .IsUnique();
 
-                    b.ToTable("Complaints");
+                    b.ToTable("Complaints", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Customer", b =>
@@ -643,7 +643,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "CustomerCode" }, "UQ__Customer__066785219AD29F38")
                         .IsUnique();
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.DebtTermConfig", b =>
@@ -682,7 +682,7 @@ namespace BACKEND.Migrations
                     b.HasKey("TermId")
                         .HasName("PK__DebtTerm__410A2E45333850B3");
 
-                    b.ToTable("DebtTermConfigs");
+                    b.ToTable("DebtTermConfigs", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Dock", b =>
@@ -731,7 +731,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "DockCode" }, "UQ__Docks__7438A825EF84AB85")
                         .IsUnique();
 
-                    b.ToTable("Docks");
+                    b.ToTable("Docks", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Driver", b =>
@@ -796,7 +796,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "LicenseNo" }, "UQ__Drivers__72D7E870E2D423EC")
                         .IsUnique();
 
-                    b.ToTable("Drivers");
+                    b.ToTable("Drivers", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.ExceptionExpense", b =>
@@ -856,7 +856,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "ExpenseCode" }, "UQ__Exceptio__5064CAE1F5BEFCDE")
                         .IsUnique();
 
-                    b.ToTable("ExceptionExpenses");
+                    b.ToTable("ExceptionExpenses", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Faqitem", b =>
@@ -973,7 +973,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("ForecastMonth");
 
-                    b.ToTable("FinancialForecasts");
+                    b.ToTable("FinancialForecasts", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.GateLog", b =>
@@ -1039,7 +1039,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "VehicleId", "EventAt" }, "IX_GateLog_Vehicle")
                         .IsDescending(false, true);
 
-                    b.ToTable("GateLogs");
+                    b.ToTable("GateLogs", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.InboundOrder", b =>
@@ -1111,7 +1111,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "InboundCode" }, "UQ__InboundO__D6CE9D26E8FF636A")
                         .IsUnique();
 
-                    b.ToTable("InboundOrders");
+                    b.ToTable("InboundOrders", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.InboundOrderLine", b =>
@@ -1177,7 +1177,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("Skuid");
 
-                    b.ToTable("InboundOrderLines");
+                    b.ToTable("InboundOrderLines", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.InspectionRecord", b =>
@@ -1221,7 +1221,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("InspectionRecords");
+                    b.ToTable("InspectionRecords", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Inventory", b =>
@@ -1381,7 +1381,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "InvoiceNo" }, "UQ__Invoices__D796B227DD50CAAA")
                         .IsUnique();
 
-                    b.ToTable("Invoices");
+                    b.ToTable("Invoices", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.MaintenanceSchedule", b =>
@@ -1423,7 +1423,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("MaintenanceSchedules");
+                    b.ToTable("MaintenanceSchedules", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.MasterCategory", b =>
@@ -1514,7 +1514,7 @@ namespace BACKEND.Migrations
                     b.HasKey("ConfigId")
                         .HasName("PK__Notifica__C3BC333C1ACBF3C8");
 
-                    b.ToTable("NotificationConfigs");
+                    b.ToTable("NotificationConfigs", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.OperatingExpense", b =>
@@ -1570,7 +1570,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "ExpenseCode" }, "UQ_OperatingExpenses_ExpenseCode")
                         .IsUnique();
 
-                    b.ToTable("OperatingExpenses");
+                    b.ToTable("OperatingExpenses", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.OrderLine", b =>
@@ -1617,7 +1617,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("Skuid");
 
-                    b.ToTable("OrderLines");
+                    b.ToTable("OrderLines", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.OutboundLine", b =>
@@ -1664,7 +1664,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("Skuid");
 
-                    b.ToTable("OutboundLines");
+                    b.ToTable("OutboundLines", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.OutboundOrder", b =>
@@ -1725,7 +1725,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "OutboundCode" }, "UQ__Outbound__1E23CBD375391702")
                         .IsUnique();
 
-                    b.ToTable("OutboundOrders");
+                    b.ToTable("OutboundOrders", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.OverstayAlert", b =>
@@ -1816,7 +1816,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("AlertStatus", "AlertLevel");
 
-                    b.ToTable("OverstayAlerts");
+                    b.ToTable("OverstayAlerts", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Payment", b =>
@@ -1892,7 +1892,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "PaymentCode" }, "UQ__Payments__106D3BA80953A9EB")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.PriceConfig", b =>
@@ -1989,7 +1989,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "CategoryCode" }, "UQ__ProductC__371BA955BEBC17C3")
                         .IsUnique();
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Role", b =>
@@ -2027,7 +2027,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "RoleCode" }, "UQ__Roles__D62CB59C6C88479A")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.ServiceCharge", b =>
@@ -2101,7 +2101,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "ChargeCode" }, "UQ__ServiceC__3FFCA5B4F68D5770")
                         .IsUnique();
 
-                    b.ToTable("ServiceCharges");
+                    b.ToTable("ServiceCharges", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.ServiceFeedback", b =>
@@ -2273,7 +2273,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "OrderCode" }, "UQ__ServiceO__999B52292FD2C80F")
                         .IsUnique();
 
-                    b.ToTable("ServiceOrders");
+                    b.ToTable("ServiceOrders", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Sku", b =>
@@ -2554,7 +2554,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "BookingCode" }, "UQ__SlotBook__C6E56BD5968CEB62")
                         .IsUnique();
 
-                    b.ToTable("SlotBookings");
+                    b.ToTable("SlotBookings", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.StockAlert", b =>
@@ -2603,7 +2603,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("Skuid");
 
-                    b.ToTable("StockAlerts");
+                    b.ToTable("StockAlerts", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.StockLedger", b =>
@@ -2734,7 +2734,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "TransferCode" }, "UQ__StockTra__CE99A4C54ECE3D2E")
                         .IsUnique();
 
-                    b.ToTable("StockTransfers");
+                    b.ToTable("StockTransfers", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.StockWriteOff", b =>
@@ -2802,7 +2802,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "WriteOffCode" }, "UQ__StockWri__5D8543DDB43D1941")
                         .IsUnique();
 
-                    b.ToTable("StockWriteOffs");
+                    b.ToTable("StockWriteOffs", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.StocktakeLine", b =>
@@ -2860,7 +2860,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("StocktakeId");
 
-                    b.ToTable("StocktakeLines");
+                    b.ToTable("StocktakeLines", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.StocktakeOrder", b =>
@@ -2913,7 +2913,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "StocktakeCode" }, "UQ__Stocktak__66FC5709B341915C")
                         .IsUnique();
 
-                    b.ToTable("StocktakeOrders");
+                    b.ToTable("StocktakeOrders", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.TierConfig", b =>
@@ -2952,7 +2952,7 @@ namespace BACKEND.Migrations
 
                     b.HasKey("TierId");
 
-                    b.ToTable("TierConfigs");
+                    b.ToTable("TierConfigs", (string)null);
 
                     b.HasData(
                         new
@@ -3052,7 +3052,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "Email" }, "UQ__Users__A9D105346AB00C68")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Vehicle", b =>
@@ -3157,7 +3157,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "TruckPlate" }, "UQ__Vehicles__7E7475852470FDF2")
                         .IsUnique();
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.VehicleDockSession", b =>
@@ -3230,7 +3230,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("DockId", "DockStartTime");
 
-                    b.ToTable("VehicleDockSessions");
+                    b.ToTable("VehicleDockSessions", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.VehicleEvent", b =>
@@ -3314,7 +3314,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("VehicleMaintenanceLogs");
+                    b.ToTable("VehicleMaintenanceLogs", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.Voucher", b =>
@@ -3383,7 +3383,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "VoucherCode" }, "UQ__Vouchers__7F0ABCA973C3C967")
                         .IsUnique();
 
-                    b.ToTable("Vouchers");
+                    b.ToTable("Vouchers", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.VwCustomerDebt", b =>
@@ -3670,7 +3670,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "WarehouseCode" }, "UQ__Warehous__1686A0569F2F8A8B")
                         .IsUnique();
 
-                    b.ToTable("Warehouses");
+                    b.ToTable("Warehouses", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.WarehouseBin", b =>
@@ -3722,7 +3722,7 @@ namespace BACKEND.Migrations
                     b.HasIndex(new[] { "BinCode" }, "UQ__Warehous__6343424506A26A7C")
                         .IsUnique();
 
-                    b.ToTable("WarehouseBins");
+                    b.ToTable("WarehouseBins", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.WarehouseShelf", b =>
@@ -3762,7 +3762,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("ZoneId");
 
-                    b.ToTable("WarehouseShelves");
+                    b.ToTable("WarehouseShelves", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.WarehouseZone", b =>
@@ -3807,7 +3807,7 @@ namespace BACKEND.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("WarehouseZones");
+                    b.ToTable("WarehouseZones", (string)null);
                 });
 
             modelBuilder.Entity("BACKEND.Models.AdjustmentNote", b =>
