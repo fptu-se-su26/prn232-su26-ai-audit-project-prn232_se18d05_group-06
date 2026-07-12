@@ -567,7 +567,28 @@ Author: Tran Van Tung (DE180109)
 ### Verification
 - `dotnet build BACKEND\\BACKEND.csproj --no-restore`: thanh cong.
 - `npm run type-check`: thanh cong.
+
 ---
+## [2026-07-12]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them man hinh My Orders moi cho Customer tai `/customer/orders`.
+- Them KPI tong don, dang xu ly, hoan thanh va cho danh gia.
+- Them nut xem chi tiet, xem PDF, tai PDF, thanh toan va danh gia dich vu.
+- Them modal feedback 1-5 sao va comment toi da 1000 ky tu.
+
+### Changed
+- API `/api/customer/orders` tra them thong tin warehouse, invoice va trang thai feedback.
+- Doi menu Customer sang nhan "Don hang cua toi" va "Hoa don cua toi".
+- Chuan hoa hien thi trang thai don, trang thai thanh toan va label tieng Viet tren My Orders.
+
+### Verification
+- `dotnet build BACKEND\BACKEND.csproj --no-restore`: thanh cong.
+- `npm run type-check`: thanh cong.
+
+---
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành
