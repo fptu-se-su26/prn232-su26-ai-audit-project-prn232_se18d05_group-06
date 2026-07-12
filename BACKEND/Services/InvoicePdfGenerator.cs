@@ -9,6 +9,11 @@ namespace BACKEND.Services
 {
     public static class InvoicePdfGenerator
     {
+        private const string PaymentBankName = "MB Bank - Ngan hang TMCP Quan doi";
+        private const string PaymentAccountName = "VU LE DUY";
+        private const string PaymentAccountNumber = "VQRQAKJRY6534";
+        private const string PaymentQrBaseUrl = "https://img.vietqr.io/image/MB-VQRQAKJRY6534-compact2.png";
+
         public static byte[] Generate(
             string invoiceNo,
             string orderCode,
@@ -25,60 +30,70 @@ namespace BACKEND.Services
             decimal vatAmount,
             decimal total)
         {
+            var transferContent = $"SmartLog {invoiceNo}";
+            var qrUrl = BuildVietQrUrl(total, transferContent);
             var lines = new List<string>
             {
-                "SMARTLOG AI - INVOICE",
+                "SMARTLOG AI - LOGISTICS INVOICE",
                 "--------------------------------------------------",
-                $"Invoice Number: {invoiceNo}",
-                $"Order Code    : {orderCode}",
-                $"Issue Date    : {issueDate:dd/MM/yyyy}",
-                $"Due Date      : {dueDate:dd/MM/yyyy}",
+                $"Invoice Number : {invoiceNo}",
+                $"Order Code     : {orderCode}",
+                $"Issue Date     : {issueDate:dd/MM/yyyy}",
+                $"Due Date       : {dueDate:dd/MM/yyyy}",
                 "",
-                "COMPANY INFORMATION:",
-                "  SmartLog AI Corp",
+                "SMARTLOG AI INFORMATION:",
+                "  SmartLog AI - Warehouse Management",
                 "  Address: Tan Binh District, Ho Chi Minh City",
-                "  Email  : billing@smartlogai.com",
-                "  Website: www.smartlogai.com",
+                "  Email  : smartlogai2026@gmail.com",
                 "",
                 "CUSTOMER BILL TO:",
-                $"  Company: {customerName}",
-                $"  Contact: {contactName ?? "N/A"}",
-                $"  Address: {address ?? "N/A"}",
+                $"  Company : {customerName}",
+                $"  Contact : {contactName ?? "N/A"}",
+                $"  Address : {address ?? "N/A"}",
                 $"  Tax Code: {taxCode ?? "N/A"}",
                 "",
-                "CHARGES DETAIL BREAKDOWN:",
-                string.Format("  {0,-24} | {1,-18}", "Charge Type / Description", "Amount (VND)"),
+                "SERVICE CHARGES:",
+                string.Format("  {0,-25} | {1,16}", "Charge", "Amount (VND)"),
                 "  --------------------------------------------------",
             };
 
             foreach (var c in charges)
             {
-                var label = $"{c.Type} ({c.Desc})";
-                if (label.Length > 24) label = label.Substring(0, 21) + "...";
-                lines.Add(string.Format("  {0,-24} | {1,18:N0}", label, c.Amt));
+                var label = string.IsNullOrWhiteSpace(c.Desc) ? c.Type : $"{c.Type} - {c.Desc}";
+                if (label.Length > 25) label = label.Substring(0, 22) + "...";
+                lines.Add(string.Format("  {0,-25} | {1,16:N0}", label, c.Amt));
             }
 
             lines.AddRange(new[]
             {
                 "  --------------------------------------------------",
-                string.Format("  {0,-24} | {1,18:N0}", "SubTotal", subTotal),
-                string.Format("  {0,-24} | {1,18:N0}", $"Discount ({discount:N0})", -discount),
-                string.Format("  {0,-24} | {1,18:N0}", $"VAT ({vatRate * 100}%)", vatAmount),
+                string.Format("  {0,-25} | {1,16:N0}", "Subtotal", subTotal),
+                string.Format("  {0,-25} | {1,16:N0}", "Discount", -discount),
+                string.Format("  {0,-25} | {1,16:N0}", $"VAT ({vatRate * 100:N0}%)", vatAmount),
                 "  --------------------------------------------------",
-                string.Format("  {0,-24} | {1,18:N0}", "TOTAL AMOUNT DUE", total),
+                string.Format("  {0,-25} | {1,16:N0}", "TOTAL AMOUNT", total),
                 "  --------------------------------------------------",
                 "",
-                "PAYMENT INSTRUCTIONS:",
-                "  Please pay via bank transfer to:",
-                "  Bank Name: Vietnam Joint Stock Commercial Bank (VietinBank)",
-                "  Account Name: SMARTLOG AI CORPORATION",
-                "  Account Number: 112000293456",
-                "  Description: [Invoice Number]",
+                "PAYMENT / VIETQR INFORMATION:",
+                $"  Bank          : {PaymentBankName}",
+                $"  Account Name  : {PaymentAccountName}",
+                $"  Account No    : {PaymentAccountNumber}",
+                $"  Amount        : {total:N0} VND",
+                $"  Content       : {transferContent}",
+                "  QR Link       :",
+                $"  {qrUrl}",
                 "",
-                "Thank you for choosing SmartLog AI!"
+                "Please use the exact transfer content above so SmartLog AI can reconcile payment automatically.",
+                "Thank you for choosing SmartLog AI."
             });
 
             return SimplePdfWriter.Write(lines.Select(ToPdfText).ToList());
+        }
+
+        private static string BuildVietQrUrl(decimal amount, string transferContent)
+        {
+            var roundedAmount = decimal.ToInt32(decimal.Round(Math.Max(0, amount), 0));
+            return $"{PaymentQrBaseUrl}?amount={roundedAmount}&addInfo={Uri.EscapeDataString(transferContent)}&accountName={Uri.EscapeDataString(PaymentAccountName)}";
         }
 
         private static string ToPdfText(string value)
@@ -106,7 +121,7 @@ namespace BACKEND.Services
                     "<< /Type /Catalog /Pages 2 0 R >>",
                     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
                     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
-                    "<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>", // Courier is monospace to align tables perfectly!
+                    "<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>",
                     $"<< /Length {Encoding.ASCII.GetByteCount(content)} >>\nstream\n{content}\nendstream"
                 };
 
@@ -145,12 +160,12 @@ namespace BACKEND.Services
             {
                 var builder = new StringBuilder();
                 builder.AppendLine("BT");
-                builder.AppendLine("/F1 10 Tf");
-                builder.AppendLine("40 800 Td");
-                foreach (var line in lines.Take(44))
+                builder.AppendLine("/F1 9 Tf");
+                builder.AppendLine("36 806 Td");
+                foreach (var line in lines.Take(52))
                 {
                     builder.AppendLine($"({Escape(line)}) Tj");
-                    builder.AppendLine("0 -16 Td");
+                    builder.AppendLine("0 -14 Td");
                 }
                 builder.AppendLine("ET");
                 return builder.ToString();

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -162,6 +163,58 @@ namespace BACKEND.Controllers
         }
 
 
+
+        [HttpGet("{invoiceId:int}/pdf")]
+        public async Task<IActionResult> GetInvoicePdf(int invoiceId, [FromQuery] bool download = false)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                if (userId == null)
+                {
+                    return Unauthorized("Missing or invalid user id claim.");
+                }
+
+                var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId.Value);
+                if (customer == null)
+                {
+                    return BadRequest("User is not registered as a customer.");
+                }
+
+                var invoice = await _context.Invoices
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
+
+                if (invoice == null)
+                {
+                    return NotFound($"Invoice with ID {invoiceId} not found.");
+                }
+
+                if (invoice.CustomerId != customer.CustomerId)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, "You do not have permission to view this invoice.");
+                }
+
+                var regenerated = await _invoiceService.RegenerateInvoicePdfAsync(invoiceId);
+                var pdfFilePath = GetInvoicePdfPath(regenerated.InvoiceNo);
+                if (!System.IO.File.Exists(pdfFilePath))
+                {
+                    return NotFound("Invoice PDF file is not available yet.");
+                }
+
+                var bytes = await System.IO.File.ReadAllBytesAsync(pdfFilePath);
+                var fileName = $"{regenerated.InvoiceNo}.pdf";
+                Response.Headers.ContentDisposition = download
+                    ? $"attachment; filename=\"{fileName}\""
+                    : $"inline; filename=\"{fileName}\"";
+
+                return File(bytes, "application/pdf");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
         [HttpGet("{invoiceId:int}/receipt")]
         public async Task<IActionResult> GetReceipt(int invoiceId)
         {
@@ -284,6 +337,18 @@ namespace BACKEND.Controllers
             }
         }
 
+
+        private static string GetInvoicePdfPath(string invoiceNo)
+        {
+            var projectRoot = AppDomain.CurrentDomain.BaseDirectory;
+            var binIndex = projectRoot.IndexOf("bin", StringComparison.OrdinalIgnoreCase);
+            if (binIndex >= 0)
+            {
+                projectRoot = projectRoot[..binIndex];
+            }
+
+            return Path.Combine(projectRoot, "wwwroot", "invoices", $"{invoiceNo}.pdf");
+        }
         private int? GetCurrentUserId()
         {
             var raw = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
