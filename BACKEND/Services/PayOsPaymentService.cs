@@ -26,7 +26,7 @@ namespace BACKEND.Services
         {
             _context = context;
             _configuration = configuration;
-            _paymentService = paymentService;
+            // _paymentService = paymentService;
             _logger = logger;
             _env = env;
 
@@ -162,10 +162,10 @@ namespace BACKEND.Services
             await ApplyPaymentResultAsync(payment, paid, verifiedData.Reference, verifiedData.PaymentLinkId);
             await _context.SaveChangesAsync();
 
-            if (shouldSendBill)
-            {
-                await ConfirmAndSendBillAsync(payment.PaymentId);
-            }
+            // if (shouldSendBill)
+            // {
+            //     await ConfirmAndSendBillAsync(payment.PaymentId);
+            // }
         }
 
 
@@ -303,7 +303,7 @@ namespace BACKEND.Services
             if (!paid)
             {
                 payment.Status = "FAILED";
-                return false;
+                return;
             }
 
             var alreadyConfirmed = string.Equals(payment.Status, "CONFIRMED", StringComparison.OrdinalIgnoreCase)

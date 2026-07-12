@@ -58,10 +58,10 @@ const compactMoney = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 1, 
 const formatCompactMoney = (value = 0) => `${compactMoney.format(value)} VND`;
 
 const statusOptions = [
-  { value: 'ALL', label: 'T\u1ea5t c\u1ea3' },
-  { value: 'UNMATCHED', label: 'Ch\u01b0a kh\u1edbp' },
-  { value: 'PARTIAL', label: 'Thanh to\u00e1n m\u1ed9t ph\u1ea7n' },
-  { value: 'MATCHED', label: '\u0110\u00e3 kh\u1edbp' },
+  { value: 'ALL', label: 'Tất cả' },
+  { value: 'UNMATCHED', label: 'Chưa khớp' },
+  { value: 'PARTIAL', label: 'Thanh toán một phần' },
+  { value: 'MATCHED', label: 'Đã khớp' },
 ];
 
 const statusStyles: Record<string, string> = {
@@ -71,9 +71,9 @@ const statusStyles: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  MATCHED: '\u0110\u00e3 kh\u1edbp',
-  PARTIAL: 'M\u1ed9t ph\u1ea7n',
-  UNMATCHED: 'Ch\u01b0a kh\u1edbp',
+  MATCHED: 'Đã khớp',
+  PARTIAL: 'Một phần',
+  UNMATCHED: 'Chưa khớp',
 };
 
 const PaymentReconciliationPanel: React.FC = () => {
@@ -96,7 +96,7 @@ const PaymentReconciliationPanel: React.FC = () => {
       setError(null);
     } catch {
       setData(fallbackList);
-      setError('Kh\u00f4ng t\u1ea3i \u0111\u01b0\u1ee3c danh s\u00e1ch \u0111\u1ed1i so\u00e1t thanh to\u00e1n.');
+      setError('Không tải được danh sách đối soát thanh toán.');
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ const PaymentReconciliationPanel: React.FC = () => {
       setNotice(`Auto-match: ${response.data.matched} matched, ${response.data.partial} partial, ${response.data.unmatched} unmatched.`);
       await loadData();
     } catch {
-      setError('Auto-match th\u1ea5t b\u1ea1i. Vui l\u00f2ng ki\u1ec3m tra backend ho\u1eb7c database.');
+      setError('Auto-match thất bại. Vui lòng kiểm tra backend hoặc database.');
     } finally {
       setBusy(false);
     }
@@ -155,10 +155,10 @@ const PaymentReconciliationPanel: React.FC = () => {
   };
 
   const cards = useMemo(() => [
-    { label: 'T\u1ed5ng giao d\u1ecbch', value: data.total, icon: 'account_balance', tone: 'bg-slate-100 text-slate-700' },
-    { label: '\u0110\u00e3 kh\u1edbp', value: data.matched, icon: 'check_circle', tone: 'bg-emerald-50 text-emerald-700' },
-    { label: 'M\u1ed9t ph\u1ea7n', value: data.partial, icon: 'rule', tone: 'bg-amber-50 text-amber-700' },
-    { label: 'Ch\u01b0a kh\u1edbp', value: data.unmatched, icon: 'error', tone: 'bg-rose-50 text-rose-700' },
+    { label: 'Tổng giao dịch', value: data.total, icon: 'account_balance', tone: 'bg-slate-100 text-slate-700' },
+    { label: 'Đã khớp', value: data.matched, icon: 'check_circle', tone: 'bg-emerald-50 text-emerald-700' },
+    { label: 'Một phần', value: data.partial, icon: 'rule', tone: 'bg-amber-50 text-amber-700' },
+    { label: 'Chưa khớp', value: data.unmatched, icon: 'error', tone: 'bg-rose-50 text-rose-700' },
   ], [data]);
 
   const statusChartData = useMemo(() => {
@@ -190,8 +190,8 @@ const PaymentReconciliationPanel: React.FC = () => {
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">Finance / Payment Reconciliation</p>
-            <h2 className="mt-1 text-xl font-semibold text-slate-950">{'\u0110\u1ed1i so\u00e1t giao d\u1ecbch thanh to\u00e1n'}</h2>
-            <p className="mt-1 text-sm text-slate-500">{'Ki\u1ec3m tra BankTxnRef, s\u1ed1 ti\u1ec1n, payment v\u00e0 h\u00f3a \u0111\u01a1n \u0111\u1ec3 x\u00e1c \u0111\u1ecbnh tr\u1ea1ng th\u00e1i \u0111\u1ed1i so\u00e1t.'}</p>
+            <h2 className="mt-1 text-xl font-semibold text-slate-950">{'Đối soát giao dịch thanh toán'}</h2>
+            <p className="mt-1 text-sm text-slate-500">{'Kiểm tra BankTxnRef, số tiền, payment và hóa đơn để xác định trạng thái đối soát.'}</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <select value={status} onChange={(event) => setStatus(event.target.value)} className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100">
@@ -199,11 +199,11 @@ const PaymentReconciliationPanel: React.FC = () => {
             </select>
             <button type="button" onClick={loadData} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:translate-y-px">
               <span className="material-symbols-outlined text-[18px]">sync</span>
-              {'L\u00e0m m\u1edbi'}
+              {'Làm mới'}
             </button>
             <button type="button" onClick={autoMatch} disabled={busy} className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-indigo-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-800 disabled:opacity-60 active:translate-y-px">
               <span className="material-symbols-outlined text-[18px]">rule_settings</span>
-              {busy ? 'Matching...' : '\u0110\u1ed1i so\u00e1t'}
+              {busy ? 'Matching...' : 'Đối soát'}
             </button>
             <FinanceExportButtons reportType="payment-reconciliation" status={status} compact />
           </div>
@@ -233,8 +233,8 @@ const PaymentReconciliationPanel: React.FC = () => {
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-lg font-semibold text-slate-950">{'T\u1ef7 l\u1ec7 \u0111\u1ed1i so\u00e1t'}</h3>
-              <p className="mt-1 text-sm text-slate-500">{'Ph\u00e2n b\u1ed5 giao d\u1ecbch theo tr\u1ea1ng th\u00e1i kh\u1edbp.'}</p>
+              <h3 className="text-lg font-semibold text-slate-950">{'Tỷ lệ đối soát'}</h3>
+              <p className="mt-1 text-sm text-slate-500">{'Phân bổ giao dịch theo trạng thái khớp.'}</p>
             </div>
             <div className="rounded-lg bg-indigo-50 px-3 py-2 text-right">
               <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">Match rate</p>
@@ -248,7 +248,7 @@ const PaymentReconciliationPanel: React.FC = () => {
                   <Pie data={statusChartData} dataKey="count" nameKey="label" innerRadius="58%" outerRadius="86%" paddingAngle={3}>
                     {statusChartData.map((entry) => <Cell key={entry.status} fill={entry.color} />)}
                   </Pie>
-                  <Tooltip formatter={(value: number) => `${value} giao d\u1ecbch`} />
+                  <Tooltip formatter={(value: number) => `${value} giao dịch`} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -272,11 +272,11 @@ const PaymentReconciliationPanel: React.FC = () => {
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-slate-950">{'Gi\u00e1 tr\u1ecb giao d\u1ecbch theo tr\u1ea1ng th\u00e1i'}</h3>
-              <p className="mt-1 text-sm text-slate-500">{'T\u1ed5ng s\u1ed1 ti\u1ec1n ng\u00e2n h\u00e0ng c\u1ea7n \u0111\u1ed1i so\u00e1t theo t\u1eebng nh\u00f3m.'}</p>
+              <h3 className="text-lg font-semibold text-slate-950">{'Giá trị giao dịch theo trạng thái'}</h3>
+              <p className="mt-1 text-sm text-slate-500">{'Tổng số tiền ngân hàng cần đối soát theo từng nhóm.'}</p>
             </div>
             <div className="rounded-lg bg-rose-50 px-3 py-2 text-right">
-              <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">{'C\u1ea7n theo d\u00f5i'}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">{'Cần theo dõi'}</p>
               <p className="text-lg font-semibold text-rose-800">{formatCompactMoney(unresolvedAmount)}</p>
             </div>
           </div>
@@ -298,7 +298,7 @@ const PaymentReconciliationPanel: React.FC = () => {
       <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-5 py-4">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-lg font-semibold text-slate-950">{'Danh s\u00e1ch giao d\u1ecbch ng\u00e2n h\u00e0ng'}</h3>
+            <h3 className="text-lg font-semibold text-slate-950">{'Danh sách giao dịch ngân hàng'}</h3>
             {loading && <span className="text-sm font-medium text-indigo-700">Loading...</span>}
           </div>
         </div>
@@ -307,11 +307,11 @@ const PaymentReconciliationPanel: React.FC = () => {
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
                 <th className="px-5 py-3 text-left font-semibold">BankTxnRef</th>
-                <th className="px-5 py-3 text-right font-semibold">{'S\u1ed1 ti\u1ec1n NH'}</th>
-                <th className="px-5 py-3 text-left font-semibold">{'H\u00f3a \u0111\u01a1n'}</th>
+                <th className="px-5 py-3 text-right font-semibold">{'Số tiền NH'}</th>
+                <th className="px-5 py-3 text-left font-semibold">{'Hóa đơn'}</th>
                 <th className="px-5 py-3 text-left font-semibold">Payment</th>
-                <th className="px-5 py-3 text-left font-semibold">{'Tr\u1ea1ng th\u00e1i'}</th>
-                <th className="px-5 py-3 text-left font-semibold">{'Ghi ch\u00fa'}</th>
+                <th className="px-5 py-3 text-left font-semibold">{'Trạng thái'}</th>
+                <th className="px-5 py-3 text-left font-semibold">{'Ghi chú'}</th>
                 <th className="px-5 py-3 text-left font-semibold">Thao tac</th>
               </tr>
             </thead>
@@ -348,7 +348,7 @@ const PaymentReconciliationPanel: React.FC = () => {
             </tbody>
           </table>
         </div>
-        {!data.items.length && <div className="px-5 py-10 text-center text-sm text-slate-500">{'Kh\u00f4ng c\u00f3 giao d\u1ecbch \u0111\u1ed1i so\u00e1t theo b\u1ed9 l\u1ecdc hi\u1ec7n t\u1ea1i.'}</div>}
+        {!data.items.length && <div className="px-5 py-10 text-center text-sm text-slate-500">{'Không có giao dịch đối soát theo bộ lọc hiện tại.'}</div>}
       </section>
       {manualTarget && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
