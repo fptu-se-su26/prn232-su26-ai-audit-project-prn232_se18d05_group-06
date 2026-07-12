@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { LayoutDashboard, Truck } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import WarehouseHeader from '../../components/WarehouseHeader';
 import FloatingActionButton from '../../components/FloatingActionButton';
 import OverviewTab from './OverviewTab';
 import VehicleDashboard from './VehicleDashboard';
-import { LayoutDashboard, Truck } from 'lucide-react';
 
 const WarehouseDashboard = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'vehicle'>('overview');
@@ -17,7 +17,6 @@ const WarehouseDashboard = () => {
         <WarehouseHeader title="Warehouse Dashboard" subtitle="Welcome to the SmartLog AI Warehouse Management System." />
 
         <div className="p-8 pt-24 flex-1 flex flex-col">
-          {/* Tabs Navigation */}
           <div className="mb-6 border-b border-gray-200">
             <nav className="flex space-x-8" aria-label="Tabs">
               <button
@@ -30,7 +29,6 @@ const WarehouseDashboard = () => {
                 <LayoutDashboard size={18} />
                 Tổng quan
               </button>
-
               <button
                 onClick={() => setActiveTab('vehicle')}
                 className={`flex items-center gap-2 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'vehicle'
@@ -44,7 +42,6 @@ const WarehouseDashboard = () => {
             </nav>
           </div>
 
-          {/* Tab Content */}
           <div className="flex-1">
             {activeTab === 'overview' && <OverviewTab />}
             {activeTab === 'vehicle' && <VehicleDashboard />}

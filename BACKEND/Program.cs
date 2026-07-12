@@ -76,19 +76,21 @@ builder.Services.AddScoped<ISlottingService, SlottingService>();
 builder.Services.AddScoped<ICustomerOrderTrackingService, CustomerOrderTrackingService>();
 builder.Services.AddScoped<ILocationSuggestionService, LocationSuggestionService>();
 builder.Services.AddScoped<IPricingEngineService, PricingEngineService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInvoiceOcrService, InvoiceOcrService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
+builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
+builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 builder.Services.AddScoped<IFinanceDashboardService, FinanceDashboardService>();
-builder.Services.AddScoped<IInvoiceService, InvoiceService>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 
 builder.Services.AddHttpClient();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();
-builder.Services.AddHostedService<MaintenanceAlertWorker>();
+// builder.Services.AddHostedService<MaintenanceAlertWorker>();
 // builder.Services.AddHostedService<OverstayAlertWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

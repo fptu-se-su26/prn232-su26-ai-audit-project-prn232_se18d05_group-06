@@ -8,15 +8,41 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    const userEmail = localStorage.getItem('email');
-    if (userEmail && !isUserAuthorized(userEmail)) {
-      return Promise.reject(new Error('User not authorized'));
+function getStoredUserRole(): string {
+  try {
+    const rawUser = localStorage.getItem('user');
+    if (!rawUser) {
+      return '';
     }
+
+    const parsedUser = JSON.parse(rawUser);
+    return parsedUser?.role || parsedUser?.Role || '';
+  } catch {
+    return '';
+  }
+}
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  const userEmail = localStorage.getItem('email');
+  const userRole = getStoredUserRole();
+  const isAuthRequest = config.url?.includes('/auth/');
+
+  if (isAuthRequest) {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+  }
+
+  if (userEmail && !isUserAuthorized(userEmail, userRole)) {
+    return Promise.reject(new Error('User not authorized'));
+  }
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
   return config;
 });
 

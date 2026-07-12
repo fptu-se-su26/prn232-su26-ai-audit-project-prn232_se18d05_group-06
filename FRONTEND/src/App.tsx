@@ -56,6 +56,7 @@ import { ROUTE_PATHS } from './routes';
 
 // Only Admin (RoleID = 1) and Warehouse (RoleID = 2) may access warehouse pages.
 const WAREHOUSE_ROLES = ['ADMIN', 'WAREHOUSE', 'WF'];
+const ADMIN_ROLES = ['ADMIN'];
 
 const modules = [
   { path: '/admin/dashboard', name: 'Dashboard', desc: 'KPI Grid, AI Insights, Maps', icon: 'dashboard', color: 'from-blue-500 to-indigo-600' },
@@ -114,21 +115,21 @@ const App: React.FC = () => {
         <Route path="/support-chat" element={<SupportChat />} />
 
         {/* Admin Dashboard & Management */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/analytics" element={<AdminAnalytics />} />
-        <Route path="/admin/finance" element={<AdminFinance />} />
-        <Route path="/admin/invoices" element={<AdminFinance defaultTab="invoices" />} />
-        <Route path="/admin/audit-log" element={<AdminAuditLog />} />
-        <Route path="/admin/notifications" element={<AdminNotifications />} />
-        <Route path="/admin/fleet-map" element={<AdminFleetMap />} />
-        <Route path="/admin/orders" element={<AdminOrders />} />
-        <Route path="/admin/user-management" element={<AdminUserManagement />} />
-        <Route path="/admin/role-permission" element={<AdminRolePermission />} />
-        <Route path="/admin/smart-log-ai" element={<AdminSmartLogAI />} />
+        <Route path="/admin/dashboard" element={<RoleGuard allow={ADMIN_ROLES}><AdminDashboard /></RoleGuard>} />
+        <Route path="/admin/analytics" element={<RoleGuard allow={ADMIN_ROLES}><AdminAnalytics /></RoleGuard>} />
+        <Route path="/admin/finance" element={<RoleGuard allow={ADMIN_ROLES}><AdminFinance /></RoleGuard>} />
+        <Route path="/admin/invoices" element={<RoleGuard allow={ADMIN_ROLES}><AdminFinance defaultTab="invoices" /></RoleGuard>} />
+        <Route path="/admin/audit-log" element={<RoleGuard allow={ADMIN_ROLES}><AdminAuditLog /></RoleGuard>} />
+        <Route path="/admin/notifications" element={<RoleGuard allow={ADMIN_ROLES}><AdminNotifications /></RoleGuard>} />
+        <Route path="/admin/fleet-map" element={<RoleGuard allow={ADMIN_ROLES}><AdminFleetMap /></RoleGuard>} />
+        <Route path="/admin/orders" element={<RoleGuard allow={ADMIN_ROLES}><AdminOrders /></RoleGuard>} />
+        <Route path="/admin/user-management" element={<RoleGuard allow={ADMIN_ROLES}><AdminUserManagement /></RoleGuard>} />
+        <Route path="/admin/role-permission" element={<RoleGuard allow={ADMIN_ROLES}><AdminRolePermission /></RoleGuard>} />
+        <Route path="/admin/smart-log-ai" element={<RoleGuard allow={ADMIN_ROLES}><AdminSmartLogAI /></RoleGuard>} />
+        <Route path="/admin/settings" element={<RoleGuard allow={ADMIN_ROLES}><AdminSettings /></RoleGuard>} />
+        <Route path="/admin/feedback" element={<RoleGuard allow={ADMIN_ROLES}><AdminServiceFeedback /></RoleGuard>} />
+        <Route path="/admin/tier-management" element={<RoleGuard allow={ADMIN_ROLES}><TierManagementPage /></RoleGuard>} />
         <Route path="/admin/warehouses" element={<RoleGuard allow={WAREHOUSE_ROLES}><AdminWarehouses /></RoleGuard>} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
-        <Route path="/admin/feedback" element={<AdminServiceFeedback />} />
-        <Route path="/admin/tier-management" element={<TierManagementPage />} />
 
         {/* Warehouse Management (Admin + Warehouse roles only) */}
         <Route path={ROUTE_PATHS.WAREHOUSE_DASHBOARD} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseDashboard /></RoleGuard>} />

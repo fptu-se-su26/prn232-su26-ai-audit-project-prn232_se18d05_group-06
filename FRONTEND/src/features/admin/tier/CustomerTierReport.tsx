@@ -57,7 +57,7 @@ export const CustomerTierReport: React.FC = () => {
   }));
 
   return (
-    <div className="rounded-2xl p-6 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}>
+    <div className="rounded-2xl p-6 transition-all duration-300" style={{ background: 'rgba(15, 23, 42, 0.96)', border: '1px solid rgba(148, 163, 184, 0.14)', backdropFilter: 'blur(16px)' }}>
       <h2 className="text-xl font-bold text-white tracking-tight mb-6">Tier Distribution</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -105,7 +105,7 @@ export const CustomerTierReport: React.FC = () => {
         </div>
 
         {/* Chart */}
-        <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="rounded-xl p-4" style={{ background: 'rgba(15, 23, 42, 0.92)', border: '1px solid rgba(148, 163, 184, 0.16)' }}>
           <div className="h-[280px]">
             {totalCustomers === 0 ? (
               <div className="h-full flex items-center justify-center text-slate-500 text-sm">
