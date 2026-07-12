@@ -775,6 +775,25 @@ Khi customer thanh toan thanh cong thi he thong tao Invoice PAID, generate bill 
 AI ho tro tim vi tri file va goi y luong xu ly, nhung sinh vien tu doc code that, tu quyet dinh endpoint `/customer/invoices/{invoiceId}/pdf`, tu kiem tra quyen customer va tu build/type-check de xac nhan ket qua.
 
 ---
+
+## Prompt #33
+
+- Date: 2026-07-12
+- AI Tool: Antigravity
+- Author: Tran Van Tung (DE180109)
+- Purpose: Hoan thien My Orders va UC036 Feedback thanh mot luong Customer lien thong.
+
+### Original Prompt Summary
+```text
+My Orders la man hinh Customer dung de xem don logistics, trang thai xu ly, hoa don PDF, tai PDF va danh gia chat luong dich vu sau khi don hoan thanh. Can doi title thanh Don hang cua toi, them KPI, filter, bang don hang, nut hoa don va nut danh gia theo business rules UC036.
+```
+
+### Result
+```text
+AI ho tro xac dinh cac field can bo sung trong DTO/API va goi y bo cuc UI. Ket qua duoc chinh sua lai theo code hien co cua project, dung endpoint invoice PDF va feedback da co.
+```
+
+---
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
