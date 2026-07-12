@@ -79,6 +79,9 @@ builder.Services.AddScoped<IPricingEngineService, PricingEngineService>();
 builder.Services.AddScoped<IInvoiceOcrService, InvoiceOcrService>();
 builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
+builder.Services.AddScoped<IFinanceDashboardService, FinanceDashboardService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 
 builder.Services.AddHttpClient();
@@ -110,7 +113,7 @@ if (args.Any(arg => string.Equals(arg, "--seed-dispatch-optimization", StringCom
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SmartLogAiContext>();
-// db.Database.Migrate();
+    // db.Database.Migrate();
 }
 
 
