@@ -12,6 +12,7 @@ namespace BACKEND.Services
         private readonly SmartLogAiContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PayOsPaymentService> _logger;
+        private readonly IPaymentService _paymentService;
         private readonly string? _clientId;
         private readonly string? _apiKey;
         private readonly string? _checksumKey;
@@ -19,10 +20,12 @@ namespace BACKEND.Services
         public PayOsPaymentService(
             SmartLogAiContext context,
             IConfiguration configuration,
+            IPaymentService paymentService,
             ILogger<PayOsPaymentService> logger)
         {
             _context = context;
             _configuration = configuration;
+            _paymentService = paymentService;
             _logger = logger;
 
             _clientId = _configuration["PayOS:ClientId"];
@@ -154,14 +157,20 @@ namespace BACKEND.Services
             }
 
             var paid = string.Equals(verifiedData.Code, "00", StringComparison.OrdinalIgnoreCase);
-            ApplyPaymentResult(payment, paid, verifiedData.Reference, verifiedData.PaymentLinkId);
+            var shouldSendBill = ApplyPaymentResult(payment, paid, verifiedData.Reference, verifiedData.PaymentLinkId);
             await _context.SaveChangesAsync();
+
+            if (shouldSendBill)
+            {
+                await ConfirmAndSendBillAsync(payment.PaymentId);
+            }
         }
 
         public async Task<PayOsPaymentStatusDto> SyncReturnAsync(PayOsReturnSyncRequestDto request, int currentUserId)
         {
             var order = await GetOwnedOrderAsync(request.OrderId, currentUserId);
             var invoice = await _context.Invoices
+                .Include(i => i.Order)
                 .Include(i => i.Payments)
                 .FirstOrDefaultAsync(i => i.OrderId == order.OrderId);
 
@@ -186,7 +195,13 @@ namespace BACKEND.Services
             }
             else if (IsSuccessfulReturn(request))
             {
-                ApplyPaymentResult(payment, true, request.PayOsOrderCode?.ToString(), payment.HashCode);
+                var shouldSendBill = ApplyPaymentResult(payment, true, request.PayOsOrderCode?.ToString(), payment.HashCode);
+                await _context.SaveChangesAsync();
+
+                if (shouldSendBill)
+                {
+                    await ConfirmAndSendBillAsync(payment.PaymentId);
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -250,7 +265,7 @@ namespace BACKEND.Services
         {
             var payment = await _context.Payments
                 .OrderByDescending(p => p.PaymentId)
-                .FirstOrDefaultAsync(p => p.InvoiceId == invoice.InvoiceId && p.PaymentMethod == "PAYOS" && p.Status != "PAID");
+                .FirstOrDefaultAsync(p => p.InvoiceId == invoice.InvoiceId && p.PaymentMethod == "PAYOS" && p.Status != "CONFIRMED" && p.Status != "PAID");
 
             if (payment != null)
             {
@@ -286,23 +301,43 @@ namespace BACKEND.Services
             return Math.Max(10000m, decimal.Round(fallback / 1000m, 0) * 1000m);
         }
 
-        private static void ApplyPaymentResult(Payment payment, bool paid, string? bankReference, string? paymentLinkId)
+        private static bool ApplyPaymentResult(Payment payment, bool paid, string? bankReference, string? paymentLinkId)
         {
             if (!paid)
             {
                 payment.Status = "FAILED";
-                return;
+                return false;
             }
 
-            payment.Status = "PAID";
+            var alreadyConfirmed = string.Equals(payment.Status, "CONFIRMED", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(payment.Status, "PAID", StringComparison.OrdinalIgnoreCase);
+
+            payment.Status = "CONFIRMED";
             payment.PaidAt = DateTime.Now;
             payment.BankTxnRef = bankReference;
             payment.HashCode = paymentLinkId ?? payment.HashCode;
 
             payment.Invoice.PaidAmount = payment.Amount;
             payment.Invoice.Status = "PAID";
-            payment.Invoice.Order.Status = "CONFIRMED";
-            payment.Invoice.Order.ConfirmedAt ??= DateTime.Now;
+            if (payment.Invoice.Order != null)
+            {
+                payment.Invoice.Order.Status = "CONFIRMED";
+                payment.Invoice.Order.ConfirmedAt ??= DateTime.Now;
+            }
+
+            return !alreadyConfirmed;
+        }
+
+        private async Task ConfirmAndSendBillAsync(int paymentId)
+        {
+            try
+            {
+                await _paymentService.ConfirmExistingPaymentAsync(paymentId, null, true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "PayOS payment was confirmed but invoice PDF email failed for PaymentId {PaymentId}.", paymentId);
+            }
         }
 
         private static PayOsPaymentStatusDto ToStatusDto(ServiceOrder order, Invoice? invoice, Payment? payment)

@@ -88,11 +88,24 @@ namespace BACKEND.Controllers
             var customer = await ResolveCustomerAsync(userId.Value);
             if (customer == null)
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Current user is not linked to an active customer profile." });
             }
 
+            var serviceType = string.IsNullOrWhiteSpace(request.ServiceType)
+                ? "TRANSPORT"
+                : request.ServiceType.Trim().ToUpperInvariant();
+
+            var deliverySpeed = string.IsNullOrWhiteSpace(request.DeliverySpeed)
+                ? "STANDARD"
+                : request.DeliverySpeed.Trim().ToUpperInvariant();
+
+            if (serviceType == "STANDARD" || serviceType == "EXPRESS")
+            {
+                deliverySpeed = serviceType;
+                serviceType = "TRANSPORT";
+            }
             // Validations based on requirement
-            if (!string.IsNullOrWhiteSpace(request.ServiceType))
+            if (serviceType == "TRANSPORT")
             {
                 if (string.IsNullOrWhiteSpace(request.PickupAddress))
                     return BadRequest(new { Message = "Vui lòng nhập điểm lấy hàng." });
@@ -111,10 +124,10 @@ namespace BACKEND.Controllers
                     DeliveryLng = (double)(request.DeliveryLng ?? 0),
                     WeightKg = (double)(request.TotalWeightKg ?? 1),
                     Cbm = (double)(request.TotalCBM ?? 0),
-                    ServiceType = request.ServiceType
+                    ServiceType = serviceType
                 });
 
-                finalCost = string.Equals(request.ServiceType, "EXPRESS", StringComparison.OrdinalIgnoreCase)
+                finalCost = string.Equals(deliverySpeed, "EXPRESS", StringComparison.OrdinalIgnoreCase)
                     ? quote.ExpressPrice
                     : quote.StandardPrice;
             }
@@ -130,7 +143,7 @@ namespace BACKEND.Controllers
                 OrderCode = "SO" + DateTime.Now.ToString("yyyyMMddHHmmss"),
                 CustomerId = customer.CustomerId,
                 WarehouseId = warehouseId.Value,
-                ServiceType = request.ServiceType,
+                ServiceType = serviceType,
                 PickupAddress = request.PickupAddress,
                 PickupLat = request.PickupLat,
                 PickupLng = request.PickupLng,

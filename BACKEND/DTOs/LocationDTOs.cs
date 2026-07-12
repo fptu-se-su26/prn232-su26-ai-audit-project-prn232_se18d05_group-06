@@ -16,7 +16,7 @@ namespace BACKEND.DTOs
     {
         [Required]
         public string Keyword { get; set; } = string.Empty;
-        
+
         public string? Type { get; set; }
     }
 
@@ -24,7 +24,7 @@ namespace BACKEND.DTOs
     {
         [Required]
         public int WarehouseID { get; set; }
-        
+
         [Required]
         public string ServiceType { get; set; } = string.Empty;
 
@@ -39,6 +39,7 @@ namespace BACKEND.DTOs
         public decimal? TotalWeightKg { get; set; }
         public decimal? TotalCBM { get; set; }
         public int TotalPallets { get; set; }
+        public string? DeliverySpeed { get; set; }
         public decimal? QuotedPrice { get; set; }
     }
 }

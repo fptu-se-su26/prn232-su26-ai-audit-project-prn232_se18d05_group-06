@@ -208,38 +208,28 @@ namespace BACKEND.Services
 
             var pdfFilePath = GetInvoicePdfPath(invoice.InvoiceNo);
             var pdfBytes = await File.ReadAllBytesAsync(pdfFilePath);
+            var total = invoice.TotalAmount ?? Math.Max(0, invoice.SubTotal - (invoice.DiscountAmt ?? 0) + (invoice.Vatamount ?? 0));
+            var paymentInstructionsHtml = BuildPaymentInstructionHtml(invoice, total, "Quét QR hoặc chuyển khoản để thanh toán");
             var subject = $"[SmartLog AI] Hóa đơn thanh toán - {invoice.InvoiceNo}";
             var body = $@"
 <html>
 <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; background: #f8fafc; padding: 20px;'>
-    <div style='max-width: 640px; margin: 0 auto; background: #ffffff; padding: 24px; border: 1px solid #e5e7eb; border-radius: 14px;'>
+    <div style='max-width: 680px; margin: 0 auto; background: #ffffff; padding: 24px; border: 1px solid #e5e7eb; border-radius: 14px;'>
         <h2 style='color: #2563eb; margin-top: 0;'>SmartLog AI - Hóa đơn thanh toán</h2>
         <p>Kính chào Quý khách <strong>{invoice.Customer.CompanyName}</strong>,</p>
         <p>SmartLog AI gửi kèm hóa đơn PDF cho đơn hàng <strong>{invoice.Order.OrderCode}</strong>. Hóa đơn được tổng hợp tự động từ các phí dịch vụ logistics đã được duyệt.</p>
         <table style='width: 100%; border-collapse: collapse; margin: 20px 0;'>
-            <tr style='background-color: #f8fafc;'>
-                <td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Mã hóa đơn</td>
-                <td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.InvoiceNo}</td>
-            </tr>
-            <tr>
-                <td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Ngày phát hành</td>
-                <td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.IssueDate:dd/MM/yyyy}</td>
-            </tr>
-            <tr style='background-color: #f8fafc;'>
-                <td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Hạn thanh toán</td>
-                <td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.DueDate:dd/MM/yyyy}</td>
-            </tr>
-            <tr style='font-size: 16px; font-weight: bold;'>
-                <td style='padding: 10px; border: 1px solid #e2e8f0; color: #2563eb;'>Tổng thanh toán</td>
-                <td style='padding: 10px; border: 1px solid #e2e8f0; color: #2563eb;'>{(invoice.TotalAmount ?? 0):N0} VND</td>
-            </tr>
+            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Mã hóa đơn</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.InvoiceNo}</td></tr>
+            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Ngày phát hành</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.IssueDate:dd/MM/yyyy}</td></tr>
+            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Hạn thanh toán</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.DueDate:dd/MM/yyyy}</td></tr>
+            <tr style='font-size: 16px; font-weight: bold;'><td style='padding: 10px; border: 1px solid #e2e8f0; color: #2563eb;'>Tổng thanh toán</td><td style='padding: 10px; border: 1px solid #e2e8f0; color: #2563eb;'>{total:N0} VND</td></tr>
         </table>
+        {paymentInstructionsHtml}
         <p>Chi tiết từng khoản phí, giảm giá và VAT nằm trong file PDF đính kèm.</p>
         <p>Trân trọng,<br/><strong>SmartLog AI Finance Team</strong></p>
     </div>
 </body>
 </html>";
-
             try
             {
                 await _emailService.SendEmailWithAttachmentAsync(recipientEmail, subject, body, pdfBytes, $"{invoice.InvoiceNo}.pdf");
@@ -294,31 +284,33 @@ namespace BACKEND.Services
             var remaining = Math.Max(0m, total - paid);
             var statusText = invoice.Status == "PAID" ? "Da thanh toan" : invoice.Status == "PARTIAL" ? "Thanh toan mot phan" : invoice.Status ?? "PENDING";
             var paidAt = payment.PaidAt ?? DateTime.UtcNow;
-            var subject = $"[SmartLog AI] Xac nhan thanh toan hoa don {invoice.InvoiceNo}";
+            var paymentReferenceAmount = remaining > 0 ? remaining : total;
+            var paymentInstructionsHtml = BuildPaymentInstructionHtml(invoice, paymentReferenceAmount, remaining > 0 ? "Thông tin thanh toán phần còn lại" : "Thông tin giao dịch đã thanh toán");
+            var subject = $"[SmartLog AI] Xác nhận thanh toán hóa đơn {invoice.InvoiceNo}";
             var body = $@"
 <html>
 <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; background: #f8fafc; padding: 20px;'>
-    <div style='max-width: 640px; margin: 0 auto; background: #ffffff; padding: 24px; border: 1px solid #e5e7eb; border-radius: 14px;'>
-        <h2 style='color: #059669; margin-top: 0;'>SmartLog AI - X&#225;c nh&#7853;n thanh to&#225;n</h2>
-        <p>Xin ch&#224;o <strong>{invoice.Customer.CompanyName}</strong>,</p>
-        <p>SmartLog AI x&#225;c nh&#7853;n &#273;&#227; nh&#7853;n &#273;&#432;&#7907;c thanh to&#225;n cho h&#243;a &#273;&#417;n d&#7883;ch v&#7909; logistics c&#7911;a qu&#253; kh&#225;ch.</p>
+    <div style='max-width: 680px; margin: 0 auto; background: #ffffff; padding: 24px; border: 1px solid #e5e7eb; border-radius: 14px;'>
+        <h2 style='color: #059669; margin-top: 0;'>SmartLog AI - Xác nhận thanh toán</h2>
+        <p>Xin chào <strong>{invoice.Customer.CompanyName}</strong>,</p>
+        <p>SmartLog AI xác nhận đã nhận được thanh toán cho hóa đơn dịch vụ logistics của quý khách.</p>
         <table style='width: 100%; border-collapse: collapse; margin: 20px 0;'>
-            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>M&#227; h&#243;a &#273;&#417;n</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.InvoiceNo}</td></tr>
-            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>M&#227; &#273;&#417;n h&#224;ng</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.Order.OrderCode}</td></tr>
-            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>S&#7889; ti&#7873;n thanh to&#225;n</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{payment.Amount:N0} VND</td></tr>
-            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Ph&#432;&#417;ng th&#7913;c</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{payment.PaymentMethod ?? "N/A"}</td></tr>
-            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Th&#7901;i gian thanh to&#225;n</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{paidAt:dd/MM/yyyy HH:mm}</td></tr>
-            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>T&#7893;ng &#273;&#227; thanh to&#225;n</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{paid:N0} VND</td></tr>
-            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>C&#242;n l&#7841;i</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{remaining:N0} VND</td></tr>
-            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Tr&#7841;ng th&#225;i h&#243;a &#273;&#417;n</td><td style='padding: 10px; border: 1px solid #e2e8f0; color: #059669; font-weight: bold;'>{statusText}</td></tr>
+            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Mã hóa đơn</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.InvoiceNo}</td></tr>
+            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Mã đơn hàng</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{invoice.Order.OrderCode}</td></tr>
+            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Số tiền thanh toán</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{payment.Amount:N0} VND</td></tr>
+            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Phương thức</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{payment.PaymentMethod ?? "N/A"}</td></tr>
+            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Thời gian thanh toán</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{paidAt:dd/MM/yyyy HH:mm}</td></tr>
+            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Tổng đã thanh toán</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{paid:N0} VND</td></tr>
+            <tr style='background-color: #f8fafc;'><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Còn lại</td><td style='padding: 10px; border: 1px solid #e2e8f0;'>{remaining:N0} VND</td></tr>
+            <tr><td style='padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;'>Trạng thái hóa đơn</td><td style='padding: 10px; border: 1px solid #e2e8f0; color: #059669; font-weight: bold;'>{statusText}</td></tr>
         </table>
-        <p>File h&#243;a &#273;&#417;n PDF &#273;&#432;&#7907;c &#273;&#237;nh k&#232;m trong email n&#224;y.</p>
-        <p>C&#7843;m &#417;n qu&#253; kh&#225;ch &#273;&#227; s&#7917; d&#7909;ng d&#7883;ch v&#7909; c&#7911;a SmartLog AI.</p>
-        <p>Tr&#226;n tr&#7885;ng,<br/><strong>SmartLog AI Finance Team</strong></p>
+        {paymentInstructionsHtml}
+        <p>File hóa đơn PDF được đính kèm trong email này.</p>
+        <p>Cảm ơn quý khách đã sử dụng dịch vụ của SmartLog AI.</p>
+        <p>Trân trọng,<br/><strong>SmartLog AI Finance Team</strong></p>
     </div>
 </body>
 </html>";
-
             try
             {
                 await _emailService.SendEmailWithAttachmentAsync(recipientEmail, subject, body, pdfBytes, $"{invoice.InvoiceNo}.pdf");
@@ -372,6 +364,46 @@ namespace BACKEND.Services
             return invoice;
         }
 
+
+        private const string PaymentBankName = "MB Bank - Ngân hàng TMCP Quân đội";
+        private const string PaymentAccountName = "VU LE DUY";
+        private const string PaymentAccountNumber = "VQRQAKJRY6534";
+        private const string PaymentQrBaseUrl = "https://img.vietqr.io/image/MB-VQRQAKJRY6534-compact2.png";
+
+        private static string BuildPaymentTransferContent(Invoice invoice)
+        {
+            return $"SmartLog {invoice.InvoiceNo}";
+        }
+
+        private static string BuildVietQrUrl(Invoice invoice, decimal amount)
+        {
+            var roundedAmount = decimal.ToInt32(decimal.Round(Math.Max(0, amount), 0));
+            var content = BuildPaymentTransferContent(invoice);
+            return $"{PaymentQrBaseUrl}?amount={roundedAmount}&addInfo={Uri.EscapeDataString(content)}&accountName={Uri.EscapeDataString(PaymentAccountName)}";
+        }
+
+        private static string BuildPaymentInstructionHtml(Invoice invoice, decimal amount, string title)
+        {
+            var transferContent = BuildPaymentTransferContent(invoice);
+            var qrUrl = BuildVietQrUrl(invoice, amount);
+            return $@"
+        <div style='margin: 22px 0; padding: 18px; border: 1px solid #bbf7d0; border-radius: 16px; background: #f0fdf4;'>
+            <h3 style='margin: 0 0 12px; color: #047857;'>{title}</h3>
+            <div style='display: table; width: 100%;'>
+                <div style='display: table-cell; width: 180px; vertical-align: top;'>
+                    <img src='{qrUrl}' alt='SmartLog AI VietQR' style='width: 160px; height: 160px; border: 1px solid #d1fae5; border-radius: 12px; background: #ffffff;' />
+                </div>
+                <div style='display: table-cell; vertical-align: top; padding-left: 16px;'>
+                    <p style='margin: 4px 0;'><strong>Ngân hàng:</strong> {PaymentBankName}</p>
+                    <p style='margin: 4px 0;'><strong>Chủ tài khoản:</strong> {PaymentAccountName}</p>
+                    <p style='margin: 4px 0;'><strong>Số tài khoản:</strong> {PaymentAccountNumber}</p>
+                    <p style='margin: 4px 0;'><strong>Số tiền:</strong> {amount:N0} VND</p>
+                    <p style='margin: 4px 0;'><strong>Nội dung:</strong> {transferContent}</p>
+                </div>
+            </div>
+            <p style='margin: 12px 0 0; color: #047857; font-size: 13px;'>Vui lòng chuyển đúng nội dung để hệ thống đối soát thanh toán tự động.</p>
+        </div>";
+        }
         private static decimal CalculateDiscount(ServiceOrder order, decimal subTotal)
         {
             var discount = order.DiscountAmount ?? 0m;

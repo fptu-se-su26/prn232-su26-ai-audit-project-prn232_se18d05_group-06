@@ -45,6 +45,29 @@ const CreateOrder: React.FC = () => {
   const [weightKg, setWeightKg] = useState<number>(1.5);
   const [cbm, setCbm] = useState<number>(0.5);
 
+  const getAuthToken = () => localStorage.getItem('token') || localStorage.getItem('accessToken') || '';
+
+  const handleAuthRequired = (message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.') => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    toast.error(message, {
+      style: {
+        borderRadius: '16px',
+        background: '#ef4444',
+        color: '#fff',
+        fontWeight: 'bold',
+      }
+    });
+    navigate('/login', { replace: true, state: { from: '/create-shipment' } });
+  };
+
+  useEffect(() => {
+    if (!getAuthToken()) {
+      handleAuthRequired('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+    }
+  }, [navigate]);
+
   const handleCreateOrder = async () => {
     setIsLoading(true);
 
@@ -52,13 +75,14 @@ const CreateOrder: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       if (!token) {
-        throw new Error('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+        handleAuthRequired('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+        return;
       }
       const payload = {
         WarehouseID: 1,
-        ServiceType: selectedSpeed,
+        ServiceType: serviceType,
         PickupAddress: pickupAddress,
         PickupLat: pickupLat,
         PickupLng: pickupLng,
@@ -68,6 +92,7 @@ const CreateOrder: React.FC = () => {
         TotalWeightKg: weightKg,
         TotalCBM: cbm,
         TotalPallets: 0,
+        DeliverySpeed: selectedSpeed,
         QuotedPrice: price
       };
 
@@ -79,6 +104,11 @@ const CreateOrder: React.FC = () => {
         },
         body: JSON.stringify(payload)
       });
+
+      if (response.status === 401) {
+        handleAuthRequired();
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -102,6 +132,11 @@ const CreateOrder: React.FC = () => {
           },
           body: JSON.stringify({ orderId: data.orderId })
         });
+
+        if (payResponse.status === 401) {
+          handleAuthRequired();
+          return;
+        }
 
         if (payResponse.ok) {
           paymentLink = await payResponse.json();
@@ -153,12 +188,18 @@ const CreateOrder: React.FC = () => {
 
   const fetchQuote = async (pLat: number, pLng: number, dLat: number, dLng: number, w: number, v: number) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      if (!token) return;
       const res = await fetch('http://localhost:5200/api/customer/orders/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ PickupLat: pLat, PickupLng: pLng, DeliveryLat: dLat, DeliveryLng: dLng, WeightKg: w, Cbm: v, ServiceType: serviceType })
       });
+      if (res.status === 401) {
+        handleAuthRequired();
+        return;
+      }
+
       if (res.ok) {
         const data = await res.json();
         setDistanceKm(data.distanceKm);
@@ -186,12 +227,21 @@ const CreateOrder: React.FC = () => {
       const formData = new FormData();
       formData.append('imageFile', e.target.files[0]);
 
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      if (!token) {
+        handleAuthRequired('Vui lòng đăng nhập trước khi quét hóa đơn.');
+        return;
+      }
       const res = await fetch('http://localhost:5200/api/customer/orders/scan-invoice', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
+
+      if (res.status === 401) {
+        handleAuthRequired();
+        return;
+      }
 
       if (res.ok) {
         const data = await res.json();
