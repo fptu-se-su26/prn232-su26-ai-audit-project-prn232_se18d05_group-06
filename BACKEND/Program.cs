@@ -78,6 +78,7 @@ builder.Services.AddScoped<ILocationSuggestionService, LocationSuggestionService
 builder.Services.AddScoped<IPricingEngineService, PricingEngineService>();
 builder.Services.AddScoped<IInvoiceOcrService, InvoiceOcrService>();
 builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>();
+builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 
 builder.Services.AddHttpClient();
