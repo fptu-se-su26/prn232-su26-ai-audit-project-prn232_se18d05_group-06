@@ -16,17 +16,19 @@ namespace BACKEND.Services
         private readonly string? _clientId;
         private readonly string? _apiKey;
         private readonly string? _checksumKey;
+        private readonly IWebHostEnvironment _env;
 
         public PayOsPaymentService(
             SmartLogAiContext context,
             IConfiguration configuration,
-            IPaymentService paymentService,
-            ILogger<PayOsPaymentService> logger)
+            ILogger<PayOsPaymentService> logger,
+            IWebHostEnvironment env)
         {
             _context = context;
             _configuration = configuration;
             _paymentService = paymentService;
             _logger = logger;
+            _env = env;
 
             _clientId = _configuration["PayOS:ClientId"];
             _apiKey = _configuration["PayOS:ApiKey"];
@@ -157,7 +159,7 @@ namespace BACKEND.Services
             }
 
             var paid = string.Equals(verifiedData.Code, "00", StringComparison.OrdinalIgnoreCase);
-            var shouldSendBill = ApplyPaymentResult(payment, paid, verifiedData.Reference, verifiedData.PaymentLinkId);
+            await ApplyPaymentResultAsync(payment, paid, verifiedData.Reference, verifiedData.PaymentLinkId);
             await _context.SaveChangesAsync();
 
             if (shouldSendBill)
@@ -165,6 +167,7 @@ namespace BACKEND.Services
                 await ConfirmAndSendBillAsync(payment.PaymentId);
             }
         }
+
 
         public async Task<PayOsPaymentStatusDto> SyncReturnAsync(PayOsReturnSyncRequestDto request, int currentUserId)
         {
@@ -195,13 +198,7 @@ namespace BACKEND.Services
             }
             else if (IsSuccessfulReturn(request))
             {
-                var shouldSendBill = ApplyPaymentResult(payment, true, request.PayOsOrderCode?.ToString(), payment.HashCode);
-                await _context.SaveChangesAsync();
-
-                if (shouldSendBill)
-                {
-                    await ConfirmAndSendBillAsync(payment.PaymentId);
-                }
+                await ApplyPaymentResultAsync(payment, true, request.PayOsOrderCode?.ToString(), payment.HashCode);
             }
 
             await _context.SaveChangesAsync();
@@ -301,7 +298,7 @@ namespace BACKEND.Services
             return Math.Max(10000m, decimal.Round(fallback / 1000m, 0) * 1000m);
         }
 
-        private static bool ApplyPaymentResult(Payment payment, bool paid, string? bankReference, string? paymentLinkId)
+        private async Task ApplyPaymentResultAsync(Payment payment, bool paid, string? bankReference, string? paymentLinkId)
         {
             if (!paid)
             {
@@ -317,27 +314,107 @@ namespace BACKEND.Services
             payment.BankTxnRef = bankReference;
             payment.HashCode = paymentLinkId ?? payment.HashCode;
 
-            payment.Invoice.PaidAmount = payment.Amount;
-            payment.Invoice.Status = "PAID";
-            if (payment.Invoice.Order != null)
+            if (payment.Invoice != null)
             {
-                payment.Invoice.Order.Status = "CONFIRMED";
-                payment.Invoice.Order.ConfirmedAt ??= DateTime.Now;
+                payment.Invoice.PaidAmount = payment.Amount;
+                payment.Invoice.Status = "PAID";
+                if (payment.Invoice.Order != null)
+                {
+                    payment.Invoice.Order.Status = "CONFIRMED";
+                    payment.Invoice.Order.ConfirmedAt ??= DateTime.Now;
+                }
             }
 
-            return !alreadyConfirmed;
+            await GenerateHtmlReceiptAsync(payment);
         }
 
-        private async Task ConfirmAndSendBillAsync(int paymentId)
+        private async Task GenerateHtmlReceiptAsync(Payment payment)
         {
-            try
-            {
-                await _paymentService.ConfirmExistingPaymentAsync(paymentId, null, true);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "PayOS payment was confirmed but invoice PDF email failed for PaymentId {PaymentId}.", paymentId);
-            }
+            if (_env == null) return;
+            var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+            var receiptsDir = Path.Combine(webRoot, "receipts");
+            if (!Directory.Exists(receiptsDir)) Directory.CreateDirectory(receiptsDir);
+
+            var fileName = $"{payment.PaymentCode}_{DateTime.Now:yyyyMMddHHmmss}.html";
+            var filePath = Path.Combine(receiptsDir, fileName);
+
+            var html = $@"<!DOCTYPE html>
+<html lang='vi'>
+<head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Biên nhận - {payment.PaymentCode}</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: #1f2937; }}
+        .receipt-card {{ background: #ffffff; width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); overflow: hidden; position: relative; }}
+        .receipt-card::before {{ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #10b981, #059669); }}
+        .header {{ padding: 32px 32px 24px; text-align: center; border-bottom: 1px dashed #e5e7eb; }}
+        .success-icon {{ width: 64px; height: 64px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #10b981; }}
+        .success-icon svg {{ width: 32px; height: 32px; }}
+        .brand-name {{ font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; font-weight: 600; margin-bottom: 4px; }}
+        .title {{ font-size: 24px; font-weight: 700; color: #111827; }}
+        .amount-display {{ font-size: 36px; font-weight: 700; color: #059669; margin-top: 12px; }}
+        .details {{ padding: 24px 32px; background: #f9fafb; }}
+        .row {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 14px; }}
+        .row:last-child {{ margin-bottom: 0; }}
+        .label {{ color: #6b7280; }}
+        .value {{ font-weight: 600; color: #111827; text-align: right; }}
+        .badge {{ background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase; }}
+        .footer {{ padding: 20px 32px; text-align: center; font-size: 13px; color: #9ca3af; border-top: 1px solid #f3f4f6; }}
+        .cut-marks {{ position: absolute; left: 0; right: 0; top: 218px; display: flex; justify-content: space-between; z-index: 10; pointer-events: none; }}
+        .cut-mark {{ width: 20px; height: 20px; background: #f3f4f6; border-radius: 50%; }}
+        .cut-mark.left {{ transform: translate(-50%, -50%); }}
+        .cut-mark.right {{ transform: translate(50%, -50%); }}
+    </style>
+</head>
+<body>
+    <div class='receipt-card'>
+        <div class='cut-marks'>
+            <div class='cut-mark left'></div>
+            <div class='cut-mark right'></div>
+        </div>
+        <div class='header'>
+            <div class='success-icon'>
+                <svg fill='none' stroke='currentColor' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M5 13l4 4L19 7'></path></svg>
+            </div>
+            <div class='brand-name'>SmartLog AI</div>
+            <div class='title'>Thanh toán thành công</div>
+            <div class='amount-display'>{payment.Amount:N0} đ</div>
+        </div>
+        <div class='details'>
+            <div class='row'>
+                <span class='label'>Trạng thái</span>
+                <span class='badge'>Đã thanh toán</span>
+            </div>
+            <div class='row'>
+                <span class='label'>Mã giao dịch</span>
+                <span class='value'>{payment.PaymentCode}</span>
+            </div>
+            <div class='row'>
+                <span class='label'>Tham chiếu (Bank)</span>
+                <span class='value'>{payment.BankTxnRef ?? "N/A"}</span>
+            </div>
+            <div class='row'>
+                <span class='label'>Thời gian</span>
+                <span class='value'>{payment.PaidAt:dd/MM/yyyy HH:mm:ss}</span>
+            </div>
+            <div class='row'>
+                <span class='label'>Phương thức</span>
+                <span class='value'>{payment.PaymentMethod ?? "PAYOS"}</span>
+            </div>
+        </div>
+        <div class='footer'>
+            <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
+            <p style='margin-top: 4px;'>Mọi thắc mắc vui lòng liên hệ hỗ trợ.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+            await File.WriteAllTextAsync(filePath, html);
+            payment.ReceiptPath = $"/receipts/{fileName}";
         }
 
         private static PayOsPaymentStatusDto ToStatusDto(ServiceOrder order, Invoice? invoice, Payment? payment)

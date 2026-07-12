@@ -37,7 +37,7 @@ const CreateOrder: React.FC = () => {
   const [deliveryLng, setDeliveryLng] = useState<number | undefined>();
   const [receiverName, setReceiverName] = useState('');
   const [receiverPhone, setReceiverPhone] = useState('');
-  
+
   const [itemName, setItemName] = useState('');
   const [itemValue, setItemValue] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
@@ -256,7 +256,7 @@ const CreateOrder: React.FC = () => {
         if (data.itemValue) setItemValue(data.itemValue);
         if (data.notes) setNotes(data.notes);
         if (data.deliverySpeed === 'EXPRESS' || data.deliverySpeed === 'STANDARD') setSelectedSpeed(data.deliverySpeed as 'EXPRESS' | 'STANDARD');
-        
+
         toast.success('Đã trích xuất thông tin hóa đơn thành công!', {
           style: {
             borderRadius: '16px',
@@ -550,11 +550,11 @@ const CreateOrder: React.FC = () => {
 
               {/* Route Map */}
               <section className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-100 aspect-[4/3] lg:aspect-square relative group z-0">
-                <RouteMiniMap 
-                  pickupLat={pickupLat} 
-                  pickupLng={pickupLng} 
-                  deliveryLat={deliveryLat} 
-                  deliveryLng={deliveryLng} 
+                <RouteMiniMap
+                  pickupLat={pickupLat}
+                  pickupLng={pickupLng}
+                  deliveryLat={deliveryLat}
+                  deliveryLng={deliveryLng}
                 />
                 <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end z-20 pointer-events-none">
                   <div className="bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-lg pointer-events-auto border border-slate-100/50">

@@ -3,17 +3,16 @@ import { ROUTE_PATHS } from '../routes'
 
 const navItems = [
   { label: 'Dashboard', icon: 'dashboard', to: ROUTE_PATHS.WAREHOUSE_DASHBOARD },
+  { label: 'Gate', icon: 'sensor_door', to: ROUTE_PATHS.WAREHOUSE_GATE_CHECKOUT },
   { label: 'Import Goods', icon: 'input', to: ROUTE_PATHS.WAREHOUSE_IMPORT },
   { label: 'Export Goods', icon: 'output', to: ROUTE_PATHS.WAREHOUSE_EXPORT },
   { label: 'Inventory', icon: 'inventory_2', to: ROUTE_PATHS.WAREHOUSE_INVENTORY },
   { label: 'Reports', icon: 'assessment', to: ROUTE_PATHS.WAREHOUSE_REPORTS },
-  { label: 'QR Scanner', icon: 'qr_code_scanner', to: ROUTE_PATHS.WAREHOUSE_QR_SCANNER },
   { label: 'AI OCR Scan', icon: 'document_scanner', to: ROUTE_PATHS.WAREHOUSE_AI_OCR },
   { label: 'Inventory Audit', icon: 'checklist', to: ROUTE_PATHS.WAREHOUSE_INVENTORY_AUDIT },
   { label: 'Warehouse Transfer', icon: 'local_shipping', to: ROUTE_PATHS.WAREHOUSE_TRANSFER },
   { label: 'Stock Alerts', icon: 'notifications_active', to: ROUTE_PATHS.WAREHOUSE_STOCK_ALERTS },
   { label: 'Notifications', icon: 'notifications', to: ROUTE_PATHS.WAREHOUSE_NOTIFICATIONS },
-  { label: 'Gate Checkout', icon: 'sensor_door', to: ROUTE_PATHS.WAREHOUSE_GATE_CHECKOUT },
 ]
 
 const Sidebar = () => (
