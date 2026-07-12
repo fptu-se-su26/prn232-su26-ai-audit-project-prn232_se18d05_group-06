@@ -304,6 +304,23 @@ Bài học rút ra là AI giúp tiết kiệm thời gian khi phân tích lỗi 
 
 ---
 
+## 21. Reflection bo sung - UC026 Flow Optimization - Tran Van Tung (DE180109)
+
+Trong phan toi uu luong xe cho Dispatcher, em su dung AI de tham khao cach doc lai lien ket giua dat lich xe, QR check-in va hang cho dieu phoi. AI goi y nen kiem tra `SlotBookings`, `GateLogs`, `Docks`, `ServiceOrders` va component `DispatchOptimizationTab.tsx`, nhung em tu quyet dinh cach seed du lieu va cach hien thi tren UI.
+
+Phan quan trong nhat la khong hien ma ky thuat UC tren giao dien, vi man hinh van hanh can hien thi thong tin nghiep vu nhu bien so, khach hang, tai xe, loai hang, diem uu tien va dock de xuat. Sau khi sua, em chay `npm run type-check` de dam bao frontend khong loi TypeScript.
+
+Bai hoc rut ra la AI co the ho tro nhanh trong viec tim file va goi y bo cuc, nhung nguoi lam van phai tu hieu du lieu that va luong nghiep vu de quyet dinh UI nao phu hop voi Dispatcher.
+---
+## 22. Reflection bo sung - Invoice PDF va Email - Tran Van Tung (DE180109)
+
+Trong phan , em su dung AI de tham khao cach noi luong tao don, thanh toan PayOS, tao hoa don PDF va gui email cho customer. AI goi y nen tach ro hai truong hop: customer thanh toan ngay thi invoice chuyen PAID va gui bill PDF, con chua thanh toan thi invoice giu PENDING va gui email yeu cau thanh toan.
+
+Khi trien khai, em tu doc lai `PayOsPaymentService`, `PaymentService`, `InvoiceService`, `CustomerInvoicesController` va man `PaymentHistory.tsx` de dam bao khong pha vo luong hien co. Phan quan trong nhat la customer chi duoc xem hoa don cua minh, cac nut xem/tai PDF phai co thong bao thanh cong/that bai, va email/PDF phai co thong tin chuyen khoan ro rang de ho tro doi soat.
+
+Bai hoc rut ra la AI co the giup nhanh trong viec tim huong xu ly, nhung cac buoc nhu bao mat quyen xem hoa don, kiem tra SMTP, generate PDF va chay build/type-check van phai do sinh vien tu xac nhan.
+
+---
 ## 17. Cam kết Reflection
 
 Em/nhóm cam kết rằng nội dung reflection này phản ánh trung thực quá trình sử dụng AI và quá trình học tập trong bài tập/project.
@@ -327,3 +344,11 @@ Trong giai doan hoan thien demo, em su dung AI nhu cong cu tham khao de tim nhan
 Khi gap loi o o dang nhap, em xac dinh nguyen nhan la input dang de `type="email"`, lam trinh duyet bat buoc phai co ky tu `@`. AI chi ho tro dinh huong cach tim loi, con em tu sua input thanh `type="text"`, them `autoComplete="username"` va build lai frontend de kiem tra. Voi nghiep vu AI goi y vi tri luu kho, em cung tu kiem tra giao dien thuc te va sua nut goi y de hien thi ro hon, tranh bi chim tren nen trang.
 
 Voi phan cau hinh local va Azure Vision, em nhan ra tai lieu khong nen ghi lo key hoac secret day du. AI ho tro nhac cach to chuc section cau hinh va canh bao bao mat, nhung viec kiem tra file `appsettings.json`, chay backend/frontend va xac nhan localhost hoat dong la do em thuc hien. Bai hoc rut ra la AI co the ho tro debug va goi y nhanh, nhung nguoi lam van phai tu hieu luong dang nhap, quyen truy cap va cach bao ve thong tin nhay cam.
+
+---
+
+## 20. Reflection bo sung - 2D Warehouse Layout -Tran Van Tung (DE180109)
+
+Trong phan cai thien man Admin Warehouses, em su dung AI de tham khao cach to chuc lai so do 2D cho de nhin hon. AI goi y nen tach ro cac thanh phan nhu zone, bin, dock, aisle, gate va wall thay vi chi ve cac hinh chu nhat don gian. Em khong copy may moc ma tu doc lai `Warehouses.tsx` va `WarehouseLayoutController.cs` de giu lai logic chon object, drag/drop va API auto-generate hien co.
+
+Sau khi sua, em chay `npx tsc --noEmit` va `dotnet build` de kiem tra. Bai hoc rut ra la khi dung AI cho UI/UX, can doi chieu voi du lieu that va luong nghiep vu cua project, vi giao dien dep nhung mat logic thao tac thi khong phu hop.

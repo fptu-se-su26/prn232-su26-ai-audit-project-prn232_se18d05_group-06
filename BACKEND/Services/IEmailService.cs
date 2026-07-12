@@ -16,5 +16,7 @@ namespace BACKEND.Services
             string qrCodeBase64);
 
         Task SendEmailAsync(string toEmail, string subject, string body);
+
+        Task SendEmailWithAttachmentAsync(string toEmail, string subject, string body, byte[] attachmentBytes, string attachmentName);
     }
 }

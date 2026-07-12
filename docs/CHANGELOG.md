@@ -391,61 +391,45 @@ Author: Trần Văn Tùng (DE180109)
 
 ---
 
----
+## [2026-07-09]
+Author: Trần Văn Tùng (DE180109)
 
-## 4. Tổng kết thay đổi cuối project
+### Added
+- Báo cáo doanh thu theo loại dịch vụ: Thêm báo cáo doanh thu theo loại dịch vụ với API `/api/finance/reports/revenue-by-service`, card tổng quan, bảng dữ liệu, biểu đồ cột và biểu đồ tỷ lệ đóng góp.
+- Báo cáo chi phí vận hành: Thêm báo cáo chi phí vận hành với dữ liệu `OperatingExpenses`, `ExceptionExpenses` và `VehicleMaintenanceLogs`, hỗ trợ lọc theo ngày và loại chi phí.
+- Báo cáo lợi nhuận theo thời gian: Thêm báo cáo lợi nhuận theo thời gian, tính doanh thu - chi phí, profit margin và biểu đồ xu hướng theo kỳ.
+- Đối soát giao dịch thanh toán: Thêm đối soát thanh toán với API danh sách, auto-match, manual-match và biểu đồ trực quan trạng thái giao dịch ngân hàng.
+- Xuất báo cáo tài chính ra Excel/PDF: Thêm endpoint export `/api/finance/reports/export` hỗ trợ `excel` và `pdf` cho các reportType: `revenue-by-service`, `operating-expenses`, `profit`, `payment-reconciliation`, `financial-forecast`.
+- Dự báo tài chính cơ bản: Cập nhật dự báo tài chính cơ bản theo Moving Average 3 tháng, hỗ trợ chọn forecast 1/3/6 tháng, lưu `FinancialForecasts` và ghi `AiModelTrainingLogs` khi generate.
 
-### 4.1. Các chức năng đã hoàn thành
+### Changed
+- Admin Finance được mở rộng thành trung tâm báo cáo M4 gồm Revenue by Service, Operating Expense, Profit Report, Payment Reconciliation và Financial Forecast.
+- Route forecast mới dùng `/api/finance/forecasts`, vẫn giữ `/api/finance/forecast` để tương thích màn cũ.
+- Model version forecast chuyển sang dạng `FIN-MA-YYYYMM.1` để phản ánh phương pháp Moving Average.
+- UI bổ sung nút `Export Excel` và `Export PDF` dùng chung qua `FinanceExportButtons`.
 
-| STT | Chức năng | Trạng thái | Minh chứng | Ghi chú |
-|---:|---|---|---|---|
-| 1 | Giao diện Phòng điều phối | Completed | DispatcherDashboard | Giao diện tĩnh |
-| 2 | Giao diện màn hình Tài xế | Completed | DriverDashboard | Giao diện tĩnh |
-| 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
-| 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
-| 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
-| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
-| 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
+### Fixed
+- Sửa lỗi controller export thiếu inject `IFinanceReportExportService`.
+- Sửa lỗi text mojibake còn sót ở nút Đối soát thanh toán.
+- Sửa lỗi TypeScript khi đọc `content-disposition` từ Axios headers trong luồng tải file.
 
-
----
-
-### 4.2. Các chức năng chưa hoàn thành
-
-| STT | Chức năng | Lý do chưa hoàn thành | Hướng cải thiện |
-|---:|---|---|---|
-| 1 | Kết nối API thật cho các chức năng còn lại | Giới hạn thời gian | Đã kết nối API thật cho các chức năng quan trọng (Vận đơn, Phê duyệt xe ALPR, Đặt lịch kho, Theo dõi hành trình xe). Sẽ tiếp tục mở rộng cho các tab phụ. |
-
----
-
-### 4.3. Tổng hợp AI hỗ trợ trong project
-
-| Hạng mục | AI có hỗ trợ không? | Mức độ hỗ trợ | Ghi chú |
-|---|---|---|---|
-| Requirement | Có | Ít | Tìm hiểu khái niệm |
-| Design | Có | Ít | Gợi ý bố cục |
-| Database | Không | Ít | Không dùng |
-| Coding | Có | Ít | Tra cứu cú pháp |
-| Debug | Có | Ít | Sửa lỗi CSS nhỏ |
-| Testing | Không | Ít | Tự test tay |
-| Report | Có | Ít | Định dạng văn bản |
-| Presentation | Không | Ít | Không dùng |
+### Verification
+- `npx tsc --noEmit` frontend thành công.
+- `dotnet build --no-restore /p:UseAppHost=false -o .\obj\codex-check` backend thành công 0 warning/0 error.
 
 ---
 
-### 4.4. Bài học rút ra
+## [2026-07-09]
+Author: Tran Van Tung (DE180109)
 
-```text
-Nhóm đã hiểu rõ hơn cách tổ chức một ứng dụng React chia theo component nhỏ và cách sử dụng CSS Tailwind để lập trình giao diện nhanh chóng.
-```
+### Changed
+- Tach trang Admin Finance thanh workspace theo tab: Overview, Revenue, Expenses, Profit, Reconciliation, Forecast, Exports.
+- Chuyen nut Generate Forecast va Retrain vao tab Forecast.
+- Them tab Exports de xuat bao cao theo tung loai.
 
----
-
-### 4.5. Hướng cải thiện tiếp theo
-
-```text
-Lập trình phần Backend bằng .NET Core để kết nối cơ sở dữ liệu SQL Server, hoàn thiện chức năng đăng nhập và lưu trữ đơn hàng thực tế.
-```
+### Fixed
+- Rut gon bang doi soat thanh toan bang nut Manual Match va modal xac nhan.
+- Giu UI admin theo tone sang, sidebar den ro nhu man hinh warehouse.
 
 ---
 
@@ -491,17 +475,6 @@ Author: Vũ Lê Duy (DE180104)
 - `dotnet build BACKEND/BACKEND.csproj`: thành công.
 - `npm run build`: thành công.
 - Kiểm tra thủ công backend Swagger và frontend Dispatcher trên localhost.
-
----
-
-## 5. Cam kết cập nhật Changelog
-
-Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các thay đổi đã thực hiện trong quá trình làm bài tập/project.
-
-| Đại diện sinh viên/nhóm | Ngày xác nhận |
-|---|---|
-| Nhóm trưởng | 02/06/2026 |
-
 ---
 
 ## [1.5.0] - 2026-07-10
@@ -546,65 +519,154 @@ Author: Vu Le Duy (DE180104)
 ### AI-assisted
 - Dùng AI để tra cứu cú pháp cấu hình Mapbox/Goong và thuật toán nội suy điểm trên đường thẳng (Interpolation). Sinh viên tự thiết kế cấu trúc code, tự debug lỗi lệch toạ độ và tự thiết kế giao diện xe tải.
 
-
-
-## [1.7.0] - 2026-07-11
-Author: Vu Le Duy (DE180104)
+## [2026-07-10 ]
+Author: Tran Van Tung (DE180109)
 
 ### Added
-- Tính năng Bản đồ tương tác (Interactive Route MiniMap) sử dụng Leaflet và OpenStreetMap để hiển thị tuyến đường nối Điểm lấy hàng và Điểm giao hàng trên form Tạo đơn.
-- Tự động lấy tọa độ thực từ backend để plot lên bản đồ.
-- Tự động nhận dạng Tên hàng hóa, Trị giá, Ghi chú và Loại dịch vụ (Hỏa tốc/Tiết kiệm) từ tính năng OCR (Quét AI) thông qua việc phân tích hóa đơn.
+- Them floor plan 2D moi cho Admin Warehouses gom wall, main aisle, cross aisle, dock lane, gate, zone, bin va dock.
+- Them KPI/legend trong tab 2D Layout de nhin nhanh so zone, bin, dock va trang thai busy.
 
 ### Changed
-- Gỡ bỏ giao diện ảnh bản đồ giả (mock tĩnh) trên trang CreateOrder.tsx.
-- Cải thiện độ nhạy của thuật toán Azure Vision OCR trong InvoiceOcrService.cs để match chính xác các từ khóa trong hóa đơn vận chuyển Việt Nam.
-- Tối ưu hóa UI/UX: Ẩn bớt các mục nhập liệu thừa (như Pallets), bổ sung ô ghi chú lớn và thay đổi menu ngang (xóa Giá cước).
-
-### Fixed
-- Khắc phục lỗi Quét AI không nhận dạng được đầy đủ chi tiết tên hàng hóa nếu hóa đơn xuống dòng đột ngột.
-- Sửa lỗi hiển thị UI của phần MiniMap bị chớp nhoáng (flickering) khi cập nhật tọa độ.
-
-### AI-assisted
-- Antigravity đã hỗ trợ thiết kế thuật toán substring trong C# để parse file text từ OCR và hỗ trợ thay thế thư viện bản đồ tương tác Leaflet vào React Component.
+- Cai thien renderer SVG de map responsive hon, nhan object ro hon va moi loai object co style rieng.
+- Cai thien auto-generate layout backend de sinh so do kho co cau truc ro rang hon.
 
 
-## [1.7.0] - 2026-07-11
-Author: Vu Le Duy (DE180104)
+### Verification
+- `npx tsc --noEmit`: thanh cong.
+- `dotnet build`: thanh cong, 0 warning, 0 error.
+---
+
+## [2026-07-10]
+Author: Tran Van Tung (DE180109)
 
 ### Added
-- Tính năng Bản đồ tương tác (Interactive Route MiniMap) sử dụng Leaflet và OpenStreetMap để hiển thị tuyến đường nối Điểm lấy hàng và Điểm giao hàng trên form Tạo đơn.
-- Tự động lấy tọa độ thực từ backend để plot lên bản đồ.
-- Tự động nhận dạng Tên hàng hóa, Trị giá, Ghi chú và Loại dịch vụ (Hỏa tốc/Tiết kiệm) từ tính năng OCR (Quét AI) thông qua việc phân tích hóa đơn.
+- Them seed du lieu cho Flow Optimization gom warehouse, dock, vehicle, driver, service order, slot booking da check-in va gate log.
+- Them mapping label tieng Viet cho trang thai, do uu tien, loai hang, loai chuyen va kha nang dock trong Dispatcher Flow Optimization.
 
 ### Changed
-- Gỡ bỏ giao diện ảnh bản đồ giả (mock tĩnh) trên trang CreateOrder.tsx.
-- Cải thiện độ nhạy của thuật toán Azure Vision OCR trong InvoiceOcrService.cs để match chính xác các từ khóa trong hóa đơn vận chuyển Việt Nam.
-- Tối ưu hóa UI/UX: Ẩn bớt các mục nhập liệu thừa (như Pallets), bổ sung ô ghi chú lớn và thay đổi menu ngang (xóa Giá cước).
+- Cai thien UI tab Flow Optimization de hien thi tieng Viet dung font, khong hien ma UC ky thuat tren giao dien.
+- Bo cuc lai cum diem uu tien va nut hanh dong thanh action card gon hon.
 
-### Fixed
-- Khắc phục lỗi Quét AI không nhận dạng được đầy đủ chi tiết tên hàng hóa nếu hóa đơn xuống dòng đột ngột.
-- Sửa lỗi hiển thị UI của phần MiniMap bị chớp nhoáng (flickering) khi cập nhật tọa độ.
 
-### AI-assisted
-- Antigravity đã hỗ trợ thiết kế thuật toán substring trong C# để parse file text từ OCR và hỗ trợ thay thế thư viện bản đồ tương tác Leaflet vào React Component.
-
-## [1.7.0] - 2026-07-11
-Author: Vu Le Duy (DE180104)
+### Verification
+- `npm run type-check`: thanh cong.
+---
+## [2026-07-12]
+Author: Tran Van Tung (DE180109)
 
 ### Added
-- Tính năng Bản đồ tương tác (Interactive Route MiniMap) sử dụng Leaflet và OpenStreetMap để hiển thị tuyến đường nối Điểm lấy hàng và Điểm giao hàng trên form Tạo đơn.
-- Tự động lấy tọa độ thực từ backend để plot lên bản đồ.
-- Tự động nhận dạng Tên hàng hóa, Trị giá, Ghi chú và Loại dịch vụ (Hỏa tốc/Tiết kiệm) từ tính năng OCR (Quét AI) thông qua việc phân tích hóa đơn.
+- Them endpoint customer xem/tai PDF hoa don co kiem tra quyen so huu hoa don.
+- Them nut Thanh toan trong Payment History de customer quay lai trang thanh toan cho hoa don PENDING.
+- Them thong tin MB Bank, chu tai khoan, so tai khoan, noi dung chuyen khoan va VietQR vao PDF/email hoa don.
 
 ### Changed
-- Gỡ bỏ giao diện ảnh bản đồ giả (mock tĩnh) trên trang CreateOrder.tsx.
-- Cải thiện độ nhạy của thuật toán Azure Vision OCR trong InvoiceOcrService.cs để match chính xác các từ khóa trong hóa đơn vận chuyển Việt Nam.
-- Tối ưu hóa UI/UX: Ẩn bớt các mục nhập liệu thừa (như Pallets), bổ sung ô ghi chú lớn và thay đổi menu ngang (xóa Giá cước).
+- Cai thien: PayOS thanh cong cap nhat payment CONFIRMED, invoice PAID, generate PDF va gui email cho customer.
+- Sua thong bao thao tac Xem PDF, Tai PDF, Gui lai Email, Bien nhan co toast thanh cong/that bai ro rang.
+- Sua lai chu tieng Viet bi loi encoding tren man Payment History.
 
-### Fixed
-- Khắc phục lỗi Quét AI không nhận dạng được đầy đủ chi tiết tên hàng hóa nếu hóa đơn xuống dòng đột ngột.
-- Sửa lỗi hiển thị UI của phần MiniMap bị chớp nhoáng (flickering) khi cập nhật tọa độ.
+### Verification
+- `dotnet build BACKEND\\BACKEND.csproj --no-restore`: thanh cong.
+- `npm run type-check`: thanh cong.
 
-### AI-assisted
-- Antigravity đã hỗ trợ thiết kế thuật toán substring trong C# để parse file text từ OCR và hỗ trợ thay thế thư viện bản đồ tương tác Leaflet vào React Component.
+---
+## [2026-07-12]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them man hinh My Orders moi cho Customer tai `/customer/orders`.
+- Them KPI tong don, dang xu ly, hoan thanh va cho danh gia.
+- Them nut xem chi tiet, xem PDF, tai PDF, thanh toan va danh gia dich vu.
+- Them modal feedback 1-5 sao va comment toi da 1000 ky tu.
+
+### Changed
+- API `/api/customer/orders` tra them thong tin warehouse, invoice va trang thai feedback.
+- Doi menu Customer sang nhan "Don hang cua toi" va "Hoa don cua toi".
+- Chuan hoa hien thi trang thai don, trang thai thanh toan va label tieng Viet tren My Orders.
+
+### Verification
+- `dotnet build BACKEND\BACKEND.csproj --no-restore`: thanh cong.
+- `npm run type-check`: thanh cong.
+
+---
+
+## [2026-07-12]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them API chatbot Customer `POST /api/customer/chatbot/ask`.
+- Them API FAQ Customer `GET /api/customer/faqs`.
+- Them service chatbot uu tien FAQ, tra cuu don noi bo va fallback Gemini.
+- Them chatbox AI noi goc duoi phai tren Customer Portal.
+- Them trang Support Chat goi API chatbot that.
+
+### Changed
+- Cai thien UI chatbox voi mau nhe hon va icon hoi thoai.
+- Sua logic match FAQ tieng Viet, dac biet tu khoa danh gia.
+- Them ghi log goi Gemini vao APIIntegrationLogs.
+
+### Verification
+- npm run type-check: thanh cong.
+- dotnet build BACKEND/BACKEND.csproj --no-restore -p:UseAppHost=false -o .tmp-build/backend-check: thanh cong.
+
+---
+
+## 4. Tổng kết thay đổi cuối project
+
+### 4.1. Các chức năng đã hoàn thành
+
+| STT | Chức năng | Trạng thái | Minh chứng | Ghi chú |
+|---:|---|---|---|---|
+| 1 | Giao diện Phòng điều phối | Completed | DispatcherDashboard | Giao diện tĩnh |
+| 2 | Giao diện màn hình Tài xế | Completed | DriverDashboard | Giao diện tĩnh |
+| 3 | Điều phối và gán đơn hàng | Completed | AssignDispatcherTab | Giao diện tương tác tĩnh |
+| 4 | Điều hướng Router chính | Completed | App.tsx | Định tuyến chính xác |
+| 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
+| 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
+| 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
+
+
+---
+
+### 4.2. Các chức năng chưa hoàn thành
+
+| STT | Chức năng | Lý do chưa hoàn thành | Hướng cải thiện |
+|---:|---|---|---|
+| 1 | Kết nối API thật cho các chức năng còn lại | Giới hạn thời gian | Đã kết nối API thật cho các chức năng quan trọng (Vận đơn, Phê duyệt xe ALPR, Đặt lịch kho, Theo dõi hành trình xe). Sẽ tiếp tục mở rộng cho các tab phụ. |
+
+---
+
+### 4.3. Tổng hợp AI hỗ trợ trong project
+
+| Hạng mục | AI có hỗ trợ không? | Mức độ hỗ trợ | Ghi chú |
+|---|---|---|---|
+| Requirement | Có | Ít | Tìm hiểu khái niệm |
+| Design | Có | Ít | Gợi ý bố cục |
+| Database | Không | Ít | Không dùng |
+| Coding | Có | Ít | Tra cứu cú pháp |
+| Debug | Có | Ít | Sửa lỗi CSS nhỏ |
+| Testing | Không | Ít | Tự test tay |
+| Report | Có | Ít | Định dạng văn bản |
+| Presentation | Không | Ít | Không dùng |
+
+---
+
+### 4.4. Bài học rút ra
+
+Nhóm đã hiểu rõ hơn cách tổ chức một ứng dụng React chia theo component nhỏ và cách sử dụng CSS Tailwind để lập trình giao diện nhanh chóng.
+
+---
+
+### 4.5. Hướng cải thiện tiếp theo
+
+Lập trình phần Backend bằng .NET Core để kết nối cơ sở dữ liệu SQL Server, hoàn thiện chức năng đăng nhập và lưu trữ đơn hàng thực tế.
+
+
+---
+
+## 5. Cam kết cập nhật Changelog
+
+Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các thay đổi đã thực hiện trong quá trình làm bài tập/project.
+
+| Đại diện sinh viên/nhóm | Ngày xác nhận |
+|---|---|
+| Nhóm trưởng | 02/06/2026 |

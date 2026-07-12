@@ -12,6 +12,7 @@ namespace BACKEND.Services
         private readonly SmartLogAiContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PayOsPaymentService> _logger;
+        private readonly IPaymentService _paymentService;
         private readonly string? _clientId;
         private readonly string? _apiKey;
         private readonly string? _checksumKey;
@@ -25,6 +26,7 @@ namespace BACKEND.Services
         {
             _context = context;
             _configuration = configuration;
+            _paymentService = paymentService;
             _logger = logger;
             _env = env;
 
@@ -159,6 +161,11 @@ namespace BACKEND.Services
             var paid = string.Equals(verifiedData.Code, "00", StringComparison.OrdinalIgnoreCase);
             await ApplyPaymentResultAsync(payment, paid, verifiedData.Reference, verifiedData.PaymentLinkId);
             await _context.SaveChangesAsync();
+
+            if (shouldSendBill)
+            {
+                await ConfirmAndSendBillAsync(payment.PaymentId);
+            }
         }
 
 
@@ -166,6 +173,7 @@ namespace BACKEND.Services
         {
             var order = await GetOwnedOrderAsync(request.OrderId, currentUserId);
             var invoice = await _context.Invoices
+                .Include(i => i.Order)
                 .Include(i => i.Payments)
                 .FirstOrDefaultAsync(i => i.OrderId == order.OrderId);
 
@@ -254,7 +262,7 @@ namespace BACKEND.Services
         {
             var payment = await _context.Payments
                 .OrderByDescending(p => p.PaymentId)
-                .FirstOrDefaultAsync(p => p.InvoiceId == invoice.InvoiceId && p.PaymentMethod == "PAYOS" && p.Status != "PAID");
+                .FirstOrDefaultAsync(p => p.InvoiceId == invoice.InvoiceId && p.PaymentMethod == "PAYOS" && p.Status != "CONFIRMED" && p.Status != "PAID");
 
             if (payment != null)
             {
@@ -295,10 +303,13 @@ namespace BACKEND.Services
             if (!paid)
             {
                 payment.Status = "FAILED";
-                return;
+                return false;
             }
 
-            payment.Status = "PAID";
+            var alreadyConfirmed = string.Equals(payment.Status, "CONFIRMED", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(payment.Status, "PAID", StringComparison.OrdinalIgnoreCase);
+
+            payment.Status = "CONFIRMED";
             payment.PaidAt = DateTime.Now;
             payment.BankTxnRef = bankReference;
             payment.HashCode = paymentLinkId ?? payment.HashCode;

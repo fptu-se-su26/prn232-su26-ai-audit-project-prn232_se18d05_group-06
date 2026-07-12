@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 import { AddressAutocomplete } from '@/components/customer/AddressAutocomplete';
@@ -17,6 +17,9 @@ const CreateOrder: React.FC = () => {
   const [distanceKm, setDistanceKm] = useState<number>(0);
   const [standardPrice, setStandardPrice] = useState<number>(0);
   const [expressPrice, setExpressPrice] = useState<number>(0);
+  const [basePrice, setBasePrice] = useState<number>(0);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [tierName, setTierName] = useState<string>('Tiêu chuẩn');
   const [standardTime, setStandardTime] = useState<string>('');
   const [expressTime, setExpressTime] = useState<string>('');
   const [selectedSpeed, setSelectedSpeed] = useState<'STANDARD' | 'EXPRESS'>('STANDARD');
@@ -42,6 +45,29 @@ const CreateOrder: React.FC = () => {
   const [weightKg, setWeightKg] = useState<number>(1.5);
   const [cbm, setCbm] = useState<number>(0.5);
 
+  const getAuthToken = () => localStorage.getItem('token') || localStorage.getItem('accessToken') || '';
+
+  const handleAuthRequired = (message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.') => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    toast.error(message, {
+      style: {
+        borderRadius: '16px',
+        background: '#ef4444',
+        color: '#fff',
+        fontWeight: 'bold',
+      }
+    });
+    navigate('/login', { replace: true, state: { from: '/create-shipment' } });
+  };
+
+  useEffect(() => {
+    if (!getAuthToken()) {
+      handleAuthRequired('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+    }
+  }, [navigate]);
+
   const handleCreateOrder = async () => {
     setIsLoading(true);
 
@@ -49,13 +75,14 @@ const CreateOrder: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       if (!token) {
-        throw new Error('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+        handleAuthRequired('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+        return;
       }
       const payload = {
         WarehouseID: 1,
-        ServiceType: selectedSpeed,
+        ServiceType: serviceType,
         PickupAddress: pickupAddress,
         PickupLat: pickupLat,
         PickupLng: pickupLng,
@@ -65,6 +92,7 @@ const CreateOrder: React.FC = () => {
         TotalWeightKg: weightKg,
         TotalCBM: cbm,
         TotalPallets: 0,
+        DeliverySpeed: selectedSpeed,
         QuotedPrice: price
       };
 
@@ -76,6 +104,11 @@ const CreateOrder: React.FC = () => {
         },
         body: JSON.stringify(payload)
       });
+
+      if (response.status === 401) {
+        handleAuthRequired();
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -99,6 +132,11 @@ const CreateOrder: React.FC = () => {
           },
           body: JSON.stringify({ orderId: data.orderId })
         });
+
+        if (payResponse.status === 401) {
+          handleAuthRequired();
+          return;
+        }
 
         if (payResponse.ok) {
           paymentLink = await payResponse.json();
@@ -150,17 +188,26 @@ const CreateOrder: React.FC = () => {
 
   const fetchQuote = async (pLat: number, pLng: number, dLat: number, dLng: number, w: number, v: number) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      if (!token) return;
       const res = await fetch('http://localhost:5200/api/customer/orders/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ PickupLat: pLat, PickupLng: pLng, DeliveryLat: dLat, DeliveryLng: dLng, WeightKg: w, Cbm: v, ServiceType: serviceType })
       });
+      if (res.status === 401) {
+        handleAuthRequired();
+        return;
+      }
+
       if (res.ok) {
         const data = await res.json();
         setDistanceKm(data.distanceKm);
         setStandardPrice(data.standardPrice);
         setExpressPrice(data.expressPrice);
+        setBasePrice(data.basePrice ?? data.standardPrice ?? 0);
+        setDiscountPercent(data.discountPercent ?? 0);
+        setTierName(data.tierName ?? 'Tiêu chuẩn');
         setStandardTime(data.standardTime);
         setExpressTime(data.expressTime);
 
@@ -180,12 +227,21 @@ const CreateOrder: React.FC = () => {
       const formData = new FormData();
       formData.append('imageFile', e.target.files[0]);
 
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      if (!token) {
+        handleAuthRequired('Vui lòng đăng nhập trước khi quét hóa đơn.');
+        return;
+      }
       const res = await fetch('http://localhost:5200/api/customer/orders/scan-invoice', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
+
+      if (res.status === 401) {
+        handleAuthRequired();
+        return;
+      }
 
       if (res.ok) {
         const data = await res.json();
@@ -236,7 +292,7 @@ const CreateOrder: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans text-[#191c1e] overflow-x-hidden">
+    <div className="bg-white min-h-screen font-sans text-[#191c1e] light-surface overflow-x-hidden">
       <Header />
 
       {/* Main Content Area */}
@@ -435,7 +491,21 @@ const CreateOrder: React.FC = () => {
                 <div className="space-y-5">
                   <div className="bg-purple-50/50 p-6 rounded-2xl border border-purple-100 cursor-default transition-all duration-300">
                     <span className="text-[10px] font-extrabold text-purple-600 uppercase tracking-widest block mb-1">Cước phí ước tính</span>
-                    <div className="flex items-baseline gap-2">
+                    
+                    {discountPercent > 0 && (
+                      <div className="flex flex-col gap-1 mb-2">
+                        <div className="flex justify-between text-sm text-slate-500 line-through">
+                          <span>Gốc:</span>
+                          <span>{basePrice.toLocaleString('vi-VN')} VNĐ</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-green-600 font-medium">
+                          <span>Ưu đãi hạng {tierName} (-{discountPercent}%):</span>
+                          <span>-{((basePrice * discountPercent) / 100).toLocaleString('vi-VN')} VNĐ</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-baseline gap-2 border-t border-purple-100 pt-2">
                       <span className="font-sans text-[48px] font-extrabold tracking-[-0.02em] text-slate-900">
                         {price > 0 ? price.toLocaleString('vi-VN') : '--'}
                       </span>
