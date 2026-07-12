@@ -1,105 +1,286 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import AdminSidebar from '@components/AdminSidebar';
+import api from '../../lib/api';
 
-const kpiCards = [
-  {
-    title: 'Total Users',
-    value: '2,405',
-    icon: 'groups',
-    iconClass: 'text-primary bg-primary/10',
-    trendIcon: 'trending_up',
-    trendText: '+12%',
-    trendClass: 'text-tertiary-container bg-tertiary-container/10',
-    hoverGlow: 'bg-primary/5 group-hover:bg-primary/10',
-  },
-  {
-    title: 'Active Accounts',
-    value: '2,189',
-    icon: 'person_check',
-    iconClass: 'text-tertiary bg-tertiary/10',
-    trendIcon: null,
-    trendText: 'Active Now: 843',
-    trendClass: 'text-outline bg-on-surface/5',
-    hoverGlow: 'bg-tertiary/5 group-hover:bg-tertiary/10',
-  },
-  {
-    title: 'Suspended',
-    value: '42',
-    icon: 'person_off',
-    iconClass: 'text-error bg-error/10',
-    trendIcon: null,
-    trendText: 'Requires Review',
-    trendClass: 'text-error bg-error/10',
-    hoverGlow: 'bg-error/5 group-hover:bg-error/10',
-  },
-  {
-    title: 'New Registrations',
-    value: '174',
-    icon: 'fiber_new',
-    iconClass: 'text-primary-container bg-primary-container/10',
-    trendIcon: null,
-    trendText: 'This Week',
-    trendClass: 'text-primary bg-primary/10',
-    hoverGlow: 'bg-primary-fixed/30 group-hover:bg-primary-fixed/50',
-  },
-];
+type UserDto = {
+  userId: number;
+  username: string;
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  roleId: number;
+  roleCode: string;
+  roleName: string;
+  isActive: boolean;
+  lastLoginAt?: string | null;
+  createdAt?: string | null;
+};
 
-const usersData = [
-  {
-    name: 'Sarah Jenkins',
-    email: 'sarah.j@smartlog.ai',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBs_gC3ip6c2L9r0gtWOmY2V81k09QAYvfAlX6d0GGlwR1r8sCTMbcnO-doSSb28h5i0gwfiRQdpqWj7HEbOP4nh40BFX3KHZ-IUGCkVyu9Hz4r7N9sX4JYym-XcJuV4DGIolZmsOEvdG42H0vsyowtA9QYDA92H2DdZqEhO810WI3wvQK2usQkVZrQcsxpI5-53Urvl9T9tEguQrHUbrq7X1KY2B9LOJpOnyseFR5zze9a0gutC0TM7BPpAQErv01JNKkbaU0Du7XX',
-    role: 'Administrator',
-    status: 'Active',
-    statusClass: 'text-tertiary bg-tertiary/10 border-tertiary/20',
-    statusDot: 'bg-tertiary shadow-[0_0_8px_rgba(0,94,110,0.6)]',
-    lastActive: 'Just now (Seattle, WA)',
-    lastActiveIcon: 'schedule',
-    isPending: false,
-    isSuspended: false,
-  },
-  {
-    name: 'Marcus Chen',
-    email: 'm.chen@smartlog.ai',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBQCBDhNscUmSjGJMw-qzbMD34eGuMbzPq-PBvXdx8ByvRI4k3G8aAp1xlklVwB8P8EMH0CGW8SU8CZT7ReZk2yDBQXoifaH6ZMy5nR1NPMPueKUctN1nyvH1oSoWSz6eK8p8nuxHcfl1CL03MlXxcyzrou8H4MfNLkVmOqi9tG2-0w9Rl_6CUI4MynGJpiNE6j8gMhDgoejYfP-XQH735-e4zt2WKQB5K3mD0E6PRN9YKwRHiHfq0lTtxHF2Sa6Z08xnHQV2GzKepe',
-    role: 'Lead Dispatcher',
-    status: 'Active',
-    statusClass: 'text-tertiary bg-tertiary/10 border-tertiary/20',
-    statusDot: 'bg-tertiary shadow-[0_0_8px_rgba(0,94,110,0.6)]',
-    lastActive: '2 hrs ago (Chicago, IL)',
-    lastActiveIcon: 'schedule',
-    isPending: false,
-    isSuspended: false,
-  },
-  {
-    name: 'David Kim',
-    email: 'david.k@smartlog.ai',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdr9r4qxoOb-qihn9dOtzAWYk5yJiwhv-oGRAVHS-VaprY_GlLknYaviWvAovK5bqb9Bg-v8AwnSHxytznkdOXprGEBoyiJfYYoafAyq60FOXAXpkj7cNYdMkyUeZ8jTymZ4alAsl9GvEs17PPGmBO703CZs15jbt_2E720bApG0EACefDCZj3EUNN_Ez_SJT5NCD9Yeab73DBaITQkkUu6_0ArL_GoDtgvP46dB4nw_g-CkfI98zhXyx0XykOtT2Z9SA-nILuBB7P',
-    role: 'Field Operator',
-    status: 'Suspended',
-    statusClass: 'text-error bg-error/10 border-error/20',
-    statusDot: 'bg-error shadow-[0_0_8px_rgba(186,26,26,0.6)]',
-    lastActive: 'Oct 12, 2023',
-    lastActiveIcon: 'schedule',
-    isPending: false,
-    isSuspended: true,
-  },
-  {
-    name: 'elena.rodriguez@external.com',
-    email: 'Invited via Email',
-    avatar: null,
-    role: 'Viewer',
-    status: 'Pending',
-    statusClass: 'text-outline bg-outline/10 border-outline/20',
-    statusDot: 'bg-outline shadow-[0_0_8px_rgba(115,118,134,0.4)]',
-    lastActive: 'Invite sent 4 hrs ago',
-    lastActiveIcon: 'mark_email_unread',
-    isPending: true,
-    isSuspended: false,
-  },
-];
+type RoleDto = {
+  roleId: number;
+  roleCode: string;
+  roleName: string;
+};
+
+type NewUserForm = {
+  username: string;
+  password: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  roleId: number;
+  isActive: boolean;
+};
 
 const AdminUserManagement: React.FC = () => {
+  const [users, setUsers] = useState<UserDto[]>([]);
+  const [roles, setRoles] = useState<RoleDto[]>([]);
+  const [form, setForm] = useState<NewUserForm>({
+    username: '',
+    password: '',
+    fullName: '',
+    email: '',
+    phone: '',
+    roleId: 0,
+    isActive: true,
+  });
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
+  const [editRoleId, setEditRoleId] = useState(0);
+  const [editIsActive, setEditIsActive] = useState(true);
+
+  type DisplayUser = {
+    userId: number;
+    roleId: number;
+    isActive: boolean;
+    name: string;
+    email: string;
+    avatar?: string | null;
+    role: string;
+    status: string;
+    statusClass: string;
+    statusDot: string;
+    lastActive: string;
+    lastActiveIcon: string;
+    isPending: boolean;
+    isSuspended: boolean;
+  };
+
+  const mapUserToDisplay = (user: UserDto): DisplayUser => {
+    const isActive = user.isActive;
+    return {
+      userId: user.userId,
+      roleId: user.roleId,
+      isActive,
+      name: user.fullName,
+      email: user.email,
+      avatar: null,
+      role: user.roleName,
+      status: isActive ? 'Active' : 'Suspended',
+      statusClass: isActive ? 'text-tertiary bg-tertiary/10 border-tertiary/20' : 'text-error bg-error/10 border-error/20',
+      statusDot: isActive ? 'bg-tertiary shadow-[0_0_8px_rgba(0,94,110,0.6)]' : 'bg-error shadow-[0_0_8px_rgba(186,26,26,0.6)]',
+      lastActive: user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'No recent activity',
+      lastActiveIcon: 'schedule',
+      isPending: false,
+      isSuspended: !isActive,
+    };
+  };
+
+  const displayedUsers = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    return users.filter((user) => {
+      const matchesSearch = !normalizedSearch || [user.fullName, user.email, user.username, user.roleName, user.roleCode]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(normalizedSearch));
+      const matchesRole = !roleFilter || user.roleCode.toLowerCase() === roleFilter.toLowerCase();
+      const matchesStatus = !statusFilter || (statusFilter === 'active' ? user.isActive : !user.isActive);
+      return matchesSearch && matchesRole && matchesStatus;
+    }).map(mapUserToDisplay);
+  }, [users, roleFilter, searchTerm, statusFilter]);
+
+  const kpiCards = useMemo(() => {
+    const activeAccounts = users.filter((user) => user.isActive).length;
+    const suspended = users.filter((user) => !user.isActive).length;
+    const newRegistrations = users.filter((user) => {
+      if (!user.createdAt) {
+        return false;
+      }
+      const createdAt = new Date(user.createdAt);
+      const now = new Date();
+      const diffDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+      return diffDays >= 0 && diffDays <= 7;
+    }).length;
+
+    return [
+      {
+        title: 'Total Users',
+        value: users.length.toLocaleString(),
+        icon: 'groups',
+        iconClass: 'text-primary bg-primary/10',
+        trendIcon: 'trending_up',
+        trendText: `${users.length ? 'Live' : 'No data'}`,
+        trendClass: 'text-tertiary-container bg-tertiary-container/10',
+        hoverGlow: 'bg-primary/5 group-hover:bg-primary/10',
+      },
+      {
+        title: 'Active Accounts',
+        value: activeAccounts.toLocaleString(),
+        icon: 'person_check',
+        iconClass: 'text-tertiary bg-tertiary/10',
+        trendIcon: null,
+        trendText: `Active Now: ${activeAccounts}`,
+        trendClass: 'text-outline bg-on-surface/5',
+        hoverGlow: 'bg-tertiary/5 group-hover:bg-tertiary/10',
+      },
+      {
+        title: 'Suspended',
+        value: suspended.toLocaleString(),
+        icon: 'person_off',
+        iconClass: 'text-error bg-error/10',
+        trendIcon: null,
+        trendText: 'Needs review',
+        trendClass: 'text-error bg-error/10',
+        hoverGlow: 'bg-error/5 group-hover:bg-error/10',
+      },
+      {
+        title: 'New Registrations',
+        value: newRegistrations.toLocaleString(),
+        icon: 'fiber_new',
+        iconClass: 'text-primary-container bg-primary-container/10',
+        trendIcon: null,
+        trendText: 'Last 7 days',
+        trendClass: 'text-primary bg-primary/10',
+        hoverGlow: 'bg-primary-fixed/30 group-hover:bg-primary-fixed/50',
+      },
+    ];
+  }, [users]);
+
+  useEffect(() => {
+    void loadRoles();
+    void loadUsers();
+  }, []);
+
+  const loadRoles = async () => {
+    try {
+      const response = await api.get<RoleDto[]>('/admin/roles');
+      setRoles(response.data);
+      if (response.data.length) {
+        setForm((prev) => ({ ...prev, roleId: prev.roleId || response.data[0].roleId }));
+      }
+    } catch (error) {
+      console.error('Failed to load roles', error);
+    }
+  };
+
+  const loadUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const response = await api.get<{ total: number; items: UserDto[] }>('/admin/users?limit=100');
+      setUsers(response.data.items);
+    } catch (error: any) {
+      console.error('Failed to load users', error);
+      setFeedbackError(error?.response?.data?.message || 'Không thể tải danh sách người dùng.');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleFormChange = (field: keyof NewUserForm, value: string | boolean | number) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const openUserDrawer = (user: UserDto) => {
+    setSelectedUser(user);
+    setEditRoleId(user.roleId);
+    setEditIsActive(user.isActive);
+    setFeedbackError(null);
+    setFeedbackMessage(null);
+  };
+
+  const handleCreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFeedbackMessage(null);
+    setFeedbackError(null);
+    setSaving(true);
+
+    try {
+      const response = await api.post<UserDto>('/admin/users', form);
+      setUsers((prev) => [response.data, ...prev]);
+      setFeedbackMessage('Tạo người dùng thành công.');
+      setForm({
+        username: '',
+        password: '',
+        fullName: '',
+        email: '',
+        phone: '',
+        roleId: roles.length ? roles[0].roleId : 1,
+        isActive: true,
+      });
+      setIsCreatePanelOpen(false);
+    } catch (error: any) {
+      console.error('Create user failed', error);
+      setFeedbackError(error?.response?.data?.message || 'Lỗi khi tạo người dùng.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateUser = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedUser) {
+      return;
+    }
+
+    setSaving(true);
+    setFeedbackMessage(null);
+    setFeedbackError(null);
+
+    try {
+      const response = await api.put<UserDto>(`/admin/users/${selectedUser.userId}`, {
+        roleId: editRoleId,
+        isActive: editIsActive,
+      });
+      setUsers((prev) => prev.map((user) => (user.userId === response.data.userId ? response.data : user)));
+      setFeedbackMessage('Cập nhật phân quyền thành công.');
+      setSelectedUser(null);
+    } catch (error: any) {
+      console.error('Update user failed', error);
+      setFeedbackError(error?.response?.data?.message || 'Lỗi khi cập nhật người dùng.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExportUsers = () => {
+    const rows = displayedUsers.map((user) => [
+      user.name,
+      user.email,
+      user.role,
+      user.status,
+      user.lastActive,
+    ]);
+    const csvContent = [
+      ['Name', 'Email', 'Role', 'Status', 'Last Active'],
+      ...rows,
+    ].map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'users.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+    setFeedbackMessage('Đã xuất danh sách người dùng.');
+  };
+
   return (
     <div className="bg-background text-on-background antialiased min-h-screen overflow-x-hidden flex selection:bg-primary/20 selection:text-primary relative">
       {/* Background Atmospheric Elements */}
@@ -148,16 +329,66 @@ const AdminUserManagement: React.FC = () => {
               <p className="font-body-lg text-body-lg text-secondary mt-1">Manage platform access, roles, and administrative privileges.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="h-[48px] px-6 rounded-[18px] bg-white/50 backdrop-blur-md border border-outline-variant/30 text-on-surface font-body-md font-medium hover:bg-surface-variant/50 transition-all flex items-center gap-2">
+              <button type="button" onClick={handleExportUsers} className="h-[48px] px-6 rounded-[18px] bg-white/50 backdrop-blur-md border border-outline-variant/30 text-on-surface font-body-md font-medium hover:bg-surface-variant/50 transition-all flex items-center gap-2">
                 <span className="material-symbols-outlined text-[20px]">download</span>
                 Export List
               </button>
-              <button className="h-[48px] px-6 rounded-[18px] bg-gradient-to-r from-primary to-tertiary-fixed-dim text-on-primary font-body-md font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all flex items-center gap-2">
+              <button type="button" onClick={() => setIsCreatePanelOpen((prev) => !prev)} className="h-[48px] px-6 rounded-[18px] bg-gradient-to-r from-primary to-tertiary-fixed-dim text-on-primary font-body-md font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all flex items-center gap-2">
                 <span className="material-symbols-outlined text-[20px]">person_add</span>
-                Invite User
+                {isCreatePanelOpen ? 'Close Form' : 'Invite User'}
               </button>
             </div>
           </div>
+
+          {feedbackMessage && (
+            <div className="rounded-[18px] border border-tertiary/20 bg-tertiary/10 px-4 py-3 text-sm text-tertiary">{feedbackMessage}</div>
+          )}
+          {feedbackError && (
+            <div className="rounded-[18px] border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">{feedbackError}</div>
+          )}
+
+          {isCreatePanelOpen && (
+            <form onSubmit={handleCreateUser} className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest/80 p-6 shadow-sm">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-on-surface">Username</label>
+                  <input required value={form.username} onChange={(event) => handleFormChange('username', event.target.value)} className="w-full rounded-[14px] border border-outline-variant/40 bg-white/80 px-3 py-2" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-on-surface">Password</label>
+                  <input type="password" required value={form.password} onChange={(event) => handleFormChange('password', event.target.value)} className="w-full rounded-[14px] border border-outline-variant/40 bg-white/80 px-3 py-2" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-on-surface">Full name</label>
+                  <input required value={form.fullName} onChange={(event) => handleFormChange('fullName', event.target.value)} className="w-full rounded-[14px] border border-outline-variant/40 bg-white/80 px-3 py-2" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-on-surface">Email</label>
+                  <input type="email" required value={form.email} onChange={(event) => handleFormChange('email', event.target.value)} className="w-full rounded-[14px] border border-outline-variant/40 bg-white/80 px-3 py-2" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-on-surface">Phone</label>
+                  <input value={form.phone} onChange={(event) => handleFormChange('phone', event.target.value)} className="w-full rounded-[14px] border border-outline-variant/40 bg-white/80 px-3 py-2" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-on-surface">Role</label>
+                  <select value={form.roleId} onChange={(event) => handleFormChange('roleId', Number(event.target.value))} className="w-full rounded-[14px] border border-outline-variant/40 bg-white/80 px-3 py-2">
+                    {roles.map((role) => (
+                      <option key={role.roleId} value={role.roleId}>{role.roleName}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <label className="mt-4 flex items-center gap-2 text-sm text-on-surface">
+                <input type="checkbox" checked={form.isActive} onChange={(event) => handleFormChange('isActive', event.target.checked)} />
+                Active account
+              </label>
+              <div className="mt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsCreatePanelOpen(false)} className="rounded-[14px] border border-outline-variant/40 px-4 py-2">Cancel</button>
+                <button type="submit" disabled={saving} className="rounded-[14px] bg-primary px-4 py-2 text-on-primary">{saving ? 'Saving...' : 'Create User'}</button>
+              </div>
+            </form>
+          )}
 
           {/* KPI Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-stack-md">
@@ -184,25 +415,23 @@ const AdminUserManagement: React.FC = () => {
             <div className="flex flex-col md:flex-row items-center gap-4 bg-surface-container-lowest/50 backdrop-blur-md p-2 rounded-[24px] border border-outline-variant/20 shadow-sm">
               <div className="relative flex-1 w-full group">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-[24px]">search</span>
-                <input className="w-full h-[48px] pl-12 pr-4 bg-on-surface/5 border-none rounded-[18px] font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary/50 focus:bg-white/80 transition-all placeholder:text-outline-variant" placeholder="Search by name, email, or ID..." type="text" />
+                <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} className="w-full h-[48px] pl-12 pr-4 bg-on-surface/5 border-none rounded-[18px] font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary/50 focus:bg-white/80 transition-all placeholder:text-outline-variant" placeholder="Search by name, email, or ID..." type="text" />
               </div>
               <div className="flex items-center gap-2 w-full md:w-auto">
                 <div className="relative">
-                  <select className="h-[48px] pl-4 pr-10 appearance-none bg-white/50 backdrop-blur-md border border-outline-variant/30 rounded-[18px] font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary/50 cursor-pointer min-w-[140px]">
+                  <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)} className="h-[48px] pl-4 pr-10 appearance-none bg-white/50 backdrop-blur-md border border-outline-variant/30 rounded-[18px] font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary/50 cursor-pointer min-w-[140px]">
                     <option value="">All Roles</option>
-                    <option value="admin">Administrator</option>
-                    <option value="dispatcher">Dispatcher</option>
-                    <option value="driver">Driver</option>
-                    <option value="viewer">Viewer</option>
+                    {roles.map((role) => (
+                      <option key={role.roleId} value={role.roleCode}>{role.roleName}</option>
+                    ))}
                   </select>
                   <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-[20px]">expand_more</span>
                 </div>
                 <div className="relative">
-                  <select className="h-[48px] pl-4 pr-10 appearance-none bg-white/50 backdrop-blur-md border border-outline-variant/30 rounded-[18px] font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary/50 cursor-pointer min-w-[140px]">
+                  <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="h-[48px] pl-4 pr-10 appearance-none bg-white/50 backdrop-blur-md border border-outline-variant/30 rounded-[18px] font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary/50 cursor-pointer min-w-[140px]">
                     <option value="">All Statuses</option>
                     <option value="active">Active</option>
                     <option value="suspended">Suspended</option>
-                    <option value="pending">Pending</option>
                   </select>
                   <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-[20px]">expand_more</span>
                 </div>
@@ -221,8 +450,8 @@ const AdminUserManagement: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              {usersData.map((user, index) => (
-                <div key={index} className={`grid grid-cols-1 md:grid-cols-12 gap-4 items-center px-4 md:px-6 py-4 bg-surface-container-lowest/80 backdrop-blur-md border border-white/40 shadow-[0_4px_15px_rgba(0,0,0,0.02)] rounded-[20px] hover:-translate-y-[2px] hover:shadow-[0_8px_25px_rgba(0,0,0,0.05)] transition-all cursor-pointer group ${user.isSuspended ? 'opacity-80' : ''}`}>
+              {(loadingUsers ? [] : displayedUsers).map((user) => (
+                <div key={user.userId} className={`grid grid-cols-1 md:grid-cols-12 gap-4 items-center px-4 md:px-6 py-4 bg-surface-container-lowest/80 backdrop-blur-md border border-white/40 shadow-[0_4px_15px_rgba(0,0,0,0.02)] rounded-[20px] hover:-translate-y-[2px] hover:shadow-[0_8px_25px_rgba(0,0,0,0.05)] transition-all cursor-pointer group ${user.isSuspended ? 'opacity-80' : ''}`}>
                   <div className="col-span-1 md:col-span-4 flex items-center gap-4">
                     {user.isPending ? (
                       <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-surface-bright border-dashed shrink-0 flex items-center justify-center bg-surface-variant/30 text-secondary">
@@ -252,17 +481,11 @@ const AdminUserManagement: React.FC = () => {
                     <span className="font-body-sm text-body-sm text-on-surface-variant">{user.lastActive}</span>
                   </div>
                   <div className="col-span-1 md:col-span-1 flex items-center justify-end gap-1 opacity-0 md:opacity-100 group-hover:opacity-100 transition-opacity">
-                    {user.isPending ? (
-                      <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-variant text-secondary hover:text-on-surface transition-colors" title="Resend Invite">
-                        <span className="material-symbols-outlined text-[20px]">send</span>
-                      </button>
-                    ) : (
-                      <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-variant text-secondary hover:text-on-surface transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">edit</span>
-                      </button>
-                    )}
-                    <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-variant text-secondary hover:text-on-surface transition-colors">
-                      <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                    <button type="button" onClick={(event) => { event.stopPropagation(); openUserDrawer(users.find((item) => item.userId === user.userId) ?? null as any); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-variant text-secondary hover:text-on-surface transition-colors" title="Edit user">
+                      <span className="material-symbols-outlined text-[20px]">edit</span>
+                    </button>
+                    <button type="button" onClick={(event) => { event.stopPropagation(); openUserDrawer(users.find((item) => item.userId === user.userId) ?? null as any); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-variant text-secondary hover:text-on-surface transition-colors" title="Manage permissions">
+                      <span className="material-symbols-outlined text-[20px]">security</span>
                     </button>
                   </div>
                 </div>
@@ -270,7 +493,7 @@ const AdminUserManagement: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between mt-4 px-2">
-              <p className="font-body-sm text-body-sm text-secondary">Showing 1 to 4 of 2,405 users</p>
+              <p className="font-body-sm text-body-sm text-secondary">Showing {displayedUsers.length} of {users.length} users</p>
               <div className="flex items-center gap-1">
                 <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-lowest/50 border border-outline-variant/30 text-secondary hover:bg-surface-variant/50 transition-colors disabled:opacity-50" disabled>
                   <span className="material-symbols-outlined text-[20px]">chevron_left</span>
@@ -288,84 +511,53 @@ const AdminUserManagement: React.FC = () => {
         </div>
       </main>
 
-      {/* User Detail Drawer (Hidden by default) */}
-      <div className="fixed inset-0 z-50 flex justify-end pointer-events-none hidden">
-        <div className="absolute inset-0 bg-on-surface/20 backdrop-blur-sm pointer-events-auto transition-opacity opacity-0"></div>
+      {/* User Detail Drawer */}
+      <div className={`fixed inset-0 z-50 flex justify-end pointer-events-none ${selectedUser ? 'flex' : 'hidden'}`}>
+        <div className="absolute inset-0 bg-on-surface/20 backdrop-blur-sm pointer-events-auto transition-opacity" onClick={() => setSelectedUser(null)}></div>
         <div className="relative w-full max-w-[480px] h-full bg-surface-container-lowest/90 backdrop-blur-2xl shadow-[-20px_0_50px_rgba(0,0,0,0.1)] border-l border-white/40 flex flex-col pointer-events-auto translate-x-0 transition-transform duration-300">
           <div className="flex items-center justify-between p-6 border-b border-outline-variant/20">
-            <h3 className="font-headline-sm text-headline-sm text-on-surface">User Profile</h3>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-variant/50 text-secondary hover:text-on-surface hover:bg-surface-variant transition-colors">
+            <h3 className="font-headline-sm text-headline-sm text-on-surface">Manage Permissions</h3>
+            <button type="button" onClick={() => setSelectedUser(null)} className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-variant/50 text-secondary hover:text-on-surface hover:bg-surface-variant transition-colors">
               <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-surface-bright shadow-lg mb-4 relative">
-                <img alt="Sarah Jenkins Detail Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4g1ZFIcswmPh0ileW-wGIeYwvWzRaQFEgJphty6twis8_cenGd6zYwowPFJEH6IwxYJ9pTBhi6kwllZ5pZtGmq9uWAdjlmcszEng55gijjBYam6VloDvm43NmDlhzzwzJjdHGjH2vKToxKPljQQkC7dgpVCVoHKzfMzEWSdBjIzOOK3O3Jtqq5H2DltmSKQfXxq3-70xq4T6dh9GfSigTYbK7e4q-0-p-s4lGTbgRvBrkd8I1pSaoq_5BPWQePvj_2lna9rXBP4H9" />
-                <div className="absolute bottom-0 right-0 w-6 h-6 bg-tertiary border-2 border-surface-bright rounded-full"></div>
+          {selectedUser && (
+            <form onSubmit={handleUpdateUser} className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+              <div className="rounded-[20px] border border-outline-variant/20 bg-surface-container/50 p-4">
+                <p className="text-sm text-secondary">User</p>
+                <h4 className="mt-1 text-lg font-semibold text-on-surface">{selectedUser.fullName}</h4>
+                <p className="text-sm text-secondary">{selectedUser.email}</p>
               </div>
-              <h2 className="font-headline-md text-headline-md text-on-surface">Sarah Jenkins</h2>
-              <p className="font-body-md text-body-md text-secondary mb-3">sarah.j@smartlog.ai</p>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-tertiary/10 border border-tertiary/20">
-                <div className="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_rgba(0,94,110,0.6)]"></div>
-                <span className="font-label-md text-label-md text-tertiary">Active Account</span>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-on-surface">Role</label>
+                  <select value={editRoleId} onChange={(event) => setEditRoleId(Number(event.target.value))} className="w-full rounded-[14px] border border-outline-variant/40 bg-white/80 px-3 py-2">
+                    {roles.map((role) => (
+                      <option key={role.roleId} value={role.roleId}>{role.roleName}</option>
+                    ))}
+                  </select>
+                </div>
+                <label className="flex items-center gap-2 text-sm text-on-surface">
+                  <input type="checkbox" checked={editIsActive} onChange={(event) => setEditIsActive(event.target.checked)} />
+                  Active account
+                </label>
               </div>
-            </div>
-            <div className="bg-surface-container/50 rounded-[20px] p-1 border border-outline-variant/10">
-              <div className="grid grid-cols-2 gap-px bg-outline-variant/20 rounded-[18px] overflow-hidden">
-                <div className="bg-surface-container-lowest p-4">
-                  <p className="font-label-md text-label-md text-secondary uppercase mb-1">Role</p>
-                  <p className="font-body-md text-body-md text-on-surface font-medium">Administrator</p>
-                </div>
-                <div className="bg-surface-container-lowest p-4">
-                  <p className="font-label-md text-label-md text-secondary uppercase mb-1">Department</p>
-                  <p className="font-body-md text-body-md text-on-surface font-medium">Operations Central</p>
-                </div>
-                <div className="bg-surface-container-lowest p-4">
-                  <p className="font-label-md text-label-md text-secondary uppercase mb-1">Last Login</p>
-                  <p className="font-body-md text-body-md text-on-surface font-medium">Oct 24, 09:41 AM</p>
-                </div>
-                <div className="bg-surface-container-lowest p-4">
-                  <p className="font-label-md text-label-md text-secondary uppercase mb-1">Location</p>
-                  <p className="font-body-md text-body-md text-on-surface font-medium">Seattle HQ</p>
-                </div>
+
+              <div className="rounded-[20px] border border-outline-variant/20 bg-surface-container-lowest/50 p-4 text-sm text-secondary">
+                Assign a different role or change account status for this user instantly.
               </div>
-            </div>
-            <div>
-              <h4 className="font-headline-sm text-[16px] text-on-surface mb-4">Key Permissions</h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-xl border border-outline-variant/20 bg-surface-container-lowest/50">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[20px] text-primary">manage_accounts</span>
-                    <span className="font-body-sm text-body-sm text-on-surface">Manage Users & Roles</span>
-                  </div>
-                  <span className="material-symbols-outlined text-[20px] text-tertiary">check_circle</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-outline-variant/20 bg-surface-container-lowest/50">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[20px] text-primary">local_shipping</span>
-                    <span className="font-body-sm text-body-sm text-on-surface">Fleet Dispatch Authority</span>
-                  </div>
-                  <span className="material-symbols-outlined text-[20px] text-tertiary">check_circle</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-outline-variant/20 bg-surface-container-lowest/50 opacity-60">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[20px] text-secondary">payments</span>
-                    <span className="font-body-sm text-body-sm text-secondary">Financial Approvals</span>
-                  </div>
-                  <span className="material-symbols-outlined text-[20px] text-outline">cancel</span>
-                </div>
+
+              <div className="mt-auto flex gap-3">
+                <button type="button" onClick={() => setSelectedUser(null)} className="flex-1 h-[48px] rounded-[18px] bg-white border border-outline-variant/30 text-on-surface font-body-md font-medium hover:bg-surface-variant/50 transition-all">
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving} className="flex-1 h-[48px] rounded-[18px] bg-primary text-on-primary font-body-md font-medium hover:bg-primary/90 transition-all">
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
               </div>
-            </div>
-          </div>
-          <div className="p-6 border-t border-outline-variant/20 bg-surface-container-lowest/50 flex gap-3">
-            <button className="flex-1 h-[48px] rounded-[18px] bg-white border border-outline-variant/30 text-on-surface font-body-md font-medium hover:bg-surface-variant/50 transition-all">
-              Edit Profile
-            </button>
-            <button className="h-[48px] px-6 rounded-[18px] bg-error/10 text-error font-body-md font-medium hover:bg-error/20 transition-all flex items-center justify-center" title="Suspend Account">
-              <span className="material-symbols-outlined text-[20px]">block</span>
-            </button>
-          </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

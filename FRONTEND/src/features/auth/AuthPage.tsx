@@ -60,8 +60,9 @@ export default function AuthPage() {
           password: password
         });
         localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify({ 
-          name: res.data.fullName, 
+        localStorage.setItem('email', res.data.email);
+        localStorage.setItem('user', JSON.stringify({
+          name: res.data.fullName,
           email: res.data.email,
           role: res.data.role
         }));
@@ -99,8 +100,9 @@ export default function AuthPage() {
         tokenId: credentialResponse.credential
       });
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify({ 
-        name: res.data.fullName, 
+      localStorage.setItem('email', res.data.email);
+      localStorage.setItem('user', JSON.stringify({
+        name: res.data.fullName,
         email: res.data.email,
         role: res.data.role
       }));

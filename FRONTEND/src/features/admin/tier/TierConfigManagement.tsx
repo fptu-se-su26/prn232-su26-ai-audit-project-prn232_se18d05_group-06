@@ -88,7 +88,7 @@ export const TierConfigManagement: React.FC = () => {
   }
 
   return (
-    <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}>
+    <div className="rounded-2xl p-6" style={{ background: 'rgba(15, 23, 42, 0.96)', border: '1px solid rgba(148, 163, 184, 0.14)', backdropFilter: 'blur(16px)' }}>
       <div className="mb-6">
         <h2 className="text-xl font-bold text-white tracking-tight">Tier Configurations</h2>
         <p className="text-sm text-slate-400 mt-1">Set requirements. Changes auto-apply to all customers.</p>
