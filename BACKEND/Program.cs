@@ -83,6 +83,7 @@ builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>();
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
+builder.Services.AddScoped<IFinanceDashboardService, FinanceDashboardService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 
 builder.Services.AddHttpClient();
@@ -114,7 +115,7 @@ if (args.Any(arg => string.Equals(arg, "--seed-dispatch-optimization", StringCom
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SmartLogAiContext>();
-// db.Database.Migrate();
+    // db.Database.Migrate();
 }
 
 
