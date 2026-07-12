@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Sidebar from '../../components/Sidebar'
+import WarehouseHeader from '../../components/WarehouseHeader'
 
 const WarehouseTransfer = () => {
   const [progress] = useState(65)
@@ -9,24 +10,22 @@ const WarehouseTransfer = () => {
       <Sidebar />
 
       <main className="ml-[280px] min-h-screen">
-        <header className="h-20 glass-card fixed top-0 right-0 w-[calc(100%-280px)] z-40 px-8 flex justify-between items-center shadow-sm">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold">Warehouse Transfer</h2>
-            <span className="bg-[#00687a] text-white px-3 py-1 rounded-full text-sm">#WT-2024-8842</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative w-80">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-              <input className="w-full bg-slate-50 rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search transfers..." />
+        <WarehouseHeader 
+          title={
+            <div className="flex items-center gap-4">
+              <span>Warehouse Transfer</span>
+              <span className="bg-[#00687a] text-white px-3 py-1 rounded-full text-sm">#WT-2024-8842</span>
             </div>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-all">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-all">
-              <span className="material-symbols-outlined">smart_toy</span>
-            </button>
-          </div>
-        </header>
+          }
+          rightContent={
+            <>
+              <div className="relative w-80">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input className="w-full bg-slate-50 rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search transfers..." />
+              </div>
+            </>
+          }
+        />
 
         <div className="pt-24 p-8 space-y-8 animate-fade-in-up">
           <section className="glass-card p-6 rounded-xl flex items-center justify-between relative overflow-hidden">

@@ -131,6 +131,7 @@ namespace BACKEND.Controllers
             return Ok(new { success = true });
         }
 
+
         private int? GetCurrentUserId()
         {
             var raw = User.FindFirst(ClaimTypes.NameIdentifier)?.Value

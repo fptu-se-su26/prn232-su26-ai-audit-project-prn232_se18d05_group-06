@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Sidebar from '../../components/Sidebar';
+import WarehouseHeader from '../../components/WarehouseHeader';
 import api from '../../lib/api';
 
 interface ActiveBooking {
@@ -382,26 +383,22 @@ const GateCheckoutDashboard: React.FC = () => {
       {/* Main Content Wrapper (Pushed right by sidebar width) */}
       <div className="flex-1 flex flex-col md:ml-[280px] overflow-hidden min-h-screen relative">
         
-        {/* Top Banner/App Bar */}
-        <header className="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center z-10 shadow-sm shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-lg">N</div>
-          <span className="font-bold text-lg text-slate-800 tracking-tight">NexusPort AI</span>
-          <span className="ml-4 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Trạm A - Hoạt động
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-slate-500">{new Date().toLocaleDateString('vi-VN')}</div>
-          <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
-            <span className="material-symbols-outlined text-slate-500 text-[20px]">account_circle</span>
-          </div>
-        </div>
-        </header>
+        <WarehouseHeader 
+          title="Kiểm soát ra vào (Gate)"
+          subtitle="Giám sát luồng xe ra vào cảng"
+          rightContent={
+            <>
+              <span className="ml-4 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Trạm A - Hoạt động
+              </span>
+              <div className="text-sm text-slate-500">{new Date().toLocaleDateString('vi-VN')}</div>
+            </>
+          }
+        />
 
         {/* Main Interface */}
-        <main className="flex-1 flex gap-6 p-6 overflow-hidden h-[calc(100vh-61px)]">
+        <main className="flex-1 flex gap-6 p-6 overflow-hidden h-screen pt-24">
           
           {/* CAMERA SECTION (60%) */}
           <section className="w-3/5 flex flex-col gap-4">

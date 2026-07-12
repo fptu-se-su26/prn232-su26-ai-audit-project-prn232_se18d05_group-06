@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Sidebar from '../../components/Sidebar'
+import WarehouseHeader from '../../components/WarehouseHeader'
 import api from '../../lib/api'
 
 type StockAlert = {
@@ -172,33 +173,28 @@ const StockAlerts = () => {
     <div className="min-h-screen bg-[#f5f7fb] text-slate-950 antialiased flex overflow-hidden">
       <Sidebar />
 
-      <main className="ml-[280px] h-screen flex-1 overflow-y-auto bg-[#f5f7fb]">
-        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 px-8 py-5 backdrop-blur-xl">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950">Cảnh báo tồn kho</h1>
-              <p className="mt-1 text-sm font-semibold text-slate-500">
-                Quét tự động mỗi <span className="text-blue-700">30 phút</span> · Worker giữ debounce 12 giờ · Quét thủ công gửi lại email để test
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-800">
-                Email nhận cảnh báo: {recipientEmail}
-              </div>
-              <button
+      <WarehouseHeader
+        title="Cảnh báo tồn kho"
+        subtitle={
+          <>Quét tự động mỗi <span className="text-blue-700">30 phút</span> · Worker giữ debounce 12 giờ · Quét thủ công gửi lại email để test</>
+        }
+        rightContent={
+          <div className="flex flex-wrap items-center gap-3">
+              <button 
                 onClick={handleScan}
                 disabled={scanning}
-                className="inline-flex h-12 items-center gap-2 rounded-lg bg-blue-700 px-5 text-sm font-black text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-blue-600 px-5 py-2.5 font-semibold text-white shadow-lg shadow-blue-600/30 transition-all hover:bg-blue-700 hover:shadow-blue-600/40 disabled:cursor-not-allowed disabled:bg-blue-400"
               >
-                <span className="material-symbols-outlined text-[20px]">{scanning ? 'hourglass_top' : 'refresh'}</span>
+                <span className={`material-symbols-outlined text-[20px] ${scanning ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`}>
+                  sync
+                </span>
                 {scanning ? 'Đang quét...' : 'Quét ngay'}
               </button>
-            </div>
           </div>
-        </header>
-
-        <section className="space-y-6 p-6 lg:p-8">
+        }
+      />
+      <main className="ml-[280px] h-screen flex-1 overflow-y-auto bg-[#f5f7fb] pt-24 px-8 pb-10">
+        <section className="space-y-6 lg:p-8">
           {error && (
             <div className="flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-bold text-rose-800">
               <span className="material-symbols-outlined text-[20px]">error</span>

@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useReactToPrint } from 'react-to-print'
 import Sidebar from '../../components/Sidebar'
 import api from '../../lib/api'
-
+import FindInboundModal from './FindInboundModal'
+import { LabelPrintTemplate } from '../../components/LabelPrintTemplate'
+import WarehouseHeader from '../../components/WarehouseHeader'
 type CargoPhoto = {
   photoId: number
   photoUrl: string
@@ -121,10 +124,14 @@ const ImportGoods = () => {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [slottingResult, setSlottingResult] = useState<SlottingResponse | null>(null)
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const [photoAngle, setPhotoAngle] = useState<string>('FRONT')
   const [markDamaged, setMarkDamaged] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const printRef = useRef<HTMLDivElement>(null)
 
   const selectedOrder = useMemo(
     () => orders.find((o) => o.inboundId === selectedOrderId) ?? null,
@@ -135,21 +142,25 @@ const ImportGoods = () => {
     [lines, selectedLineId],
   )
 
-  useEffect(() => {
-    let active = true
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `LPN-${selectedOrder?.inboundCode}-${selectedLine?.skucode}`
+  })
+
+  const loadOrders = () => {
     setLoadingOrders(true)
     api
-      .get<InboundOrder[]>('/inbound')
+      .get<InboundOrder[]>('/inbound?statuses=PENDING&statuses=IN_PROGRESS')
       .then((res) => {
-        if (!active) return
         setOrders(res.data)
-        if (res.data.length > 0) setSelectedOrderId(res.data[0].inboundId)
+        if (res.data.length > 0 && !selectedOrderId) setSelectedOrderId(res.data[0].inboundId)
       })
-      .catch(() => active && setError('Không tải được danh sách đơn nhập kho.'))
-      .finally(() => active && setLoadingOrders(false))
-    return () => {
-      active = false
-    }
+      .catch(() => setError('Không tải được danh sách đơn nhập kho.'))
+      .finally(() => setLoadingOrders(false))
+  }
+
+  useEffect(() => {
+    loadOrders()
   }, [])
 
   useEffect(() => {
@@ -258,6 +269,32 @@ const ImportGoods = () => {
     if (file) handleUpload(file)
   }
 
+  const submitReceiving = async () => {
+    if (!selectedOrderId) return
+    setError(null)
+    try {
+      const payload = {
+        lines: lines.map((l) => ({
+          lineId: l.lineId,
+          receivedQty: l.receivedQty ?? l.expectedQty,
+          binId: 0, // Backend will handle it using the DB binId
+          conditionStatus: l.conditionStatus || 'GOOD',
+        })),
+      }
+      const res = await api.post(`/inbound/${selectedOrderId}/confirm-receiving`, payload)
+      if (res.data?.success) {
+        alert('Đã xác nhận nhập kho thành công!')
+        loadOrders()
+        setLines([])
+        setSelectedOrderId(null)
+      } else {
+        setError(res.data?.message || 'Có lỗi xảy ra khi xác nhận.')
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Không thể xác nhận nhập kho. Vui lòng thử lại.')
+    }
+  }
+
   const currentPhotos = selectedLine?.photos?.length ?? 0
   const photosNeeded = selectedLine?.requiresMinPhotos
     ? Math.max(0, selectedLine.minPhotos - currentPhotos)
@@ -282,30 +319,47 @@ const ImportGoods = () => {
     <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased overflow-hidden">
       <Sidebar />
 
-      <header className="fixed top-0 right-0 w-[calc(100%-280px)] h-20 bg-white/90 backdrop-blur-md z-40 border-b border-slate-200/70 flex items-center justify-between px-8">
-        <div>
-          <h1 className="text-2xl font-bold">Nhập kho hàng hóa</h1>
-          <p className="text-xs text-slate-500">Chụp ảnh tình trạng hàng khi nhập</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <button className="relative rounded-full p-2 text-slate-600 hover:bg-slate-100 transition-all duration-200" type="button">
-            <span className="material-symbols-outlined">notifications</span>
-            <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-red-600" />
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200" type="button">
-            <span className="material-symbols-outlined text-base">smart_toy</span>
-            Trạng thái AI: Sẵn sàng
-          </button>
-        </div>
-      </header>
+      <WarehouseHeader 
+        title="Nhập kho hàng hóa" 
+        subtitle="Chụp ảnh tình trạng hàng khi nhập"
+      />
 
       <main className="ml-[280px] mt-20 p-8 pb-10 animate-fade-in-up">
+        {/* Header */}
+        <div className="mb-8 rounded-[32px] bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white shadow-2xl shadow-blue-900/20">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight mb-2">Nhập Hàng (Inbound)</h1>
+              <p className="text-blue-100 text-lg max-w-2xl">
+                Quản lý quy trình nhận hàng, kiểm tra chất lượng và sắp xếp vị trí lưu kho.
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setIsCreateModalOpen(true)}
+                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 transition-colors px-6 py-3 rounded-2xl font-semibold backdrop-blur-md border border-white/20"
+              >
+                <span className="material-symbols-outlined">qr_code_scanner</span>
+                Tìm Đơn (QR/Barcode)
+              </button>
+            </div>
+          </div>
+        </div>
+
         {error && (
           <div className="mb-6 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
             <span className="material-symbols-outlined text-base">error</span>
             {error}
           </div>
         )}
+
+        {/* Modal Find */}
+        <FindInboundModal 
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          orders={orders.map(o => ({ inboundId: o.inboundId, inboundCode: o.inboundCode }))}
+          onOrderFound={(id) => setSelectedOrderId(id)}
+        />
 
         <div className="grid gap-6 lg:grid-cols-[1.75fr_1fr]">
           <div className="space-y-6">
@@ -543,23 +597,6 @@ const ImportGoods = () => {
 
           <div className="space-y-6">
             <section className="glass-card rounded-[28px] border border-white/80 p-6 shadow-xl shadow-slate-900/5">
-              <div className="flex items-center gap-3 mb-5">
-                <span className="material-symbols-outlined text-primary">document_scanner</span>
-                <h2 className="text-xl font-semibold">Quét hóa đơn bằng AI</h2>
-              </div>
-              <div className="relative rounded-[28px] border-2 border-dashed border-primary/35 bg-slate-50 p-8 text-center">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-                <span className="material-symbols-outlined mb-4 inline-block text-4xl text-primary/70">cloud_upload</span>
-                <p className="mx-auto max-w-xs text-sm text-slate-500">
-                  Kéo thả file PDF hoặc ảnh hóa đơn vào đây để tự động điền thông tin
-                </p>
-                <button className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/15 transition hover:bg-blue-700" type="button">
-                  Chọn file
-                </button>
-              </div>
-            </section>
-
-            <section className="glass-card rounded-[28px] border border-white/80 p-6 shadow-xl shadow-slate-900/5">
               <div className="flex items-center justify-between gap-3 mb-5">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-primary">photo_camera</span>
@@ -699,10 +736,26 @@ const ImportGoods = () => {
                 <div className="rounded-3xl bg-white p-5 shadow-sm">
                   <p className="text-xs text-slate-500">Mã nhãn: {selectedOrder?.inboundCode ?? 'IMP-'}</p>
                   <p className="mt-2 text-sm font-semibold text-slate-900">Dòng hàng: {selectedLine?.skucode ?? '-'}</p>
-                  <button className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800" type="button">
+                  <button 
+                    onClick={handlePrint}
+                    disabled={!selectedLine || !selectedOrder}
+                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    type="button"
+                  >
                     <span className="material-symbols-outlined">print</span>
                     In nhãn
                   </button>
+                  
+                  {/* Print Template (Hidden from screen) */}
+                  {selectedOrder && selectedLine && (
+                    <LabelPrintTemplate 
+                      ref={printRef}
+                      inboundCode={selectedOrder.inboundCode}
+                      skuCode={selectedLine.skucode || ''}
+                      productName={selectedLine.productName || ''}
+                      binCode={selectedLine.binCode || selectedLine.aiSlottedBinCode || ''}
+                    />
+                  )}
                 </div>
               </div>
             </section>
@@ -716,10 +769,9 @@ const ImportGoods = () => {
               Còn kiện hàng lỗi chưa đủ số ảnh bắt buộc - chưa thể xác nhận.
             </p>
           )}
-          <button className="rounded-full border border-blue-600 bg-white px-8 py-4 text-sm font-bold text-blue-600 transition hover:bg-blue-50" type="button">
-            Lưu nháp
-          </button>
+
           <button
+            onClick={submitReceiving}
             disabled={blockConfirm}
             className="rounded-full bg-blue-600 px-10 py-4 text-sm font-bold text-white shadow-[0_20px_50px_rgba(37,99,235,0.25)] transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             type="button"

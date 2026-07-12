@@ -1,4 +1,5 @@
 import Sidebar from '../../components/Sidebar'
+import WarehouseHeader from '../../components/WarehouseHeader'
 import Topbar from '../../components/Topbar'
 import KpiCards from '../../components/KpiCards'
 import WarehouseMap from '../../components/WarehouseMap'
@@ -13,9 +14,9 @@ const WarehouseDashboard = () => {
       <Sidebar />
 
       <main className="ml-[280px] flex-1 h-screen overflow-y-auto custom-scrollbar flex flex-col animate-fade-in-up">
-        <Topbar />
-
-        <div className="p-8 space-y-8">
+        <WarehouseHeader title="Warehouse Dashboard" subtitle="Welcome to the SmartLog AI Warehouse Management System." />
+        
+        <div className="p-8 pt-24 space-y-8">
           <KpiCards />
 
           <div className="grid grid-cols-12 gap-6">
