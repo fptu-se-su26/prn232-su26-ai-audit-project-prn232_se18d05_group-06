@@ -7,6 +7,7 @@ using BACKEND.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using QRCoder;
+using Microsoft.Data.SqlClient;
 
 namespace BACKEND.Services
 {
@@ -406,6 +407,150 @@ namespace BACKEND.Services
             await _context.SaveChangesAsync();
 
             return MapToDto(order);
+        }
+
+        public async Task<ShippingLabelDto> GetOrCreateShippingLabelAsync(int outboundId, int authenticatedUserId)
+        {
+            var outbound = await _context.OutboundOrders
+                .Include(o => o.Order)
+                    .ThenInclude(so => so.Customer)
+                .Include(o => o.Warehouse)
+                .FirstOrDefaultAsync(o => o.OutboundId == outboundId);
+
+            if (outbound == null)
+            {
+                throw new KeyNotFoundException($"Outbound order with ID {outboundId} was not found.");
+            }
+
+            if (outbound.Status != "PACKED" && outbound.Status != "DISPATCHED")
+            {
+                throw new InvalidOperationException($"Outbound order status is '{outbound.Status}'. A shipping label can only be generated for PACKED or DISPATCHED orders.");
+            }
+
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
+            {
+                var existing = await _context.Waybills.FirstOrDefaultAsync(w => w.OutboundId == outboundId);
+                if (existing != null)
+                {
+                    return MapToShippingLabelDto(existing, outbound);
+                }
+
+                var today = DateTime.UtcNow.ToString("yyyyMMdd");
+                var guidSegment = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+                var waybillCode = $"WB-{today}-{guidSegment}";
+
+                while (await _context.Waybills.AnyAsync(w => w.WaybillCode == waybillCode))
+                {
+                    guidSegment = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+                    waybillCode = $"WB-{today}-{guidSegment}";
+                }
+
+                var newWaybill = new Waybill
+                {
+                    OrderId = outbound.OrderId,
+                    OutboundId = outbound.OutboundId,
+                    WaybillCode = waybillCode,
+                    QrCodeBase64 = null,
+                    Status = "CREATED",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                using (var transaction = await _context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        _context.Waybills.Add(newWaybill);
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return MapToShippingLabelDto(newWaybill, outbound);
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        await transaction.RollbackAsync();
+
+                        var sqlException = ex.InnerException as SqlException;
+                        if (sqlException != null && (sqlException.Number == 2601 || sqlException.Number == 2627))
+                        {
+                            _context.Entry(newWaybill).State = EntityState.Detached;
+
+                            Waybill? competingWaybill = null;
+                            for (int i = 0; i < 5; i++)
+                            {
+                                competingWaybill = await _context.Waybills.AsNoTracking().FirstOrDefaultAsync(w => w.OutboundId == outboundId);
+                                if (competingWaybill != null) break;
+                                await Task.Delay(100);
+                            }
+
+                            if (competingWaybill != null)
+                            {
+                                return MapToShippingLabelDto(competingWaybill, outbound);
+                            }
+                            throw;
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+            });
+        }
+
+        public async Task<ShippingLabelDto?> GetShippingLabelAsync(int outboundId)
+        {
+            var outbound = await _context.OutboundOrders
+                .Include(o => o.Order)
+                    .ThenInclude(so => so.Customer)
+                .Include(o => o.Warehouse)
+                .FirstOrDefaultAsync(o => o.OutboundId == outboundId);
+
+            if (outbound == null)
+            {
+                throw new KeyNotFoundException($"Outbound order with ID {outboundId} was not found.");
+            }
+
+            var waybill = await _context.Waybills.FirstOrDefaultAsync(w => w.OutboundId == outboundId);
+            if (waybill == null)
+            {
+                return null;
+            }
+
+            return MapToShippingLabelDto(waybill, outbound);
+        }
+
+        private ShippingLabelDto MapToShippingLabelDto(Waybill waybill, OutboundOrder outbound)
+        {
+            string qrCodeBase64 = string.Empty;
+            using (var qrGenerator = new QRCodeGenerator())
+            {
+                var qrCodeData = qrGenerator.CreateQrCode(waybill.WaybillCode, QRCodeGenerator.ECCLevel.Q);
+                using (var qrCode = new PngByteQRCode(qrCodeData))
+                {
+                    byte[] qrCodeBytes = qrCode.GetGraphic(20);
+                    qrCodeBase64 = Convert.ToBase64String(qrCodeBytes);
+                }
+            }
+
+            return new ShippingLabelDto
+            {
+                WaybillId = waybill.WaybillId,
+                WaybillCode = waybill.WaybillCode,
+                OutboundId = outbound.OutboundId,
+                OutboundCode = outbound.OutboundCode,
+                OrderCode = outbound.Order?.OrderCode ?? string.Empty,
+                WarehouseName = outbound.Warehouse?.WarehouseName ?? string.Empty,
+                WarehouseAddress = outbound.Warehouse?.Address ?? string.Empty,
+                DestinationAddress = outbound.Order?.Customer?.Address ?? string.Empty,
+                RecipientName = outbound.Order?.Customer?.ContactName ?? outbound.Order?.Customer?.CompanyName ?? string.Empty,
+                RecipientPhone = outbound.Order?.Customer?.Phone ?? string.Empty,
+                TotalWeightKg = outbound.Order?.TotalWeightKg ?? 0,
+                TotalPallets = outbound.Order?.TotalPallets ?? 0,
+                CreatedAt = waybill.CreatedAt ?? DateTime.UtcNow,
+                QrPayload = waybill.WaybillCode,
+                QrCodeBase64 = qrCodeBase64,
+                OutboundStatus = outbound.Status ?? string.Empty
+            };
         }
     }
 }

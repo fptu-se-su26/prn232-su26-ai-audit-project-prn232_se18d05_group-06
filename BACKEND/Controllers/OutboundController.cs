@@ -161,5 +161,55 @@ namespace BACKEND.Controllers
                 return StatusCode(500, new { message = "An error occurred while confirming outbound picking.", details = ex.Message });
             }
         }
+
+        [HttpPut("{outboundId}/shipping-label")]
+        public async Task<IActionResult> GetOrCreateShippingLabel(int outboundId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new { message = "User context is missing or invalid in authenticated claims." });
+            }
+
+            try
+            {
+                var label = await _outboundService.GetOrCreateShippingLabelAsync(outboundId, userId);
+                return Ok(label);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred while processing the shipping label.", details = ex.Message });
+            }
+        }
+
+        [HttpGet("{outboundId}/shipping-label")]
+        public async Task<IActionResult> GetShippingLabel(int outboundId)
+        {
+            try
+            {
+                var label = await _outboundService.GetShippingLabelAsync(outboundId);
+                if (label == null)
+                {
+                    return NotFound(new { message = $"No shipping label has been generated for outbound order {outboundId}." });
+                }
+                return Ok(label);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred while retrieving the shipping label.", details = ex.Message });
+            }
+        }
     }
 }

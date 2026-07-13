@@ -140,6 +140,8 @@ public partial class SmartLogAiContext : DbContext
 
     public virtual DbSet<WarehouseLayoutObject> WarehouseLayoutObjects { get; set; }
 
+    public virtual DbSet<Waybill> Waybills { get; set; }
+
     public override int SaveChanges()
     {
         PreventVehicleEventModification();
@@ -1897,6 +1899,40 @@ public partial class SmartLogAiContext : DbContext
                 .HasForeignKey(d => d.MapId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__WarehouseLayoutObjects__Maps");
+        });
+
+        modelBuilder.Entity<Waybill>(entity =>
+        {
+            entity.HasKey(e => e.WaybillId).HasName("PK__Waybills__578D591AD8E7B89A");
+
+            entity.ToTable("Waybills");
+
+            entity.Property(e => e.WaybillId).HasColumnName("WaybillID");
+            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.Property(e => e.OutboundId).HasColumnName("OutboundId");
+
+            entity.Property(e => e.WaybillCode)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.Property(e => e.QrCodeBase64)
+                .IsUnicode(true);
+
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+
+            entity.Property(e => e.CreatedAt);
+
+            entity.HasOne(d => d.Order)
+                .WithMany(p => p.Waybills)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("FK__Waybills__OrderI__61316BF4");
+
+            entity.HasOne(d => d.Outbound)
+                .WithOne(p => p.Waybill)
+                .HasForeignKey<Waybill>(d => d.OutboundId)
+                .HasConstraintName("FK_Waybills_OutboundOrders");
         });
 
         OnModelCreatingPartial(modelBuilder);

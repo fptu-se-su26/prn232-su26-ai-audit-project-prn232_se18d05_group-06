@@ -30,4 +30,6 @@ public partial class OutboundOrder
     public virtual ICollection<OutboundLine> OutboundLines { get; set; } = new List<OutboundLine>();
 
     public virtual Warehouse Warehouse { get; set; } = null!;
+
+    public virtual Waybill? Waybill { get; set; }
 }
