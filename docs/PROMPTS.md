@@ -6,7 +6,7 @@
 |---|---|
 | Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
-| Lớp | SE18D05 |
+| Lá»›p | SE18D05 |
 | Học kỳ | 8 |
 | Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
 | Tên sinh viên / Nhóm | Nhóm 6 |
@@ -422,7 +422,7 @@ Nhóm giữ nguyên routing và cấu trúc tab chính, chỉ đổi giao diện
 - Date: 2026-07-01
 - AI Tool: Antigravity
 - Author: Trần Văn Tùng (DE180109)
-- Purpose: Gộp SQL Overstay Alert
+- Purpose: Gá»™p SQL Overstay Alert
 
 ### Bối cảnh
 ```text
@@ -755,6 +755,62 @@ Làm sao để nhúng Goong Map vào React, gọi API Direction để lấy đư
 ### Evaluation
 AI đưa ra hướng dẫn sử dụng thư viện `goongjs` và thuật toán nội suy điểm. Nhóm quyết định không copy toàn bộ logic mà tự viết hàm `getRoutePoint`, tự thiết kế SVG Marker hình xe tải theo phong cách Glassmorphism và tự mapping % tiến độ từ dữ liệu đơn hàng vào lộ trình trên bản đồ thực, thay thế hoàn toàn giao diện SVG giả trước đó.
 
+## Prompt #32
+
+- Date: 2026-07-12
+- AI Tool: ChatGPT/Codex
+- Author: Tran Van Tung (DE180109)
+- Purpose: Hoan thien tao hoa don PDF tu dong va gui email cho customer sau thanh toan
+
+### Prompt
+Khi customer thanh toan thanh cong thi he thong tao Invoice PAID, generate bill PDF va gui bill PDF ve email customer. Neu chua thanh toan thi gui invoice PENDING. Can sua nut xem/tai PDF, gui lai email, them nut thanh toan lai va them thong tin QR, ten tai khoan, so tai khoan vao PDF/email.
+
+### Expected Output
+- Backend cap nhat luong PayOS, invoice, payment va email.
+- Frontend Payment History co toast bao thanh cong/that bai cho cac nut.
+- PDF/email co thong tin chuyen khoan va VietQR.
+- Customer chi xem duoc hoa don cua minh.
+
+### Evaluation
+AI ho tro tim vi tri file va goi y luong xu ly, nhung sinh vien tu doc code that, tu quyet dinh endpoint `/customer/invoices/{invoiceId}/pdf`, tu kiem tra quyen customer va tu build/type-check de xac nhan ket qua.
+
+---
+
+## Prompt #33
+
+- Date: 2026-07-12
+- AI Tool: Antigravity
+- Author: Tran Van Tung (DE180109)
+- Purpose: Hoan thien My Orders va UC036 Feedback thanh mot luong Customer lien thong.
+
+### Original Prompt Summary
+```text
+My Orders la man hinh Customer dung de xem don logistics, trang thai xu ly, hoa don PDF, tai PDF va danh gia chat luong dich vu sau khi don hoan thanh. Can doi title thanh Don hang cua toi, them KPI, filter, bang don hang, nut hoa don va nut danh gia theo business rules UC036.
+```
+
+### Result
+```text
+AI ho tro xac dinh cac field can bo sung trong DTO/API va goi y bo cuc UI. Ket qua duoc chinh sua lai theo code hien co cua project, dung endpoint invoice PDF va feedback da co.
+```
+---
+
+## Prompt #34
+- Date: 2026-07-12
+- AI Tool: Antigravity
+- Author: Tran Van Tung (DE180109)
+- Purpose: Tich hop AI Chatbot ho tro Customer bang FAQ va Gemini, dong thoi tao chatbox noi.
+
+### Original Prompt Summary
+```text
+Can lam AI Chatbot ho tro khach hang, uu tien FAQ trong database, neu FAQ khong du thi goi Gemini API, fallback an toan khi Gemini loi. Chatbot can hien thi nhu bong chat o goc duoi phai, bam vao mo khung chat cho user hoi nhanh.
+```
+
+### Result
+```text
+AI ho tro xac dinh backend API, service FAQ/Gemini fallback va UI chatbox noi. Ket qua duoc chinh sua theo code hien co, them kiem tra quyen customer khi hoi ma don va sua UI de bot bot choi mau.
+```
+
+---
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
@@ -860,7 +916,7 @@ Không nên hỏi AI làm hộ toàn bộ dự án mà nên chia nhỏ từng vi
 | Prompt thiết kế giải pháp | 1 | "Hãy thiết kế một GateService chạy trong IDbContextTransaction..." |
 | Prompt thiết kế database | 1 | "Hãy thiết kế bảng VehicleEvents..." |
 | Prompt sinh code mẫu | 2 | "Cách sử dụng React Router v6..." |
-| Prompt debug lỗi | 0 |  |
+| Prompt debug lá»—i | 0 |  |
 | Prompt viết test case | 0 |  |
 | Prompt review code | 0 |  |
 | Prompt tối ưu code | 0 |  |
@@ -902,5 +958,3 @@ Sinh viên/nhóm cam kết rằng:
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 02/06/2026 |
-
----

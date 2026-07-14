@@ -17,12 +17,12 @@ const CreateOrder: React.FC = () => {
   const [distanceKm, setDistanceKm] = useState<number>(0);
   const [standardPrice, setStandardPrice] = useState<number>(0);
   const [expressPrice, setExpressPrice] = useState<number>(0);
+  const [basePrice, setBasePrice] = useState<number>(0);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [tierName, setTierName] = useState<string>('Tiêu chuẩn');
   const [standardTime, setStandardTime] = useState<string>('');
   const [expressTime, setExpressTime] = useState<string>('');
   const [selectedSpeed, setSelectedSpeed] = useState<'STANDARD' | 'EXPRESS'>('STANDARD');
-  const [discountPercent, setDiscountPercent] = useState<number>(0);
-  const [basePrice, setBasePrice] = useState<number>(0);
-  const [tierName, setTierName] = useState<string>('Standard');
 
   // Form states
   const [serviceType, setServiceType] = useState('TRANSPORT');
@@ -37,13 +37,36 @@ const CreateOrder: React.FC = () => {
   const [deliveryLng, setDeliveryLng] = useState<number | undefined>();
   const [receiverName, setReceiverName] = useState('');
   const [receiverPhone, setReceiverPhone] = useState('');
-  
+
   const [itemName, setItemName] = useState('');
   const [itemValue, setItemValue] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
 
   const [weightKg, setWeightKg] = useState<number>(1.5);
   const [cbm, setCbm] = useState<number>(0.5);
+
+  const getAuthToken = () => localStorage.getItem('token') || localStorage.getItem('accessToken') || '';
+
+  const handleAuthRequired = (message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.') => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    toast.error(message, {
+      style: {
+        borderRadius: '16px',
+        background: '#ef4444',
+        color: '#fff',
+        fontWeight: 'bold',
+      }
+    });
+    navigate('/login', { replace: true, state: { from: '/create-shipment' } });
+  };
+
+  useEffect(() => {
+    if (!getAuthToken()) {
+      handleAuthRequired('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+    }
+  }, [navigate]);
 
   const handleCreateOrder = async () => {
     setIsLoading(true);
@@ -52,9 +75,14 @@ const CreateOrder: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      if (!token) {
+        handleAuthRequired('Vui lòng đăng nhập trước khi tạo đơn hàng.');
+        return;
+      }
       const payload = {
-        ServiceType: selectedSpeed,
+        WarehouseID: 1,
+        ServiceType: serviceType,
         PickupAddress: pickupAddress,
         PickupLat: pickupLat,
         PickupLng: pickupLng,
@@ -62,7 +90,10 @@ const CreateOrder: React.FC = () => {
         DeliveryLat: deliveryLat,
         DeliveryLng: deliveryLng,
         TotalWeightKg: weightKg,
-        TotalCBM: cbm
+        TotalCBM: cbm,
+        TotalPallets: 0,
+        DeliverySpeed: selectedSpeed,
+        QuotedPrice: price
       };
 
       const response = await fetch('http://localhost:5200/api/customer/orders', {
@@ -74,15 +105,57 @@ const CreateOrder: React.FC = () => {
         body: JSON.stringify(payload)
       });
 
+      if (response.status === 401) {
+        handleAuthRequired();
+        return;
+      }
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.Message || 'Có lỗi xảy ra khi tạo đơn hàng');
+        const validationErrors = errorData.errors
+          ? Object.values(errorData.errors).flat().join(' ')
+          : '';
+        throw new Error(errorData.message || errorData.Message || validationErrors || 'Có lỗi xảy ra khi tạo đơn hàng.');
       }
 
       const data = await response.json();
 
-      // Navigate to tracking via success page
-      navigate('/order-success', { state: { orderId: data.orderId } });
+      let paymentLink = null;
+      let paymentError = '';
+
+      try {
+        const payResponse = await fetch('http://localhost:5200/api/payments/payos/create-link', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ orderId: data.orderId })
+        });
+
+        if (payResponse.status === 401) {
+          handleAuthRequired();
+          return;
+        }
+
+        if (payResponse.ok) {
+          paymentLink = await payResponse.json();
+        } else {
+          const payErrorData = await payResponse.json().catch(() => ({}));
+          paymentError = payErrorData.message || payErrorData.Message || 'Khong the tao link thanh toan PayOS.';
+        }
+      } catch (paymentLinkError: any) {
+        paymentError = paymentLinkError.message || 'Khong the tao link thanh toan PayOS.';
+      }
+
+      navigate(`/payment?orderId=${data.orderId}`, {
+        state: {
+          orderId: data.orderId,
+          amount: data.amount,
+          paymentLink,
+          paymentError
+        }
+      });
     } catch (error: any) {
       toast.error(error.message, {
         style: {
@@ -115,17 +188,26 @@ const CreateOrder: React.FC = () => {
 
   const fetchQuote = async (pLat: number, pLng: number, dLat: number, dLng: number, w: number, v: number) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      if (!token) return;
       const res = await fetch('http://localhost:5200/api/customer/orders/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ PickupLat: pLat, PickupLng: pLng, DeliveryLat: dLat, DeliveryLng: dLng, WeightKg: w, Cbm: v, ServiceType: serviceType })
       });
+      if (res.status === 401) {
+        handleAuthRequired();
+        return;
+      }
+
       if (res.ok) {
         const data = await res.json();
         setDistanceKm(data.distanceKm);
         setStandardPrice(data.standardPrice);
         setExpressPrice(data.expressPrice);
+        setBasePrice(data.basePrice ?? data.standardPrice ?? 0);
+        setDiscountPercent(data.discountPercent ?? 0);
+        setTierName(data.tierName ?? 'Tiêu chuẩn');
         setStandardTime(data.standardTime);
         setExpressTime(data.expressTime);
 
@@ -145,12 +227,21 @@ const CreateOrder: React.FC = () => {
       const formData = new FormData();
       formData.append('imageFile', e.target.files[0]);
 
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      if (!token) {
+        handleAuthRequired('Vui lòng đăng nhập trước khi quét hóa đơn.');
+        return;
+      }
       const res = await fetch('http://localhost:5200/api/customer/orders/scan-invoice', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
+
+      if (res.status === 401) {
+        handleAuthRequired();
+        return;
+      }
 
       if (res.ok) {
         const data = await res.json();
@@ -165,7 +256,7 @@ const CreateOrder: React.FC = () => {
         if (data.itemValue) setItemValue(data.itemValue);
         if (data.notes) setNotes(data.notes);
         if (data.deliverySpeed === 'EXPRESS' || data.deliverySpeed === 'STANDARD') setSelectedSpeed(data.deliverySpeed as 'EXPRESS' | 'STANDARD');
-        
+
         toast.success('Đã trích xuất thông tin hóa đơn thành công!', {
           style: {
             borderRadius: '16px',
@@ -201,7 +292,7 @@ const CreateOrder: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans text-[#191c1e] overflow-x-hidden">
+    <div className="bg-white min-h-screen font-sans text-[#191c1e] light-surface overflow-x-hidden">
       <Header />
 
       {/* Main Content Area */}
@@ -459,11 +550,11 @@ const CreateOrder: React.FC = () => {
 
               {/* Route Map */}
               <section className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-100 aspect-[4/3] lg:aspect-square relative group z-0">
-                <RouteMiniMap 
-                  pickupLat={pickupLat} 
-                  pickupLng={pickupLng} 
-                  deliveryLat={deliveryLat} 
-                  deliveryLng={deliveryLng} 
+                <RouteMiniMap
+                  pickupLat={pickupLat}
+                  pickupLng={pickupLng}
+                  deliveryLat={deliveryLat}
+                  deliveryLng={deliveryLng}
                 />
                 <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end z-20 pointer-events-none">
                   <div className="bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-lg pointer-events-auto border border-slate-100/50">

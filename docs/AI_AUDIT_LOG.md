@@ -6,7 +6,7 @@
 |---|---|
 | Môn học |Building Cross-Platform Back-End Application With .NET  |
 | Mã môn học | PRN232 |
-| Lớp |	SE18D05  |
+| Lá»›p |	SE18D05  |
 | Học kỳ | 8 |
 | Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh  |
 | Tên sinh viên / Nhóm | Nhóm 6 |
@@ -296,7 +296,7 @@ Nhóm sử dụng AI làm trợ lý kỹ thuật xuyên suốt dự án FleetNov
 | Thiết kế giao diện |  | [x] |  |  |  |
 | Code frontend |  | [x] |  |  |  |
 | Code backend | [x] |  |  |  |  |
-| Debug lỗi |  | [x] |  |  |  |
+| Debug lá»—i |  | [x] |  |  |  |
 | Viết test case | [x] |  |  |  |  |
 | Kiểm thử sản phẩm | [x] |  |  |  |  |
 | Tối ưu code |  | [x] |  |  |  |
@@ -419,6 +419,44 @@ Ghi lại các trường hợp AI trả lời sai, thiếu, chưa phù hợp ho�
 - Human Decision: Sinh vien da tu doc hieu va chi su dung AI nhu tai lieu tham khao. Toan bo logic ve % tiến trình (progress), cat duong di (slice route) va thiet ke Marker xe tai (Truck SVG) deu do nhom tu quyet dinh va trien khai. Xem chi tiet tai folder `docs/order_tracking_ai_reference`.
 - Applied To: FRONTEND/src/features/customer/OrderTracking.tsx
 - Verification: Test giao dien tren trinh duyet thanh cong, xe tai va lo trinh the hien dung % mapping voi timeline don hang.
+
+## Log #28
+- Date: 2026-07-12
+- Author: Tran Van Tung (DE180109)
+- AI Tool: ChatGPT/Codex
+- Purpose: Hoan thien tao hoa don PDF tu dong, gui email hoa don va ho tro customer xem/tai/thanh toan lai hoa don.
+- Prompt Reference: PROMPTS.md#prompt-32
+- AI Output Summary: AI ho tro xac dinh luong PayOS thanh cong -> invoice PAID -> generate PDF -> gui email, dong thoi goi y them endpoint PDF an toan va toast thong bao ket qua thao tac.
+- Human Decision: Sinh vien tu doi chieu code backend/frontend hien co, giu cau hinh SMTP trong EmailSettings, them thong tin VietQR/MB Bank vao PDF va email, va chi cho customer xem hoa don cua minh.
+- Applied To: BACKEND/Services/PayOsPaymentService.cs, BACKEND/Services/InvoiceService.cs, BACKEND/Services/InvoicePdfGenerator.cs, BACKEND/Controllers/CustomerInvoicesController.cs, FRONTEND/src/features/customer/PaymentHistory.tsx
+- Verification: `dotnet build BACKEND\BACKEND.csproj --no-restore` thanh cong; `npm run type-check` thanh cong.
+---
+
+## Log #29
+- Date: 2026-07-12
+- Author: Tran Van Tung (DE180109)
+- AI Tool: Antigravity
+- Purpose: Hoan thien My Orders ket hop Feedback cho Customer.
+- Prompt Summary: Yeu cau bien My Orders thanh trung tam theo doi don hang, hoa don PDF va danh gia dich vu sau khi don DELIVERED.
+- AI Contribution: Goi y bo cuc KPI, filter, bang don hang, nut PDF/thanh toan/danh gia va logic hien thi feedback theo trang thai don.
+- Human Adjustment: Tu doc lai API `/api/customer/orders`, endpoint invoice PDF va feedback de noi dung voi code hien co, tranh tao luong trung lap.
+- Applied To: BACKEND/DTOs/CustomerOrderTrackingDTOs.cs, BACKEND/Services/CustomerOrderTrackingService.cs, FRONTEND/src/features/customer/OrderHistory.tsx, FRONTEND/src/features/customer/Header.tsx, FRONTEND/src/App.tsx
+- Verification: `dotnet build BACKEND\BACKEND.csproj --no-restore` thanh cong; `npm run type-check` thanh cong.
+
+---
+
+## Log #30
+- Date: 2026-07-12
+- Author: Tran Van Tung (DE180109)
+- AI Tool: Antigravity
+- Purpose: Hoan thien AI Chatbot ho tro Customer va chatbox noi goc duoi phai.
+- Prompt Summary: Yeu cau tich hop FAQ fallback, Gemini API va tao bong chat AI de Customer hoi nhanh ve don hang, hoa don, thanh toan, feedback, voucher va khieu nai.
+- AI Contribution: Goi y luong FAQ first, Gemini second, fallback an toan, kiem tra quyen khi hoi ma don va UI chatbox noi.
+- Human Adjustment: Tu doc lai FAQItems, APIIntegrationLogs, auth token va customer routes de noi voi backend/frontend hien co; dieu chinh UI bot cho chuyen nghiep hon va sua match tieng Viet.
+- Applied To: BACKEND/DTOs/ChatbotDTOs.cs, BACKEND/Services/CustomerChatbotService.cs, BACKEND/Controllers/CustomerChatbotController.cs, BACKEND/Program.cs, BACKEND/appsettings.json, FRONTEND/src/components/customer/FloatingAiChatbot.tsx, FRONTEND/src/features/support/SupportChat.tsx, FRONTEND/src/App.tsx
+- Verification: npm run type-check thanh cong; dotnet build voi output tam thoi thanh cong.
+
+---
 
 ## 7. Kiểm chứng kết quả AI
 

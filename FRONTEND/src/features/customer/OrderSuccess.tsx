@@ -15,7 +15,7 @@ const OrderSuccess: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white light-surface">
       <Header />
       <div className="pt-32 pb-20">
         <div className="max-w-4xl mx-auto px-6">

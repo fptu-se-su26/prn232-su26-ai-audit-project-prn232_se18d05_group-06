@@ -5,9 +5,13 @@ import './index.css'
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+const googleClientId =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+  '942067946320-n4vghkcmieprtlgbg5gukf4978rflk5b.apps.googleusercontent.com';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId="942067946320-n4vghkcmieprtlgbg5gukf4978rflk5b.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={googleClientId}>
       <App />
     </GoogleOAuthProvider>
   </React.StrictMode>,

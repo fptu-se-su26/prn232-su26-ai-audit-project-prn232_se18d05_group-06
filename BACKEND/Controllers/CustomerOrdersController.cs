@@ -1,9 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using BACKEND.DTOs;
+using BACKEND.Models;
 using BACKEND.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BACKEND.Controllers
 {
@@ -15,13 +17,13 @@ namespace BACKEND.Controllers
         private readonly ICustomerOrderTrackingService _trackingService;
         private readonly IPricingEngineService _pricingEngine;
         private readonly IInvoiceOcrService _invoiceOcr;
-        private readonly BACKEND.Models.SmartLogAiContext _context;
+        private readonly SmartLogAiContext _context;
 
         public CustomerOrdersController(
-            ICustomerOrderTrackingService trackingService, 
-            IPricingEngineService pricingEngine, 
+            ICustomerOrderTrackingService trackingService,
+            IPricingEngineService pricingEngine,
             IInvoiceOcrService invoiceOcr,
-            BACKEND.Models.SmartLogAiContext context)
+            SmartLogAiContext context)
         {
             _trackingService = trackingService;
             _pricingEngine = pricingEngine;
@@ -82,15 +84,28 @@ namespace BACKEND.Controllers
                 return Unauthorized(new { Message = "Missing or invalid user id claim." });
             }
 
-            // Find customer ID for this user
-            var customer = _context.Customers.FirstOrDefault(c => c.UserId == userId.Value);
+            // Find or bootstrap customer profile for this user.
+            var customer = await ResolveCustomerAsync(userId.Value);
             if (customer == null)
             {
-                return BadRequest(new { Message = "User is not associated with any customer." });
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Current user is not linked to an active customer profile." });
             }
 
+            var serviceType = string.IsNullOrWhiteSpace(request.ServiceType)
+                ? "TRANSPORT"
+                : request.ServiceType.Trim().ToUpperInvariant();
+
+            var deliverySpeed = string.IsNullOrWhiteSpace(request.DeliverySpeed)
+                ? "STANDARD"
+                : request.DeliverySpeed.Trim().ToUpperInvariant();
+
+            if (serviceType == "STANDARD" || serviceType == "EXPRESS")
+            {
+                deliverySpeed = serviceType;
+                serviceType = "TRANSPORT";
+            }
             // Validations based on requirement
-            if (request.ServiceType == "TRANSPORT")
+            if (serviceType == "TRANSPORT")
             {
                 if (string.IsNullOrWhiteSpace(request.PickupAddress))
                     return BadRequest(new { Message = "Vui lòng nhập điểm lấy hàng." });
@@ -98,12 +113,37 @@ namespace BACKEND.Controllers
                     return BadRequest(new { Message = "Vui lòng nhập điểm giao hàng." });
             }
 
+            var finalCost = request.QuotedPrice;
+            if (!finalCost.HasValue || finalCost.Value <= 0)
+            {
+                var quote = await _pricingEngine.CalculateQuoteAsync(new QuoteRequestDto
+                {
+                    PickupLat = (double)(request.PickupLat ?? 0),
+                    PickupLng = (double)(request.PickupLng ?? 0),
+                    DeliveryLat = (double)(request.DeliveryLat ?? 0),
+                    DeliveryLng = (double)(request.DeliveryLng ?? 0),
+                    WeightKg = (double)(request.TotalWeightKg ?? 1),
+                    Cbm = (double)(request.TotalCBM ?? 0),
+                    ServiceType = serviceType
+                });
+
+                finalCost = string.Equals(deliverySpeed, "EXPRESS", StringComparison.OrdinalIgnoreCase)
+                    ? quote.ExpressPrice
+                    : quote.StandardPrice;
+            }
+
+            var warehouseId = await ResolveWarehouseIdAsync(request.WarehouseID);
+            if (warehouseId == null)
+            {
+                return BadRequest(new { Message = "Chưa có kho hoạt động để tạo đơn hàng. Vui lòng tạo kho trước." });
+            }
+
             var order = new BACKEND.Models.ServiceOrder
             {
                 OrderCode = "SO" + DateTime.Now.ToString("yyyyMMddHHmmss"),
                 CustomerId = customer.CustomerId,
-                WarehouseId = request.WarehouseID,
-                ServiceType = request.ServiceType,
+                WarehouseId = warehouseId.Value,
+                ServiceType = serviceType,
                 PickupAddress = request.PickupAddress,
                 PickupLat = request.PickupLat,
                 PickupLng = request.PickupLng,
@@ -113,7 +153,9 @@ namespace BACKEND.Controllers
                 TotalWeightKg = request.TotalWeightKg,
                 TotalCbm = request.TotalCBM,
                 TotalPallets = request.TotalPallets,
-                Status = "DRAFT",
+                EstimatedCost = finalCost,
+                FinalCost = finalCost,
+                Status = "PENDING_PAYMENT",
                 CreatedBy = userId.Value,
                 CreatedAt = DateTime.Now
             };
@@ -125,7 +167,10 @@ namespace BACKEND.Controllers
             {
                 success = true,
                 message = "Tạo đơn hàng thành công.",
-                orderId = order.OrderId
+                orderId = order.OrderId,
+                orderCode = order.OrderCode,
+                amount = finalCost,
+                nextAction = "PAYMENT_REQUIRED"
             });
         }
 
@@ -157,7 +202,7 @@ namespace BACKEND.Controllers
             }
 
             var result = await _invoiceOcr.ScanInvoiceAsync(imageFile);
-            
+
             if (!result.IsInvoice)
             {
                 return BadRequest(new { Message = result.Message });
@@ -166,6 +211,83 @@ namespace BACKEND.Controllers
             return Ok(result);
         }
 
+
+        [HttpPost("{orderId:int}/feedback")]
+        public async Task<IActionResult> SubmitFeedback(int orderId, [FromBody] CreateServiceFeedbackRequestDto request)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { Message = "Missing or invalid user id claim." });
+            }
+
+            if (!request.StarRating.HasValue || request.StarRating.Value < 1 || request.StarRating.Value > 5)
+            {
+                return BadRequest(new { Message = "Vui lòng chọn số sao đánh giá." });
+            }
+
+            var comment = request.Comment?.Trim();
+            if (!string.IsNullOrEmpty(comment) && comment.Length > 1000)
+            {
+                return BadRequest(new { Message = "Nội dung phản hồi không được vượt quá 1000 ký tự." });
+            }
+
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId.Value);
+            if (customer == null)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Bạn không có quyền đánh giá đơn hàng này." });
+            }
+
+            var order = await _context.ServiceOrders
+                .Include(o => o.ServiceFeedbacks)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null || order.CustomerId != customer.CustomerId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Bạn không có quyền đánh giá đơn hàng này." });
+            }
+
+            if (!string.Equals(order.Status, "DELIVERED", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { Message = "Bạn chỉ có thể đánh giá đơn hàng đã hoàn thành." });
+            }
+
+            var alreadyReviewed = await _context.ServiceFeedbacks
+                .AnyAsync(f => f.OrderId == orderId && f.CustomerId == customer.CustomerId);
+
+            if (alreadyReviewed)
+            {
+                return BadRequest(new { Message = "Bạn đã gửi đánh giá cho đơn hàng này." });
+            }
+
+            var feedback = new ServiceFeedback
+            {
+                CustomerId = customer.CustomerId,
+                OrderId = order.OrderId,
+                StarRating = (byte)request.StarRating.Value,
+                Comment = comment,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.ServiceFeedbacks.Add(feedback);
+            await _context.SaveChangesAsync();
+
+            return Ok(new ServiceFeedbackDto
+            {
+                FeedbackId = feedback.FeedbackId,
+                CustomerId = customer.CustomerId,
+                CustomerName = customer.CompanyName,
+                CustomerEmail = customer.Email,
+                OrderId = order.OrderId,
+                OrderCode = order.OrderCode,
+                OrderStatus = order.Status ?? string.Empty,
+                StarRating = feedback.StarRating ?? 0,
+                Comment = feedback.Comment,
+                CreatedAt = feedback.CreatedAt ?? DateTime.UtcNow,
+                NeedsFollowUp = feedback.StarRating <= 2,
+                FollowUpStatus = feedback.StarRating <= 2 ? "NEEDS_FOLLOW_UP" : "NORMAL"
+            });
+        }
         private int? GetCurrentUserId()
         {
             var raw = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -173,6 +295,80 @@ namespace BACKEND.Controllers
                 ?? User.FindFirst("sub")?.Value;
 
             return int.TryParse(raw, out var userId) ? userId : null;
+        }
+
+        private async Task<int?> ResolveWarehouseIdAsync(int requestedWarehouseId)
+        {
+            if (requestedWarehouseId > 0)
+            {
+                var requestedWarehouseExists = await _context.Warehouses
+                    .AnyAsync(w => w.WarehouseId == requestedWarehouseId);
+
+                if (requestedWarehouseExists)
+                {
+                    return requestedWarehouseId;
+                }
+            }
+
+            var existingWarehouseId = await _context.Warehouses
+                .Where(w => w.IsActive != false)
+                .OrderBy(w => w.WarehouseId)
+                .Select(w => (int?)w.WarehouseId)
+                .FirstOrDefaultAsync();
+
+            if (existingWarehouseId.HasValue)
+            {
+                return existingWarehouseId;
+            }
+
+            var defaultWarehouse = new BACKEND.Models.Warehouse
+            {
+                WarehouseCode = "WH-DEMO",
+                WarehouseName = "Kho demo SmartLog",
+                Address = "TP. Hồ Chí Minh",
+                TotalCapacity = 10000,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Warehouses.Add(defaultWarehouse);
+            await _context.SaveChangesAsync();
+
+            return defaultWarehouse.WarehouseId;
+        }
+
+        private async Task<BACKEND.Models.Customer?> ResolveCustomerAsync(int userId)
+        {
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId);
+            if (customer != null)
+            {
+                return customer;
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId && u.IsActive != false);
+            if (user == null)
+            {
+                return null;
+            }
+
+            customer = new BACKEND.Models.Customer
+            {
+                CustomerCode = $"CUST{user.UserId:D8}",
+                CompanyName = string.IsNullOrWhiteSpace(user.FullName) ? user.Username : user.FullName,
+                ContactName = user.FullName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Tier = "BRONZE",
+                TotalOrders12M = 0,
+                UserId = user.UserId,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
+            return customer;
         }
     }
 }

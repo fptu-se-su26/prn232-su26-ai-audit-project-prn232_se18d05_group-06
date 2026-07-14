@@ -16,17 +16,17 @@ public partial class InspectionRecord
     public DateTime? ExpiryDate { get; set; }
 
     [MaxLength(20)]
-    public string Result { get; set; } // PASS, FAIL
+    public string Result { get; set; } = string.Empty;
 
     [MaxLength(100)]
-    public string InspectorName { get; set; }
+    public string? InspectorName { get; set; }
 
     [MaxLength(500)]
-    public string Notes { get; set; }
+    public string? Notes { get; set; }
 
     [MaxLength(500)]
     public string? DocumentUrl { get; set; }
 
     [ForeignKey("VehicleId")]
-    public virtual Vehicle Vehicle { get; set; }
+    public virtual Vehicle? Vehicle { get; set; }
 }

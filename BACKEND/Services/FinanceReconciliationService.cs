@@ -7,10 +7,12 @@ namespace BACKEND.Services;
 public class FinanceReconciliationService : IFinanceReconciliationService
 {
     private readonly SmartLogAiContext _context;
+    private readonly IPaymentService _paymentService;
 
-    public FinanceReconciliationService(SmartLogAiContext context)
+    public FinanceReconciliationService(SmartLogAiContext context, IPaymentService paymentService)
     {
         _context = context;
+        _paymentService = paymentService;
     }
 
     public async Task<PaymentReconciliationListDto> GetReconciliationsAsync(string? status, CancellationToken cancellationToken = default)
@@ -53,6 +55,7 @@ public class FinanceReconciliationService : IFinanceReconciliationService
         var matched = 0;
         var partial = 0;
         var unmatched = 0;
+        var paymentsToConfirm = new HashSet<int>();
 
         foreach (var reconciliation in reconciliations)
         {
@@ -76,21 +79,33 @@ public class FinanceReconciliationService : IFinanceReconciliationService
             if (reconciliation.Amount == payment.Amount && payment.Amount >= invoiceAmount)
             {
                 reconciliation.Status = "MATCHED";
+                paymentsToConfirm.Add(payment.PaymentId);
                 matched++;
             }
             else if (reconciliation.Amount == payment.Amount && payment.Amount > 0 && payment.Amount < invoiceAmount)
             {
                 reconciliation.Status = "PARTIAL";
+                paymentsToConfirm.Add(payment.PaymentId);
                 partial++;
             }
             else
             {
                 reconciliation.Status = payment.Amount > 0 && payment.Amount < invoiceAmount ? "PARTIAL" : "UNMATCHED";
-                if (reconciliation.Status == "PARTIAL") partial++; else unmatched++;
+                if (reconciliation.Status == "PARTIAL")
+                {
+                    paymentsToConfirm.Add(payment.PaymentId);
+                    partial++;
+                }
+                else unmatched++;
             }
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        foreach (var paymentId in paymentsToConfirm)
+        {
+            await _paymentService.ConfirmExistingPaymentAsync(paymentId, null, true, cancellationToken);
+        }
 
         return new AutoMatchReconciliationResponseDto
         {
@@ -134,6 +149,11 @@ public class FinanceReconciliationService : IFinanceReconciliationService
         reconciliation.MatchedPaymentId = payment.PaymentId;
         reconciliation.Status = ResolveMatchStatus(reconciliation.Amount, payment.Amount, ResolveInvoiceAmount(invoice));
         await _context.SaveChangesAsync(cancellationToken);
+
+        if (reconciliation.Status == "MATCHED" || reconciliation.Status == "PARTIAL")
+        {
+            await _paymentService.ConfirmExistingPaymentAsync(payment.PaymentId, null, true, cancellationToken);
+        }
 
         return new ManualMatchReconciliationResponseDto
         {

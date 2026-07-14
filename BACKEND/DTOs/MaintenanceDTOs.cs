@@ -11,7 +11,7 @@ public class CreateMaintenanceScheduleDto
 
     [Required]
     [MaxLength(100)]
-    public string Type { get; set; }
+    public string Type { get; set; } = string.Empty;
 
     [Required]
     public DateTime DueDate { get; set; }
@@ -23,12 +23,12 @@ public class CreateMaintenanceScheduleDto
 public class UpdateMaintenanceScheduleDto
 {
     [MaxLength(100)]
-    public string Type { get; set; }
+    public string? Type { get; set; }
 
     public DateTime? DueDate { get; set; }
 
     [MaxLength(20)]
-    public string Status { get; set; } // PENDING, COMPLETED, OVERDUE
+    public string? Status { get; set; }
 
     [MaxLength(500)]
     public string? Notes { get; set; }
@@ -46,13 +46,13 @@ public class CreateInspectionRecordDto
 
     [Required]
     [MaxLength(20)]
-    public string Result { get; set; } // PASS, FAIL
+    public string Result { get; set; } = string.Empty;
 
     [MaxLength(100)]
-    public string InspectorName { get; set; }
+    public string? InspectorName { get; set; }
 
     [MaxLength(500)]
     public string? Notes { get; set; }
 
-    public IFormFile Document { get; set; }
+    public IFormFile? Document { get; set; }
 }

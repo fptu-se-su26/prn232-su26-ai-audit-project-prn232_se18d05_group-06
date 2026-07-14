@@ -20,7 +20,7 @@ Nguyên tắc ghi changelog:
 |---|---|
 | Môn học | Building Cross-Platform Back-End Application With .NET |
 | Mã môn học | PRN232 |
-| Lớp | SE18D05 |
+| Lá»›p | SE18D05 |
 | Học kỳ | 8 |
 | Tên bài tập / Project | FleetNova - Hệ thống Quản trị Logistics Thông minh |
 | Tên sinh viên / Nhóm | Nhóm 6 |
@@ -529,7 +529,7 @@ Author: Tran Van Tung (DE180109)
 ### Changed
 - Cai thien renderer SVG de map responsive hon, nhan object ro hon va moi loai object co style rieng.
 - Cai thien auto-generate layout backend de sinh so do kho co cau truc ro rang hon.
-- Cap nhat `2d_layout_setup.sql` de seed du lieu layout mau dong bo voi UI moi.
+
 
 ### Verification
 - `npx tsc --noEmit`: thanh cong.
@@ -546,11 +546,70 @@ Author: Tran Van Tung (DE180109)
 ### Changed
 - Cai thien UI tab Flow Optimization de hien thi tieng Viet dung font, khong hien ma UC ky thuat tren giao dien.
 - Bo cuc lai cum diem uu tien va nut hanh dong thanh action card gon hon.
-- Dong bo `smartlogAI.sql` va `setup-dispatch-optimization.sql` voi du lieu demo UC026.
+
 
 ### Verification
 - `npm run type-check`: thanh cong.
 ---
+## [2026-07-12]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them endpoint customer xem/tai PDF hoa don co kiem tra quyen so huu hoa don.
+- Them nut Thanh toan trong Payment History de customer quay lai trang thanh toan cho hoa don PENDING.
+- Them thong tin MB Bank, chu tai khoan, so tai khoan, noi dung chuyen khoan va VietQR vao PDF/email hoa don.
+
+### Changed
+- Cai thien: PayOS thanh cong cap nhat payment CONFIRMED, invoice PAID, generate PDF va gui email cho customer.
+- Sua thong bao thao tac Xem PDF, Tai PDF, Gui lai Email, Bien nhan co toast thanh cong/that bai ro rang.
+- Sua lai chu tieng Viet bi loi encoding tren man Payment History.
+
+### Verification
+- `dotnet build BACKEND\\BACKEND.csproj --no-restore`: thanh cong.
+- `npm run type-check`: thanh cong.
+
+---
+## [2026-07-12]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them man hinh My Orders moi cho Customer tai `/customer/orders`.
+- Them KPI tong don, dang xu ly, hoan thanh va cho danh gia.
+- Them nut xem chi tiet, xem PDF, tai PDF, thanh toan va danh gia dich vu.
+- Them modal feedback 1-5 sao va comment toi da 1000 ky tu.
+
+### Changed
+- API `/api/customer/orders` tra them thong tin warehouse, invoice va trang thai feedback.
+- Doi menu Customer sang nhan "Don hang cua toi" va "Hoa don cua toi".
+- Chuan hoa hien thi trang thai don, trang thai thanh toan va label tieng Viet tren My Orders.
+
+### Verification
+- `dotnet build BACKEND\BACKEND.csproj --no-restore`: thanh cong.
+- `npm run type-check`: thanh cong.
+
+---
+
+## [2026-07-12]
+Author: Tran Van Tung (DE180109)
+
+### Added
+- Them API chatbot Customer `POST /api/customer/chatbot/ask`.
+- Them API FAQ Customer `GET /api/customer/faqs`.
+- Them service chatbot uu tien FAQ, tra cuu don noi bo va fallback Gemini.
+- Them chatbox AI noi goc duoi phai tren Customer Portal.
+- Them trang Support Chat goi API chatbot that.
+
+### Changed
+- Cai thien UI chatbox voi mau nhe hon va icon hoi thoai.
+- Sua logic match FAQ tieng Viet, dac biet tu khoa danh gia.
+- Them ghi log goi Gemini vao APIIntegrationLogs.
+
+### Verification
+- npm run type-check: thanh cong.
+- dotnet build BACKEND/BACKEND.csproj --no-restore -p:UseAppHost=false -o .tmp-build/backend-check: thanh cong.
+
+---
+
 ## 4. Tổng kết thay đổi cuối project
 
 ### 4.1. Các chức năng đã hoàn thành

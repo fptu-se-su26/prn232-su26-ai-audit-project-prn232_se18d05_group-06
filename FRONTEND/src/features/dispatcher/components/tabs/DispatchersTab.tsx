@@ -87,7 +87,7 @@ export const DispatchersTab: React.FC<DispatchersTabProps> = ({
 
   const fetchDrivers = async () => {
     try {
-      const response = await axios.get('http://localhost:5184/api/drivers');
+      const response = await axios.get('http://localhost:5200/api/drivers');
       const backendDrivers = response.data.map((d: any) => ({
         id: `drv-${d.driverId}`,
         dbDriverId: d.driverId,
@@ -140,7 +140,7 @@ export const DispatchersTab: React.FC<DispatchersTabProps> = ({
     }
 
     try {
-      await axios.post(`http://localhost:5184/api/drivers/${dbId}/blacklist`, {
+      await axios.post(`http://localhost:5200/api/drivers/${dbId}/blacklist`, {
         isBlacklisted: isChecked,
         blacklistReason: reason
       });

@@ -58,6 +58,8 @@ builder.Services.AddScoped<IOutboundService, OutboundService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<ITrackingService, TrackingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IOcrService, MockOcrService>();
+builder.Services.AddScoped<IInboundReceivingService, InboundReceivingService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IGateService, GateService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
@@ -74,14 +76,21 @@ builder.Services.AddScoped<ISlottingService, SlottingService>();
 builder.Services.AddScoped<ICustomerOrderTrackingService, CustomerOrderTrackingService>();
 builder.Services.AddScoped<ILocationSuggestionService, LocationSuggestionService>();
 builder.Services.AddScoped<IPricingEngineService, PricingEngineService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInvoiceOcrService, InvoiceOcrService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>();
+builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
+builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
+builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
+builder.Services.AddScoped<IFinanceDashboardService, FinanceDashboardService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 
 builder.Services.AddHttpClient();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
 builder.Services.AddHostedService<StockAlertWorker>();
-builder.Services.AddHostedService<MaintenanceAlertWorker>();
+// builder.Services.AddHostedService<MaintenanceAlertWorker>();
 // builder.Services.AddHostedService<OverstayAlertWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -106,7 +115,7 @@ if (args.Any(arg => string.Equals(arg, "--seed-dispatch-optimization", StringCom
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SmartLogAiContext>();
-// db.Database.Migrate();
+    // db.Database.Migrate();
 }
 
 
@@ -120,11 +129,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowAll");
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

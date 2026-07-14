@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using BACKEND.Models;
 using BACKEND.DTOs;
 
@@ -11,11 +12,19 @@ namespace BACKEND.Services
     {
         private readonly SmartLogAiContext _context;
         private readonly IBlacklistValidationService _blacklistValidationService;
+        private readonly IInvoiceService _invoiceService;
+        private readonly ILogger<GateService> _logger;
 
-        public GateService(SmartLogAiContext context, IBlacklistValidationService blacklistValidationService)
+        public GateService(
+            SmartLogAiContext context,
+            IBlacklistValidationService blacklistValidationService,
+            IInvoiceService invoiceService,
+            ILogger<GateService> logger)
         {
             _context = context;
             _blacklistValidationService = blacklistValidationService;
+            _invoiceService = invoiceService;
+            _logger = logger;
         }
 
         public async Task<ActiveBookingSummaryDto?> GetActiveBookingAsync(string search)
@@ -105,7 +114,18 @@ namespace BACKEND.Services
                     booking.Status = "COMPLETED";
                     booking.CheckOutAt = checkOutTime;
 
-                    // 2. Release Dock associated with the booking
+                    // 2. Mark linked service order as delivered so finance automation can invoice it.
+                    if (booking.OrderId.HasValue)
+                    {
+                        var serviceOrder = await _context.ServiceOrders.FindAsync(booking.OrderId.Value);
+                        if (serviceOrder != null && serviceOrder.Status != "DELIVERED")
+                        {
+                            serviceOrder.Status = "DELIVERED";
+                            serviceOrder.DeliveredAt ??= checkOutTime;
+                        }
+                    }
+
+                    // 3. Release Dock associated with the booking
                     if (booking.DockId.HasValue)
                     {
                         var dock = await _context.Docks.FindAsync(booking.DockId.Value);
@@ -115,7 +135,7 @@ namespace BACKEND.Services
                         }
                     }
 
-                    // 3. Resolve Vehicle ID
+                    // 4. Resolve Vehicle ID
                     int? resolvedVehicleId = booking.VehicleId;
                     if (!resolvedVehicleId.HasValue)
                     {
@@ -132,7 +152,7 @@ namespace BACKEND.Services
                         }
                     }
 
-                    // 4. Log to GateLogs with EventType = 'CHECKOUT'
+                    // 5. Log to GateLogs with EventType = 'CHECKOUT'
                     var gateLog = new GateLog
                     {
                         BookingId = booking.BookingId,
@@ -146,7 +166,7 @@ namespace BACKEND.Services
                     };
                     _context.GateLogs.Add(gateLog);
 
-                    // 5. Log to VehicleEvents with EventType = 'CheckOut'
+                    // 6. Log to VehicleEvents with EventType = 'CheckOut'
                     if (resolvedVehicleId.HasValue)
                     {
                         var vehicleEvent = new VehicleEvent
@@ -164,6 +184,19 @@ namespace BACKEND.Services
 
                     // Commit Transaction
                     await transaction.CommitAsync();
+
+                    // 7. Automatic invoice generation from order if applicable
+                    if (booking.OrderId.HasValue)
+                    {
+                        try
+                        {
+                            await _invoiceService.GenerateInvoiceFromOrderAsync(booking.OrderId.Value);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Automatic invoice generation failed after checkout for booking {BookingCode}.", booking.BookingCode);
+                        }
+                    }
 
                     return new CheckoutResponseDto
                     {
