@@ -101,118 +101,123 @@ namespace BACKEND.Services
                 throw new InvalidOperationException("No active (Checked-In or In-Dock) slot booking found for the provided details.");
             }
 
-            // Start Transaction to ensure atomicity
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            // Start Transaction to ensure atomicity using execution strategy
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                var checkOutTime = DateTime.UtcNow;
-
-                // 1. Update SlotBookings status to COMPLETED and CheckOutAt
-                booking.Status = "COMPLETED";
-                booking.CheckOutAt = checkOutTime;
-
-                // 2. Mark linked service order as delivered so finance automation can invoice it.
-                if (booking.OrderId.HasValue)
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    var serviceOrder = await _context.ServiceOrders.FindAsync(booking.OrderId.Value);
-                    if (serviceOrder != null && serviceOrder.Status != "DELIVERED")
-                    {
-                        serviceOrder.Status = "DELIVERED";
-                        serviceOrder.DeliveredAt ??= checkOutTime;
-                    }
-                }
+                    var checkOutTime = DateTime.UtcNow;
 
-                // 3. Release Dock associated with the booking
-                if (booking.DockId.HasValue)
-                {
-                    var dock = await _context.Docks.FindAsync(booking.DockId.Value);
-                    if (dock != null)
-                    {
-                        dock.Status = "AVAILABLE";
-                    }
-                }
+                    // 1. Update SlotBookings status to COMPLETED and CheckOutAt
+                    booking.Status = "COMPLETED";
+                    booking.CheckOutAt = checkOutTime;
 
-                // 4. Resolve Vehicle ID
-                int? resolvedVehicleId = booking.VehicleId;
-                if (!resolvedVehicleId.HasValue)
-                {
-                    // Fallback lookup by plate in Vehicles table
-                    var plateToFind = booking.AlprPlate ?? cleanPlate;
-                    if (!string.IsNullOrWhiteSpace(plateToFind))
+                    // 2. Mark linked service order as delivered so finance automation can invoice it.
+                    if (booking.OrderId.HasValue)
                     {
-                        var normPlate = plateToFind.Trim().ToUpper();
-                        var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.TruckPlate == normPlate);
-                        if (vehicle != null)
+                        var serviceOrder = await _context.ServiceOrders.FindAsync(booking.OrderId.Value);
+                        if (serviceOrder != null && serviceOrder.Status != "DELIVERED")
                         {
-                            resolvedVehicleId = vehicle.VehicleId;
+                            serviceOrder.Status = "DELIVERED";
+                            serviceOrder.DeliveredAt ??= checkOutTime;
                         }
                     }
-                }
 
-                // 5. Log to GateLogs with EventType = 'CHECKOUT'
-                var gateLog = new GateLog
-                {
-                    BookingId = booking.BookingId,
-                    VehicleId = resolvedVehicleId,
-                    DriverId = booking.DriverId,
-                    EventType = "CHECKOUT",
-                    EventAt = checkOutTime,
-                    AlprPlate = booking.AlprPlate ?? cleanPlate ?? booking.Vehicle?.TruckPlate,
-                    Alprconfidence = booking.Alprconfidence ?? 95.0m,
-                    OperatorId = operatorId
-                };
-                _context.GateLogs.Add(gateLog);
-
-                // 6. Log to VehicleEvents with EventType = 'CheckOut'
-                if (resolvedVehicleId.HasValue)
-                {
-                    var vehicleEvent = new VehicleEvent
+                    // 3. Release Dock associated with the booking
+                    if (booking.DockId.HasValue)
                     {
-                        VehicleId = resolvedVehicleId.Value,
-                        EventType = "CheckOut",
-                        EventTime = checkOutTime,
-                        Remarks = $"Vehicle successfully checked out at exit gate. Booking: {booking.BookingCode}"
+                        var dock = await _context.Docks.FindAsync(booking.DockId.Value);
+                        if (dock != null)
+                        {
+                            dock.Status = "AVAILABLE";
+                        }
+                    }
+
+                    // 4. Resolve Vehicle ID
+                    int? resolvedVehicleId = booking.VehicleId;
+                    if (!resolvedVehicleId.HasValue)
+                    {
+                        // Fallback lookup by plate in Vehicles table
+                        var plateToFind = booking.AlprPlate ?? cleanPlate;
+                        if (!string.IsNullOrWhiteSpace(plateToFind))
+                        {
+                            var normPlate = plateToFind.Trim().ToUpper();
+                            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.TruckPlate == normPlate);
+                            if (vehicle != null)
+                            {
+                                resolvedVehicleId = vehicle.VehicleId;
+                            }
+                        }
+                    }
+
+                    // 5. Log to GateLogs with EventType = 'CHECKOUT'
+                    var gateLog = new GateLog
+                    {
+                        BookingId = booking.BookingId,
+                        VehicleId = resolvedVehicleId,
+                        DriverId = booking.DriverId,
+                        EventType = "CHECKOUT",
+                        EventAt = checkOutTime,
+                        AlprPlate = booking.AlprPlate ?? cleanPlate ?? booking.Vehicle?.TruckPlate,
+                        Alprconfidence = booking.Alprconfidence ?? 95.0m,
+                        OperatorId = (operatorId > 0) ? operatorId : null
                     };
-                    _context.VehicleEvents.Add(vehicleEvent);
-                }
+                    _context.GateLogs.Add(gateLog);
 
-                // Save all changes
-                await _context.SaveChangesAsync();
-
-                // Commit Transaction
-                await transaction.CommitAsync();
-
-                if (booking.OrderId.HasValue)
-                {
-                    try
+                    // 6. Log to VehicleEvents with EventType = 'CheckOut'
+                    if (resolvedVehicleId.HasValue)
                     {
-                        await _invoiceService.GenerateInvoiceFromOrderAsync(booking.OrderId.Value);
+                        var vehicleEvent = new VehicleEvent
+                        {
+                            VehicleId = resolvedVehicleId.Value,
+                            EventType = "CheckOut",
+                            EventTime = checkOutTime,
+                            Remarks = $"Vehicle successfully checked out at exit gate. Booking: {booking.BookingCode}"
+                        };
+                        _context.VehicleEvents.Add(vehicleEvent);
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Automatic invoice generation failed after checkout for booking {BookingCode}.", booking.BookingCode);
-                    }
-                }
 
-                return new CheckoutResponseDto
+                    // Save all changes
+                    await _context.SaveChangesAsync();
+
+                    // Commit Transaction
+                    await transaction.CommitAsync();
+
+                    // 7. Automatic invoice generation from order if applicable
+                    if (booking.OrderId.HasValue)
+                    {
+                        try
+                        {
+                            await _invoiceService.GenerateInvoiceFromOrderAsync(booking.OrderId.Value);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Automatic invoice generation failed after checkout for booking {BookingCode}.", booking.BookingCode);
+                        }
+                    }
+
+                    return new CheckoutResponseDto
+                    {
+                        BarrierCommand = "OPEN_EXIT",
+                        Message = "Vehicle checkout transaction processed successfully. Exit barrier command issued.",
+                        BookingId = booking.BookingId,
+                        BookingCode = booking.BookingCode,
+                        LicensePlate = booking.Vehicle?.TruckPlate ?? booking.AlprPlate ?? cleanPlate ?? "UNKNOWN",
+                        Status = booking.Status,
+                        CheckOutAt = checkOutTime,
+                        DockId = booking.DockId,
+                        DockCode = booking.Dock?.DockCode
+                    };
+                }
+                catch (Exception ex)
                 {
-                    BarrierCommand = "OPEN_EXIT",
-                    Message = "Vehicle checkout transaction processed successfully. Exit barrier command issued.",
-                    BookingId = booking.BookingId,
-                    BookingCode = booking.BookingCode,
-                    LicensePlate = booking.Vehicle?.TruckPlate ?? booking.AlprPlate ?? cleanPlate ?? "UNKNOWN",
-                    Status = booking.Status,
-                    CheckOutAt = checkOutTime,
-                    DockId = booking.DockId,
-                    DockCode = booking.Dock?.DockCode
-                };
-            }
-            catch (Exception ex)
-            {
-                // Rollback in case of any failure
-                await transaction.RollbackAsync();
-                throw new InvalidOperationException($"Failed to process checkout transaction: {ex.Message}", ex);
-            }
+                    // Rollback in case of any failure
+                    await transaction.RollbackAsync();
+                    throw new InvalidOperationException($"Failed to process checkout transaction: {ex.Message}", ex);
+                }
+            });
         }
 
         public async Task<object> ProcessCheckInAsync(GateCheckInRequestDto request, int? operatorId)
@@ -273,79 +278,83 @@ namespace BACKEND.Services
                 return blacklistDenied;
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                var checkInTime = DateTime.UtcNow;
-
-                // 1. Update SlotBooking status to CHECKED_IN and CheckInAt
-                booking.Status = "CHECKED_IN";
-                booking.CheckInAt = checkInTime;
-
-                // 2. Resolve Vehicle ID
-                int? resolvedVehicleId = booking.VehicleId;
-                if (!resolvedVehicleId.HasValue)
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    var plateToFind = booking.AlprPlate ?? cleanPlate;
-                    if (!string.IsNullOrWhiteSpace(plateToFind))
+                    var checkInTime = DateTime.UtcNow;
+
+                    // 1. Update SlotBooking status to CHECKED_IN and CheckInAt
+                    booking.Status = "CHECKED_IN";
+                    booking.CheckInAt = checkInTime;
+
+                    // 2. Resolve Vehicle ID
+                    int? resolvedVehicleId = booking.VehicleId;
+                    if (!resolvedVehicleId.HasValue)
                     {
-                        var normPlate = plateToFind.Trim().ToUpper();
-                        var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.TruckPlate == normPlate);
-                        if (vehicle != null)
+                        var plateToFind = booking.AlprPlate ?? cleanPlate;
+                        if (!string.IsNullOrWhiteSpace(plateToFind))
                         {
-                            resolvedVehicleId = vehicle.VehicleId;
+                            var normPlate = plateToFind.Trim().ToUpper();
+                            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.TruckPlate == normPlate);
+                            if (vehicle != null)
+                            {
+                                resolvedVehicleId = vehicle.VehicleId;
+                            }
                         }
                     }
-                }
 
-                // 3. Log to GateLogs with EventType = 'CHECKIN'
-                var gateLog = new GateLog
-                {
-                    BookingId = booking.BookingId,
-                    VehicleId = resolvedVehicleId,
-                    DriverId = booking.DriverId,
-                    EventType = "CHECKIN",
-                    EventAt = checkInTime,
-                    AlprPlate = booking.AlprPlate ?? cleanPlate ?? booking.Vehicle?.TruckPlate,
-                    Alprconfidence = booking.Alprconfidence ?? 95.0m,
-                    OperatorId = operatorId
-                };
-                _context.GateLogs.Add(gateLog);
-
-                // 4. Log to VehicleEvents with EventType = 'CheckIn'
-                if (resolvedVehicleId.HasValue)
-                {
-                    var vehicleEvent = new VehicleEvent
+                    // 3. Log to GateLogs with EventType = 'CHECKIN'
+                    var gateLog = new GateLog
                     {
-                        VehicleId = resolvedVehicleId.Value,
-                        EventType = "CheckIn",
-                        EventTime = checkInTime,
-                        Remarks = $"Vehicle successfully checked in at entry gate. Booking: {booking.BookingCode}"
+                        BookingId = booking.BookingId,
+                        VehicleId = resolvedVehicleId,
+                        DriverId = booking.DriverId,
+                        EventType = "CHECKIN",
+                        EventAt = checkInTime,
+                        AlprPlate = booking.AlprPlate ?? cleanPlate ?? booking.Vehicle?.TruckPlate,
+                        Alprconfidence = booking.Alprconfidence ?? 95.0m,
+                        OperatorId = (operatorId > 0) ? operatorId : null
                     };
-                    _context.VehicleEvents.Add(vehicleEvent);
+                    _context.GateLogs.Add(gateLog);
+
+                    // 4. Log to VehicleEvents with EventType = 'CheckIn'
+                    if (resolvedVehicleId.HasValue)
+                    {
+                        var vehicleEvent = new VehicleEvent
+                        {
+                            VehicleId = resolvedVehicleId.Value,
+                            EventType = "CheckIn",
+                            EventTime = checkInTime,
+                            Remarks = $"Vehicle successfully checked in at entry gate. Booking: {booking.BookingCode}"
+                        };
+                        _context.VehicleEvents.Add(vehicleEvent);
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return new GateCheckInResponseDto
+                    {
+                        BarrierCommand = "OPEN_ENTRY",
+                        Message = "Vehicle check-in transaction processed successfully. Entry barrier command issued.",
+                        BookingId = booking.BookingId,
+                        BookingCode = booking.BookingCode,
+                        LicensePlate = booking.Vehicle?.TruckPlate ?? booking.AlprPlate ?? cleanPlate ?? "UNKNOWN",
+                        Status = booking.Status,
+                        CheckInAt = checkInTime,
+                        DockId = booking.DockId,
+                        DockCode = booking.Dock?.DockCode
+                    };
                 }
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return new GateCheckInResponseDto
+                catch (Exception ex)
                 {
-                    BarrierCommand = "OPEN_ENTRY",
-                    Message = "Vehicle check-in transaction processed successfully. Entry barrier command issued.",
-                    BookingId = booking.BookingId,
-                    BookingCode = booking.BookingCode,
-                    LicensePlate = booking.Vehicle?.TruckPlate ?? booking.AlprPlate ?? cleanPlate ?? "UNKNOWN",
-                    Status = booking.Status,
-                    CheckInAt = checkInTime,
-                    DockId = booking.DockId,
-                    DockCode = booking.Dock?.DockCode
-                };
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                throw new InvalidOperationException($"Failed to process check-in transaction: {ex.Message}", ex);
-            }
+                    await transaction.RollbackAsync();
+                    throw new InvalidOperationException($"Failed to process check-in transaction: {ex.Message}", ex);
+                }
+            });
         }
 
         private string NormalizePlate(string plate)

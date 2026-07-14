@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AdminSidebar from '@components/AdminSidebar';
+
+const API_BASE = 'http://localhost:5200';
 
 interface PickingListItem {
   productSku: string;
@@ -14,6 +16,17 @@ interface OutboundResponse {
   waybillCode: string;
   qrCodeBase64: string; // Chuỗi Base64 của ảnh QR từ Backend
   pickingList: PickingListItem[];
+  createdAt: string;
+}
+
+// Shape returned by GET /api/outbound
+interface RealOutboundRow {
+  outboundId: number;
+  outboundCode: string;
+  orderId: number;
+  orderCode: string;
+  status: string;
+  warehouseName: string;
   createdAt: string;
 }
 
@@ -136,19 +149,117 @@ const AdminOrders: React.FC = () => {
     Object.fromEntries(orders.map(o => [o.id, o.status]))
   );
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  
+
   // Real API integration states
   const [outboundLoading, setOutboundLoading] = useState<boolean>(false);
   const [outboundResult, setOutboundResult] = useState<OutboundResponse | null>(null);
 
+  // Phase D States
+  const [outboundDetail, setOutboundDetail] = useState<any | null>(null);
+  const [outboundDetailLoading, setOutboundDetailLoading] = useState<boolean>(false);
+  const [shippingLabel, setShippingLabel] = useState<any | null>(null);
+
+  // ── Real outbound orders fetched from API ──────────────────────────────────
+  const [realOutboundList, setRealOutboundList] = useState<RealOutboundRow[]>([]);
+  const [realOutboundListLoading, setRealOutboundListLoading] = useState(false);
+  // Label for the drawer header when opened from a real row (not a mock row)
+  const [drawerRealRow, setDrawerRealRow] = useState<RealOutboundRow | null>(null);
+  // isMockRow = true when the drawer was opened via the mock table
+  const [isMockRow, setIsMockRow] = useState(false);
+
   const selectedOrder = orders[selectedOrderIndex];
 
+  // Helper for auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
+  // Eligible ServiceOrders state for UC004 Phase A
+  const [eligibleServiceOrders, setEligibleServiceOrders] = useState<any[]>([]);
+  const [eligibleLoading, setEligibleLoading] = useState<boolean>(false);
+
+  const loadEligibleServiceOrders = async () => {
+    setEligibleLoading(true);
+    try {
+      const res = await axios.get<any[]>(`${API_BASE}/api/outbound/eligible-service-orders`, getAuthHeaders());
+      setEligibleServiceOrders(res.data);
+    } catch (err) {
+      console.error('Failed to load eligible service orders:', err);
+    } finally {
+      setEligibleLoading(false);
+    }
+  };
+
+  // ── Load real outbound orders from the backend on mount ───────────────────
+  const loadRealOutboundList = async () => {
+    setRealOutboundListLoading(true);
+    try {
+      const res = await axios.get<RealOutboundRow[]>(`${API_BASE}/api/outbound`, getAuthHeaders());
+      setRealOutboundList(res.data);
+    } catch (err) {
+      console.error('Failed to load real outbound orders:', err);
+    } finally {
+      setRealOutboundListLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRealOutboundList();
+    loadEligibleServiceOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Fetch outbound detail by outboundId directly (more reliable than searching by orderId)
+  const fetchOutboundDetail = async (outboundId: number) => {
+    setOutboundDetailLoading(true);
+    setShippingLabel(null);
+    try {
+      const response = await axios.get<any>(`${API_BASE}/api/outbound/${outboundId}`, getAuthHeaders());
+      const found = response.data;
+      if (found) {
+        setOutboundDetail(found);
+        // Fetch shipping label if status is PACKED or DISPATCHED
+        if (found.status === 'PACKED' || found.status === 'DISPATCHED') {
+          try {
+            const labelRes = await axios.get(`${API_BASE}/api/outbound/${found.outboundId}/shipping-label`, getAuthHeaders());
+            setShippingLabel(labelRes.data);
+          } catch (e) {
+            console.log('No shipping label found yet.');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching outbound detail:', error);
+    } finally {
+      setOutboundDetailLoading(false);
+    }
+  };
+
+  // Open drawer for a mock table row (UC004 tab will show disabled message)
   const openDrawer = (index: number) => {
     setSelectedOrderIndex(index);
     setDrawerTab('tracking');
     setPickedItems(new Set());
-    setOutboundResult(null); // Reset real results when opening drawer for another order
+    setOutboundResult(null);
+    setOutboundDetail(null);
+    setShippingLabel(null);
+    setDrawerRealRow(null);
+    setIsMockRow(true);
     setIsDrawerOpen(true);
+  };
+
+  // Open drawer for a real outbound row — loads the real outbound detail immediately
+  const openDrawerForReal = (row: RealOutboundRow) => {
+    setDrawerRealRow(row);
+    setIsMockRow(false);
+    setDrawerTab('outbound');
+    setPickedItems(new Set());
+    setOutboundResult(null);
+    setOutboundDetail(null);
+    setShippingLabel(null);
+    setIsDrawerOpen(true);
+    fetchOutboundDetail(row.outboundId);
   };
 
   const handleTogglePick = (itemId: string) => {
@@ -167,26 +278,99 @@ const AdminOrders: React.FC = () => {
     }, 1800);
   };
 
-  const handleCreateOutbound = async (orderIdStr: string) => {
-    const orderId = parseInt(orderIdStr.replace(/\D/g, ''), 10);
-    if (isNaN(orderId)) {
+  // Create an outbound order from a real ServiceOrder ID, then reload the detail
+  const handleCreateOutbound = async (orderId: number) => {
+    if (!orderId || isNaN(orderId)) {
       showToast('❌ Invalid Order ID.');
       return;
     }
-
     setOutboundLoading(true);
     try {
-      const response = await axios.post<OutboundResponse>('http://localhost:5200/api/outbound/create', {
-        orderId: orderId
-      });
+      const res = await axios.post<any>(`${API_BASE}/api/outbound/create`, {
+        orderId
+      }, getAuthHeaders());
+      showToast(`🚚 Outbound created successfully!`);
+      
+      // Refresh the eligible service orders list
+      await loadEligibleServiceOrders();
+      
+      // Refresh the real outbound list and open the new outbound
+      const freshListRes = await axios.get<RealOutboundRow[]>(`${API_BASE}/api/outbound`, getAuthHeaders());
+      setRealOutboundList(freshListRes.data);
 
-      setOutboundResult(response.data);
-      setOrderStatuses(prev => ({ ...prev, [orderIdStr]: 'In Transit' }));
-      showToast(`🚚 Outbound successful! Order ${orderIdStr} status updated → In Transit`);
+      const newOutboundId: number = res.data?.outboundId;
+      if (newOutboundId) {
+        const foundRow = freshListRes.data.find(r => r.outboundId === newOutboundId);
+        if (foundRow) {
+          openDrawerForReal(foundRow);
+        } else {
+          const fallbackRow: RealOutboundRow = {
+            outboundId: newOutboundId,
+            outboundCode: res.data?.outboundCode || `OUT-${newOutboundId}`,
+            orderId: orderId,
+            orderCode: '',
+            status: 'PENDING',
+            warehouseName: '',
+            createdAt: new Date().toISOString()
+          };
+          openDrawerForReal(fallbackRow);
+        }
+      }
     } catch (error: any) {
       console.error('Error creating outbound order:', error);
       const errMsg = error.response?.data?.message || error.message || 'Unknown error occurred.';
       showToast(`❌ Outbound failed: ${errMsg}`);
+    } finally {
+      setOutboundLoading(false);
+    }
+  };
+
+  const handlePickLine = async (outboundId: number, lineId: number, reqQty: number) => {
+    try {
+      await axios.post(`${API_BASE}/api/outbound/${outboundId}/lines/${lineId}/pick`, {
+        pickedQty: reqQty
+      }, getAuthHeaders());
+      showToast(`✅ Picked item line ${lineId}`);
+      fetchOutboundDetail(outboundId);
+    } catch (error: any) {
+      const errMsg = error.response?.data?.message || error.message;
+      showToast(`❌ Picking failed: ${errMsg}`);
+    }
+  };
+
+  const handleConfirmPicking = async (outboundId: number) => {
+    try {
+      await axios.post(`${API_BASE}/api/outbound/${outboundId}/confirm-picking`, {}, getAuthHeaders());
+      showToast(`✅ Picking confirmed! Status → PACKED`);
+      fetchOutboundDetail(outboundId);
+    } catch (error: any) {
+      const errMsg = error.response?.data?.message || error.message;
+      showToast(`❌ Confirmation failed: ${errMsg}`);
+    }
+  };
+
+  const handleGenerateShippingLabel = async (outboundId: number) => {
+    try {
+      const response = await axios.put(`${API_BASE}/api/outbound/${outboundId}/shipping-label`, {}, getAuthHeaders());
+      setShippingLabel(response.data);
+      showToast(`✅ Waybill generated successfully!`);
+      fetchOutboundDetail(outboundId);
+    } catch (error: any) {
+      const errMsg = error.response?.data?.message || error.message;
+      showToast(`❌ Waybill generation failed: ${errMsg}`);
+    }
+  };
+
+  const handleDispatchOrder = async (outboundId: number) => {
+    setOutboundLoading(true);
+    try {
+      await axios.post(`${API_BASE}/api/outbound/${outboundId}/dispatch`, {}, getAuthHeaders());
+      showToast(`🚚 Outbound order dispatched successfully!`);
+      fetchOutboundDetail(outboundId);
+      loadRealOutboundList();
+    } catch (error: any) {
+      const errMsg = error.response?.data?.message || error.message;
+      showToast(`❌ Dispatch failed: ${errMsg}`);
     } finally {
       setOutboundLoading(false);
     }
@@ -198,7 +382,8 @@ const AdminOrders: React.FC = () => {
 
   const handleConfirmExport = () => {
     if (!selectedOrder) return;
-    handleCreateOutbound(selectedOrder.id);
+    // mock rows don't have a valid ServiceOrder — guide user to use the real table below
+    showToast('⚠️ Please use the "Live Outbound Orders" table below to create outbound orders.');
   };
 
   const showToast = (msg: string) => {
@@ -212,6 +397,17 @@ const AdminOrders: React.FC = () => {
     } else {
       setSelectedOrders(new Set());
     }
+  };
+
+  // Status badge helper for real outbound rows
+  const outboundStatusBadge = (status: string) => {
+    const map: Record<string, string> = {
+      PENDING:    'bg-yellow-100 text-yellow-800 border-yellow-200',
+      PICKING:    'bg-amber-100  text-amber-800  border-amber-200',
+      PACKED:     'bg-blue-100   text-blue-800   border-blue-200',
+      DISPATCHED: 'bg-green-100  text-green-800  border-green-200',
+    };
+    return map[status] ?? 'bg-slate-100 text-slate-700 border-slate-200';
   };
 
   const toggleSelectOrder = (index: number) => {
@@ -271,7 +467,10 @@ const AdminOrders: React.FC = () => {
                   <span className="material-symbols-outlined text-sm">filter_list</span>
                   Filter
                 </button>
-                <button className="px-4 py-2 bg-primary text-white rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-primary-container transition-colors shadow-md shadow-primary/20">
+                <button
+                  onClick={() => showToast('ℹ️ New Order creates a ServiceOrder in the customer/order module. UC004 starts only after a ServiceOrder is CONFIRMED.')}
+                  className="px-4 py-2 bg-primary text-white rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-primary-container transition-colors shadow-md shadow-primary/20"
+                >
                   <span className="material-symbols-outlined text-sm">add</span>
                   New Order
                 </button>
@@ -364,31 +563,166 @@ const AdminOrders: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* ── Approved Service Orders Ready for Outbound (UC004 Phase A) ── */}
+            <div className="glass-card rounded-xl flex flex-col mt-6" style={{ background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(16,185,129,0.25)', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.04)' }}>
+              <div className="p-6 border-b border-emerald-100 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-emerald-600">assignment_turned_in</span>
+                  <div>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Approved Service Orders Ready for Outbound <span className="text-emerald-600">(UC004 Phase A)</span></h3>
+                    <p className="text-xs text-secondary mt-0.5">Approved service orders awaiting warehouse outbound fulfillment initialization.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={loadEligibleServiceOrders}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-semibold hover:bg-emerald-50 transition"
+                >
+                  <span className="material-symbols-outlined text-sm">refresh</span>
+                  Refresh
+                </button>
+              </div>
+
+              <div className="p-4">
+                {eligibleLoading ? (
+                  <div className="flex items-center gap-2 py-6 justify-center text-secondary text-sm">
+                    <span className="material-symbols-outlined animate-spin text-emerald-500">sync</span>
+                    Loading eligible service orders...
+                  </div>
+                ) : eligibleServiceOrders.length === 0 ? (
+                  <div className="text-center py-8 text-secondary text-sm">
+                    <span className="material-symbols-outlined text-3xl block mb-2 text-slate-300">check_circle_outline</span>
+                    No CONFIRMED service orders are ready for outbound. Create and approve a service order first.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {/* Header */}
+                    <div className="grid grid-cols-[80px_160px_1fr_120px_120px_180px] gap-3 px-3 py-1.5 text-[10px] font-bold text-secondary uppercase tracking-wider">
+                      <div>Order ID</div>
+                      <div>Order Code</div>
+                      <div>Customer</div>
+                      <div>Status</div>
+                      <div>Created</div>
+                      <div className="text-right">Action</div>
+                    </div>
+                    {eligibleServiceOrders.map((so) => (
+                      <div
+                        key={so.orderId}
+                        className="grid grid-cols-[80px_160px_1fr_120px_120px_180px] gap-3 items-center px-3 py-3 bg-white rounded-lg border border-emerald-50 hover:border-emerald-300 hover:shadow-md transition-all group"
+                      >
+                        <div className="font-mono text-xs font-bold text-slate-700">#{so.orderId}</div>
+                        <div className="font-mono text-xs text-slate-800">{so.orderCode}</div>
+                        <div className="text-xs text-secondary truncate">{so.customerName ?? '—'}</div>
+                        <div>
+                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold border bg-emerald-100 text-emerald-800 border-emerald-200">
+                            {so.status}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          {so.createdAt ? new Date(so.createdAt).toLocaleDateString() : '—'}
+                        </div>
+                        <div className="text-right">
+                          <button
+                            onClick={() => handleCreateOutbound(so.orderId)}
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold shadow-sm transition"
+                          >
+                            Create Outbound Order
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ── Live Outbound Orders (UC004) ──────────────────────────────── */}
+            <div className="glass-card rounded-xl flex flex-col mt-6" style={{ background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(59,130,246,0.25)', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.04)' }}>
+              <div className="p-6 border-b border-blue-100 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-blue-600">warehouse</span>
+                  <div>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Live Outbound Orders <span className="text-blue-600">(UC004)</span></h3>
+                    <p className="text-xs text-secondary mt-0.5">Real orders from the database — click a row to open the UC004 picking &amp; dispatch workflow.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={loadRealOutboundList}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-200 text-blue-700 text-xs font-semibold hover:bg-blue-50 transition"
+                >
+                  <span className="material-symbols-outlined text-sm">refresh</span>
+                  Refresh
+                </button>
+              </div>
+
+              <div className="p-4">
+                {realOutboundListLoading ? (
+                  <div className="flex items-center gap-2 py-6 justify-center text-secondary text-sm">
+                    <span className="material-symbols-outlined animate-spin text-blue-500">sync</span>
+                    Loading outbound orders...
+                  </div>
+                ) : realOutboundList.length === 0 ? (
+                  <div className="text-center py-8 text-secondary text-sm">
+                    <span className="material-symbols-outlined text-3xl block mb-2 text-slate-300">local_shipping</span>
+                    No outbound orders found in the database.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {/* Header */}
+                    <div className="grid grid-cols-[80px_160px_160px_1fr_120px_100px] gap-3 px-3 py-1.5 text-[10px] font-bold text-secondary uppercase tracking-wider">
+                      <div>Outbound ID</div>
+                      <div>Outbound Code</div>
+                      <div>Order Code</div>
+                      <div>Warehouse</div>
+                      <div>Status</div>
+                      <div>Created</div>
+                    </div>
+                    {realOutboundList.map((row) => (
+                      <div
+                        key={row.outboundId}
+                        onClick={() => openDrawerForReal(row)}
+                        className="grid grid-cols-[80px_160px_160px_1fr_120px_100px] gap-3 items-center px-3 py-3 bg-white rounded-lg border border-blue-50 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group"
+                      >
+                        <div className="font-mono text-xs font-bold text-slate-700">#{row.outboundId}</div>
+                        <div className="font-mono text-xs text-slate-800">{row.outboundCode}</div>
+                        <div className="text-xs text-secondary">{row.orderCode}</div>
+                        <div className="text-xs text-secondary truncate">{row.warehouseName ?? '—'}</div>
+                        <div>
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${outboundStatusBadge(row.status)}`}>
+                            {row.status}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          {new Date(row.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* ── End Live Outbound Orders ───────────────────────────────────── */}
+
           </div>
         </main>
       </div>
 
       {/* Side Drawer */}
       <div className={`fixed right-0 top-0 h-full w-[450px] z-50 transform transition-transform duration-300 ease-in-out flex flex-col shadow-[-20px_0_50px_rgba(0,0,0,0.1)] ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`} style={{ background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(16px)', borderLeft: '1px solid rgba(255, 255, 255, 0.3)' }}>
-        {selectedOrder && (
+        {/* Drawer opened from a REAL outbound row */}
+        {!isMockRow && drawerRealRow && (
           <>
-            {/* Drawer Header */}
+            {/* Drawer Header – real outbound row */}
             <div className="p-6 border-b border-outline-variant/20 flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="font-headline-md text-headline-md text-on-surface font-bold text-xl">{selectedOrder.id}</h2>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'
-                      ? 'text-green-700 bg-green-50 border border-green-200'
-                      : 'text-amber-700 bg-amber-50 border border-amber-200'
-                    }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'
-                        ? 'bg-green-500'
-                        : 'bg-amber-500'
-                      }`}></span>
-                    {orderStatuses[selectedOrder.id] || selectedOrder.status}
+                  <h2 className="font-headline-md text-headline-md text-on-surface font-bold text-xl">{drawerRealRow.outboundCode}</h2>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${outboundStatusBadge(outboundDetail?.status ?? drawerRealRow.status)}`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></span>
+                    {outboundDetail?.status ?? drawerRealRow.status}
                   </span>
                 </div>
-                <p className="font-body-sm text-body-sm text-secondary">{selectedOrder.customerName} • {selectedOrder.customerType}</p>
+                <p className="font-body-sm text-body-sm text-secondary">Order: {drawerRealRow.orderCode} &bull; ID #{drawerRealRow.outboundId}</p>
               </div>
               <button className="p-2 text-secondary hover:bg-surface-variant rounded-full transition-colors" onClick={() => setIsDrawerOpen(false)}>
                 <span className="material-symbols-outlined">close</span>
@@ -507,182 +841,158 @@ const AdminOrders: React.FC = () => {
                     }
                   `}</style>
 
-                  {outboundResult ? (
-                    /* Real Result from Backend */
-                    <div id="print-section" className="space-y-6">
-                      {/* Waybill Print Card */}
-                      <div className="bg-white border-2 border-slate-900 rounded-xl p-5 shadow-sm relative overflow-hidden text-black">
-                        <div className="flex justify-between items-start border-b border-slate-200 pb-3 mb-3">
-                          <div>
-                            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">SmartLog Waybill</span>
-                            <h4 className="font-bold text-sm mt-1 font-mono text-slate-900">{outboundResult.waybillCode}</h4>
-                            <p className="text-[10px] text-slate-500 mt-0.5">Created: {new Date(outboundResult.createdAt).toLocaleString()}</p>
-                          </div>
-                          {outboundResult.qrCodeBase64 && (
-                            <img src={outboundResult.qrCodeBase64} alt="Waybill QR Code" className="w-20 h-20 border border-slate-100 p-1 bg-white" />
-                          )}
-                        </div>
-
-                        <div className="space-y-2.5 text-xs">
-                          <div>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sender:</span>
-                            <p className="font-medium text-slate-800 text-[11px]">SmartLog Hub A - District 9, HCMC</p>
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Receiver:</span>
-                            <p className="font-bold text-slate-900 text-[11px]">{selectedOrder.customerName}</p>
-                            <p className="text-slate-600 text-[11px] leading-tight mt-0.5">{selectedOrder.destination}</p>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-2 text-[11px]">
-                            <div>
-                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Weight:</span>
-                              <p className="font-semibold text-slate-800">45 kg</p>
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Final Cost:</span>
-                              <p className="font-semibold text-slate-800">{selectedOrder.cost}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Picking List table */}
-                      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-black">
-                        <div className="flex items-center gap-2 border-b border-gray-100 pb-3 mb-3">
-                          <span className="material-symbols-outlined text-blue-600 text-lg">receipt_long</span>
-                          <h4 className="font-bold text-sm text-on-surface">Optimized Picking Path</h4>
-                        </div>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-xs text-left">
-                            <thead>
-                              <tr className="border-b border-slate-100 text-slate-400 font-semibold uppercase text-[10px]">
-                                <th className="py-2">SKU</th>
-                                <th className="py-2">Product</th>
-                                <th className="py-2 text-center">Qty</th>
-                                <th className="py-2 text-right">Location</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {outboundResult.pickingList.map((item, idx) => (
-                                <tr key={idx} className="border-b border-slate-100 last:border-0">
-                                  <td className="py-2 font-mono text-slate-600">{item.productSku}</td>
-                                  <td className="py-2 font-medium text-slate-900 truncate max-w-[120px]">{item.productName}</td>
-                                  <td className="py-2 text-center font-bold text-blue-600">{item.quantityToPick}</td>
-                                  <td className="py-2 text-right font-semibold text-slate-700">
-                                    {item.zoneName} - {item.binName}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-
-                      {/* Print Actions (Visible only on screen) */}
-                      <div className="grid grid-cols-1 gap-3 no-print">
-                        <button
-                          onClick={handlePrint}
-                          className="py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-green-500/20"
-                        >
-                          <span className="material-symbols-outlined text-sm">print</span>
-                          Print Documents (Waybill &amp; Picking List)
-                        </button>
-                      </div>
+                  {outboundDetailLoading ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <span className="material-symbols-outlined text-3xl text-blue-600 animate-spin">sync</span>
+                      <p className="text-xs text-secondary mt-2">Loading Outbound Details...</p>
                     </div>
-                  ) : (
-                    /* Preview mockup when not processed */
-                    <>
-                      {/* Picking List Checklist */}
-                      <div className="bg-white border border-outline-variant/30 rounded-xl p-4 shadow-sm">
-                        <div className="flex items-center gap-2 border-b border-gray-100 pb-3 mb-3">
-                          <span className="material-symbols-outlined text-blue-600 text-lg">inventory_2</span>
-                          <h4 className="font-bold text-sm text-on-surface">Picking List Preview</h4>
+                  ) : outboundDetail ? (
+                    <div className="space-y-6">
+                      {/* Outbound Order Header Card */}
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-slate-500 uppercase tracking-wider">Outbound Order:</span>
+                          <span className="font-mono font-bold text-slate-800">{outboundDetail.outboundCode}</span>
                         </div>
-                        <p className="text-xs text-secondary mb-3">Please pick items according to the optimized shelf locations below:</p>
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-slate-500 uppercase tracking-wider">Status:</span>
+                          <span className={`px-2 py-0.5 rounded font-bold uppercase text-[10px] ${
+                            outboundDetail.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                            outboundDetail.status === 'PICKING' ? 'bg-amber-100 text-amber-800' :
+                            outboundDetail.status === 'PACKED' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>{outboundDetail.status}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-slate-500 uppercase tracking-wider">Created:</span>
+                          <span>{new Date(outboundDetail.createdAt).toLocaleString()}</span>
+                        </div>
+                      </div>
 
-                        <div className="space-y-2.5">
-                          {orderPickingItems[selectedOrder.id]?.map((item) => {
-                            const isPicked = pickedItems.has(item.id);
-                            return (
-                              <div
-                                key={item.id}
-                                onClick={() => handleTogglePick(item.id)}
-                                className={`flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer ${isPicked ? 'bg-blue-50/40 border-blue-200' : 'bg-slate-50 border-slate-100 hover:border-slate-200'
-                                  }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isPicked}
-                                  onChange={() => { }} // handled by div onClick
-                                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 mt-0.5"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex justify-between items-start gap-2">
-                                    <p className={`font-semibold text-xs truncate ${isPicked ? 'text-blue-900 line-through' : 'text-slate-900'}`}>{item.name}</p>
-                                    <span className="text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">Qty: {item.qty}</span>
+                      {/* Display Picking Progress if PENDING or PICKING */}
+                      {(outboundDetail.status === 'PENDING' || outboundDetail.status === 'PICKING') && (
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
+                          <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5 border-b pb-2">
+                            <span className="material-symbols-outlined text-sm">receipt_long</span>
+                            Picking Progress
+                          </h4>
+                          <div className="space-y-2.5">
+                            {outboundDetail.outboundLines?.map((line: any) => {
+                              const isFullyPicked = line.pickedQty >= line.requiredQty;
+                              return (
+                                <div key={line.lineId} className="flex justify-between items-center p-2 rounded bg-slate-50 border border-slate-100">
+                                  <div className="text-left">
+                                    <p className="font-semibold text-xs text-slate-900">{line.skuCode} - {line.skuName}</p>
+                                    <p className="text-[10px] text-slate-500">Loc: {line.zoneName} - {line.binCode}</p>
                                   </div>
-                                  <div className="flex justify-between items-center mt-1 text-[11px] text-secondary">
-                                    <span>SKU: {item.sku}</span>
-                                    <span className="font-medium text-blue-700 bg-blue-50/50 px-1 rounded flex items-center gap-0.5">
-                                      <span className="material-symbols-outlined text-[10px]">location_on</span>
-                                      {item.location}
-                                    </span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-slate-600">{line.pickedQty} / {line.requiredQty}</span>
+                                    {!isFullyPicked && (
+                                      <button
+                                        onClick={() => handlePickLine(outboundDetail.outboundId, line.lineId, line.requiredQty - line.pickedQty)}
+                                        className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-bold"
+                                      >
+                                        Pick All
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Confirm Picking Action */}
+                          <div className="pt-2">
+                            <button
+                              onClick={() => handleConfirmPicking(outboundDetail.outboundId)}
+                              disabled={outboundDetail.outboundLines?.some((l: any) => l.pickedQty < l.requiredQty)}
+                              className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs disabled:opacity-50 disabled:bg-slate-300"
+                            >
+                              Confirm Picking &amp; Pack Order
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Display Waybill Card if PACKED or DISPATCHED */}
+                      {(outboundDetail.status === 'PACKED' || outboundDetail.status === 'DISPATCHED') && (
+                        <>
+                          {shippingLabel ? (
+                            <div className="bg-white border-2 border-slate-900 rounded-xl p-5 shadow-sm relative overflow-hidden text-black space-y-4">
+                              <div className="flex justify-between items-start border-b border-slate-200 pb-3">
+                                <div>
+                                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">SmartLog Shipping Label</span>
+                                  <h4 className="font-bold text-sm mt-1 font-mono text-slate-900">{shippingLabel.waybillCode}</h4>
+                                  <p className="text-[10px] text-slate-500 mt-0.5">Created: {new Date(shippingLabel.createdAt).toLocaleString()}</p>
+                                </div>
+                                {shippingLabel.qrCodeBase64 && (
+                                  <img src={`data:image/png;base64,${shippingLabel.qrCodeBase64}`} alt="Waybill QR Code" className="w-20 h-20 border border-slate-100 p-1 bg-white" />
+                                )}
+                              </div>
+
+                              <div className="space-y-2 text-xs">
+                                <div>
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sender:</span>
+                                  <p className="font-medium text-slate-800 text-[11px]">{shippingLabel.warehouseName} - {shippingLabel.warehouseAddress}</p>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Receiver:</span>
+                                  <p className="font-bold text-slate-900 text-[11px]">{shippingLabel.recipientName}</p>
+                                  <p className="text-slate-600 text-[11px] leading-tight mt-0.5">{shippingLabel.destinationAddress}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-2 text-[11px]">
+                                  <div>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Weight:</span>
+                                    <p className="font-semibold text-slate-800">{shippingLabel.totalWeightKg} kg</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pallets:</span>
+                                    <p className="font-semibold text-slate-800">{shippingLabel.totalPallets}</p>
                                   </div>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Waybill Print Preview Card */}
-                      <div className="bg-white border-2 border-dashed border-slate-300 rounded-xl p-5 shadow-inner relative overflow-hidden">
-                        <div className="absolute top-0 right-0 bg-slate-100 text-slate-500 px-3 py-1 rounded-bl-lg text-[9px] font-bold tracking-wider uppercase border-l border-b border-slate-200">Waybill Preview</div>
-
-                        {/* Barcode mockup */}
-                        <div className="flex flex-col items-center mb-4 mt-2">
-                          <div className="flex justify-center items-center gap-[2px] h-10 w-full bg-white p-1 border border-gray-100 rounded">
-                            <div className="w-[3px] h-8 bg-black"></div>
-                            <div className="w-[1px] h-8 bg-black"></div>
-                            <div className="w-[4px] h-8 bg-black"></div>
-                            <div className="w-[2px] h-8 bg-black"></div>
-                            <div className="w-[1px] h-8 bg-black"></div>
-                            <div className="w-[3px] h-8 bg-black"></div>
-                            <div className="w-[1px] h-8 bg-black"></div>
-                            <div className="w-[5px] h-8 bg-black"></div>
-                            <div className="w-[2px] h-8 bg-black"></div>
-                            <div className="w-[1px] h-8 bg-black"></div>
-                            <div className="w-[3px] h-8 bg-black"></div>
-                            <div className="w-[1px] h-8 bg-black"></div>
-                            <div className="w-[4px] h-8 bg-black"></div>
-                            <div className="w-[2px] h-8 bg-black"></div>
-                          </div>
-                          <span className="text-[10px] font-mono tracking-widest text-slate-700 mt-1 font-bold">*{selectedOrder.id.replace('#', 'WB')}*</span>
-                        </div>
-
-                        <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
-                          <div>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sender:</span>
-                            <p className="font-medium text-slate-800 text-[11px]">SmartLog Hub A - District 9, HCMC</p>
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Receiver:</span>
-                            <p className="font-bold text-slate-900 text-[11px]">{selectedOrder.customerName}</p>
-                            <p className="text-slate-600 text-[11px] leading-tight mt-0.5">{selectedOrder.destination}</p>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-2 text-[11px]">
-                            <div>
-                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Weight:</span>
-                              <p className="font-semibold text-slate-800">45 kg (Est.)</p>
                             </div>
-                            <div>
-                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cost:</span>
-                              <p className="font-semibold text-slate-800">{selectedOrder.cost}</p>
+                          ) : (
+                            <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-6 text-center space-y-3">
+                              <span className="material-symbols-outlined text-3xl text-slate-400">barcode_scanner</span>
+                              <p className="text-xs text-slate-600">Waybill and Shipping Label not generated yet.</p>
+                              <button
+                                onClick={() => handleGenerateShippingLabel(outboundDetail.outboundId)}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold"
+                              >
+                                Generate Shipping Label / Waybill
+                              </button>
                             </div>
-                          </div>
-                        </div>
+                          )}
+
+                          {outboundDetail.status === 'DISPATCHED' && (
+                            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3 items-start text-green-800 text-xs">
+                              <span className="material-symbols-outlined text-green-600">check_circle</span>
+                              <div>
+                                <h4 className="font-bold uppercase mb-0.5">Order Dispatched Successfully</h4>
+                                <p className="leading-relaxed">This outbound order has been dispatched. The slot booking has been completed, exit gate log has been recorded, and dock session is closed.</p>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    /* If no outbound exists yet, prompt creation */
+                    <div className="text-center py-10 space-y-4">
+                      <span className="material-symbols-outlined text-5xl text-slate-300">local_shipping</span>
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-800">No Outbound Order Found</h4>
+                        <p className="text-xs text-secondary mt-1">This order has not been initiated for outbound fulfillment.</p>
                       </div>
-                    </>
+                      <button
+                        onClick={() => handleCreateOutbound(drawerRealRow?.orderId ?? 0)}
+                        disabled={outboundLoading}
+                        className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition shadow-md shadow-blue-500/20"
+                      >
+                        Create Outbound Order
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
@@ -691,31 +1001,42 @@ const AdminOrders: React.FC = () => {
             {/* Drawer Footer actions */}
             <div className="p-6 border-t border-outline-variant/20 flex gap-3 bg-surface/50 backdrop-blur-md">
               {drawerTab === 'outbound' ? (
-                outboundResult ? (
-                  <button
-                    onClick={handlePrint}
-                    className="w-full py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-xs transition shadow-md shadow-green-500/20 flex items-center justify-center gap-1.5"
-                  >
-                    <span className="material-symbols-outlined text-sm">print</span>
-                    Print Waybill &amp; Picking List
-                  </button>
-                ) : outboundLoading ? (
-                  <button
-                    disabled
-                    className="w-full py-2.5 rounded-lg bg-blue-400 text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-not-allowed"
-                  >
-                    <span className="material-symbols-outlined text-sm animate-spin">sync</span>
-                    Processing Outbound...
-                  </button>
+                outboundDetail ? (
+                  outboundDetail.status === 'PACKED' && shippingLabel ? (
+                    <button
+                      onClick={() => handleDispatchOrder(outboundDetail.outboundId)}
+                      disabled={outboundLoading}
+                      className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5"
+                    >
+                      {outboundLoading ? (
+                        <>
+                          <span className="material-symbols-outlined text-sm animate-spin">sync</span>
+                          Dispatching...
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-sm">local_shipping</span>
+                          Dispatch Order
+                        </>
+                      )}
+                    </button>
+                  ) : outboundDetail.status === 'DISPATCHED' ? (
+                    <button
+                      onClick={handlePrint}
+                      className="w-full py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold text-xs transition shadow-md shadow-green-500/20 flex items-center justify-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-sm">print</span>
+                      Print Waybill
+                    </button>
+                  ) : (
+                    <div className="text-xs text-center text-secondary w-full py-2">
+                      Please complete picking/packing steps above to enable dispatch.
+                    </div>
+                  )
                 ) : (
-                  <button
-                    onClick={handleConfirmExport}
-                    disabled={(orderStatuses[selectedOrder.id] || selectedOrder.status) === 'In Transit'}
-                    className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none"
-                  >
-                    <span className="material-symbols-outlined text-sm">local_shipping</span>
-                    Confirm Outbound &amp; Dispatch Driver
-                  </button>
+                  <div className="text-xs text-center text-secondary w-full py-2">
+                    Create Outbound Order to begin.
+                  </div>
                 )
               ) : (
                 <>
@@ -723,6 +1044,66 @@ const AdminOrders: React.FC = () => {
                   <button className="flex-1 py-2.5 rounded-lg bg-primary text-white font-label-md text-label-md hover:bg-primary-container transition shadow-md shadow-primary/20">Update Status</button>
                 </>
               )}
+            </div>
+          </>
+        )}
+        {/* Drawer opened from a MOCK row – UC004 tab is disabled */}
+        {isMockRow && selectedOrder && (
+          <>
+            <div className="p-6 border-b border-outline-variant/20 flex justify-between items-start">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <h2 className="font-headline-md text-headline-md text-on-surface font-bold text-xl">{selectedOrder.id}</h2>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-green-700 bg-green-50 border border-green-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    {selectedOrder.status}
+                  </span>
+                </div>
+                <p className="font-body-sm text-body-sm text-secondary">{selectedOrder.customerName} &bull; {selectedOrder.customerType}</p>
+              </div>
+              <button className="p-2 text-secondary hover:bg-surface-variant rounded-full transition-colors" onClick={() => setIsDrawerOpen(false)}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="flex border-b border-outline-variant/10 px-6 bg-slate-50/50">
+              <button
+                onClick={() => setDrawerTab('tracking')}
+                className={`flex-1 py-3 text-center font-medium text-xs border-b-2 transition-all flex items-center justify-center gap-1.5 ${drawerTab === 'tracking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-secondary hover:text-on-surface'}`}
+              >
+                <span className="material-symbols-outlined text-sm">map</span>
+                Tracking &amp; Logistics
+              </button>
+              <button
+                className="flex-1 py-3 text-center font-medium text-xs border-b-2 border-transparent text-slate-300 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                disabled
+                title="Not available for demo rows"
+              >
+                <span className="material-symbols-outlined text-sm">warehouse</span>
+                Outbound &amp; Waybill (UC004)
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              {drawerTab === 'tracking' ? (
+                <div className="space-y-4">
+                  <div className="p-4 rounded-xl flex gap-3 items-start bg-blue-50/50 border border-blue-100">
+                    <span className="material-symbols-outlined text-blue-600">smart_toy</span>
+                    <div>
+                      <h4 className="font-label-md text-label-md text-on-surface font-semibold mb-1 uppercase tracking-wider text-xs">AI Insight</h4>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant text-xs">Route optimization suggests taking the highway to save 15 minutes of transit time.</p>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex gap-3 items-start">
+                    <span className="material-symbols-outlined text-amber-600 text-lg">info</span>
+                    <div>
+                      <p className="text-xs font-bold text-amber-800 mb-0.5">Demo Row — UC004 not available</p>
+                      <p className="text-xs text-amber-700 leading-relaxed">
+                        This row (<strong>{selectedOrder.id}</strong>) is display-only mock data and is not linked to a real ServiceOrder in the database.
+                        To test UC004 Phase A–D, scroll down and click a row in the <strong>"Live Outbound Orders"</strong> table.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </>
         )}
