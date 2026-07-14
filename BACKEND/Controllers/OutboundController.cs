@@ -75,6 +75,20 @@ namespace BACKEND.Controllers
             }
         }
 
+        [HttpGet("eligible-service-orders")]
+        public async Task<IActionResult> GetEligibleServiceOrders()
+        {
+            try
+            {
+                var list = await _outboundService.GetEligibleServiceOrdersAsync();
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving eligible service orders.", details = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOutboundOrderById(int id)
         {

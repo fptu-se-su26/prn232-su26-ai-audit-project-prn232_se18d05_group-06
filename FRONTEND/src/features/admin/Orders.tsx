@@ -175,6 +175,22 @@ const AdminOrders: React.FC = () => {
     return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   };
 
+  // Eligible ServiceOrders state for UC004 Phase A
+  const [eligibleServiceOrders, setEligibleServiceOrders] = useState<any[]>([]);
+  const [eligibleLoading, setEligibleLoading] = useState<boolean>(false);
+
+  const loadEligibleServiceOrders = async () => {
+    setEligibleLoading(true);
+    try {
+      const res = await axios.get<any[]>(`${API_BASE}/api/outbound/eligible-service-orders`, getAuthHeaders());
+      setEligibleServiceOrders(res.data);
+    } catch (err) {
+      console.error('Failed to load eligible service orders:', err);
+    } finally {
+      setEligibleLoading(false);
+    }
+  };
+
   // ── Load real outbound orders from the backend on mount ───────────────────
   const loadRealOutboundList = async () => {
     setRealOutboundListLoading(true);
@@ -190,6 +206,7 @@ const AdminOrders: React.FC = () => {
 
   useEffect(() => {
     loadRealOutboundList();
+    loadEligibleServiceOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -273,12 +290,31 @@ const AdminOrders: React.FC = () => {
         orderId
       }, getAuthHeaders());
       showToast(`🚚 Outbound created successfully!`);
+      
+      // Refresh the eligible service orders list
+      await loadEligibleServiceOrders();
+      
       // Refresh the real outbound list and open the new outbound
-      await loadRealOutboundList();
-      // Fetch the newly-created outbound by its ID
+      const freshListRes = await axios.get<RealOutboundRow[]>(`${API_BASE}/api/outbound`, getAuthHeaders());
+      setRealOutboundList(freshListRes.data);
+
       const newOutboundId: number = res.data?.outboundId;
       if (newOutboundId) {
-        fetchOutboundDetail(newOutboundId);
+        const foundRow = freshListRes.data.find(r => r.outboundId === newOutboundId);
+        if (foundRow) {
+          openDrawerForReal(foundRow);
+        } else {
+          const fallbackRow: RealOutboundRow = {
+            outboundId: newOutboundId,
+            outboundCode: res.data?.outboundCode || `OUT-${newOutboundId}`,
+            orderId: orderId,
+            orderCode: '',
+            status: 'PENDING',
+            warehouseName: '',
+            createdAt: new Date().toISOString()
+          };
+          openDrawerForReal(fallbackRow);
+        }
       }
     } catch (error: any) {
       console.error('Error creating outbound order:', error);
@@ -431,7 +467,10 @@ const AdminOrders: React.FC = () => {
                   <span className="material-symbols-outlined text-sm">filter_list</span>
                   Filter
                 </button>
-                <button className="px-4 py-2 bg-primary text-white rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-primary-container transition-colors shadow-md shadow-primary/20">
+                <button
+                  onClick={() => showToast('ℹ️ New Order creates a ServiceOrder in the customer/order module. UC004 starts only after a ServiceOrder is CONFIRMED.')}
+                  className="px-4 py-2 bg-primary text-white rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-primary-container transition-colors shadow-md shadow-primary/20"
+                >
                   <span className="material-symbols-outlined text-sm">add</span>
                   New Order
                 </button>
@@ -522,6 +561,78 @@ const AdminOrders: React.FC = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            {/* ── Approved Service Orders Ready for Outbound (UC004 Phase A) ── */}
+            <div className="glass-card rounded-xl flex flex-col mt-6" style={{ background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(16,185,129,0.25)', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.04)' }}>
+              <div className="p-6 border-b border-emerald-100 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-emerald-600">assignment_turned_in</span>
+                  <div>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Approved Service Orders Ready for Outbound <span className="text-emerald-600">(UC004 Phase A)</span></h3>
+                    <p className="text-xs text-secondary mt-0.5">Approved service orders awaiting warehouse outbound fulfillment initialization.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={loadEligibleServiceOrders}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-semibold hover:bg-emerald-50 transition"
+                >
+                  <span className="material-symbols-outlined text-sm">refresh</span>
+                  Refresh
+                </button>
+              </div>
+
+              <div className="p-4">
+                {eligibleLoading ? (
+                  <div className="flex items-center gap-2 py-6 justify-center text-secondary text-sm">
+                    <span className="material-symbols-outlined animate-spin text-emerald-500">sync</span>
+                    Loading eligible service orders...
+                  </div>
+                ) : eligibleServiceOrders.length === 0 ? (
+                  <div className="text-center py-8 text-secondary text-sm">
+                    <span className="material-symbols-outlined text-3xl block mb-2 text-slate-300">check_circle_outline</span>
+                    No CONFIRMED service orders are ready for outbound. Create and approve a service order first.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {/* Header */}
+                    <div className="grid grid-cols-[80px_160px_1fr_120px_120px_180px] gap-3 px-3 py-1.5 text-[10px] font-bold text-secondary uppercase tracking-wider">
+                      <div>Order ID</div>
+                      <div>Order Code</div>
+                      <div>Customer</div>
+                      <div>Status</div>
+                      <div>Created</div>
+                      <div className="text-right">Action</div>
+                    </div>
+                    {eligibleServiceOrders.map((so) => (
+                      <div
+                        key={so.orderId}
+                        className="grid grid-cols-[80px_160px_1fr_120px_120px_180px] gap-3 items-center px-3 py-3 bg-white rounded-lg border border-emerald-50 hover:border-emerald-300 hover:shadow-md transition-all group"
+                      >
+                        <div className="font-mono text-xs font-bold text-slate-700">#{so.orderId}</div>
+                        <div className="font-mono text-xs text-slate-800">{so.orderCode}</div>
+                        <div className="text-xs text-secondary truncate">{so.customerName ?? '—'}</div>
+                        <div>
+                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold border bg-emerald-100 text-emerald-800 border-emerald-200">
+                            {so.status}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          {so.createdAt ? new Date(so.createdAt).toLocaleDateString() : '—'}
+                        </div>
+                        <div className="text-right">
+                          <button
+                            onClick={() => handleCreateOutbound(so.orderId)}
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold shadow-sm transition"
+                          >
+                            Create Outbound Order
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

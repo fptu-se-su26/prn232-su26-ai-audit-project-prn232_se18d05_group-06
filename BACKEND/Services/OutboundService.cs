@@ -660,5 +660,27 @@ namespace BACKEND.Services
                 OutboundStatus = outbound.Status ?? string.Empty
             };
         }
+
+        public async Task<List<EligibleServiceOrderDto>> GetEligibleServiceOrdersAsync()
+        {
+            return await _context.ServiceOrders
+                .AsNoTracking()
+                .Include(o => o.Customer)
+                .Include(o => o.OrderLines)
+                .Where(o => o.Status == "CONFIRMED"
+                         && o.OrderLines.Any(ol => ol.Skuid != null && ol.Quantity > 0)
+                         && !_context.OutboundOrders.Any(oo => oo.OrderId == o.OrderId))
+                .OrderByDescending(o => o.CreatedAt ?? DateTime.MinValue)
+                .ThenByDescending(o => o.OrderId)
+                .Select(o => new EligibleServiceOrderDto
+                {
+                    OrderId = o.OrderId,
+                    OrderCode = o.OrderCode ?? string.Empty,
+                    CustomerName = o.Customer != null ? o.Customer.CompanyName : string.Empty,
+                    Status = o.Status ?? string.Empty,
+                    CreatedAt = o.CreatedAt
+                })
+                .ToListAsync();
+        }
     }
 }
