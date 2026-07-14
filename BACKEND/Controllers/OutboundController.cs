@@ -211,5 +211,33 @@ namespace BACKEND.Controllers
                 return StatusCode(500, new { message = "An unexpected error occurred while retrieving the shipping label.", details = ex.Message });
             }
         }
+
+        [HttpPost("{outboundId}/dispatch")]
+        public async Task<IActionResult> DispatchOrder(int outboundId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new { message = "User context is missing or invalid in authenticated claims." });
+            }
+
+            try
+            {
+                var response = await _outboundService.DispatchOrderAsync(outboundId, userId);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while dispatching the outbound order.", details = ex.Message });
+            }
+        }
     }
 }

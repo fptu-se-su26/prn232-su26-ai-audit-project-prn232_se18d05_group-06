@@ -13,5 +13,6 @@ namespace BACKEND.Services
         Task<OutboundOrderDto> ConfirmPickingAsync(int outboundId, int authenticatedUserId);
         Task<ShippingLabelDto> GetOrCreateShippingLabelAsync(int outboundId, int authenticatedUserId);
         Task<ShippingLabelDto?> GetShippingLabelAsync(int outboundId);
+        Task<OutboundOrderDto> DispatchOrderAsync(int outboundId, int authenticatedUserId);
     }
 }

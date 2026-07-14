@@ -15,11 +15,13 @@ namespace BACKEND.Services
     {
         private readonly SmartLogAiContext _context;
         private readonly IConfiguration _config;
+        private readonly IGateService _gateService;
 
-        public OutboundService(SmartLogAiContext context, IConfiguration config)
+        public OutboundService(SmartLogAiContext context, IConfiguration config, IGateService gateService)
         {
             _context = context;
             _config = config;
+            _gateService = gateService;
         }
 
         public async Task<OutboundResponseDto> CreateOutboundOrderAsync(int orderId, int authenticatedUserId)
@@ -517,6 +519,112 @@ namespace BACKEND.Services
             }
 
             return MapToShippingLabelDto(waybill, outbound);
+        }
+
+        public async Task<OutboundOrderDto> DispatchOrderAsync(int outboundId, int authenticatedUserId)
+        {
+            var outbound = await _context.OutboundOrders
+                .Include(o => o.Order)
+                .Include(o => o.Warehouse)
+                .Include(o => o.CreatedByNavigation)
+                .Include(o => o.Waybill)
+                .Include(o => o.OutboundLines)
+                    .ThenInclude(l => l.Sku)
+                .Include(o => o.OutboundLines)
+                    .ThenInclude(l => l.Bin)
+                        .ThenInclude(b => b.Shelf)
+                            .ThenInclude(s => s.Zone)
+                .FirstOrDefaultAsync(o => o.OutboundId == outboundId);
+
+            if (outbound == null)
+            {
+                throw new KeyNotFoundException($"Outbound order with ID {outboundId} was not found.");
+            }
+
+            // 3. Idempotency Check
+            if (outbound.Status == "DISPATCHED")
+            {
+                return MapToDto(outbound);
+            }
+
+            // 4. Precondition Validation
+            if (outbound.Status != "PACKED")
+            {
+                throw new InvalidOperationException($"Only packed outbound orders can be dispatched. Current status is '{outbound.Status}'.");
+            }
+
+            if (outbound.Waybill == null)
+            {
+                throw new InvalidOperationException("A shipping label/waybill must be generated before dispatch.");
+            }
+
+            // 5. Stage 1 (Checkout - Reuse UC020)
+            var booking = await _context.SlotBookings
+                .FirstOrDefaultAsync(b => b.OrderId == outbound.OrderId && (b.Status == "IN_DOCK" || b.Status == "CHECKED_IN"));
+
+            if (booking != null)
+            {
+                await _gateService.ProcessCheckoutAsync(new CheckoutRequestDto { BookingCode = booking.BookingCode }, authenticatedUserId);
+            }
+
+            // 6. Stage 2 (Dispatch & Session updates inside transaction)
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    var dbOutbound = await _context.OutboundOrders
+                        .Include(o => o.Order)
+                        .Include(o => o.Waybill)
+                        .FirstOrDefaultAsync(o => o.OutboundId == outboundId);
+
+                    if (dbOutbound != null && dbOutbound.Status != "DISPATCHED")
+                    {
+                        dbOutbound.Status = "DISPATCHED";
+                        dbOutbound.CompletedAt = DateTime.UtcNow;
+                        dbOutbound.Order.Status = "DISPATCHED";
+                        if (dbOutbound.Waybill != null)
+                        {
+                            dbOutbound.Waybill.Status = "DISPATCHED";
+                        }
+
+                        // Close active VehicleDockSession associated with this order
+                        var session = await _context.VehicleDockSessions
+                            .FirstOrDefaultAsync(s => s.Booking.OrderId == dbOutbound.OrderId && s.DockEndTime == null);
+                        if (session != null)
+                        {
+                            session.DockEndTime = DateTime.UtcNow;
+                            session.CurrentStatus = "COMPLETED";
+                            session.UpdatedAt = DateTime.UtcNow;
+                        }
+
+                        await _context.SaveChangesAsync();
+                    }
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
+
+            // Reload final state
+            var finalOutbound = await _context.OutboundOrders
+                .Include(o => o.Order)
+                .Include(o => o.Warehouse)
+                .Include(o => o.CreatedByNavigation)
+                .Include(o => o.Waybill)
+                .Include(o => o.OutboundLines)
+                    .ThenInclude(l => l.Sku)
+                .Include(o => o.OutboundLines)
+                    .ThenInclude(l => l.Bin)
+                        .ThenInclude(b => b.Shelf)
+                            .ThenInclude(s => s.Zone)
+                .FirstOrDefaultAsync(o => o.OutboundId == outboundId);
+
+            return MapToDto(finalOutbound!);
         }
 
         private ShippingLabelDto MapToShippingLabelDto(Waybill waybill, OutboundOrder outbound)

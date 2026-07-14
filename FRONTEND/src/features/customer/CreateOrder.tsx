@@ -20,6 +20,9 @@ const CreateOrder: React.FC = () => {
   const [standardTime, setStandardTime] = useState<string>('');
   const [expressTime, setExpressTime] = useState<string>('');
   const [selectedSpeed, setSelectedSpeed] = useState<'STANDARD' | 'EXPRESS'>('STANDARD');
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [basePrice, setBasePrice] = useState<number>(0);
+  const [tierName, setTierName] = useState<string>('Standard');
 
   // Form states
   const [serviceType, setServiceType] = useState('TRANSPORT');
