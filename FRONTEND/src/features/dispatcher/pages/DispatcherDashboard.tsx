@@ -14,6 +14,7 @@ import { AlertsTab } from '../components/tabs/AlertsTab';
 import { DispatchOptimizationTab } from '../components/tabs/DispatchOptimizationTab';
 import { ReportsTab } from '../components/tabs/ReportsTab';
 import { VehicleTrackingDashboard } from './VehicleTrackingDashboard';
+import SlotBooking from '@/features/warehouse/SlotBooking';
 
 // --- MOCK DATABASE CONFIGURATIONS ---
 
@@ -155,8 +156,15 @@ const INITIAL_ASSIGN_VEHICLES: AssignVehicle[] = [
   { id: 'V-305', type: 'Semi Reefer', capacity: 'Tối đa 15.0 Tấn', fuel: '90% Diesel', fuelValue: 90, status: 'READY' },
 ];
 
-export const DispatcherDashboard = () => {
-  const [activeTab, setActiveTab] = useState('Dashboard');
+export const DispatcherDashboard = ({ defaultTab }: { defaultTab?: string }) => {
+  const [activeTab, setActiveTab] = useState(defaultTab || 'Dashboard');
+
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationsCount, setNotificationsCount] = useState(2);
@@ -487,14 +495,15 @@ export const DispatcherDashboard = () => {
         />
       )}
 
-      {/* =========================================================================
-          VIEW B: Orders View (Tách thành OrdersTab)
-          ========================================================================= */}
       {activeTab === 'Orders' && (
         <OrdersTab
           searchQuery={searchQuery}
           setToastMessage={setToastMessage}
         />
+      )}
+
+      {activeTab === 'SlotBooking' && (
+        <SlotBooking isTab={true} onBack={() => setActiveTab('Dashboard')} />
       )}
 
       {/* =========================================================================
@@ -595,7 +604,7 @@ export const DispatcherDashboard = () => {
       {/* =========================================================================
           VIEW F: Placeholder views for non-integrated modules
           ========================================================================= */}
-      {activeTab !== 'Dashboard' && activeTab !== 'Orders' && activeTab !== 'Assign Driver' && activeTab !== 'Live Tracking' && activeTab !== 'Drivers' && activeTab !== 'Vehicles' && activeTab !== 'Fleet Monitoring' && activeTab !== 'Alerts Center' && activeTab !== 'Flow Optimization' && activeTab !== 'Reports' && activeTab !== 'Delivery Analytics' && (
+      {activeTab !== 'Dashboard' && activeTab !== 'Orders' && activeTab !== 'SlotBooking' && activeTab !== 'Assign Driver' && activeTab !== 'Live Tracking' && activeTab !== 'Drivers' && activeTab !== 'Vehicles' && activeTab !== 'Fleet Monitoring' && activeTab !== 'Alerts Center' && activeTab !== 'Flow Optimization' && activeTab !== 'Reports' && activeTab !== 'Delivery Analytics' && (
         <div className="flex-1 glass-panel rounded-lg flex flex-col items-center justify-center text-center p-8 select-none relative z-10">
           <span className="material-symbols-outlined text-[64px] text-primary animate-pulse mb-4">
             construction

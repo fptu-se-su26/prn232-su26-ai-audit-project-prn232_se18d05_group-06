@@ -143,6 +143,13 @@ namespace BACKEND.Services
         {
             await EnsureDocksSeededAsync();
 
+            // Validate BookingType
+            var bookingType = string.IsNullOrWhiteSpace(dto.BookingType) ? "INBOUND" : dto.BookingType.Trim().ToUpperInvariant();
+            if (bookingType != "INBOUND" && bookingType != "OUTBOUND")
+            {
+                throw new Exception("Loại dịch vụ không hợp lệ. Chỉ chấp nhận INBOUND hoặc OUTBOUND.");
+            }
+
             // 1. Validate warehouse
             var warehouse = await _context.Warehouses.FindAsync(dto.WarehouseId);
             if (warehouse == null)
@@ -200,9 +207,16 @@ namespace BACKEND.Services
                 _context.Vehicles.Add(vehicle);
                 await _context.SaveChangesAsync();
             }
-            else if (IsInspectionExpired(vehicle))
+            else
             {
-                throw new Exception($"Xe {dto.LicensePlate} đã hết hạn đăng kiểm, không thể đặt lịch.");
+                if (vehicle.IsBlacklisted == true || vehicle.Status == "BLACKLISTED")
+                {
+                    throw new Exception($"Xe {dto.LicensePlate} đang nằm trong danh sách đen, không thể đặt lịch.");
+                }
+                if (IsInspectionExpired(vehicle))
+                {
+                    throw new Exception($"Xe {dto.LicensePlate} đã hết hạn đăng kiểm, không thể đặt lịch.");
+                }
             }
 
             // 6. Generate Booking ID (BookingCode)
@@ -231,7 +245,7 @@ namespace BACKEND.Services
                 VehicleId = vehicle.VehicleId,
                 WarehouseId = dto.WarehouseId,
                 DockId = dock.DockId,
-                BookingType = "INBOUND",
+                BookingType = bookingType,
                 ScheduledDate = bookingDateOnly,
                 ScheduledStart = startOffset,
                 ScheduledEnd = endOffset,
@@ -266,7 +280,8 @@ namespace BACKEND.Services
                 LicensePlate = dto.LicensePlate,
                 DriverEmail = dto.DriverEmail,
                 Status = "CONFIRMED",
-                QrCodeBase64 = qrCodeBase64
+                QrCodeBase64 = qrCodeBase64,
+                BookingType = slotBooking.BookingType
             };
         }
 

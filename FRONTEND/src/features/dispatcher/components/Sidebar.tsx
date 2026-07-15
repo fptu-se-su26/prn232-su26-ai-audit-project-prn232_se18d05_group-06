@@ -18,6 +18,7 @@ interface MenuItem {
 const MENU_ITEMS: MenuItem[] = [
   { name: 'Dashboard', label: 'Tổng quan bãi xe', icon: 'space_dashboard', group: 'Vận hành' },
   { name: 'Orders', label: 'Đơn & lịch xe', icon: 'inventory_2', group: 'Vận hành' },
+  { name: 'SlotBooking', label: 'Đặt lịch Dock', icon: 'calendar_month', group: 'Vận hành' },
   { name: 'Route Planning', label: 'Lập lộ trình', icon: 'route', group: 'Vận hành' },
   { name: 'Assign Driver', label: 'Điều phối Dock', icon: 'assignment_ind', group: 'Vận hành' },
   { name: 'Live Tracking', label: 'Theo dõi realtime', icon: 'near_me', group: 'Vận hành' },
