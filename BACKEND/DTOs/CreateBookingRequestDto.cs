@@ -31,5 +31,8 @@ namespace BACKEND.DTOs
         [Required]
         [MaxLength(50)]
         public string DockName { get; set; } = string.Empty;
+
+        [MaxLength(50)]
+        public string? BookingType { get; set; }
     }
 }
