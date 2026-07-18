@@ -223,7 +223,7 @@ namespace BACKEND.Services
             var bookingCode = $"SLOT-WH{dto.WarehouseId}-{new Random().Next(100000, 999999)}";
 
             // 7. Construct QR Code Content (within VARCHAR(500) limit)
-            var qrContent = $"BookingCode: {bookingCode}\nWarehouse: {warehouse.WarehouseName}\nDock: {dock.DockCode}\nVehicle: {dto.LicensePlate}\nTime: {dto.StartTime}-{dto.EndTime} on {dto.BookingDate:dd/MM/yyyy}";
+            var qrContent = $"BookingCode: {bookingCode}\nWarehouse: {warehouse.WarehouseName}\nDock: {dock.DockCode}\nVehicle: {dto.LicensePlate}\nTime: {dto.StartTime}-{dto.EndTime} on {dto.BookingDate:dd/MM/yyyy}\nEmail: {dto.DriverEmail}";
 
             // Generate QR Code image Base64 using QRCoder PngByteQRCode
             string qrCodeBase64 = string.Empty;
@@ -331,12 +331,21 @@ namespace BACKEND.Services
                     ? "?"
                     : driverName.Split(' ').LastOrDefault()?.Substring(0, 1).ToUpper() ?? "?";
 
+                string? qrEmail = null;
+                if (!string.IsNullOrEmpty(booking.Qrcode))
+                {
+                    var emailLine = booking.Qrcode.Split('\n').FirstOrDefault(l => l.StartsWith("Email: "));
+                    if (emailLine != null) qrEmail = emailLine.Substring(7).Trim();
+                }
+
                 // Get email from CreatedBy (User) first, then Customer
-                var recipientEmail = !string.IsNullOrWhiteSpace(booking.CreatedByNavigation?.Email)
-                    ? booking.CreatedByNavigation.Email
-                    : !string.IsNullOrWhiteSpace(booking.Customer?.Email)
-                        ? booking.Customer.Email
-                        : "không có email";
+                var recipientEmail = !string.IsNullOrWhiteSpace(qrEmail)
+                    ? qrEmail
+                    : !string.IsNullOrWhiteSpace(booking.CreatedByNavigation?.Email)
+                        ? booking.CreatedByNavigation.Email
+                        : !string.IsNullOrWhiteSpace(booking.Customer?.Email)
+                            ? booking.Customer.Email
+                            : "không có email";
 
                 result.Add(new DispatcherOrderDto
                 {
