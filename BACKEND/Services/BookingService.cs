@@ -297,5 +297,76 @@ namespace BACKEND.Services
                 ? string.Empty
                 : plate.Trim().ToUpperInvariant().Replace("-", "").Replace(".", "").Replace(" ", "");
         }
+
+        public async Task<List<DispatcherOrderDto>> GetDispatcherOrdersAsync()
+        {
+            await EnsureDocksSeededAsync();
+
+            var bookings = await _context.SlotBookings
+                .Include(sb => sb.Vehicle)
+                    .ThenInclude(v => v.DefaultDriver)
+                .Include(sb => sb.Dock)
+                .Include(sb => sb.Warehouse)
+                .Include(sb => sb.Driver)
+                .Include(sb => sb.Customer)
+                .Include(sb => sb.CreatedByNavigation)
+                .Where(sb => sb.Status != "CANCELLED")
+                .OrderByDescending(sb => sb.ScheduledDate)
+                .ThenBy(sb => sb.ScheduledStart)
+                .ToListAsync();
+
+            var result = new List<DispatcherOrderDto>();
+
+            foreach (var booking in bookings)
+            {
+                // Status logic based on CheckIn/CheckOut
+                var status = booking.CheckOutAt.HasValue ? "delivered"
+                    : booking.CheckInAt.HasValue ? "transit"
+                    : booking.Status == "CONFIRMED" ? "approaching"
+                    : booking.Status == "COMPLETED" ? "delivered"
+                    : "approaching";
+
+                var driverName = booking.Vehicle?.DefaultDriver?.FullName ?? booking.Driver?.FullName ?? "Chưa phân công";
+                var driverAvatar = string.IsNullOrWhiteSpace(driverName) || driverName == "Chưa phân công"
+                    ? "?"
+                    : driverName.Split(' ').LastOrDefault()?.Substring(0, 1).ToUpper() ?? "?";
+
+                // Get email from CreatedBy (User) first, then Customer
+                var recipientEmail = !string.IsNullOrWhiteSpace(booking.CreatedByNavigation?.Email)
+                    ? booking.CreatedByNavigation.Email
+                    : !string.IsNullOrWhiteSpace(booking.Customer?.Email)
+                        ? booking.Customer.Email
+                        : "không có email";
+
+                result.Add(new DispatcherOrderDto
+                {
+                    Id = booking.BookingCode ?? $"#ORD-{booking.BookingId}",
+                    Customer = booking.Customer?.CompanyName ?? booking.Warehouse?.WarehouseName ?? "Unknown",
+                    Destination = booking.Dock?.DockName ?? "Unknown Dock",
+                    DriverName = driverName,
+                    Vehicle = booking.Vehicle?.TruckPlate ?? "Chưa có xe",
+                    DriverAvatar = driverAvatar,
+                    Eta = $"{booking.ScheduledDate:dd/MM/yyyy} {booking.ScheduledStart:HH:mm} - {booking.ScheduledEnd:HH:mm}",
+                    Status = status,
+                    Priority = "normal",
+                    Location = booking.Dock?.DockName ?? "Unknown",
+                    Coordinates = new CoordinatesDto { X = 50, Y = 50 },
+                    Timeline = new[]
+                    {
+                        new TimelineDto
+                        {
+                            Title = $"Đã đặt lịch: {booking.BookingCode}",
+                            Timestamp = booking.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "Unknown",
+                            Active = true
+                        }
+                    },
+                    BookingDate = booking.ScheduledDate.ToDateTime(TimeOnly.MinValue),
+                    TimeRange = $"{booking.ScheduledStart:HH:mm} - {booking.ScheduledEnd:HH:mm}",
+                    RecipientEmail = recipientEmail
+                });
+            }
+
+            return result;
+        }
     }
 }
