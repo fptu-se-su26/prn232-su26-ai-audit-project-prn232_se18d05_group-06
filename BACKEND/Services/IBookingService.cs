@@ -10,5 +10,6 @@ namespace BACKEND.Services
         Task<List<WarehouseDto>> GetWarehousesAsync();
         Task<List<AvailableSlotsResponseDto>> GetAvailableSlotsAsync(int warehouseId, DateTime date);
         Task<BookingResponseDto> CreateBookingAsync(CreateBookingRequestDto dto);
+        Task<List<DispatcherOrderDto>> GetDispatcherOrdersAsync();
     }
 }

@@ -92,5 +92,20 @@ namespace BACKEND.Controllers
                 return StatusCode(500, $"Lỗi máy chủ: {ex.Message}");
             }
         }
+
+        // GET: api/bookings/dispatcher-orders
+        [HttpGet("dispatcher-orders")]
+        public async Task<ActionResult<List<DispatcherOrderDto>>> GetDispatcherOrders()
+        {
+            try
+            {
+                var orders = await _bookingService.GetDispatcherOrdersAsync();
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi hệ thống: {ex.Message}");
+            }
+        }
     }
 }
