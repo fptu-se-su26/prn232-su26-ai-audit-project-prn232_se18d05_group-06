@@ -79,17 +79,21 @@ builder.Services.AddScoped<IPricingEngineService, PricingEngineService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInvoiceOcrService, InvoiceOcrService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>();
+// builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>(); // TODO: Implement PayOsPaymentService
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
+builder.Services.AddScoped<IVehicleDashboardService, VehicleDashboardService>();
+builder.Services.AddScoped<ICompanyProfileService, CompanyProfileService>();
 builder.Services.AddScoped<IFinanceDashboardService, FinanceDashboardService>();
 builder.Services.AddSingleton<ILprService, LprService>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<INotificationConfigService, NotificationConfigService>();
 
 builder.Services.AddHttpClient();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
-builder.Services.AddHostedService<StockAlertWorker>();
+// builder.Services.AddHostedService<StockAlertWorker>();
 // builder.Services.AddHostedService<MaintenanceAlertWorker>();
 // builder.Services.AddHostedService<OverstayAlertWorker>();
 
