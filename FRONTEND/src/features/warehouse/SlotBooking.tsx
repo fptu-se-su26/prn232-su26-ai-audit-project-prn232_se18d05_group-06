@@ -296,7 +296,7 @@ const SlotBooking: React.FC<SlotBookingProps> = ({ isTab = false, onBack }) => {
                 className={isTab ? "w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all appearance-none" : "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition-all appearance-none"}
               >
                 <option value="INBOUND">INBOUND (Xe Đến Nhận/Giao Hàng)</option>
-                <option value="OUTBOUND">OUTBOUND (Xe Lấy Hàng Đi - UC004 Outbound)</option>
+                <option value="OUTBOUND">OUTBOUND (Xe Lấy Hàng Đi - Outbound)</option>
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 font-bold">
                 ▼
@@ -304,7 +304,7 @@ const SlotBooking: React.FC<SlotBookingProps> = ({ isTab = false, onBack }) => {
             </div>
             {bookingType === 'OUTBOUND' && (
               <p className="text-[11px] text-amber-600 font-semibold mt-1">
-                * Lưu ý: Kết nối đầy đủ luồng OUTBOUND phụ thuộc vào điều phối Dock/Tài xế và tích hợp UC004 sau.
+                * Lưu ý: Kết nối đầy đủ luồng OUTBOUND phụ thuộc vào điều phối Dock/Tài xế và tích hợp xuất kho sau.
               </p>
             )}
           </div>

@@ -179,6 +179,8 @@ const AdminOrders: React.FC = () => {
   const [eligibleServiceOrders, setEligibleServiceOrders] = useState<any[]>([]);
   const [eligibleLoading, setEligibleLoading] = useState<boolean>(false);
 
+
+
   const loadEligibleServiceOrders = async () => {
     setEligibleLoading(true);
     try {
@@ -318,7 +320,7 @@ const AdminOrders: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error creating outbound order:', error);
-      const errMsg = error.response?.data?.message || error.message || 'Unknown error occurred.';
+      const errMsg = error.response?.data?.details || error.response?.data?.message || error.message || 'Unknown error occurred.';
       showToast(`❌ Outbound failed: ${errMsg}`);
     } finally {
       setOutboundLoading(false);
@@ -468,7 +470,7 @@ const AdminOrders: React.FC = () => {
                   Filter
                 </button>
                 <button
-                  onClick={() => showToast('ℹ️ New Order creates a ServiceOrder in the customer/order module. UC004 starts only after a ServiceOrder is CONFIRMED.')}
+                  onClick={() => showToast('New Order belongs to the customer/order module. Warehouse outbound processing starts after a ServiceOrder is CONFIRMED.')}
                   className="px-4 py-2 bg-primary text-white rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-primary-container transition-colors shadow-md shadow-primary/20"
                 >
                   <span className="material-symbols-outlined text-sm">add</span>
@@ -570,7 +572,7 @@ const AdminOrders: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-emerald-600">assignment_turned_in</span>
                   <div>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Approved Service Orders Ready for Outbound <span className="text-emerald-600">(UC004 Phase A)</span></h3>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Đơn hàng đã duyệt chờ xuất kho</h3>
                     <p className="text-xs text-secondary mt-0.5">Approved service orders awaiting warehouse outbound fulfillment initialization.</p>
                   </div>
                 </div>
@@ -642,8 +644,8 @@ const AdminOrders: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-blue-600">warehouse</span>
                   <div>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Live Outbound Orders <span className="text-blue-600">(UC004)</span></h3>
-                    <p className="text-xs text-secondary mt-0.5">Real orders from the database — click a row to open the UC004 picking &amp; dispatch workflow.</p>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Lệnh xuất kho đang xử lý</h3>
+                    <p className="text-xs text-secondary mt-0.5">Real orders from the database — click a row to open the outbound picking &amp; dispatch workflow.</p>
                   </div>
                 </div>
                 <button
@@ -749,7 +751,7 @@ const AdminOrders: React.FC = () => {
                   }`}
               >
                 <span className="material-symbols-outlined text-sm">warehouse</span>
-                Outbound &amp; Waybill (UC004)
+                Outbound &amp; Waybill
               </button>
             </div>
 
@@ -1079,7 +1081,7 @@ const AdminOrders: React.FC = () => {
                 title="Not available for demo rows"
               >
                 <span className="material-symbols-outlined text-sm">warehouse</span>
-                Outbound &amp; Waybill (UC004)
+                Outbound &amp; Waybill
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-6">
@@ -1095,10 +1097,10 @@ const AdminOrders: React.FC = () => {
                   <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex gap-3 items-start">
                     <span className="material-symbols-outlined text-amber-600 text-lg">info</span>
                     <div>
-                      <p className="text-xs font-bold text-amber-800 mb-0.5">Demo Row — UC004 not available</p>
+                      <p className="text-xs font-bold text-amber-800 mb-0.5">Demo Row — Outbound not available</p>
                       <p className="text-xs text-amber-700 leading-relaxed">
                         This row (<strong>{selectedOrder.id}</strong>) is display-only mock data and is not linked to a real ServiceOrder in the database.
-                        To test UC004 Phase A–D, scroll down and click a row in the <strong>"Live Outbound Orders"</strong> table.
+                        To test Outbound flow, scroll down and click a row in the <strong>"Lệnh xuất kho đang xử lý"</strong> table.
                       </p>
                     </div>
                   </div>
@@ -1232,6 +1234,8 @@ const AdminOrders: React.FC = () => {
           </button>
         </div>
       )}
+
+
 
       {/* Backdrop */}
       <div className={`fixed inset-0 bg-on-surface/20 backdrop-blur-sm z-40 transition-opacity ${isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsDrawerOpen(false)}></div>

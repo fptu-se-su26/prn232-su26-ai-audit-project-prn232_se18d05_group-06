@@ -12,7 +12,7 @@ namespace BACKEND.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "ADMIN,WAREHOUSE,WF")]
+    [Authorize(Roles = "ADMIN,WAREHOUSE,WF,DISPATCHER")]
     public class OutboundController : ControllerBase
     {
         private readonly IOutboundService _outboundService;
@@ -53,7 +53,7 @@ namespace BACKEND.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = ex.Message, details = ex.Message });
             }
             catch (Exception ex)
             {
@@ -200,7 +200,7 @@ namespace BACKEND.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An unexpected error occurred while processing the shipping label.", details = ex.Message });
+                return StatusCode(500, new { message = "An unexpected error occurred while processing the shipping label.", details = ex.ToString() });
             }
         }
 

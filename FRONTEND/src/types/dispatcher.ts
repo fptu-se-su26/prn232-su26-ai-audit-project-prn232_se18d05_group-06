@@ -12,6 +12,9 @@ export interface Order {
   destination?: string;
   priority?: 'high' | 'normal';
   timeline?: Array<{ title: string; timestamp: string; active?: boolean }>;
+  timeRange?: string;
+  bookingDate?: string;
+  recipientEmail?: string;
 }
 
 export interface LiveEvent {

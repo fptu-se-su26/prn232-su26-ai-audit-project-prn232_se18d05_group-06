@@ -448,12 +448,23 @@ namespace BACKEND.Services
                     waybillCode = $"WB-{today}-{guidSegment}";
                 }
 
+                string qrCodeBase64 = string.Empty;
+                using (var qrGenerator = new QRCodeGenerator())
+                {
+                    var qrCodeData = qrGenerator.CreateQrCode(waybillCode, QRCodeGenerator.ECCLevel.Q);
+                    using (var qrCode = new PngByteQRCode(qrCodeData))
+                    {
+                        byte[] qrCodeBytes = qrCode.GetGraphic(20);
+                        qrCodeBase64 = Convert.ToBase64String(qrCodeBytes);
+                    }
+                }
+
                 var newWaybill = new Waybill
                 {
                     OrderId = outbound.OrderId,
                     OutboundId = outbound.OutboundId,
                     WaybillCode = waybillCode,
-                    QrCodeBase64 = null,
+                    QrCodeBase64 = qrCodeBase64,
                     Status = "CREATED",
                     CreatedAt = DateTime.UtcNow
                 };
