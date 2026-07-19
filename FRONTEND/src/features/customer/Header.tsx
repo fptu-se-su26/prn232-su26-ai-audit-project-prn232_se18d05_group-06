@@ -48,7 +48,6 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
     { label: 'Trang chủ', path: '/' },
     { label: 'Dịch vụ', path: '/create-shipment' },
     { label: 'Theo dõi đơn hàng', path: '/tracking' },
-    { label: 'Đặt lịch xe', path: '/slot-booking' },
     { label: 'Giới thiệu', path: '/about' },
     { label: 'Liên hệ', path: '/support' },
   ];
@@ -65,7 +64,6 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
     { label: 'Trang chủ', path: '/', icon: Home },
     { label: 'Tạo đơn mới', path: '/create-shipment', icon: Package },
     { label: 'Đơn hàng của tôi', path: '/customer/orders', icon: History },
-    { label: 'Đặt lịch xe', path: '/slot-booking', icon: Bookmark },
     { label: 'Báo giá', path: '/shipping-quotation', icon: DollarSign },
     { label: 'Theo dõi', path: '/tracking', icon: MapPin },
     { label: 'Hỗ trợ', path: '/support', icon: HelpCircle },

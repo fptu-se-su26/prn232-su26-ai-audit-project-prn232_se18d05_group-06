@@ -95,7 +95,7 @@ const App: React.FC = () => {
         <Route path="/tracking" element={<OrderTracking />} />
         <Route path="/order-details" element={<OrderDetails />} />
         <Route path="/tracking-map" element={<OrderTrackingMap />} />
-        <Route path="/slot-booking" element={<SlotBooking />} />
+        <Route path="/slot-booking" element={<Navigate to="/dispatcher/slot-booking" replace />} />
 
         {/* Complaints (Coral) */}
         <Route path="/complaints" element={<ComplaintCenter />} />
@@ -149,6 +149,7 @@ const App: React.FC = () => {
         {/* Route for Dispatcher Control Room */}
         <Route path="/" element={<DispatcherDashboard />} />
         <Route path="/dispatcher" element={<DispatcherDashboard />} />
+        <Route path="/dispatcher/slot-booking" element={<DispatcherDashboard defaultTab="SlotBooking" />} />
 
         {/* Route for Driver Dashboard */}
         <Route path="/driver" element={<DriverDashboard />} />

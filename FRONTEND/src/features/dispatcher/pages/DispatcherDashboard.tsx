@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DispatcherLayout } from '@layouts/DispatcherLayout';
 import { Order, LiveEvent, AIRecommendation, KPIStats } from '@/types/dispatcher';
+import api from '@/lib/api';
 
 // Import Separated Tab Views
 import { DashboardTab } from '../components/tabs/DashboardTab';
@@ -14,6 +15,7 @@ import { AlertsTab } from '../components/tabs/AlertsTab';
 import { DispatchOptimizationTab } from '../components/tabs/DispatchOptimizationTab';
 import { ReportsTab } from '../components/tabs/ReportsTab';
 import { VehicleTrackingDashboard } from './VehicleTrackingDashboard';
+import SlotBooking from '@/features/warehouse/SlotBooking';
 
 // --- MOCK DATABASE CONFIGURATIONS ---
 
@@ -155,8 +157,15 @@ const INITIAL_ASSIGN_VEHICLES: AssignVehicle[] = [
   { id: 'V-305', type: 'Semi Reefer', capacity: 'Tối đa 15.0 Tấn', fuel: '90% Diesel', fuelValue: 90, status: 'READY' },
 ];
 
-export const DispatcherDashboard = () => {
-  const [activeTab, setActiveTab] = useState('Dashboard');
+export const DispatcherDashboard = ({ defaultTab }: { defaultTab?: string }) => {
+  const [activeTab, setActiveTab] = useState(defaultTab || 'Dashboard');
+
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationsCount, setNotificationsCount] = useState(2);
@@ -169,6 +178,34 @@ export const DispatcherDashboard = () => {
     INITIAL_RECOMMENDATION
   );
   const [stats, setStats] = useState<KPIStats>(INITIAL_STATS);
+
+  useEffect(() => {
+    const fetchRealData = async () => {
+      try {
+        const [dashboardRes, vehiclesRes, driversRes] = await Promise.all([
+          api.get('/vehicles/dashboard'),
+          api.get('/dispatcher/vehicles'),
+          api.get('/drivers')
+        ]);
+
+        const dashboardKpi = dashboardRes.data?.kpi;
+        const totalVehiclesCount = vehiclesRes.data?.length || 0;
+        const activeVehiclesCount = vehiclesRes.data?.filter((v: any) => v.status === 'ACTIVE' || v.status === 'AVAILABLE').length || 0;
+        const activeDriversCount = driversRes.data?.filter((d: any) => d.isActive && !d.isBlacklisted).length || 0;
+
+        setStats((prev) => ({
+          ...prev,
+          vehiclesOnRoute: activeVehiclesCount || prev.vehiclesOnRoute,
+          activeDeliveries: totalVehiclesCount || prev.activeDeliveries,
+          availableDrivers: activeDriversCount || prev.availableDrivers,
+          fuelConsumption: dashboardKpi?.fuelEfficiency || prev.fuelConsumption,
+        }));
+      } catch (err) {
+        console.error('Failed to load real dashboard stats:', err);
+      }
+    };
+    fetchRealData();
+  }, []);
 
   // --- Assign Driver Matrix States ---
   const [unassignedOrders, setUnassignedOrders] = useState<AssignOrder[]>(INITIAL_ASSIGN_ORDERS);
@@ -487,14 +524,15 @@ export const DispatcherDashboard = () => {
         />
       )}
 
-      {/* =========================================================================
-          VIEW B: Orders View (Tách thành OrdersTab)
-          ========================================================================= */}
       {activeTab === 'Orders' && (
         <OrdersTab
           searchQuery={searchQuery}
           setToastMessage={setToastMessage}
         />
+      )}
+
+      {activeTab === 'SlotBooking' && (
+        <SlotBooking isTab={true} onBack={() => setActiveTab('Dashboard')} />
       )}
 
       {/* =========================================================================
@@ -595,7 +633,7 @@ export const DispatcherDashboard = () => {
       {/* =========================================================================
           VIEW F: Placeholder views for non-integrated modules
           ========================================================================= */}
-      {activeTab !== 'Dashboard' && activeTab !== 'Orders' && activeTab !== 'Assign Driver' && activeTab !== 'Live Tracking' && activeTab !== 'Drivers' && activeTab !== 'Vehicles' && activeTab !== 'Fleet Monitoring' && activeTab !== 'Alerts Center' && activeTab !== 'Flow Optimization' && activeTab !== 'Reports' && activeTab !== 'Delivery Analytics' && (
+      {activeTab !== 'Dashboard' && activeTab !== 'Orders' && activeTab !== 'SlotBooking' && activeTab !== 'Assign Driver' && activeTab !== 'Live Tracking' && activeTab !== 'Drivers' && activeTab !== 'Vehicles' && activeTab !== 'Fleet Monitoring' && activeTab !== 'Alerts Center' && activeTab !== 'Flow Optimization' && activeTab !== 'Reports' && activeTab !== 'Delivery Analytics' && activeTab !== 'Vehicle Tracking' && (
         <div className="flex-1 glass-panel rounded-lg flex flex-col items-center justify-center text-center p-8 select-none relative z-10">
           <span className="material-symbols-outlined text-[64px] text-primary animate-pulse mb-4">
             construction

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Order } from '@/types/dispatcher';
+import axios from 'axios';
 
 const REGISTRY_ORDERS: Order[] = [
   {
@@ -102,10 +103,35 @@ interface OrdersTabProps {
 }
 
 export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessage }) => {
-  const [selectedRegistryOrder, setSelectedRegistryOrder] = useState<Order | null>(REGISTRY_ORDERS[0]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedRegistryOrder, setSelectedRegistryOrder] = useState<Order | null>(null);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'transit' | 'pending' | 'delayed' | 'delivered'>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'today'>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  
+  const ITEMS_PER_PAGE = 7;
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5200/api/bookings/dispatcher-orders');
+      setOrders(response.data);
+      if (response.data.length > 0) {
+        setSelectedRegistryOrder(response.data[0]);
+      }
+    } catch (error) {
+      console.error('Lỗi khi tải danh sách xe:', error);
+      setToastMessage('Lỗi khi tải danh sách đơn & xe.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Action: Export Order Registry CSV
   const handleExportRegistry = () => {
@@ -114,6 +140,11 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
 
   // Action: Contact Driver Satellite Link
   const handleContactDriver = (driver: string) => {
+    if (driver === 'Unassigned' || driver === 'Chưa phân công') {
+      setToastMessage('Chưa có tài xế được phân công cho đơn này.');
+      return;
+    }
+
     setToastMessage(`Opening encrypted satellite communication link with ${driver}...`);
   };
 
@@ -123,47 +154,48 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
   };
 
   // Status mapping utility for display badges
-  const renderStatusBadge = (status: Order['status'], id: string) => {
-    if (id === '#ORD-9929-BY') {
-      return (
-        <span className="px-2 py-1 rounded border border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b] text-xs flex items-center w-max gap-1">
-          Chờ xử lý
-        </span>
-      );
-    }
+  const renderStatusBadge = (status: string, id: string) => {
     switch (status) {
-      case 'transit':
       case 'approaching':
         return (
-          <span className="px-2 py-1 rounded border border-secondary/30 bg-secondary/10 text-secondary text-xs flex items-center w-max gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+          <span className="px-2 py-1 rounded border border-slate-300 bg-slate-100 text-slate-950 text-[11px] font-bold flex items-center w-max gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-pulse"></span>
+            Đang chờ
+          </span>
+        );
+      case 'transit':
+        return (
+          <span className="px-2 py-1 rounded border border-blue-500/30 bg-blue-500/10 text-slate-950 text-[11px] font-bold flex items-center w-max gap-1">
+            <span className="material-symbols-outlined text-[12px]">local_shipping</span>
             Đang di chuyển
           </span>
         );
       case 'delayed':
         return (
-          <span className="px-2 py-1 rounded border border-error/30 bg-error/10 text-error text-xs flex items-center w-max gap-1 font-semibold">
-            <span className="material-symbols-outlined text-[12px]">warning</span>
+          <span className="px-2 py-1 rounded border border-error/30 bg-error/10 text-slate-950 text-[11px] font-bold flex items-center w-max gap-1">
+            <span className="material-symbols-outlined text-[12px]">schedule</span>
             Trễ hạn
           </span>
         );
       case 'delivered':
         return (
-          <span className="px-2 py-1 rounded border border-[#10b981]/30 bg-[#10b981]/10 text-[#10b981] text-xs flex items-center w-max gap-1">
+          <span className="px-2 py-1 rounded border border-[#10b981]/30 bg-[#10b981]/10 text-slate-950 text-[11px] font-bold flex items-center w-max gap-1">
+            <span className="material-symbols-outlined text-[12px]">check_circle</span>
             Đã giao
           </span>
         );
       default:
+        // fallback
         return (
-          <span className="px-2 py-1 rounded border border-primary/30 bg-primary/10 text-primary text-xs flex items-center w-max gap-1">
-            Đã phân công
+          <span className="px-2 py-1 rounded border border-slate-300 bg-slate-100 text-slate-950 text-[11px] font-bold flex items-center w-max gap-1">
+            {status}
           </span>
         );
     }
   };
 
   // Filters mapping - Order Registry Grid
-  const filteredRegistryOrders = REGISTRY_ORDERS.filter((order) => {
+  const filteredRegistryOrders = orders.filter((order) => {
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q || (
       order.id.toLowerCase().includes(q) ||
@@ -175,12 +207,43 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
 
     if (!matchesSearch) return false;
     if (statusFilter === 'all') return true;
-    if (statusFilter === 'pending') return order.id === '#ORD-9929-BY';
-    if (statusFilter === 'transit') return order.status === 'transit' && order.id !== '#ORD-9929-BY';
+    if (statusFilter === 'pending') return order.status === 'approaching';
+    if (statusFilter === 'transit') return order.status === 'transit';
     if (statusFilter === 'delayed') return order.status === 'delayed';
     if (statusFilter === 'delivered') return order.status === 'delivered';
     return true;
+  }).filter((order) => {
+    if (dateFilter === 'all') return true;
+    if (dateFilter === 'today') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      // Lọc theo ngày lịch trình (bookingDate hoặc timeRange)
+      if (order.bookingDate) {
+        const bookingDate = new Date(order.bookingDate);
+        return bookingDate >= today && bookingDate < tomorrow;
+      }
+      
+      // Nếu không có bookingDate, thử lấy từ timeRange hoặc eta
+      if (order.timeRange) {
+        const timeRangeDate = new Date(order.timeRange);
+        if (!isNaN(timeRangeDate.getTime())) {
+          return timeRangeDate >= today && timeRangeDate < tomorrow;
+        }
+      }
+      
+      return false;
+    }
+    return true;
   });
+
+  const totalPages = Math.ceil(filteredRegistryOrders.length / ITEMS_PER_PAGE) || 1;
+  const paginatedOrders = filteredRegistryOrders.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="flex flex-col gap-gutter h-full min-h-0 relative z-10 transition-all duration-300">
@@ -196,11 +259,11 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full xl:w-2/3">
           <div className="glass-panel p-4 rounded-xl relative overflow-hidden group select-none">
             <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-              <span className="material-symbols-outlined text-4xl text-secondary">hourglass_empty</span>
+              <span className="material-symbols-outlined text-4xl text-slate-950">hourglass_empty</span>
             </div>
-            <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-1">Chờ xử lý</p>
-            <p className="font-display-lg text-display-lg text-on-surface font-bold">142</p>
-            <div className="mt-2 flex items-center text-error text-sm font-semibold">
+            <p className="font-label-caps text-label-caps text-slate-950 uppercase tracking-wider mb-1">Chờ xử lý</p>
+            <p className="font-display-lg text-display-lg text-slate-950 font-bold">142</p>
+            <div className="mt-2 flex items-center text-slate-950 text-sm font-semibold">
               <span className="material-symbols-outlined text-[16px] mr-1">trending_up</span>
               <span>12%</span>
             </div>
@@ -208,11 +271,11 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
 
           <div className="glass-panel p-4 rounded-xl relative overflow-hidden group select-none">
             <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-              <span className="material-symbols-outlined text-4xl text-primary">assignment_ind</span>
+              <span className="material-symbols-outlined text-4xl text-slate-950">assignment_ind</span>
             </div>
-            <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-1">Đã phân công</p>
-            <p className="font-display-lg text-display-lg text-on-surface font-bold">86</p>
-            <div className="mt-2 flex items-center text-primary text-sm font-semibold">
+            <p className="font-label-caps text-label-caps text-slate-950 uppercase tracking-wider mb-1">Đã phân công</p>
+            <p className="font-display-lg text-display-lg text-slate-950 font-bold">86</p>
+            <div className="mt-2 flex items-center text-slate-950 text-sm font-semibold">
               <span className="material-symbols-outlined text-[16px] mr-1">trending_flat</span>
               <span>Ổn định</span>
             </div>
@@ -221,11 +284,11 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
           <div className="glass-panel p-4 rounded-xl relative overflow-hidden neon-glow select-none">
             <div className="absolute inset-0 bg-secondary/5"></div>
             <div className="absolute top-0 right-0 p-3 opacity-30">
-              <span className="material-symbols-outlined text-4xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+              <span className="material-symbols-outlined text-4xl text-slate-950" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
             </div>
-            <p className="font-label-caps text-label-caps text-secondary uppercase tracking-wider mb-1 text-glow font-bold">Đang di chuyển</p>
-            <p className="font-display-lg text-display-lg text-on-surface relative z-10 font-bold">324</p>
-            <div className="mt-2 flex items-center text-secondary text-sm relative z-10 font-semibold">
+            <p className="font-label-caps text-label-caps text-slate-950 uppercase tracking-wider mb-1 text-glow font-bold">Đang di chuyển</p>
+            <p className="font-display-lg text-display-lg text-slate-950 relative z-10 font-bold">324</p>
+            <div className="mt-2 flex items-center text-slate-950 text-sm relative z-10 font-semibold">
               <span className="material-symbols-outlined text-[16px] mr-1 animate-pulse">sensors</span>
               <span>Theo dõi Trực tuyến</span>
             </div>
@@ -233,11 +296,11 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
 
           <div className="glass-panel p-4 rounded-xl relative overflow-hidden group select-none">
             <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-              <span className="material-symbols-outlined text-4xl text-[#10b981]">check_circle</span>
+              <span className="material-symbols-outlined text-4xl text-slate-950">check_circle</span>
             </div>
-            <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-1">Đã giao hôm nay</p>
-            <p className="font-display-lg text-display-lg text-on-surface font-bold">1,028</p>
-            <div className="mt-2 flex items-center text-[#10b981] text-sm font-semibold">
+            <p className="font-label-caps text-label-caps text-slate-950 uppercase tracking-wider mb-1">Đã giao hôm nay</p>
+            <p className="font-display-lg text-display-lg text-slate-950 font-bold">1,028</p>
+            <div className="mt-2 flex items-center text-slate-950 text-sm font-semibold">
               <span className="material-symbols-outlined text-[16px] mr-1">trending_up</span>
               <span>4% so với hôm qua</span>
             </div>
@@ -248,7 +311,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
           <div className="relative">
             <button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="bg-surface-container-high border border-outline-variant/30 text-on-surface px-4 py-2 rounded-lg font-body-md text-body-md flex items-center gap-2 hover:bg-surface-variant/50 transition-colors"
+              className="bg-surface-container-high border border-outline-variant/30 text-slate-950 px-4 py-2 rounded-lg font-body-md text-body-md flex items-center gap-2 hover:bg-surface-variant/50 transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">filter_list</span>
               Bộ lọc: {statusFilter === 'all' ? 'TẤT CẢ' : statusFilter === 'transit' ? 'ĐANG DI CHUYỂN' : statusFilter === 'pending' ? 'CHỜ XỬ LÝ' : statusFilter === 'delayed' ? 'TRỄ HẠN' : 'ĐÃ GIAO'}
@@ -270,8 +333,8 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
                         setStatusFilter(filter.key);
                         setShowFilterDropdown(false);
                       }}
-                      className={`w-full text-left px-4 py-2 text-xs font-semibold transition-colors hover:bg-primary-container/20 hover:text-primary ${
-                        statusFilter === filter.key ? 'text-primary bg-primary-container/10 border-l-2 border-primary' : 'text-on-surface-variant'
+                      className={`w-full text-left px-4 py-2 text-xs font-semibold transition-colors hover:bg-primary-container/20 hover:text-slate-950 ${
+                        statusFilter === filter.key ? 'text-slate-950 bg-primary-container/10 border-l-2 border-primary' : 'text-slate-950'
                       }`}
                     >
                       {filter.label}
@@ -282,14 +345,17 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
             )}
           </div>
 
-          <button className="bg-surface-container-high border border-outline-variant/30 text-on-surface px-4 py-2 rounded-lg font-body-md text-body-md flex items-center gap-2 hover:bg-surface-variant/50 transition-colors select-none">
+          <button 
+            onClick={() => setDateFilter(dateFilter === 'today' ? 'all' : 'today')}
+            className={`bg-surface-container-high border border-outline-variant/30 text-slate-950 px-4 py-2 rounded-lg font-body-md text-body-md flex items-center gap-2 hover:bg-surface-variant/50 transition-colors select-none ${dateFilter === 'today' ? 'bg-primary-container text-slate-950' : ''}`}
+          >
             <span className="material-symbols-outlined text-[18px]">calendar_today</span>
             Hôm nay
           </button>
 
           <button
             onClick={handleExportRegistry}
-            className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-body-md text-body-md font-semibold flex items-center gap-2 hover:bg-primary-container/90 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+            className="bg-primary-container text-slate-950 px-4 py-2 rounded-lg font-body-md text-body-md font-semibold flex items-center gap-2 hover:bg-primary-container/90 transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(37,99,235,0.3)]"
           >
             <span className="material-symbols-outlined text-[18px]">download</span>
             Xuất file
@@ -298,76 +364,78 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
       </div>
 
       <div className="glass-panel rounded-xl flex-1 overflow-hidden flex flex-col relative z-10 transition-all duration-300">
-        <div className="p-4 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container/50 shrink-0">
-          <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px] text-primary">inventory_2</span>
+        <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-white/90 backdrop-blur-md shrink-0 shadow-sm rounded-t-xl">
+          <h3 className="font-headline-sm text-lg text-slate-800 font-bold flex items-center gap-2">
+            <span className="material-symbols-outlined text-[20px] text-slate-950">inventory_2</span>
             Danh mục Hoạt động
           </h3>
-          <div className="text-sm text-on-surface-variant font-data-tabular">
-            Hiển thị 1-{filteredRegistryOrders.length} trên {filteredRegistryOrders.length} bản ghi
+          <div className="text-sm text-slate-950 font-medium bg-slate-100 px-3 py-1 rounded-full">
+            Hiển thị {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredRegistryOrders.length)} trên {filteredRegistryOrders.length} bản ghi
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto min-h-0">
+        <div className="flex-1 overflow-auto min-h-0 bg-white/80 backdrop-blur-sm">
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="border-b border-outline-variant/20 bg-surface-container-low/50 select-none">
-                <th className="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-[11px]">Mã đơn hàng</th>
-                <th className="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-[11px]">Khách hàng</th>
-                <th className="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-[11px]">Điểm đến</th>
-                <th className="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-[11px]">Tài xế / Xe</th>
-                <th className="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-[11px]">Dự kiến (ETA)</th>
-                <th className="p-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider text-[11px]">Trạng thái</th>
+              <tr className="border-b border-slate-200 bg-slate-50/80 select-none">
+                <th className="p-4 font-bold text-slate-950 uppercase tracking-wider text-[11px]">Booking ID</th>
+                <th className="p-4 font-bold text-slate-950 uppercase tracking-wider text-[11px]">Cửa Kho (Dock)</th>
+                <th className="p-4 font-bold text-slate-950 uppercase tracking-wider text-[11px]">Lịch Trình</th>
+                <th className="p-4 font-bold text-slate-950 uppercase tracking-wider text-[11px]">Biển Số Xe</th>
+                <th className="p-4 font-bold text-slate-950 uppercase tracking-wider text-[11px]">Email Người Nhận</th>
+                <th className="p-4 font-bold text-slate-950 uppercase tracking-wider text-[11px]">Trạng Thái</th>
               </tr>
             </thead>
-            <tbody className="font-data-tabular text-data-tabular divide-y divide-outline-variant/10">
-              {filteredRegistryOrders.length === 0 ? (
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-on-surface-variant">
+                  <td colSpan={6} className="p-12 text-center text-slate-950">
+                    <span className="material-symbols-outlined text-[36px] opacity-40 mb-2 block animate-spin">
+                      sync
+                    </span>
+                    <span className="font-medium">Đang tải dữ liệu...</span>
+                  </td>
+                </tr>
+              ) : paginatedOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-12 text-center text-slate-950">
                     <span className="material-symbols-outlined text-[36px] opacity-40 mb-2 block">
                       inbox
                     </span>
-                    Không tìm thấy đơn hàng nào.
+                    <span className="font-medium">Không tìm thấy dữ liệu đặt lịch nào.</span>
                   </td>
                 </tr>
               ) : (
-                filteredRegistryOrders.map((order) => {
+                paginatedOrders.map((order) => {
                   const isSelected = selectedRegistryOrder?.id === order.id;
-                  const isDelayed = order.status === 'delayed';
 
                   return (
                     <tr
                       key={order.id}
                       onClick={() => setSelectedRegistryOrder(order)}
-                      className={`transition-colors cursor-pointer group hover:bg-surface-variant/20 ${
-                        isSelected ? 'bg-surface-variant/35 border-l-2 border-primary' : ''
-                      } ${isDelayed ? 'bg-error/5' : ''}`}
+                      className={`transition-colors cursor-pointer group hover:bg-blue-50/50 ${
+                        isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : 'border-l-4 border-transparent'
+                      }`}
                     >
-                      <td className="p-4 font-bold text-primary group-hover:text-secondary transition-colors pl-4">
+                      <td className="p-4 font-bold text-slate-950 group-hover:text-blue-700 transition-colors">
                         {order.id}
                       </td>
-                      <td className="p-4 text-on-surface font-semibold truncate max-w-[150px]">
-                        {order.customer}
+                      <td className="p-4 text-slate-950 truncate max-w-[200px] font-medium">
+                        {order.location}
                       </td>
-                      <td className="p-4 text-on-surface-variant truncate max-w-[200px]">
-                        {order.destination}
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-[10px] font-bold text-primary select-none">
-                            {order.driverAvatar}
-                          </div>
-                          <span className="text-on-surface font-medium truncate max-w-[120px]">
-                            {order.driverName === 'Unassigned' ? (
-                              <span className="text-on-surface-variant italic">Chưa phân công</span>
-                            ) : (
-                              order.vehicle
-                            )}
-                          </span>
+                      <td className="p-4 text-slate-950 font-medium">
+                        <div className="flex flex-col gap-0.5">
+                          <span>{order.timeRange || "00:00 - 00:00"}</span>
+                          <span className="text-[12px] text-slate-400 font-normal">{order.bookingDate || order.eta?.split(' ')[0]}</span>
                         </div>
                       </td>
-                      <td className={`p-4 font-medium ${isDelayed ? 'text-error font-semibold' : 'text-on-surface'}`}>
-                        {order.eta}
+                      <td className="p-4">
+                        <span className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-slate-800 font-bold font-mono tracking-wider">
+                          {order.vehicle}
+                        </span>
+                      </td>
+                      <td className="p-4 text-slate-950 text-sm truncate max-w-[150px] font-medium">
+                        {order.recipientEmail || "dauboquay@gmail.com"}
                       </td>
                       <td className="p-4">
                         {renderStatusBadge(order.status, order.id)}
@@ -380,48 +448,34 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
           </table>
         </div>
 
-        <div className="p-4 border-t border-outline-variant/20 flex justify-between items-center bg-surface-container/50 shrink-0 mt-auto select-none">
+        <div className="p-4 border-t border-slate-200 flex justify-between items-center bg-white/90 backdrop-blur-md shrink-0 mt-auto select-none rounded-b-xl">
           <button
             onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`flex items-center gap-1 text-sm transition-colors ${
-              currentPage === 1 ? 'text-on-surface-variant/30 cursor-not-allowed' : 'text-on-surface-variant hover:text-on-surface'
+            className={`flex items-center gap-1 text-sm transition-colors font-medium ${
+              currentPage === 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-950 hover:text-slate-950'
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">chevron_left</span> Trước
           </button>
           <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage(1)}
-              className={`w-8 h-8 rounded font-bold flex items-center justify-center text-sm transition-colors ${
-                currentPage === 1 ? 'bg-primary text-on-primary' : 'border border-outline-variant/30 text-on-surface hover:bg-surface-variant/50'
-              }`}
-            >
-              1
-            </button>
-            <button
-              onClick={() => setCurrentPage(2)}
-              className={`w-8 h-8 rounded font-bold flex items-center justify-center text-sm transition-colors ${
-                currentPage === 2 ? 'bg-primary text-on-primary' : 'border border-outline-variant/30 text-on-surface hover:bg-surface-variant/50'
-              }`}
-            >
-              2
-            </button>
-            <button
-              onClick={() => setCurrentPage(3)}
-              className={`w-8 h-8 rounded font-bold flex items-center justify-center text-sm transition-colors ${
-                currentPage === 3 ? 'bg-primary text-on-primary' : 'border border-outline-variant/30 text-on-surface hover:bg-surface-variant/50'
-              }`}
-            >
-              3
-            </button>
-            <span className="text-on-surface-variant flex items-center justify-center">...</span>
+            {Array.from({ length: totalPages }).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentPage(idx + 1)}
+                className={`w-8 h-8 rounded font-bold flex items-center justify-center text-sm transition-colors ${
+                  currentPage === idx + 1 ? 'bg-blue-600 text-slate-950 shadow-md' : 'border border-slate-200 text-slate-950 hover:bg-slate-50'
+                }`}
+              >
+                {idx + 1}
+              </button>
+            ))}
           </div>
           <button
-            onClick={() => currentPage < 3 && setCurrentPage(currentPage + 1)}
-            disabled={currentPage === 3}
-            className={`flex items-center gap-1 text-sm transition-colors ${
-              currentPage === 3 ? 'text-on-surface-variant/30 cursor-not-allowed' : 'text-on-surface-variant hover:text-on-surface'
+            onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`flex items-center gap-1 text-sm transition-colors font-medium ${
+              currentPage === totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-950 hover:text-slate-950'
             }`}
           >
             Sau <span className="material-symbols-outlined text-[18px]">chevron_right</span>
@@ -437,29 +491,29 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
                 {selectedRegistryOrder.id === '#ORD-9929-BY' ? (
                   <span className="px-2 py-0.5 rounded border border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#f59e0b] text-[10px] uppercase font-bold tracking-wider">Chờ xử lý</span>
                 ) : selectedRegistryOrder.status === 'delayed' ? (
-                  <span className="px-2 py-0.5 rounded border border-error/30 bg-error/10 text-error text-[10px] uppercase font-bold tracking-wider font-semibold">Trễ hạn</span>
+                  <span className="px-2 py-0.5 rounded border border-error/30 bg-error/10 text-slate-950 text-[10px] uppercase font-bold tracking-wider font-semibold">Trễ hạn</span>
                 ) : selectedRegistryOrder.status === 'delivered' ? (
-                  <span className="px-2 py-0.5 rounded border border-[#10b981]/30 bg-[#10b981]/10 text-[#10b981] text-[10px] uppercase font-bold tracking-wider font-semibold">Đã giao</span>
+                  <span className="px-2 py-0.5 rounded border border-[#10b981]/30 bg-[#10b981]/10 text-slate-950 text-[10px] uppercase font-bold tracking-wider font-semibold">Đã giao</span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded border border-secondary/30 bg-secondary/10 text-secondary text-[10px] uppercase font-bold tracking-wider">Đang di chuyển</span>
+                  <span className="px-2 py-0.5 rounded border border-secondary/30 bg-secondary/10 text-slate-950 text-[10px] uppercase font-bold tracking-wider">Đang di chuyển</span>
                 )}
 
                 {selectedRegistryOrder.priority === 'high' && (
-                  <span className="px-2 py-0.5 rounded border border-outline-variant/30 bg-surface-container text-on-surface text-[10px] uppercase font-bold tracking-wider animate-pulse">
+                  <span className="px-2 py-0.5 rounded border border-outline-variant/30 bg-surface-container text-slate-950 text-[10px] uppercase font-bold tracking-wider animate-pulse">
                     Ưu tiên cao
                   </span>
                 )}
               </div>
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface mt-2 select-none">
+              <h2 className="font-headline-md text-headline-md font-bold text-slate-950 mt-2 select-none">
                 {selectedRegistryOrder.id}
               </h2>
-              <p className="text-sm text-on-surface-variant font-semibold select-none">
+              <p className="text-sm text-slate-950 font-semibold select-none">
                 {selectedRegistryOrder.customer}
               </p>
             </div>
             <button
               onClick={() => setSelectedRegistryOrder(null)}
-              className="text-on-surface-variant hover:text-error p-1.5 rounded-full hover:bg-surface-variant/50 transition-colors shrink-0"
+              className="text-slate-950 hover:text-slate-950 p-1.5 rounded-full hover:bg-surface-variant/50 transition-colors shrink-0"
               title="Đóng Bảng"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
@@ -498,23 +552,23 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-surface-container-low/50 p-3 rounded border border-outline-variant/10">
-                <p className="text-[11px] text-on-surface-variant uppercase tracking-wider mb-1 font-bold">Tài xế</p>
-                <p className="text-sm text-on-surface font-medium flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-primary">person</span>
+                <p className="text-[11px] text-slate-950 uppercase tracking-wider mb-1 font-bold">Tài xế</p>
+                <p className="text-sm text-slate-950 font-medium flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-slate-950">person</span>
                   {selectedRegistryOrder.driverName === 'Unassigned' ? 'Chưa phân công' : selectedRegistryOrder.driverName}
                 </p>
               </div>
               <div className="bg-surface-container-low/50 p-3 rounded border border-outline-variant/10">
-                <p className="text-[11px] text-on-surface-variant uppercase tracking-wider mb-1 font-bold">Phương tiện</p>
-                <p className="text-sm text-on-surface font-medium flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-primary">local_shipping</span>
+                <p className="text-[11px] text-slate-950 uppercase tracking-wider mb-1 font-bold">Phương tiện</p>
+                <p className="text-sm text-slate-950 font-medium flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-slate-950">local_shipping</span>
                   {selectedRegistryOrder.vehicle === 'Pending Scheduling' ? 'Đang lên lịch' : selectedRegistryOrder.vehicle}
                 </p>
               </div>
             </div>
 
             <div>
-              <h4 className="font-headline-sm text-sm text-on-surface font-semibold mb-4">Lịch trình Theo dõi</h4>
+              <h4 className="font-headline-sm text-sm text-slate-950 font-semibold mb-4">Lịch trình Theo dõi</h4>
               <div className="relative pl-4 space-y-6 border-l-2 border-outline-variant/30 ml-2">
                 {selectedRegistryOrder.timeline && selectedRegistryOrder.timeline.map((point, idx) => (
                   <div key={idx} className="relative">
@@ -528,13 +582,13 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
                     <p className={`text-sm font-semibold ${
                       point.active
                         ? selectedRegistryOrder.status === 'delayed'
-                          ? 'text-error'
-                          : 'text-secondary'
-                        : 'text-on-surface'
+                          ? 'text-slate-950'
+                          : 'text-slate-950'
+                        : 'text-slate-950'
                     }`}>
                       {point.title === 'Order Received' ? 'Đã nhận đơn hàng' : point.title === 'Order Assigned to TRK-442' ? 'Đã phân đơn cho TRK-442' : point.title === 'Order Assigned to TRK-201' ? 'Đã phân đơn cho TRK-201' : point.title === 'Order Assigned to VAN-019' ? 'Đã phân đơn cho VAN-019' : point.title === 'Departed Sorting Facility Node 2' ? 'Đã xuất trạm phân loại Node 2' : point.title === 'Departed sorting hub A' ? 'Đã xuất trạm phân loại A' : point.title === 'Departed regional hub' ? 'Đã xuất kho khu vực' : point.title === 'In Transit - Sector 7 Checkpoint' ? 'Đang di chuyển - Trạm gác Sector 7' : point.title === 'In Transit - Downtown Highway' ? 'Đang di chuyển - Đường cao tốc nội đô' : point.title === 'In Transit - Highway East' ? 'Đang di chuyển - Đường cao tốc phía Đông' : point.title === 'Stuck in Traffic: City Center' ? 'Bị kẹt xe: Trung tâm thành phố' : point.title === 'Delivered successfully' ? 'Giao hàng thành công' : point.title}
                     </p>
-                    <p className="text-[11px] text-on-surface-variant mt-0.5">{point.timestamp === 'Today, 13:45' ? 'Hôm nay, 13:45' : point.timestamp === 'Today, 11:20' ? 'Hôm nay, 11:20' : point.timestamp === 'Today, 09:05' ? 'Hôm nay, 09:05' : point.timestamp === 'Yesterday, 18:30' ? 'Hôm qua, 18:30' : point.timestamp === 'Yesterday, 20:15' ? 'Hôm qua, 20:15' : point.timestamp === 'Today, 14:02' ? 'Hôm nay, 14:02' : point.timestamp === 'Today, 13:10' ? 'Hôm nay, 13:10' : point.timestamp === 'Today, 11:45' ? 'Hôm nay, 11:45' : point.timestamp === 'Today, 10:00' ? 'Hôm nay, 10:00' : point.timestamp === 'Yesterday, 17:40' ? 'Hôm qua, 17:40' : point.timestamp === 'Today, 09:40' ? 'Hôm nay, 09:40' : point.timestamp === 'Yesterday, 15:20' ? 'Hôm qua, 15:20' : point.timestamp === 'Today, 10:45' ? 'Hôm nay, 10:45' : point.timestamp === 'Today, 08:30' ? 'Hôm nay, 08:30' : point.timestamp === 'Today, 07:15' ? 'Hôm nay, 07:15' : point.timestamp === 'Day before yesterday, 14:00' ? 'Hôm kia, 14:00' : point.timestamp}</p>
+                    <p className="text-[11px] text-slate-950 mt-0.5">{point.timestamp}</p>
                   </div>
                 ))}
               </div>
@@ -544,13 +598,13 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
           <div className="p-4 border-t border-outline-variant/20 bg-surface-container-lowest/85 flex gap-3 shrink-0 select-none">
             <button
               onClick={() => handleContactDriver(selectedRegistryOrder.driverName)}
-              className="flex-1 bg-surface-container border border-outline-variant/30 text-on-surface py-2 rounded-lg text-sm font-semibold hover:bg-surface-variant/50 transition-colors shadow-inner"
+              className="flex-1 bg-surface-container border border-outline-variant/30 text-slate-950 py-2 rounded-lg text-sm font-semibold hover:bg-surface-variant/50 transition-colors shadow-inner"
             >
               Liên hệ Tài xế
             </button>
             <button
               onClick={() => handleUpdateRoute(selectedRegistryOrder.id)}
-              className="flex-1 bg-secondary/20 border border-secondary text-secondary py-2 rounded-lg text-sm font-semibold hover:bg-secondary/30 transition-colors shadow-[0_0_10px_rgba(76,215,246,0.15)]"
+              className="flex-1 bg-secondary/20 border border-secondary text-slate-950 py-2 rounded-lg text-sm font-semibold hover:bg-secondary/30 transition-colors shadow-[0_0_10px_rgba(76,215,246,0.15)]"
             >
               Cập nhật Lộ trình
             </button>

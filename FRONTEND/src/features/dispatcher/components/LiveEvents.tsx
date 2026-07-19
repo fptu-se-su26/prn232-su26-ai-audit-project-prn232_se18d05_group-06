@@ -39,7 +39,7 @@ export const LiveEvents: React.FC<LiveEventsProps> = ({ events }) => {
         <div>
           <h3 className="flex items-center gap-2 text-[15px] font-bold text-slate-950">
             <span className="material-symbols-outlined text-[18px] text-[#0f6b7d]">history</span>
-            Nhật ký vận hành
+            Nhật ký vận hành (Mô phỏng)
           </h3>
           <p className="mt-0.5 text-[12px] font-semibold text-slate-500">Audit timeline trong ca</p>
         </div>

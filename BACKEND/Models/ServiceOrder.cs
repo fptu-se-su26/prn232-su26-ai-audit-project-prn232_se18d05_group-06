@@ -80,4 +80,6 @@ public partial class ServiceOrder
     public virtual Voucher? Voucher { get; set; }
 
     public virtual Warehouse Warehouse { get; set; } = null!;
+
+    public virtual ICollection<Waybill> Waybills { get; set; } = new List<Waybill>();
 }

@@ -15,5 +15,6 @@ namespace BACKEND.DTOs
         public string DriverEmail { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public string QrCodeBase64 { get; set; } = string.Empty;
+        public string? BookingType { get; set; }
     }
 }

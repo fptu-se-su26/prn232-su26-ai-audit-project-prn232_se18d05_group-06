@@ -96,6 +96,10 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
           <p className="font-body-md text-xs md:text-body-md text-on-surface-variant mt-1">
             Chọn một đơn hàng, sau đó ghép cặp với tài xế và phương tiện sẵn có.
           </p>
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-500">
+            <span className="material-symbols-outlined text-[14px]">warning</span>
+            <span>Outbound pickup assignment depends on Dock/Dispatcher assignment integration.</span>
+          </div>
         </div>
         <div className="flex gap-2">
           <div className="relative">
@@ -143,17 +147,17 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-gutter min-h-0 pb-16 relative">
         
         {/* Column 1: Unassigned Orders */}
-        <div className="glass-panel rounded-xl flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-white/5 flex justify-between items-center bg-surface-container-low/50 select-none shrink-0">
-            <h3 className="font-label-caps text-label-caps text-on-surface font-semibold text-[10px] tracking-wider">
+        <div className="glass-panel rounded-xl flex flex-col overflow-hidden bg-[#07192e]/60 border border-white/5">
+          <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#0a1e35]/50 select-none shrink-0">
+            <h3 className="font-label-caps text-label-caps text-[#d4e4fa] font-bold text-[10.5px] tracking-wider uppercase">
               Đơn hàng Chưa phân công ({filteredAssignOrders.length})
             </h3>
-            <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '18px' }}>sort</span>
+            <span className="material-symbols-outlined text-slate-400" style={{ fontSize: '18px' }}>sort</span>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-2">
             {filteredAssignOrders.length === 0 ? (
-              <div className="p-8 text-center text-on-surface-variant select-none">
-                <span className="material-symbols-outlined text-[32px] opacity-45 mb-2 block">
+              <div className="p-8 text-center text-slate-400 select-none">
+                <span className="material-symbols-outlined text-[32px] text-slate-500 mb-2 block">
                   done_all
                 </span>
                 Tất cả đơn hàng đã được phân công thành công!
@@ -169,40 +173,40 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
                     onClick={() => setSelectedAssignOrder(isSelected ? null : order)}
                     className={`transition-all duration-300 rounded-lg p-3 cursor-pointer relative group border ${
                       isSelected
-                        ? 'bg-primary-container/10 border-primary shadow-[0_0_15px_rgba(37,99,235,0.15)] scale-[0.98]'
-                        : 'bg-surface-container/80 border-outline-variant/30 hover:bg-surface-variant/50'
+                        ? 'bg-[#0a2540]/95 border-primary shadow-[0_0_15px_rgba(37,99,235,0.25)] scale-[0.98]'
+                        : 'bg-[#0a1e35]/85 border-white/10 hover:bg-[#0a1e35]/95 hover:border-white/20'
                     }`}
                   >
                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg transition-colors ${
-                      isHigh ? 'bg-error' : isSelected ? 'bg-primary' : 'bg-transparent'
+                      isHigh ? 'bg-red-500' : isSelected ? 'bg-primary' : 'bg-transparent'
                     }`} />
                     
                     <div className="flex justify-between items-start mb-2 pl-2 select-none">
-                      <span className={`font-data-tabular text-data-tabular font-bold ${
-                        isSelected ? 'text-primary' : 'text-on-surface'
+                      <span className={`font-data-tabular text-data-tabular font-bold text-[13px] ${
+                        isSelected ? 'text-primary' : 'text-[#d4e4fa]'
                       }`}>
                         {order.id}
                       </span>
-                      <span className={`px-2 py-0.5 rounded text-[8px] font-label-caps font-bold tracking-wider border ${
+                      <span className={`px-2 py-0.5 rounded text-[8.5px] font-label-caps font-bold tracking-wider border ${
                         isHigh
-                          ? 'bg-error-container/20 text-error border-error/30'
-                          : 'bg-secondary-container/20 text-secondary border-secondary/30'
+                          ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                          : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
                       }`}>
                         {order.priority === 'HIGH PRIORITY' ? 'ƯU TIÊN CAO' : 'TIÊU CHUẨN'}
                       </span>
                     </div>
 
-                    <div className="pl-2 space-y-1 select-none">
-                      <div className="flex items-center gap-2 text-on-surface-variant">
+                    <div className="pl-2 space-y-1 select-none text-[12px]">
+                      <div className="flex items-center gap-2 text-slate-300">
                         <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>scale</span>
-                        <span className={`font-data-tabular text-data-tabular text-[12px] ${isSelected ? 'text-on-surface' : ''}`}>
-                          {order.weight}
+                        <span className={`font-data-tabular text-data-tabular ${isSelected ? 'text-white font-medium' : 'text-slate-300'}`}>
+                          Trọng lượng: {order.weight}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-on-surface-variant">
+                      <div className="flex items-center gap-2 text-slate-300">
                         <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>my_location</span>
-                        <span className={`font-body-md text-body-md text-[12px] truncate ${isSelected ? 'text-on-surface' : ''}`}>
-                          {order.route}
+                        <span className={`font-body-md text-body-md truncate ${isSelected ? 'text-white font-medium' : 'text-slate-300'}`}>
+                          Lộ trình: {order.route}
                         </span>
                       </div>
                     </div>
@@ -214,7 +218,7 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
         </div>
 
         {/* Column 2: Available Drivers */}
-        <div className="glass-panel rounded-xl flex flex-col overflow-hidden relative">
+        <div className="glass-panel rounded-xl flex flex-col overflow-hidden relative bg-[#07192e]/60 border border-white/5">
           {/* Animated Vector Path Connection Visuals (Order -> Driver) */}
           {selectedAssignOrder && selectedAssignDriver && (
             <svg className="absolute top-1/2 -left-4 w-8 h-8 -translate-y-1/2 z-20 pointer-events-none hidden lg:block animate-pulse">
@@ -223,11 +227,11 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
             </svg>
           )}
 
-          <div className="p-4 border-b border-white/5 flex justify-between items-center bg-surface-container-low/50 select-none shrink-0">
-            <h3 className="font-label-caps text-label-caps text-on-surface font-semibold text-[10px] tracking-wider">
+          <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#0a1e35]/50 select-none shrink-0">
+            <h3 className="font-label-caps text-label-caps text-[#d4e4fa] font-bold text-[10.5px] tracking-wider uppercase">
               Tài xế Sẵn sàng ({INITIAL_ASSIGN_DRIVERS.length})
             </h3>
-            <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '18px' }}>radar</span>
+            <span className="material-symbols-outlined text-slate-400" style={{ fontSize: '18px' }}>radar</span>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-2">
             {INITIAL_ASSIGN_DRIVERS.map((driver) => {
@@ -239,39 +243,39 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
                   onClick={() => setSelectedAssignDriver(isSelected ? null : driver)}
                   className={`transition-all duration-300 rounded-lg p-3 cursor-pointer border relative ${
                     isSelected
-                      ? 'bg-surface-container/90 border-secondary ai-match-glow'
-                      : 'bg-surface-container/40 border-outline-variant/30 hover:bg-surface-variant/50'
+                      ? 'bg-[#0a2540]/95 border-secondary shadow-[0_0_15px_rgba(76,215,246,0.25)] scale-[0.98]'
+                      : 'bg-[#0a1e35]/85 border-white/10 hover:bg-[#0a1e35]/95 hover:border-white/20'
                   }`}
                 >
                   {driver.recommended && (
-                    <div className="absolute -top-2.5 right-3 bg-surface border border-secondary/50 px-2 py-0.5 rounded-full flex items-center gap-1 z-10 select-none shadow">
-                      <span className="material-symbols-outlined text-secondary animate-bounce" style={{ fontSize: '12px' }}>auto_awesome</span>
+                    <div className="absolute -top-2 right-3 bg-[#0a2540] border border-secondary/50 px-2 py-0.5 rounded-full flex items-center gap-1 z-10 select-none shadow">
+                      <span className="material-symbols-outlined text-secondary animate-bounce" style={{ fontSize: '11px' }}>auto_awesome</span>
                       <span className="font-label-caps text-[8px] font-bold text-secondary">AI PHÙ HỢP 98%</span>
                     </div>
                   )}
 
                   <div className="flex items-center gap-3 select-none">
-                    <div className="relative">
+                    <div className="relative shrink-0">
                       <img
                         alt="Driver Avatar"
-                        className="w-10 h-10 rounded-full border border-outline-variant/30 object-cover"
+                        className="w-10 h-10 rounded-full border border-white/10 object-cover"
                         src={driver.avatar}
                       />
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-surface"></div>
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-[#051424]"></div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center">
-                        <h4 className="font-body-md text-body-md font-semibold text-on-surface truncate">
+                        <h4 className="font-body-md text-body-md font-semibold text-[#d4e4fa] truncate text-[13px]">
                           {driver.name}
                         </h4>
-                        <div className="flex items-center text-yellow-500">
+                        <div className="flex items-center text-amber-400 font-bold">
                           <span className="material-symbols-outlined filled" style={{ fontSize: '12px' }}>star</span>
                           <span className="font-data-tabular text-[11px] ml-0.5">{driver.rating}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 text-on-surface-variant mt-0.5">
-                        <span className={`material-symbols-outlined ${isSelected ? 'text-secondary animate-pulse' : ''}`} style={{ fontSize: '12px' }}>near_me</span>
-                        <span className={`font-data-tabular text-[11px] ${isSelected ? 'text-secondary font-bold' : ''}`}>
+                      <div className="flex items-center gap-1 text-slate-300 mt-1">
+                        <span className={`material-symbols-outlined text-[14px] ${isSelected ? 'text-secondary animate-pulse' : ''}`} style={{ fontSize: '14px' }}>near_me</span>
+                        <span className={`font-data-tabular text-[11.5px] ${isSelected ? 'text-secondary font-bold' : 'text-slate-300'}`}>
                           {driver.distance}
                         </span>
                       </div>
@@ -284,7 +288,7 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
         </div>
 
         {/* Column 3: Yard Vehicles */}
-        <div className="glass-panel rounded-xl flex flex-col overflow-hidden relative">
+        <div className="glass-panel rounded-xl flex flex-col overflow-hidden relative bg-[#07192e]/60 border border-white/5">
           {/* Animated Vector Path Connection Visuals (Driver -> Vehicle) */}
           {selectedAssignDriver && selectedAssignVehicle && (
             <svg className="absolute top-1/2 -left-4 w-8 h-8 -translate-y-1/2 z-20 pointer-events-none hidden lg:block animate-pulse">
@@ -293,11 +297,11 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
             </svg>
           )}
 
-          <div className="p-4 border-b border-white/5 flex justify-between items-center bg-surface-container-low/50 select-none shrink-0">
-            <h3 className="font-label-caps text-label-caps text-on-surface font-semibold text-[10px] tracking-wider">
+          <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#0a1e35]/50 select-none shrink-0">
+            <h3 className="font-label-caps text-label-caps text-[#d4e4fa] font-bold text-[10.5px] tracking-wider uppercase">
               Phương tiện tại bãi ({INITIAL_ASSIGN_VEHICLES.length})
             </h3>
-            <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '18px' }}>local_shipping</span>
+            <span className="material-symbols-outlined text-slate-400" style={{ fontSize: '18px' }}>local_shipping</span>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-2">
             {INITIAL_ASSIGN_VEHICLES.map((vehicle) => {
@@ -309,21 +313,21 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
                   onClick={() => setSelectedAssignVehicle(isSelected ? null : vehicle)}
                   className={`transition-all duration-300 rounded-lg p-3 cursor-pointer border relative ${
                     isSelected
-                      ? 'bg-surface-container/90 border-secondary ai-match-glow'
-                      : 'bg-surface-container/40 border-outline-variant/30 hover:bg-surface-variant/50'
+                      ? 'bg-[#0a2540]/95 border-secondary shadow-[0_0_15px_rgba(76,215,246,0.25)] scale-[0.98]'
+                      : 'bg-[#0a1e35]/85 border-white/10 hover:bg-[#0a1e35]/95 hover:border-white/20'
                   }`}
                 >
                   {isSelected && (
-                    <div className="absolute -top-2.5 right-3 bg-surface border border-secondary/50 px-2 py-0.5 rounded-full flex items-center gap-1 z-10 select-none shadow">
-                      <span className="material-symbols-outlined text-secondary" style={{ fontSize: '12px' }}>check_circle</span>
+                    <div className="absolute -top-2 right-3 bg-[#0a2540] border border-secondary/50 px-2 py-0.5 rounded-full flex items-center gap-1 z-10 select-none shadow">
+                      <span className="material-symbols-outlined text-secondary" style={{ fontSize: '11px' }}>check_circle</span>
                       <span className="font-label-caps text-[8px] font-bold text-secondary">ĐÁP ỨNG TẢI TRỌNG</span>
                     </div>
                   )}
 
                   <div className="flex justify-between items-start mb-2 select-none">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-on-surface" style={{ fontSize: '20px' }}>local_shipping</span>
-                      <span className="font-data-tabular text-data-tabular text-on-surface font-bold">
+                      <span className="material-symbols-outlined text-[#d4e4fa] text-[20px]" style={{ fontSize: '20px' }}>local_shipping</span>
+                      <span className="font-data-tabular text-data-tabular text-[#d4e4fa] font-bold text-[13px]">
                         {vehicle.id} ({vehicle.type})
                       </span>
                     </div>
@@ -332,19 +336,19 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
                     </span>
                   </div>
 
-                  <div className="space-y-1 mt-2 select-none">
-                    <div className="flex justify-between items-center text-[10px] font-semibold">
-                      <span className="text-on-surface-variant font-label-caps">TẢI TRỌNG</span>
-                      <span className="font-data-tabular text-on-surface">{vehicle.capacity}</span>
+                  <div className="space-y-1.5 mt-2.5 select-none text-[11.5px]">
+                    <div className="flex justify-between items-center font-semibold">
+                      <span className="text-slate-400 font-label-caps">TẢI TRỌNG</span>
+                      <span className="font-data-tabular text-white">{vehicle.capacity}</span>
                     </div>
-                    <div className="w-full bg-surface-container-high rounded-full h-1 overflow-hidden">
+                    <div className="w-full bg-[#051424] rounded-full h-1 overflow-hidden">
                       <div
                         className="bg-secondary h-1 rounded-full transition-all duration-500"
                         style={{ width: vehicle.id === 'V-402' ? '50%' : vehicle.id === 'V-109' ? '30%' : '75%' }}
                       />
                     </div>
-                    <div className="flex justify-between items-center text-[10px] font-semibold mt-2">
-                      <span className="text-on-surface-variant font-label-caps">NHIÊN LIỆU / ĐIỆN</span>
+                    <div className="flex justify-between items-center font-semibold mt-2">
+                      <span className="text-slate-400 font-label-caps">NHIÊN LIỆU / ĐIỆN</span>
                       <span className="font-data-tabular text-secondary font-bold">{vehicle.fuel}</span>
                     </div>
                   </div>
@@ -357,12 +361,12 @@ export const AssignDispatcherTab: React.FC<AssignDispatcherTabProps> = ({
 
       {/* Floating Action Matrix Dispatcher footer */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-[600px] px-4 select-none animate-slide-up">
-        <div className="glass-panel p-3 rounded-full flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.6)] border-t border-white/10">
+        <div className="glass-panel p-3 rounded-full flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-white/10 bg-[#0a1e35]/95 backdrop-blur-md">
           <div className="flex items-center gap-4 px-4 text-left">
             <div className="flex flex-col">
-              <span className="font-label-caps text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">PHÂN CÔNG CHO</span>
+              <span className="font-label-caps text-[9px] font-bold text-slate-400 uppercase tracking-wider">PHÂN CÔNG CHO</span>
               {selectedAssignOrder && selectedAssignDriver && selectedAssignVehicle ? (
-                <span className="font-data-tabular text-[13px] text-on-surface font-semibold">
+                <span className="font-data-tabular text-[13px] text-white font-semibold">
                   {selectedAssignDriver.name} <span className="text-secondary font-bold">•</span> {selectedAssignVehicle.id}
                 </span>
               ) : (

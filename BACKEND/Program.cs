@@ -5,13 +5,21 @@ using BACKEND.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 // Add services to the container.
-builder.Services.AddControllers();
+// ReferenceHandler.IgnoreCycles prevents System.Text.Json from throwing on EF
+// circular navigation property chains (e.g. OutboundOrder <-> OutboundLines).
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.MaxDepth = 64;
+    });
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -79,17 +87,21 @@ builder.Services.AddScoped<IPricingEngineService, PricingEngineService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInvoiceOcrService, InvoiceOcrService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>();
+// builder.Services.AddScoped<IPayOsPaymentService, PayOsPaymentService>(); // TODO: Implement PayOsPaymentService
 builder.Services.AddScoped<ICustomerChatbotService, CustomerChatbotService>();
 builder.Services.AddScoped<ICustomerTierService, CustomerTierService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
+builder.Services.AddScoped<IVehicleDashboardService, VehicleDashboardService>();
+builder.Services.AddScoped<ICompanyProfileService, CompanyProfileService>();
 builder.Services.AddScoped<IFinanceDashboardService, FinanceDashboardService>();
 builder.Services.AddSingleton<ILprService, LprService>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<INotificationConfigService, NotificationConfigService>();
 
 builder.Services.AddHttpClient();
 // Background workers
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
-builder.Services.AddHostedService<StockAlertWorker>();
+// builder.Services.AddHostedService<StockAlertWorker>();
 // builder.Services.AddHostedService<MaintenanceAlertWorker>();
 // builder.Services.AddHostedService<OverstayAlertWorker>();
 
