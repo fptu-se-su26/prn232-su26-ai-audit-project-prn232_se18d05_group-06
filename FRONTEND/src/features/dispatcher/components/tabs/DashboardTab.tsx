@@ -41,6 +41,12 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
       />
 
       <div className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col gap-gutter">
+        <div className="pointer-events-auto shrink-0 mb-1 flex items-center justify-between bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-lg px-3 py-2 text-xs font-bold shadow-md">
+          <span className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px] animate-pulse">info</span>
+            Dữ liệu mô phỏng: Bản đồ GPS và Định vị thời gian thực được làm giả lập (mocked). KPI của Xe và Tài xế được liên kết tự động từ API.
+          </span>
+        </div>
         <div className="pointer-events-auto shrink-0">
           <KPISection stats={stats} />
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DispatcherLayout } from '@layouts/DispatcherLayout';
 import { Order, LiveEvent, AIRecommendation, KPIStats } from '@/types/dispatcher';
+import api from '@/lib/api';
 
 // Import Separated Tab Views
 import { DashboardTab } from '../components/tabs/DashboardTab';
@@ -177,6 +178,34 @@ export const DispatcherDashboard = ({ defaultTab }: { defaultTab?: string }) => 
     INITIAL_RECOMMENDATION
   );
   const [stats, setStats] = useState<KPIStats>(INITIAL_STATS);
+
+  useEffect(() => {
+    const fetchRealData = async () => {
+      try {
+        const [dashboardRes, vehiclesRes, driversRes] = await Promise.all([
+          api.get('/vehicles/dashboard'),
+          api.get('/dispatcher/vehicles'),
+          api.get('/drivers')
+        ]);
+
+        const dashboardKpi = dashboardRes.data?.kpi;
+        const totalVehiclesCount = vehiclesRes.data?.length || 0;
+        const activeVehiclesCount = vehiclesRes.data?.filter((v: any) => v.status === 'ACTIVE' || v.status === 'AVAILABLE').length || 0;
+        const activeDriversCount = driversRes.data?.filter((d: any) => d.isActive && !d.isBlacklisted).length || 0;
+
+        setStats((prev) => ({
+          ...prev,
+          vehiclesOnRoute: activeVehiclesCount || prev.vehiclesOnRoute,
+          activeDeliveries: totalVehiclesCount || prev.activeDeliveries,
+          availableDrivers: activeDriversCount || prev.availableDrivers,
+          fuelConsumption: dashboardKpi?.fuelEfficiency || prev.fuelConsumption,
+        }));
+      } catch (err) {
+        console.error('Failed to load real dashboard stats:', err);
+      }
+    };
+    fetchRealData();
+  }, []);
 
   // --- Assign Driver Matrix States ---
   const [unassignedOrders, setUnassignedOrders] = useState<AssignOrder[]>(INITIAL_ASSIGN_ORDERS);
@@ -604,7 +633,7 @@ export const DispatcherDashboard = ({ defaultTab }: { defaultTab?: string }) => 
       {/* =========================================================================
           VIEW F: Placeholder views for non-integrated modules
           ========================================================================= */}
-      {activeTab !== 'Dashboard' && activeTab !== 'Orders' && activeTab !== 'SlotBooking' && activeTab !== 'Assign Driver' && activeTab !== 'Live Tracking' && activeTab !== 'Drivers' && activeTab !== 'Vehicles' && activeTab !== 'Fleet Monitoring' && activeTab !== 'Alerts Center' && activeTab !== 'Flow Optimization' && activeTab !== 'Reports' && activeTab !== 'Delivery Analytics' && (
+      {activeTab !== 'Dashboard' && activeTab !== 'Orders' && activeTab !== 'SlotBooking' && activeTab !== 'Assign Driver' && activeTab !== 'Live Tracking' && activeTab !== 'Drivers' && activeTab !== 'Vehicles' && activeTab !== 'Fleet Monitoring' && activeTab !== 'Alerts Center' && activeTab !== 'Flow Optimization' && activeTab !== 'Reports' && activeTab !== 'Delivery Analytics' && activeTab !== 'Vehicle Tracking' && (
         <div className="flex-1 glass-panel rounded-lg flex flex-col items-center justify-center text-center p-8 select-none relative z-10">
           <span className="material-symbols-outlined text-[64px] text-primary animate-pulse mb-4">
             construction

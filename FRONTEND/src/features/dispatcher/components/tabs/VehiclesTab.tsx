@@ -158,6 +158,12 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
   const [form, setForm] = useState<VehicleFormState>(emptyForm);
   const [assignDriverId, setAssignDriverId] = useState('');
   const [blacklistReason, setBlacklistReason] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, typeFilter, ownershipFilter, riskFilter]);
 
   const eligibleDrivers = useMemo(() => drivers.filter(isDriverEligible), [drivers]);
   const selectedVehicle = vehicles.find((vehicle) => vehicle.vehicleId === selectedVehicleId) ?? vehicles[0];
@@ -334,6 +340,12 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
     return true;
   });
 
+  const totalPages = Math.ceil(visibleVehicles.length / pageSize);
+  const pagedVehicles = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return visibleVehicles.slice(startIndex, startIndex + pageSize);
+  }, [visibleVehicles, currentPage]);
+
   const activeCount = vehicles.filter((vehicle) => vehicle.isActive).length;
   const blacklistCount = vehicles.filter((vehicle) => vehicle.isBlacklisted).length;
   const expiredInspectionCount = vehicles.filter((vehicle) => isExpired(vehicle.inspectionExpiry)).length;
@@ -496,7 +508,7 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
                 ) : visibleVehicles.length === 0 ? (
                   <EmptyRow icon="inbox" text="Không có xe nào khớp với bộ lọc hiện tại." />
                 ) : (
-                  visibleVehicles.map((vehicle) => (
+                  pagedVehicles.map((vehicle) => (
                     <tr
                       key={vehicle.vehicleId}
                       onClick={() => setSelectedVehicleId(vehicle.vehicleId)}
@@ -567,6 +579,44 @@ export const VehiclesTab: React.FC<VehiclesTabProps> = ({
                 )}
               </tbody>
             </table>
+          </div>
+          {/* Pagination Footer */}
+          <div className="flex h-14 shrink-0 items-center justify-between border-t border-slate-200 px-4 bg-[#f8fbfd]">
+            <p className="text-xs font-semibold text-slate-500">
+              Tổng số: {visibleVehicles.length} xe (Trang {currentPage}/{totalPages || 1})
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() => setCurrentPage(page)}
+                  className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold transition-colors cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-[#0f3554] text-white shadow-sm'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                type="button"
+                disabled={currentPage === totalPages || totalPages === 0}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
           </div>
         </section>
 
