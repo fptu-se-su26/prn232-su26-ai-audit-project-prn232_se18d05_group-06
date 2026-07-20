@@ -19,6 +19,7 @@ const menuItems: MenuItem[] = [
   { label: 'BI Analytics', icon: 'analytics', path: '/admin/analytics', group: 'intelligence' },
   { label: 'SmartLog AI', icon: 'psychology', path: '/admin/smart-log-ai', group: 'intelligence' },
   { label: 'Customer Tiers', icon: 'military_tech', path: '/admin/tier-management', group: 'intelligence' },
+  { label: 'Vouchers', icon: 'card_membership', path: '/admin/vouchers', group: 'intelligence' },
   { label: 'Service Feedback', icon: 'reviews', path: '/admin/feedback', group: 'intelligence' },
   { label: 'Notifications', icon: 'notifications', path: '/admin/notifications', group: 'system' },
   { label: 'Audit Logs', icon: 'history', path: '/admin/audit-log', group: 'system' },
