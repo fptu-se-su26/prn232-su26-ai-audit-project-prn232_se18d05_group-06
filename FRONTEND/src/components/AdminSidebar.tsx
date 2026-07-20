@@ -23,6 +23,7 @@ const menuItems: MenuItem[] = [
   { label: 'Service Feedback', icon: 'reviews', path: '/admin/feedback', group: 'intelligence' },
   { label: 'Notifications', icon: 'notifications', path: '/admin/notifications', group: 'system' },
   { label: 'Audit Logs', icon: 'history', path: '/admin/audit-log', group: 'system' },
+  { label: 'Master Data', icon: 'database', path: '/admin/master-data', group: 'system' },
   { label: 'Settings', icon: 'settings', path: '/admin/settings', group: 'system' },
 
 ];

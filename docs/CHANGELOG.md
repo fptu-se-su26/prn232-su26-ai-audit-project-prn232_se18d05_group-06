@@ -608,6 +608,28 @@ Author: Tran Van Tung (DE180109)
 - npm run type-check: thanh cong.
 - dotnet build BACKEND/BACKEND.csproj --no-restore -p:UseAppHost=false -o .tmp-build/backend-check: thanh cong.
 
+## [2026-07-20]
+Author: Lê Quốc Hùng (DE180096)
+
+### Added
+- Feature: Triển khai toàn diện "UC054 - Quản lý Danh mục dùng chung" (Shared Master Data Management).
+- Backend:
+  - Tạo DTOs (`MasterCategoryDTOs.cs`) phục vụ truy vấn danh mục, metadata loại danh mục và các thao tác cập nhật.
+  - Xây dựng `MasterDataController.cs` cung cấp các API chuẩn hóa: `GET /api/master-data/types`, `GET /api/master-data`, `POST /api/master-data`, `PUT /api/master-data/{id}`, `PATCH /api/master-data/{id}/status`.
+  - Thiết lập phân quyền strictly Admin `[Authorize(Roles = "ADMIN")]`.
+  - Tự động bảo vệ các danh mục trạng thái hệ thống (`ORDER_STATUS`, `VEHICLE_STATUS`) theo chế độ **System read-only**, chặn các thao tác tạo/sửa/đổi trạng thái với HTTP 400.
+- Frontend:
+  - Xây dựng trang Admin `MasterDataManagement.tsx` với giao diện 7 tabs phân loại (`UOM`, `CARGO_TYPE`, `VEHICLE_TYPE`, `REGION`, `ORDER_STATUS`, `VEHICLE_STATUS`, `SERVICE_TYPE`).
+  - Hỗ trợ xem danh sách, lọc trạng thái, tìm kiếm từ khóa, modal tạo mới/chỉnh sửa và toggle trạng thái hoạt động.
+  - Tối ưu hóa UI Tiếng Việt, loại bỏ badge dev `UC054`, bổ sung banner thông tin nguồn dữ liệu (`MasterCategory` vs `Hệ thống - chỉ xem`).
+  - Đăng ký định tuyến `/admin/master-data` trong `App.tsx` và tích hợp menu **"Master Data"** vào `AdminSidebar.tsx`.
+
+### Fixed
+- Đảm bảo an toàn 100%: **Không tạo migration, không thay đổi database schema, không chỉnh sửa logic workflow của các module khác, và không dùng hard delete**.
+
+### AI-assisted
+- Sử dụng Antigravity để gợi ý cấu trúc controller API, thiết kế tabbed layout React và tối ưu nhãn hiển thị Tiếng Việt. Sinh viên tự kiểm tra toàn bộ build `dotnet build`, `npm run type-check` và `npm run build` thành công 0 warning/0 error.
+
 ---
 
 ## 4. Tổng kết thay đổi cuối project
@@ -623,6 +645,7 @@ Author: Tran Van Tung (DE180109)
 | 5 | UC018: Track Vehicle Entry/Exit History and Trip Count | Completed | VehicleTrackingDashboard.tsx, TrackingController.cs | Hoàn thành toàn diện backend & frontend, chặn chỉnh sửa logs |
 | 6 | UC020: Confirm Check-out & Exit Gate Control | Completed | GateCheckoutDashboard.tsx, GateController.cs, GateService.cs | Hoàn thành hệ thống check-out giao dịch nguyên tử, giải phóng Dock, ghi nhận logs, và thiết kế hoạt họa mô phỏng SVG Barrier Gate |
 | 7 | UC021: Quản lý Danh sách Đen Phương tiện & Tài xế | Completed | VehiclesTab.tsx, DispatchersTab.tsx, GateCheckoutDashboard.tsx, VehicleService.cs, DriverService.cs, GateController.cs | Triển khai blacklist/whitelist không thay đổi schema DB, guard clause nguyên tử tại gate check-in, 403 alarm modal đỏ trên frontend, và sửa UI contrast toàn bộ Dispatcher Dashboard |
+| 8 | UC054: Quản lý Danh mục dùng chung (Shared Master Data) | Completed | MasterDataManagement.tsx, MasterDataController.cs, MasterCategoryDTOs.cs, App.tsx, AdminSidebar.tsx | Hoàn thành API & UI quản lý danh mục dùng chung (UOM, Cargo, VehicleType, Region, ServiceType) kèm bảo vệ read-only cho trạng thái hệ thống, 0 schema change, 0 migration. |
 
 
 ---
