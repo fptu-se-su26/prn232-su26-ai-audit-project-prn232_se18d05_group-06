@@ -101,13 +101,10 @@ const CustomerProfile: React.FC = () => {
                     <Star size={20} className="text-rose-400" />
                     <span>{profile.points.toLocaleString()} Points</span>
                   </div>
-                  <button 
-                    onClick={() => navigate('/voucher-center')}
-                    className="px-6 py-3 bg-white border border-rose-100 text-rose-600 rounded-2xl font-bold flex items-center gap-3 hover:bg-rose-50 transition-all shadow-sm"
-                  >
+                  <div className="px-6 py-3 bg-white border border-rose-100 text-rose-600 rounded-2xl font-bold flex items-center gap-3 shadow-sm">
                     <Ticket size={20} />
-                    <span>12 Ưu đãi khả dụng</span>
-                  </button>
+                    <span>Ưu đãi tự động áp dụng theo hạng</span>
+                  </div>
                 </div>
               </div>
 

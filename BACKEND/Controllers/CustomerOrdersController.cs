@@ -132,6 +132,53 @@ namespace BACKEND.Controllers
                     : quote.StandardPrice;
             }
 
+            var originalCost = finalCost ?? 0m;
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var customerTier = (customer.Tier ?? "BRONZE").Trim().ToUpperInvariant();
+
+            var candidateVouchers = await _context.Vouchers
+                .Where(v => v.IsUsed != true &&
+                            v.ValidFrom <= today &&
+                            v.ValidTo >= today &&
+                            (v.CustomerId == null || v.CustomerId == customer.CustomerId) &&
+                            (v.CustomerTier != null && v.CustomerTier.ToUpper() == customerTier) &&
+                            (v.MinOrderValue == null || v.MinOrderValue <= originalCost))
+                .ToListAsync();
+
+            Voucher? bestVoucher = null;
+            decimal bestDiscount = 0m;
+
+            if (candidateVouchers.Any())
+            {
+                var evaluated = candidateVouchers.Select(v =>
+                {
+                    var percentDiscount = originalCost * ((v.DiscountPct ?? 0m) / 100m);
+                    var fixedDiscount = v.DiscountAmount ?? 0m;
+                    var maxCandidateDiscount = Math.Max(percentDiscount, fixedDiscount);
+                    var cappedDiscount = Math.Min(maxCandidateDiscount, originalCost);
+                    var roundedDiscount = decimal.Round(cappedDiscount, 0);
+
+                    return new
+                    {
+                        Voucher = v,
+                        Discount = roundedDiscount
+                    };
+                })
+                .Where(x => x.Discount > 0m)
+                .OrderByDescending(x => x.Discount)
+                .ThenBy(x => x.Voucher.ValidTo)
+                .ThenBy(x => x.Voucher.VoucherId)
+                .FirstOrDefault();
+
+                if (evaluated != null)
+                {
+                    bestVoucher = evaluated.Voucher;
+                    bestDiscount = evaluated.Discount;
+                }
+            }
+
+            var finalCostAfterDiscount = Math.Max(0m, decimal.Round(originalCost - bestDiscount, 0));
+
             var warehouseId = await ResolveWarehouseIdAsync(request.WarehouseID);
             if (warehouseId == null)
             {
@@ -153,8 +200,10 @@ namespace BACKEND.Controllers
                 TotalWeightKg = request.TotalWeightKg,
                 TotalCbm = request.TotalCBM,
                 TotalPallets = request.TotalPallets,
-                EstimatedCost = finalCost,
-                FinalCost = finalCost,
+                EstimatedCost = originalCost,
+                VoucherId = bestVoucher?.VoucherId,
+                DiscountAmount = bestDiscount,
+                FinalCost = finalCostAfterDiscount,
                 Status = "PENDING_PAYMENT",
                 CreatedBy = userId.Value,
                 CreatedAt = DateTime.Now
@@ -169,7 +218,11 @@ namespace BACKEND.Controllers
                 message = "Tạo đơn hàng thành công.",
                 orderId = order.OrderId,
                 orderCode = order.OrderCode,
-                amount = finalCost,
+                amount = finalCostAfterDiscount,
+                originalAmount = originalCost,
+                discountAmount = bestDiscount,
+                voucherCode = bestVoucher?.VoucherCode,
+                appliedTier = customerTier,
                 nextAction = "PAYMENT_REQUIRED"
             });
         }

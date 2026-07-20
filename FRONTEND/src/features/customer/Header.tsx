@@ -55,7 +55,6 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
   const accountItems = [
     { label: 'Đơn hàng của tôi', icon: History, path: '/customer/orders' },
     { label: 'Hóa đơn của tôi', icon: DollarSign, path: '/payment-history' },
-    { label: 'Voucher', icon: Bookmark, path: '/voucher-center' },
     { label: 'Hồ sơ cá nhân', icon: User, path: '/profile' },
     { label: 'Cài đặt', icon: Settings, path: '/settings' },
   ];
