@@ -811,6 +811,29 @@ AI ho tro xac dinh backend API, service FAQ/Gemini fallback va UI chatbox noi. K
 ```
 
 ---
+
+## Prompt #35
+- Date: 2026-07-20
+- AI Tool: Antigravity
+- Author: Lê Quốc Hùng (DE180096)
+- Purpose: Triển khai UC054 - Quản lý Danh mục dùng chung (Shared Master Data Management) & Tối ưu hóa UI/UX Tiếng Việt
+
+### Prompt Content
+```text
+Triển khai UC054 Shared Master Data Management bằng cách tập trung quản lý danh mục vào bảng MasterCategory sẵn có.
+1. Backend: Viết Admin MasterDataController chỉ dùng MasterCategory, các route /api/master-data (types, list, create, update, status toggle). Khóa read-only cho ORDER_STATUS và VEHICLE_STATUS.
+2. Frontend: Viết MasterDataManagement.tsx UI 7 tabs, lọc trạng thái, tìm kiếm, modal tạo/sửa. Tối ưu hóa UI Tiếng Việt, gỡ badge dev UC054, thêm banner hướng dẫn nguồn dữ liệu.
+3. Ràng buộc an toàn: Không tạo migration, không đổi DB schema, không can thiệp workflow Order/Dispatcher/Payment/Auth, không hard delete.
+```
+
+### AI Output Summary
+Antigravity gợi ý kiến trúc API Controller an toàn, guard clauses khóa read-only ở backend, DTOs chuẩn hóa, và giao diện React tabbed UI chuyên nghiệp với banner giải thích nguồn dữ liệu và giao diện Tiếng Việt hoàn toàn.
+
+### Evaluation
+Sinh viên tự kiểm tra toàn bộ các ràng buộc an toàn, không tạo migration hay đổi DB schema. Tự chạy kiểm thử `dotnet build`, `npm run type-check` và `npm run build` thành công 100% (0 error).
+
+
+---
 ## 6. Prompt quan trọng nhất
 
 Chọn một prompt có ảnh hưởng lớn nhất đến bài tập/project.
