@@ -37,6 +37,7 @@ import AdminWarehouses from '@features/admin/Warehouses';
 import AdminSettings from '@features/admin/Settings';
 import AdminServiceFeedback from '@features/admin/ServiceFeedback';
 import TierManagementPage from './features/admin/tier/TierManagementPage';
+import MasterDataManagement from './features/admin/MasterDataManagement';
 import WarehouseDashboard from './features/warehouse/WarehouseDashboard';
 import WarehouseTransfer from './features/warehouse/WarehouseTransfer';
 import WarehouseInventory from './features/warehouse/Inventory';
@@ -127,6 +128,7 @@ const App: React.FC = () => {
         <Route path="/admin/role-permission" element={<RoleGuard allow={ADMIN_ROLES}><AdminRolePermission /></RoleGuard>} />
         <Route path="/admin/smart-log-ai" element={<RoleGuard allow={ADMIN_ROLES}><AdminSmartLogAI /></RoleGuard>} />
         <Route path="/admin/settings" element={<RoleGuard allow={ADMIN_ROLES}><AdminSettings /></RoleGuard>} />
+        <Route path="/admin/master-data" element={<RoleGuard allow={ADMIN_ROLES}><MasterDataManagement /></RoleGuard>} />
         <Route path="/admin/feedback" element={<RoleGuard allow={ADMIN_ROLES}><AdminServiceFeedback /></RoleGuard>} />
         <Route path="/admin/tier-management" element={<RoleGuard allow={ADMIN_ROLES}><TierManagementPage /></RoleGuard>} />
         <Route path="/admin/vouchers" element={<RoleGuard allow={ADMIN_ROLES}><VoucherCenter /></RoleGuard>} />
