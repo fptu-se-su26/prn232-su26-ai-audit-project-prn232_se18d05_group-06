@@ -120,6 +120,18 @@ const CreateOrder: React.FC = () => {
 
       const data = await response.json();
 
+      if (data.voucherCode && data.discountAmount > 0) {
+        toast.success(`Đã tự động áp dụng voucher ${data.voucherCode} (Hạng ${data.appliedTier ?? 'BRONZE'}): Giảm ${Number(data.discountAmount).toLocaleString('vi-VN')} đ!`, {
+          duration: 4000,
+          style: {
+            borderRadius: '16px',
+            background: '#10b981',
+            color: '#fff',
+            fontWeight: 'bold',
+          }
+        });
+      }
+
       let paymentLink = null;
       let paymentError = '';
 

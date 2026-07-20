@@ -71,6 +71,7 @@ const modules = [
   { path: '/admin/smart-log-ai', name: 'SmartLog AI', desc: 'AI Assistant Chat Interface', icon: 'psychology', color: 'from-fuchsia-500 to-pink-600' },
   { path: '/admin/warehouses', name: 'Warehouses', desc: 'Facilities, Live regional map, Inventory', icon: 'warehouse', color: 'from-sky-500 to-cyan-600' },
   { path: '/admin/tier-management', name: 'Customer Tiers', desc: 'Tier rules, Reporting, Customers', icon: 'military_tech', color: 'from-orange-500 to-yellow-600' },
+  { path: '/admin/vouchers', name: 'Voucher Management', desc: 'Manage customer tier vouchers & discounts', icon: 'card_membership', color: 'from-amber-500 to-yellow-600' },
   { path: '/admin/settings', name: 'Settings', desc: 'General config, Branding, Engine config', icon: 'settings', color: 'from-gray-500 to-slate-600' },
 ];
 
@@ -104,7 +105,6 @@ const App: React.FC = () => {
         <Route path="/profile" element={<CustomerProfile />} />
         <Route path="/order-history" element={<OrderHistory />} />
         <Route path="/customer/orders" element={<OrderHistory />} />
-        <Route path="/voucher-center" element={<VoucherCenter />} />
 
         {/* Settings (Gray) */}
         <Route path="/settings" element={<Settings />} />
@@ -129,6 +129,7 @@ const App: React.FC = () => {
         <Route path="/admin/settings" element={<RoleGuard allow={ADMIN_ROLES}><AdminSettings /></RoleGuard>} />
         <Route path="/admin/feedback" element={<RoleGuard allow={ADMIN_ROLES}><AdminServiceFeedback /></RoleGuard>} />
         <Route path="/admin/tier-management" element={<RoleGuard allow={ADMIN_ROLES}><TierManagementPage /></RoleGuard>} />
+        <Route path="/admin/vouchers" element={<RoleGuard allow={ADMIN_ROLES}><VoucherCenter /></RoleGuard>} />
         <Route path="/admin/warehouses" element={<RoleGuard allow={WAREHOUSE_ROLES}><AdminWarehouses /></RoleGuard>} />
 
         {/* Warehouse Management (Admin + Warehouse roles only) */}

@@ -505,13 +505,15 @@ const VoucherSelector = ({
           <Gift size={22} />
         </span>
         <div>
-          <p className="text-xs font-black uppercase tracking-wide text-slate-500">Ưu đãi</p>
-          <h2 className="text-xl font-black text-slate-950">Voucher có thể dùng</h2>
+          <p className="text-xs font-black uppercase tracking-wide text-slate-500">Ưu đãi hạng hội viên</p>
+          <h2 className="text-xl font-black text-slate-950">
+            {appliedVoucherCode ? 'Voucher được tự động áp dụng' : 'Voucher hội viên'}
+          </h2>
         </div>
       </div>
       {appliedVoucherCode && (
         <span className="w-fit rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
-          Đã áp dụng {appliedVoucherCode}
+          Voucher được tự động áp dụng: {appliedVoucherCode}
         </span>
       )}
     </div>
