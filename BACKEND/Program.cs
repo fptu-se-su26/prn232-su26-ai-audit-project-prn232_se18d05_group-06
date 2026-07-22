@@ -97,6 +97,11 @@ builder.Services.AddScoped<IFinanceDashboardService, FinanceDashboardService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<INotificationConfigService, NotificationConfigService>();
+builder.Services.AddScoped<IDeadExpiryStockService, DeadExpiryStockService>();
+builder.Services.AddScoped<IStockTransferService, StockTransferService>();
+builder.Services.AddScoped<IStockWriteOffService, StockWriteOffService>();
+builder.Services.AddScoped<ISkuService, SkuService>();
+builder.Services.AddScoped<IKpiService, KpiService>();
 
 builder.Services.AddHttpClient();
 // Background workers
@@ -138,7 +143,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartLogAI API v1");
+        c.RoutePrefix = "swagger";
     });
+
+    // Redirect root URL to Swagger UI
+    app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 }
 
 app.UseHttpsRedirection();

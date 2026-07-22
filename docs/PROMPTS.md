@@ -968,6 +968,38 @@ Sinh viên/nhóm tự kiểm tra chất lượng prompt đã dùng.
 
 ---
 
+## Prompt #36
+- Date: 2026-07-22
+- AI Tool: Cursor (Claude Sonnet 4.5)
+- Author: Hoàng Hải Quân (DE180071)
+- Purpose: Triển khai UC007 - Warehouse Management Modules + giải quyết 14 merge conflicts + commit/push workflow
+
+### Prompt Content
+```text
+Tôi vừa merge main vào feature/DE180071-uc007-warehouse-modules và bị 14 merge conflicts.
+Bạn giúp tôi:
+1. Resolve từng conflict giữ Incoming/MaintenanceSchedule và Current branch - giữ cả hai khi có thể.
+2. Trong BACKEND/Migrations/SmartLogAiContextModelSnapshot.cs: giữ navigation MaintenanceSchedule vì entity này đã có trong Models.
+3. Trong FRONTEND/src/features/warehouse/WarehouseTransfer.tsx: giữ cả WarehouseHeader (đã import) và types (đã khai báo inline).
+4. Sau đó hướng dẫn tôi commit + push lên origin.
+
+Lưu ý: KHÔNG được xóa nội dung docs của nhóm, chỉ append thêm.
+```
+
+### Expected Output
+- 14 file không còn conflict markers.
+- `git status` cho thấy working tree clean.
+- Commit message theo format `DE180071 - Implement UC007 warehouse modules (...)`.
+- Push lên `origin/feature/DE180071-uc007-warehouse-modules` thành công.
+
+### Evaluation
+- AI đã resolve conflict bằng chiến lược keep-both cho hầu hết file.
+- Sinh viên tự verify bằng `git diff --check` để chắc chắn không còn conflict markers.
+- Sinh viên tự cấu hình git identity, tự commit, tự push.
+- Sinh viên tự review nội dung docs trước khi commit (đã phát hiện AI ghi đè file docs → restore lại từ git).
+
+---
+
 ## 11. Cam kết sử dụng prompt minh bạch
 
 Sinh viên/nhóm cam kết rằng:

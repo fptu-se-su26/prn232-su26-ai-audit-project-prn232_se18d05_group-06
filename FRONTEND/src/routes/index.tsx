@@ -30,6 +30,13 @@ export const ROUTE_PATHS = {
   ADMIN_INVOICES: '/admin/invoices',
   WAREHOUSE_GATE_CHECKOUT: '/warehouse/gate-checkout',
   WAREHOUSE_QR_SCANNER: '/warehouse/qr-scanner',
+  WAREHOUSE_DEAD_EXPIRY: '/warehouse/dead-expiry',
+  WAREHOUSE_WRITEOFF: '/warehouse/write-off',
+  WAREHOUSE_STOCK_LEDGER: '/warehouse/stock-ledger',
+  WAREHOUSE_SKU: '/warehouse/sku',
+  WAREHOUSE_SKU_NEW: '/warehouse/sku/new',
+  WAREHOUSE_SKU_EDIT: '/warehouse/sku/:id/edit',
+  ADMIN_BI_DASHBOARD: '/admin/bi-dashboard',
 };
 // Routes configuration
 // Define your application routes here using React Router

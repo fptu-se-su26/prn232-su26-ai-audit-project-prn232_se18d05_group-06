@@ -90,8 +90,11 @@ namespace BACKEND.Controllers
                 });
             }
 
+            // Tìm theo Username HOẶC Email — người dùng có thể nhập một trong hai
             var user = await _context.Users.Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Username == request.Username);
+                .FirstOrDefaultAsync(u =>
+                    u.Username == request.Username ||
+                    u.Email == request.Username);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {

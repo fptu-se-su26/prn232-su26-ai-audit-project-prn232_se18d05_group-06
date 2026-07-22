@@ -8,3 +8,14 @@ docs/
 BACKEND/.vs/
 BACKEND/*.user
 BACKEND/SentEmails/
+BACKEND/backend.log
+BACKEND/backend.log.err
+*.log
+
+# Temporary docs
+vw_def.txt
+Usecase SmartLogAI.xlsx
+Usecase SmartLogAI - Sheet1.pdf
+Usecase_SmartLogAI.zip
+Usecase_SmartLogAI_extracted/
+
