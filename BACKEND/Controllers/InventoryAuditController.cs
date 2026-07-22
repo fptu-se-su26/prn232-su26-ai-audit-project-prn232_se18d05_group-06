@@ -1,4 +1,3 @@
-﻿using BACKEND.DTOs;
 using BACKEND.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -109,6 +108,27 @@ namespace BACKEND.Controllers
                 ? Math.Abs((decimal)variance * 100m / line.SystemQty)
                 : 0m;
             line.RequireRecount = variancePct > 10m;
+            line.Variance = variance;
+            line.VariancePct = variancePct;
+
+            if (variance != 0)
+            {
+                var ledger = new StockLedger
+                {
+                    Skuid = line.Skuid,
+                    BinId = line.BinId,
+                    TxnType = "STOCKTAKE",
+                    Qty = variance,
+                    QtyBefore = line.SystemQty,
+                    QtyAfter = request.CountedQty,
+                    RefType = "StocktakeOrder",
+                    RefId = stocktakeId,
+                    Note = $"Kiểm kê lệch {variance} so với hệ thống",
+                    CreatedBy = 1, // Fallback
+                    CreatedAt = DateTime.Now
+                };
+                _context.StockLedgers.Add(ledger);
+            }
 
             await _context.SaveChangesAsync();
 

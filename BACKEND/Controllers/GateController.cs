@@ -154,7 +154,7 @@ namespace BACKEND.Controllers
 
         // POST: api/gate/scan
         [HttpPost("scan")]
-        public async Task<ActionResult> ScanLicensePlate([FromForm] ScanLicensePlateDto request)
+        public async Task<ActionResult> ScanLicensePlate(Microsoft.AspNetCore.Http.IFormFile imageFile, [FromForm] string eventType = "")
         {
             var imageFile = request.ImageFile;
             var eventType = request.EventType ?? "";

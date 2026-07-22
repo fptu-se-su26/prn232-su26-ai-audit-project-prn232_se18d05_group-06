@@ -269,7 +269,10 @@ namespace BACKEND.Controllers
         [HttpPost("lines/{lineId}/photos")]
         public async Task<ActionResult<CargoPhotoDto>> UploadPhoto(
             int lineId,
-            [FromForm] UploadPhotoDto request)
+            IFormFile file,
+            [FromForm] string? photoAngle,
+            [FromForm] bool isDamaged = false,
+            [FromForm] int? takenBy = null)
         {
             var file = request.File;
             var photoAngle = request.PhotoAngle;

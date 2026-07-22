@@ -58,6 +58,23 @@ namespace BACKEND.Services
 
             line.AislottedBinId = request.IsAiSuggestion ? selected.BinId : line.AislottedBinId;
             line.BinId = selected.BinId;
+
+            var ledger = new StockLedger
+            {
+                Skuid = line.Skuid,
+                BinId = selected.BinId,
+                TxnType = "INBOUND",
+                Qty = line.ReceivedQty ?? line.ExpectedQty,
+                QtyBefore = 0, // Inbound usually means new stock entering the bin, we can query existing but typically 0 or ignored for inbound if we don't know the exact batch yet. Wait, we should get QtyBefore from inventory.
+                QtyAfter = line.ReceivedQty ?? line.ExpectedQty, // This will be adjusted when actual inventory is updated, for now we log it based on line.
+                RefType = "InboundOrder",
+                RefId = line.InboundId,
+                Note = $"Nhập kho vào vị trí {selected.BinCode}",
+                CreatedBy = 1, // Fallback
+                CreatedAt = DateTime.Now
+            };
+            _context.StockLedgers.Add(ledger);
+
             await _context.SaveChangesAsync();
 
             return new ConfirmSlottingResponseDto

@@ -1,5 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Bookmark, DollarSign, HelpCircle, History, Home, LogOut, MapPin, Menu, Package, Settings, User, X } from 'lucide-react';
+import {
+  Bookmark,
+  DollarSign,
+  HelpCircle,
+  History,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  MapPin,
+  Menu,
+  Package,
+  Settings,
+  User,
+  X,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
@@ -10,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState<{ name?: string; fullName?: string; email?: string } | null>(null);
+  const [userData, setUserData] = useState<{ name?: string; fullName?: string; email?: string; role?: string } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,8 +45,8 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
 
   const handleNavigation = (path: string) => {
     navigate(path);
-    setMobileMenuOpen(false);
     setUserDropdownOpen(false);
+    setMobileMenuOpen(false);
   };
 
   const handleLogout = () => {
@@ -52,21 +66,51 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
     { label: 'Liên hệ', path: '/support' },
   ];
 
-  const accountItems = [
-    { label: 'Đơn hàng của tôi', icon: History, path: '/customer/orders' },
-    { label: 'Hóa đơn của tôi', icon: DollarSign, path: '/payment-history' },
-    { label: 'Hồ sơ cá nhân', icon: User, path: '/profile' },
-    { label: 'Cài đặt', icon: Settings, path: '/settings' },
-  ];
-
   const mobileItems = [
     { label: 'Trang chủ', path: '/', icon: Home },
     { label: 'Tạo đơn mới', path: '/create-shipment', icon: Package },
-    { label: 'Đơn hàng của tôi', path: '/customer/orders', icon: History },
+    { label: 'Đơn hàng của tôi', path: '/order-history', icon: History },
     { label: 'Báo giá', path: '/shipping-quotation', icon: DollarSign },
     { label: 'Theo dõi', path: '/tracking', icon: MapPin },
     { label: 'Hỗ trợ', path: '/support', icon: HelpCircle },
   ];
+
+  const getWorkspaceItem = () => {
+    if (!userData?.role) return null;
+    const role = userData.role.trim().toUpperCase();
+    if (role === 'ADMIN' || role === '1') {
+      return { label: 'Admin Console', path: '/admin/dashboard', icon: LayoutDashboard };
+    }
+    if (role === 'WAREHOUSE' || role === 'WF' || role === '2') {
+      return { label: 'Warehouse Console', path: '/warehouse/dashboard', icon: LayoutDashboard };
+    }
+    if (role === 'DISPATCHER') {
+      return { label: 'Dispatcher Console', path: '/dispatcher', icon: LayoutDashboard };
+    }
+    if (role === 'DRIVER') {
+      return { label: 'Driver Console', path: '/driver', icon: LayoutDashboard };
+    }
+    return null;
+  };
+
+  const workspaceItem = getWorkspaceItem();
+
+  const menuItems = workspaceItem
+    ? [
+        workspaceItem,
+        { label: 'Order History', icon: History, path: '/order-history' },
+        { label: 'Payment History', icon: DollarSign, path: '/payment-history' },
+        { label: 'Vouchers', icon: Bookmark, path: '/voucher-center' },
+        { label: 'Profile', icon: User, path: '/profile' },
+        { label: 'Settings', icon: Settings, path: '/settings' },
+      ]
+    : [
+        { label: 'Order History', icon: History, path: '/order-history' },
+        { label: 'Payment History', icon: DollarSign, path: '/payment-history' },
+        { label: 'Vouchers', icon: Bookmark, path: '/voucher-center' },
+        { label: 'Profile', icon: User, path: '/profile' },
+        { label: 'Settings', icon: Settings, path: '/settings' },
+      ];
 
   const userName = userData?.name || userData?.fullName || 'Customer';
 
@@ -123,13 +167,22 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
                     <p className="text-xs text-gray-500">{userData?.email || 'customer@smartlog.ai'}</p>
                   </div>
                   <div className="p-2">
-                    {accountItems.map((item) => {
+                    {menuItems.map((item) => {
                       const Icon = item.icon;
+                      const isWorkspace =
+                        item.path.includes('/admin/') ||
+                        item.path.includes('/warehouse/') ||
+                        item.path.includes('/dispatcher') ||
+                        item.path.includes('/driver');
                       return (
                         <button
                           key={item.path}
                           onClick={() => handleNavigation(item.path)}
-                          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-bold text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors ${
+                            isWorkspace
+                              ? 'border border-blue-100/50 bg-blue-50 font-bold text-blue-700 hover:bg-blue-100'
+                              : 'font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                          }`}
                         >
                           <Icon size={16} />
                           {item.label}
@@ -175,14 +228,40 @@ const Header: React.FC<HeaderProps> = ({ scrollY = 0 }) => {
 
           {!isLoggedIn ? (
             <div className="mt-4 border-t border-gray-100 pt-4">
-              <button onClick={() => handleNavigation('/auth')} className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 py-3 text-sm font-black text-white shadow-lg">
+              <button
+                onClick={() => handleNavigation('/auth')}
+                className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 py-3 text-sm font-black text-white shadow-lg"
+              >
                 Bắt đầu ngay
               </button>
             </div>
           ) : (
-            <div className="mt-4 border-t border-gray-100 pt-4">
-              <button onClick={handleLogout} className="w-full py-2 text-left text-sm font-bold text-red-600">
-                Đăng xuất
+            <div className="mt-4 space-y-2 border-t border-gray-100 pt-4">
+              {workspaceItem && (
+                <button
+                  onClick={() => handleNavigation(workspaceItem.path)}
+                  className="w-full py-2 text-left text-sm font-bold text-blue-600"
+                >
+                  {workspaceItem.label}
+                </button>
+              )}
+              <button
+                onClick={() => handleNavigation('/order-history')}
+                className="w-full py-2 text-left text-sm text-gray-700"
+              >
+                Order History
+              </button>
+              <button
+                onClick={() => handleNavigation('/profile')}
+                className="w-full py-2 text-left text-sm text-gray-700"
+              >
+                Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full py-2 text-left text-sm font-medium text-red-600"
+              >
+                Logout
               </button>
             </div>
           )}
