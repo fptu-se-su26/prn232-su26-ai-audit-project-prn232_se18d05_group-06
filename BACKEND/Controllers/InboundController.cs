@@ -274,10 +274,6 @@ namespace BACKEND.Controllers
             [FromForm] bool isDamaged = false,
             [FromForm] int? takenBy = null)
         {
-            var file = request.File;
-            var photoAngle = request.PhotoAngle;
-            var isDamaged = request.IsDamaged;
-            var takenBy = request.TakenBy;
             try
             {
                 var line = await _context.InboundOrderLines.FirstOrDefaultAsync(l => l.LineId == lineId);

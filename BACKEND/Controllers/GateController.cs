@@ -156,9 +156,6 @@ namespace BACKEND.Controllers
         [HttpPost("scan")]
         public async Task<ActionResult> ScanLicensePlate(Microsoft.AspNetCore.Http.IFormFile imageFile, [FromForm] string eventType = "")
         {
-            var imageFile = request.ImageFile;
-            var eventType = request.EventType ?? "";
-
             if (imageFile == null || imageFile.Length == 0)
             {
                 return BadRequest("No image provided.");
@@ -169,11 +166,11 @@ namespace BACKEND.Controllers
                 // Run LprService
                 var lprResult = await _lprService.RecognizeLicensePlateAsync(imageFile);
                 var licensePlate = lprResult.Text;
-                
+
                 if (string.IsNullOrWhiteSpace(licensePlate))
                 {
-                    return Ok(new { 
-                        LicensePlate = string.Empty, 
+                    return Ok(new {
+                        LicensePlate = string.Empty,
                         Message = "Could not detect license plate.",
                         DebugInfo = new { confidence = lprResult.Confidence, bbox = lprResult.BoundingBox }
                     });
