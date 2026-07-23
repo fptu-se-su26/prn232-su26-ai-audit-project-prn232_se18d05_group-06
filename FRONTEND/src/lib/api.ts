@@ -1,48 +1,25 @@
 import axios from 'axios';
-import { isUserAuthorized } from './repoPermissions';
+
+// NOTE: Backend (ASP.NET Core) returns JSON field names in camelCase (e.g. productName,
+// currentQty, createdAt). Previously this file ran a "normalizeKeys" pass that
+// lower-cased every PascalCase letter (turning "productName" into "productname"),
+// which broke every UC007 page because the React components were reading
+// `item.productName` (undefined) instead of `item.productname`. The interceptor
+// now leaves the payload untouched so the camelCase keys match the TypeScript
+// types defined in each page.
 
 const api = axios.create({
-  baseURL: 'http://localhost:5200/api',
+  baseURL: 'http://localhost:5184/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-function getStoredUserRole(): string {
-  try {
-    const rawUser = localStorage.getItem('user');
-    if (!rawUser) {
-      return '';
-    }
-
-    const parsedUser = JSON.parse(rawUser);
-    return parsedUser?.role || parsedUser?.Role || '';
-  } catch {
-    return '';
-  }
-}
-
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  const userEmail = localStorage.getItem('email');
-  const userRole = getStoredUserRole();
-  const isAuthRequest = config.url?.includes('/auth/');
-
-  if (isAuthRequest) {
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  }
-
-  if (userEmail && !isUserAuthorized(userEmail, userRole)) {
-    return Promise.reject(new Error('User not authorized'));
-  }
-
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 

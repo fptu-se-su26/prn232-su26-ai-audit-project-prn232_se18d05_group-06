@@ -112,13 +112,13 @@ export const skuApi = {
     if (width) params.append('width', width.toString())
     if (height) params.append('height', height.toString())
     const query = params.toString() ? `?${params.toString()}` : ''
-    return `http://localhost:5200/api/sku/${id}/barcode${query}`
+    return `http://localhost:5184/api/sku/${id}/barcode${query}`
   },
 
   // Get QR code image
   getQrCode: (id: number, size?: number): string => {
     const params = size ? `?size=${size}` : ''
-    return `http://localhost:5200/api/sku/${id}/qrcode${params}`
+    return `http://localhost:5184/api/sku/${id}/qrcode${params}`
   },
 
   // Import from Excel

@@ -77,8 +77,8 @@ const InventoryAudit = () => {
     setLoading(true)
     try {
       const url = selectedZone && selectedZone !== 'All'
-        ? `http://localhost:5200/api/inventory-audit/comparison?zoneCode=${selectedZone}`
-        : 'http://localhost:5200/api/inventory-audit/comparison'
+        ? `http://localhost:5184/api/inventory-audit/comparison?zoneCode=${selectedZone}`
+        : 'http://localhost:5184/api/inventory-audit/comparison'
       
       const res = await fetch(url)
       const data = await res.json()
