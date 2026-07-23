@@ -19,8 +19,6 @@ public partial class OutboundLine
 
     public string? Qrlabel { get; set; }
 
-    public byte[] RowVersion { get; set; } = null!;
-
     public virtual WarehouseBin? Bin { get; set; }
 
     public virtual OutboundOrder Outbound { get; set; } = null!;
