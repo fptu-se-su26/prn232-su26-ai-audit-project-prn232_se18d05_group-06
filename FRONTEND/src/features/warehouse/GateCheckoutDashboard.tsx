@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import WarehouseHeader from '../../components/WarehouseHeader';
 import api from '../../lib/api';
@@ -51,6 +52,7 @@ interface BlacklistAlertDto {
 }
 
 const GateCheckoutDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -189,7 +191,7 @@ const GateCheckoutDashboard: React.FC = () => {
       const response = await api.get<ActiveBooking>('/gate/active-booking?search=' + encodeURIComponent(query.trim()));
       const foundBooking = response.data;
       setActiveBooking(foundBooking);
-      
+
       // Auto processing based on booking status
       if (foundBooking.status === 'CONFIRMED') {
          await strictCheckIn(query, 1);
@@ -197,7 +199,9 @@ const GateCheckoutDashboard: React.FC = () => {
          await autoProcess('/gate/checkout', foundBooking.alprPlate || foundBooking.truckPlate || query, foundBooking.bookingCode, 'COMPLETED', 'OPEN_EXIT', 'Ra cổng thành công');
       }
     } catch (err: any) {
-      if (err.response?.status === 404) {
+      if (err.response?.status === 401) {
+        setErrorMsg('Vui lòng đăng nhập để tiếp tục.');
+      } else if (err.response?.status === 404) {
         // Not an error, just no active booking found. Run strict check-in to process rejection or validation.
         await strictCheckIn(query, 1);
       } else {
@@ -254,7 +258,11 @@ const GateCheckoutDashboard: React.FC = () => {
         setErrorMsg(`[${result.status}] ${result.message}`);
       }
     } catch (err: any) {
-       setErrorMsg('Lỗi hệ thống khi kiểm tra xe: ' + (err.response?.data || err.message));
+       if (err.response?.status === 401) {
+         setErrorMsg('Vui lòng đăng nhập để tiếp tục.');
+       } else {
+         setErrorMsg('Lỗi hệ thống khi kiểm tra xe: ' + (err.response?.data || err.message));
+       }
     }
   };
 
@@ -298,7 +306,9 @@ const GateCheckoutDashboard: React.FC = () => {
       };
       setSessionLogs(prev => [newLog, ...prev]);
     } catch (err: any) {
-      if (err.response?.status === 403 && err.response?.data?.alertType) {
+      if (err.response?.status === 401) {
+        setErrorMsg('Vui lòng đăng nhập để tiếp tục.');
+      } else if (err.response?.status === 403 && err.response?.data?.alertType) {
         setBlacklistAlert(err.response.data);
       } else {
         setErrorMsg(err.response?.data?.message || err.response?.data || 'Giao dịch thất bại');
@@ -327,7 +337,9 @@ const GateCheckoutDashboard: React.FC = () => {
       };
       setSessionLogs(prev => [newLog, ...prev]);
     } catch (err: any) {
-      if (err.response?.status === 403 && err.response?.data?.alertType) {
+      if (err.response?.status === 401) {
+        setErrorMsg('Vui lòng đăng nhập để tiếp tục.');
+      } else if (err.response?.status === 403 && err.response?.data?.alertType) {
         setBlacklistAlert(err.response.data);
       } else {
         setErrorMsg(err.response?.data?.message || err.response?.data || 'Failed to complete checkout');
@@ -367,7 +379,9 @@ const GateCheckoutDashboard: React.FC = () => {
       };
       setSessionLogs(prev => [newLog, ...prev]);
     } catch (err: any) {
-      if (err.response?.status === 403 && err.response?.data?.alertType) {
+      if (err.response?.status === 401) {
+        setErrorMsg('Vui lòng đăng nhập để tiếp tục.');
+      } else if (err.response?.status === 403 && err.response?.data?.alertType) {
         setBlacklistAlert(err.response.data);
       } else {
         setErrorMsg(err.response?.data?.message || err.response?.data || 'Failed to complete checkin');

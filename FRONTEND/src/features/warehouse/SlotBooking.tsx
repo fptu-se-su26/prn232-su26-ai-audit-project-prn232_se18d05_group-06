@@ -51,7 +51,7 @@ interface BookingResponseDto {
   bookingType?: string;
 }
 
-const API_BASE_URL = 'http://localhost:5200/api';
+const API_BASE_URL = 'http://localhost:5184/api';
 
 interface SlotBookingProps {
   isTab?: boolean;

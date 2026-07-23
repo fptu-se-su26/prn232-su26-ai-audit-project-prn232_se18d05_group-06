@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Order } from '@/types/dispatcher';
-import axios from 'axios';
+import api from '@/lib/api';
 
 const REGISTRY_ORDERS: Order[] = [
   {
@@ -120,7 +120,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ searchQuery, setToastMessa
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5200/api/bookings/dispatcher-orders');
+      const response = await api.get('/bookings/dispatcher-orders');
       setOrders(response.data);
       if (response.data.length > 0) {
         setSelectedRegistryOrder(response.data[0]);
