@@ -97,6 +97,11 @@ builder.Services.AddScoped<IFinanceDashboardService, FinanceDashboardService>();
 builder.Services.AddSingleton<ILprService, LprService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<INotificationConfigService, NotificationConfigService>();
+builder.Services.AddScoped<IDeadExpiryStockService, DeadExpiryStockService>();
+builder.Services.AddScoped<IStockTransferService, StockTransferService>();
+builder.Services.AddScoped<IStockWriteOffService, StockWriteOffService>();
+builder.Services.AddScoped<ISkuService, SkuService>();
+builder.Services.AddScoped<IKpiService, KpiService>();
 
 builder.Services.AddHttpClient();
 // Background workers
@@ -107,7 +112,10 @@ builder.Services.AddHttpClient();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.OperationFilter<BACKEND.Swagger.FormFileOperationFilter>();
+});
 
 var app = builder.Build();
 
@@ -138,10 +146,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartLogAI API v1");
+        c.RoutePrefix = "swagger";
     });
+
+    // Redirect root URL to Swagger UI
+    app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 }
 
-app.UseHttpsRedirection();
+// Disable HTTPS redirect during development to avoid ERR_FAILED on HTTP requests
+// from the Vite dev server (http://localhost:3000). Production should re-enable this.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseStaticFiles();

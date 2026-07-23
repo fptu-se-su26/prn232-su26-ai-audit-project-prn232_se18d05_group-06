@@ -34,6 +34,16 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+/* Ensure custom web font is applied to native form elements (select, option)
+   which otherwise fall back to system font in some browsers / OS */
+select,
+select option,
+input,
+textarea,
+button {
+  font-family: inherit;
+}
+
 body {
   @apply bg-[#f7f9fb] text-[#191c1e] antialiased;
 }
@@ -745,6 +755,7 @@ body.admin-light-theme textarea {
   background-color: #ffffff !important;
   border-color: rgba(100, 116, 139, 0.22) !important;
   color: #111827 !important;
+  font-family: inherit !important;
 }
 
 body.admin-light-theme input::placeholder,

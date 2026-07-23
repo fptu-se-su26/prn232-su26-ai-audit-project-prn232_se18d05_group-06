@@ -56,7 +56,7 @@ export default function AuthPage() {
       if (isLogin) {
         // Login Request
         const res = await api.post('/auth/login', {
-          username: email, // Assuming email is used as username
+          username: email,
           password: password
         });
         localStorage.setItem('token', res.data.token);

@@ -50,6 +50,13 @@ import WarehouseNotifications from './features/warehouse/Notifications';
 import WarehouseSettings from './features/warehouse/Settings';
 import WarehouseAIOCR from './features/warehouse/AIOCRScan';
 import GateCheckoutDashboard from './features/warehouse/GateCheckoutDashboard';
+import DeadExpiryDashboard from './features/warehouse/DeadExpiryDashboard';
+import StockWriteOff from './features/warehouse/StockWriteOff';
+import StockLedgerTracking from './features/warehouse/StockLedgerTracking';
+import SkuList from './features/warehouse/SkuManagement/SkuList';
+import SkuForm from './features/warehouse/SkuManagement/SkuForm';
+import SkuDetail from './features/warehouse/SkuManagement/SkuDetail';
+import BiDashboard from './features/admin/BiDashboard';
 
 // Warehouse role pages (RoleID = 2)
 import RoleGuard from './components/RoleGuard';
@@ -61,6 +68,7 @@ const ADMIN_ROLES = ['ADMIN'];
 
 const modules = [
   { path: '/admin/dashboard', name: 'Dashboard', desc: 'KPI Grid, AI Insights, Maps', icon: 'dashboard', color: 'from-blue-500 to-indigo-600' },
+  { path: '/admin/bi-dashboard', name: 'BI KPIs', desc: 'KPIs Dashboard, Analytics', icon: 'insights', color: 'from-indigo-500 to-blue-600' },
   { path: '/admin/analytics', name: 'BI Analytics', desc: 'Operational Analytics, Reports', icon: 'analytics', color: 'from-purple-500 to-pink-600' },
   { path: '/admin/finance', name: 'Finance', desc: 'Revenue, Reconciliation, Bills', icon: 'payments', color: 'from-emerald-500 to-teal-600' },
   { path: '/admin/audit-log', name: 'Audit Logs', desc: 'Security, Changes, Actions', icon: 'history', color: 'from-slate-500 to-zinc-600' },
@@ -117,6 +125,7 @@ const App: React.FC = () => {
 
         {/* Admin Dashboard & Management */}
         <Route path="/admin/dashboard" element={<RoleGuard allow={ADMIN_ROLES}><AdminDashboard /></RoleGuard>} />
+        <Route path="/admin/bi-dashboard" element={<RoleGuard allow={['ADMIN', 'WAREHOUSE', 'WF']}><BiDashboard /></RoleGuard>} />
         <Route path="/admin/analytics" element={<RoleGuard allow={ADMIN_ROLES}><AdminAnalytics /></RoleGuard>} />
         <Route path="/admin/finance" element={<RoleGuard allow={ADMIN_ROLES}><AdminFinance /></RoleGuard>} />
         <Route path="/admin/invoices" element={<RoleGuard allow={ADMIN_ROLES}><AdminFinance defaultTab="invoices" /></RoleGuard>} />
@@ -171,6 +180,13 @@ const App: React.FC = () => {
         <Route path="/warehouse/settings" element={<WarehouseSettings />} />
         <Route path="/warehouse/ai-ocr" element={<WarehouseAIOCR />} />
         <Route path="/warehouse/gate-checkout" element={<GateCheckoutDashboard />} />
+        <Route path="/warehouse/dead-expiry" element={<RoleGuard allow={WAREHOUSE_ROLES}><DeadExpiryDashboard /></RoleGuard>} />
+        <Route path="/warehouse/write-off" element={<RoleGuard allow={WAREHOUSE_ROLES}><StockWriteOff /></RoleGuard>} />
+        <Route path="/warehouse/stock-ledger" element={<RoleGuard allow={WAREHOUSE_ROLES}><StockLedgerTracking /></RoleGuard>} />
+        <Route path="/warehouse/sku" element={<RoleGuard allow={WAREHOUSE_ROLES}><SkuList /></RoleGuard>} />
+        <Route path="/warehouse/sku/new" element={<RoleGuard allow={WAREHOUSE_ROLES}><SkuForm /></RoleGuard>} />
+        <Route path="/warehouse/sku/:id/edit" element={<RoleGuard allow={WAREHOUSE_ROLES}><SkuForm /></RoleGuard>} />
+        <Route path="/warehouse/sku/:id" element={<RoleGuard allow={WAREHOUSE_ROLES}><SkuDetail /></RoleGuard>} />
 
         {/* Catch-all redirect to Dispatcher */}
         <Route path="*" element={<Navigate to="/" replace />} />

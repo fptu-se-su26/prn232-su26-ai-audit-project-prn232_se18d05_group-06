@@ -693,3 +693,51 @@ Sinh viên/nhóm cam kết rằng nội dung changelog phản ánh đúng các t
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
 | Nhóm trưởng | 02/06/2026 |
+
+---
+
+## [2026-07-22]
+|Author: Hoàng Hải Quân (DE180071)
+
+### Added
+- Feature: Triển khai "UC007 - Quản lý Kho nội bộ" (Warehouse Management Modules).
+- Backend:
+  - StockTransferController: API chuyển kho nội bộ giữa các bin/zone.
+  - StockWriteOffController: API xuất hủy hàng hợp lệ với lý do rõ ràng.
+  - DeadExpiryStockController: API cảnh báo và báo cáo hàng hết date / dead stock.
+  - StockLedgerController: API truy vết lịch sử biến động kho (audit log).
+  - SkuController: CRUD API cho SKU master data (search, filter, paging).
+  - KpiController: API snapshot KPI cho Admin BI Dashboard.
+  - DTOs: StockTransferDTOs, StockWriteOffDTOs, DeadExpiryStockDTOs, StockLedgerDTOs, SkuDTOs, KpiDTOs.
+  - Services: StockTransferService, StockWriteOffService, DeadExpiryStockService, SkuService, KpiService cùng interface tương ứng.
+- Database:
+  - Migration mới 20260710083352_SyncPendingChanges đồng bộ các entity mới.
+- Frontend:
+  - WarehouseTransfer.tsx: Giao diện tạo và quản lý stock transfer.
+  - StockWriteOff.tsx: Giao diện xuất hủy với chọn lý do.
+  - DeadExpiryDashboard.tsx: Dashboard cảnh báo dead/expiry stock.
+  - StockLedgerTracking.tsx: Giao diện xem ledger với filter theo SKU/bin/date.
+  - SkuManagement/ (List, Form, Detail, Api, types): Module quản lý SKU hoàn chỉnh.
+  - BiDashboard.tsx + KpiCard.tsx: Dashboard BI cho Admin với các card KPI.
+
+### Fixed
+- Giải quyết 14 merge conflicts giữa branch eature/DE180071-uc007-warehouse-modules và main, gồm:
+  - FRONTEND/src/features/customer/Header.tsx
+  - FRONTEND/src/features/warehouse/WarehouseTransfer.tsx (giữ cả WarehouseHeader và types)
+  - BACKEND/Migrations/SmartLogAiContextModelSnapshot.cs (giữ navigation MaintenanceSchedule)
+- Dọn dẹp .vs/BACKEND/ (Visual Studio cache) khỏi git tracking.
+
+### AI-assisted
+- Sử dụng Cursor (Claude Sonnet 4.5) để:
+  - Giải conflict 14 file TSX/C# (chiến lược keep-both).
+  - Cấu hình git identity.
+  - Soạn commit message theo đúng convention DE{ID} - {Verb} {UC}{number}.
+- Sinh viên tự review toàn bộ conflict resolution, tự commit, tự push, tự xác nhận các file quan trọng không bị mất nội dung.
+
+### Verification
+- git status: working tree clean.
+- git push lên origin/feature/DE180071-uc007-warehouse-modules thành công.
+- Commit: 2a606a (64 files changed, +14,588 / -1,508).
+- Cần chạy runtime test (dotnet ef database update, 
+pm run dev) để verify UI/API.
+

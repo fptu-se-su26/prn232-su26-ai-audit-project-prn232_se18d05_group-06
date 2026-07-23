@@ -1,16 +1,224 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
 import WarehouseHeader from '../../components/WarehouseHeader'
+import api from '../../lib/api'
+
+type Zone = {
+  zoneId: number
+  zoneCode: string
+  zoneName: string
+  shelves: Shelf[]
+}
+
+type Shelf = {
+  shelfId: number
+  shelfCode: string
+  bins: Bin[]
+}
+
+type Bin = {
+  binId: number
+  binCode: string
+  binType: string | null
+  currentStock: number
+}
+
+type SkuInventory = {
+  skuId: number
+  skuCode: string
+  skuName: string
+  quantity: number
+}
+
+type TransferHistory = {
+  transferId: number
+  transferCode: string
+  skuCode: string
+  skuName: string
+  fromBinCode: string
+  fromZoneName: string
+  toBinCode: string
+  toZoneName: string
+  quantity: number
+  status: string
+  createdByName: string
+  createdAt: string
+}
 
 const WarehouseTransfer = () => {
-  const [progress] = useState(65)
+  const [zones, setZones] = useState<Zone[]>([])
+
+  // Form State
+  const [sourceZoneId, setSourceZoneId] = useState<number | ''>('')
+  const [sourceBinId, setSourceBinId] = useState<number | ''>('')
+  const [destZoneId, setDestZoneId] = useState<number | ''>('')
+  const [destBinId, setDestBinId] = useState<number | ''>('')
+  const [skuId, setSkuId] = useState<number | ''>('')
+  const [quantity, setQuantity] = useState<number | ''>('')
+  const [note, setNote] = useState('')
+
+  // Options
+  const [sourceBins, setSourceBins] = useState<Bin[]>([])
+  const [destBins, setDestBins] = useState<Bin[]>([])
+  const [binInventories, setBinInventories] = useState<SkuInventory[]>([])
+  const [selectedSkuMaxQty, setSelectedSkuMaxQty] = useState(0)
+
+  // Data State
+  const [history, setHistory] = useState<TransferHistory[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoadingInventory, setIsLoadingInventory] = useState(false)
+  const [inventoryError, setInventoryError] = useState<string | null>(null)
+  const [message, setMessage] = useState({ type: '', text: '' })
+
+  useEffect(() => {
+    fetchLayoutTree()
+    fetchHistory()
+  }, [])
+
+  const fetchLayoutTree = async () => {
+    try {
+      const res = await api.get('/admin/warehouse-layout/tree')
+      if (res.data && res.data.length > 0) {
+        // Gom zones từ TẤT CẢ warehouses, không chỉ warehouse đầu tiên
+        const allZones = res.data.flatMap((wh: any) => wh.zones || [])
+        setZones(allZones)
+      }
+    } catch (err) {
+      console.error('Failed to fetch layout tree', err)
+    }
+  }
+
+  const fetchHistory = async () => {
+    setIsLoading(true)
+    try {
+      const res = await api.get('/stock-transfer')
+      setHistory(res.data)
+    } catch (err) {
+      console.error('Failed to fetch transfer history', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handle Source Zone Change
+  const handleSourceZoneChange = (zoneId: number) => {
+    setSourceZoneId(zoneId)
+    setSourceBinId('')
+    setSkuId('')
+    setBinInventories([])
+
+    const zone = zones.find(z => z.zoneId === zoneId)
+    if (zone) {
+      const allBins = zone.shelves.flatMap(s => s.bins)
+      setSourceBins(allBins)
+    } else {
+      setSourceBins([])
+    }
+  }
+
+  // Handle Dest Zone Change
+  const handleDestZoneChange = (zoneId: number) => {
+    setDestZoneId(zoneId)
+    setDestBinId('')
+
+    const zone = zones.find(z => z.zoneId === zoneId)
+    if (zone) {
+      const allBins = zone.shelves.flatMap(s => s.bins)
+      setDestBins(allBins)
+    } else {
+      setDestBins([])
+    }
+  }
+
+  // Handle Source Bin Change
+  const handleSourceBinChange = async (binId: number) => {
+    setSourceBinId(binId)
+    setSkuId('')
+    setBinInventories([])
+    setInventoryError(null)
+    if (!binId) return
+
+    setIsLoadingInventory(true)
+    try {
+      const res = await api.get(`/stock-transfer/bins/${binId}/inventory`)
+      setBinInventories(res.data)
+    } catch (err: any) {
+      const status = err?.response?.status
+      const msg = err?.response?.data?.message || err?.message || 'Lỗi không xác định'
+      if (status === 401 || status === 403) {
+        setInventoryError(`Không có quyền truy cập (${status}). Vui lòng đăng nhập lại.`)
+      } else {
+        setInventoryError(`Lỗi tải tồn kho: ${msg} (${status ?? 'network error'})`)
+      }
+      console.error('Failed to fetch bin inventory', err)
+    } finally {
+      setIsLoadingInventory(false)
+    }
+  }
+
+  // Handle SKU Change
+  const handleSkuChange = (sid: number) => {
+    setSkuId(sid)
+    const inv = binInventories.find(i => i.skuId === sid)
+    setSelectedSkuMaxQty(inv ? inv.quantity : 0)
+    setQuantity('')
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!sourceBinId || !destBinId || !skuId || !quantity) {
+      setMessage({ type: 'error', text: 'Vui lòng điền đầy đủ thông tin.' })
+      return
+    }
+    if (sourceBinId === destBinId) {
+      setMessage({ type: 'error', text: 'Bin nguồn và đích không được trùng nhau.' })
+      return
+    }
+    if (quantity > selectedSkuMaxQty) {
+      setMessage({ type: 'error', text: 'Số lượng chuyển không được vượt quá số lượng tồn.' })
+      return
+    }
+
+    setIsSubmitting(true)
+    setMessage({ type: '', text: '' })
+    try {
+      await api.post('/stock-transfer', {
+        skuId,
+        fromBinId: sourceBinId,
+        toBinId: destBinId,
+        quantity: Number(quantity),
+        note
+      })
+
+      setMessage({ type: 'success', text: 'Chuyển kho thành công!' })
+
+      // Reset form
+      setSourceZoneId('')
+      setSourceBinId('')
+      setDestZoneId('')
+      setDestBinId('')
+      setSkuId('')
+      setQuantity('')
+      setNote('')
+      setBinInventories([])
+
+      // Refresh Data
+      fetchLayoutTree()
+      fetchHistory()
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Có lỗi xảy ra khi chuyển kho.' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased overflow-hidden">
       <Sidebar />
 
       <main className="ml-[280px] min-h-screen">
-        <WarehouseHeader 
+        <WarehouseHeader
           title={
             <div className="flex items-center gap-4">
               <span>Warehouse Transfer</span>
@@ -27,232 +235,246 @@ const WarehouseTransfer = () => {
           }
         />
 
-        <div className="pt-24 p-8 space-y-8 animate-fade-in-up">
-          <section className="glass-card p-6 rounded-xl flex items-center justify-between relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-slate-100" />
-            <div className="absolute top-0 left-0 w-2/3 h-1 bg-[#2563eb] shadow-md" />
+        <div className="pt-24 p-8 space-y-8">
 
-            <div className="flex flex-col items-center gap-2 relative z-10">
-              <div className="w-10 h-10 rounded-full bg-[#2563eb] text-white flex items-center justify-center shadow-lg">
-                <span className="material-symbols-outlined">assignment</span>
-              </div>
-              <span className="text-sm font-bold text-[#2563eb]">Requested</span>
-              <span className="text-xs text-slate-500">Oct 12, 09:15</span>
+          {message.text && (
+            <div className={`p-4 rounded-lg flex items-center gap-2 ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+              <span className="material-symbols-outlined">{message.type === 'success' ? 'check_circle' : 'error'}</span>
+              <p>{message.text}</p>
             </div>
+          )}
 
-            <div className="flex-1 h-px bg-slate-200/40 mx-4" />
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#00687a]">sync_alt</span>
+              Tạo Lệnh Chuyển Kho
+            </h3>
 
-            <div className="flex flex-col items-center gap-2 relative z-10">
-              <div className="w-10 h-10 rounded-full bg-[#2563eb] text-white flex items-center justify-center shadow-lg">
-                <span className="material-symbols-outlined">verified</span>
-              </div>
-              <span className="text-sm font-bold text-[#2563eb]">Approved</span>
-              <span className="text-xs text-slate-500">Oct 12, 11:30</span>
-            </div>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* SOURCE */}
+              <div className="space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-100">
+                <h4 className="font-bold text-[#00687a] flex items-center gap-2">
+                  <span className="material-symbols-outlined">logout</span> Từ (Nguồn)
+                </h4>
 
-            <div className="flex-1 h-px bg-slate-200/40 mx-4" />
-
-            <div className="flex flex-col items-center gap-2 relative z-10">
-              <div className="w-10 h-10 rounded-full bg-[#2563eb] text-white flex items-center justify-center animate-pulse shadow-md">
-                <span className="material-symbols-outlined">local_shipping</span>
-              </div>
-              <span className="text-sm font-bold text-[#2563eb]">In Transit</span>
-              <span className="text-xs text-slate-500">Live Tracking</span>
-            </div>
-
-            <div className="flex-1 h-px bg-slate-200/40 mx-4 border-dashed" />
-
-            <div className="flex flex-col items-center gap-2 relative z-10 opacity-40">
-              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                <span className="material-symbols-outlined">inventory</span>
-              </div>
-              <span className="text-sm font-bold">Completed</span>
-              <span className="text-xs text-slate-500">Est: 4:00 PM</span>
-            </div>
-          </section>
-
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="glass-card p-6 rounded-[20px] shadow-sm border border-slate-200/70">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="material-symbols-outlined text-[#2563eb]">settings_ethernet</span>
-                  <h3 className="text-lg font-semibold">Logistics Routing</h3>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Zone (Khu vực)</label>
+                  <select
+                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00687a]"
+                    value={sourceZoneId}
+                    onChange={(e) => handleSourceZoneChange(Number(e.target.value))}
+                  >
+                    <option value="">-- Chọn Zone --</option>
+                    {zones.map(z => (
+                      <option key={z.zoneId} value={z.zoneId}>{z.zoneName} ({z.zoneCode})</option>
+                    ))}
+                  </select>
                 </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <label className="text-xs text-slate-500">Source Station</label>
-                    <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[#00687a]">warehouse</span>
-                      <div>
-                        <p className="font-semibold">Hub-Alpha (Detroit)</p>
-                        <p className="text-xs text-slate-500">Bay 12, Floor 2</p>
-                      </div>
-                    </div>
 
-                    <label className="text-xs text-slate-500">Destination Station</label>
-                    <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[#2563eb]">door_front</span>
-                      <div>
-                        <p className="font-semibold">Dist-Zeta (Chicago)</p>
-                        <p className="text-xs text-slate-500">Receiving Dock A</p>
-                      </div>
-                    </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Bin (Vị trí)</label>
+                  <select
+                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00687a]"
+                    value={sourceBinId}
+                    onChange={(e) => handleSourceBinChange(Number(e.target.value))}
+                    disabled={!sourceZoneId}
+                  >
+                    <option value="">-- Chọn Bin --</option>
+                    {sourceBins.map(b => (
+                      <option key={b.binId} value={b.binId}>{b.binCode} {b.currentStock > 0 ? `(${b.currentStock} items)` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Mặt hàng (SKU)</label>
+                  <select
+                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00687a]"
+                    value={skuId}
+                    onChange={(e) => handleSkuChange(Number(e.target.value))}
+                    disabled={!sourceBinId || binInventories.length === 0}
+                  >
+                    <option value="">-- Chọn Hàng --</option>
+                    {binInventories.map(inv => (
+                      <option key={inv.skuId} value={inv.skuId}>{inv.skuCode} - {inv.skuName} (Tồn: {inv.quantity})</option>
+                    ))}
+                  </select>
+                  {isLoadingInventory && (
+                    <p className="text-xs text-blue-500 mt-1 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px] animate-spin">sync</span>
+                      Đang tải tồn kho...
+                    </p>
+                  )}
+                  {!isLoadingInventory && inventoryError && (
+                    <p className="text-xs text-red-500 mt-1">⚠️ {inventoryError}</p>
+                  )}
+                  {!isLoadingInventory && !inventoryError && sourceBinId && binInventories.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-1">Bin này không có hàng hóa.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* DESTINATION */}
+              <div className="space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-100">
+                <h4 className="font-bold text-blue-600 flex items-center gap-2">
+                  <span className="material-symbols-outlined">login</span> Đến (Đích)
+                </h4>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Zone (Khu vực)</label>
+                  <select
+                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-600"
+                    value={destZoneId}
+                    onChange={(e) => handleDestZoneChange(Number(e.target.value))}
+                  >
+                    <option value="">-- Chọn Zone --</option>
+                    {zones.map(z => (
+                      <option key={z.zoneId} value={z.zoneId}>{z.zoneName} ({z.zoneCode})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Bin (Vị trí)</label>
+                  <select
+                    className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-600"
+                    value={destBinId}
+                    onChange={(e) => setDestBinId(Number(e.target.value))}
+                    disabled={!destZoneId}
+                  >
+                    <option value="">-- Chọn Bin --</option>
+                    {destBins.map(b => (
+                      <option key={b.binId} value={b.binId}>{b.binCode}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Số lượng chuyển</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max={selectedSkuMaxQty || 1}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-600"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : '')}
+                      placeholder={`Max: ${selectedSkuMaxQty}`}
+                      disabled={!skuId}
+                    />
                   </div>
-
-                  <div className="space-y-4">
-                    <label className="text-xs text-slate-500">Vehicle Unit</label>
-                    <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[#2563eb]">electric_car</span>
-                      <div>
-                        <p className="font-semibold">EV-Heavy 904</p>
-                        <p className="text-xs text-slate-500">Capacity: 12.5 Tons</p>
-                      </div>
-                    </div>
-
-                    <label className="text-xs text-slate-500">Assigned Driver</label>
-                    <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 flex items-center gap-3">
-                      <img className="w-10 h-10 rounded-full" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=256&q=80" />
-                      <div>
-                        <p className="font-semibold">Jordan Miller</p>
-                        <p className="text-xs text-slate-500">ID: #DRV-882</p>
-                      </div>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Ghi chú</label>
+                    <input
+                      type="text"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-600"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Tùy chọn"
+                    />
                   </div>
                 </div>
               </div>
 
-              <div className="glass-card rounded-[20px] overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-slate-200/70 flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">Items Manifest</h3>
-                  <button className="flex items-center gap-2 text-[#2563eb] px-4 py-2 rounded-lg hover:bg-[#eff6ff] transition-all">
-                    <span className="material-symbols-outlined">add_circle</span>
-                    Add Item
-                  </button>
-                </div>
+              <div className="md:col-span-2 flex justify-end pt-4 border-t border-slate-200">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-[#00687a] hover:bg-[#005161] text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined">move_up</span>
+                  {isSubmitting ? 'Đang xử lý...' : 'Xác Nhận Chuyển Kho'}
+                </button>
+              </div>
+            </form>
+          </div>
 
-                <table className="w-full text-left">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="p-6 border-b border-slate-200 flex justify-between items-center">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#00687a]">history</span>
+                Lịch sử chuyển kho
+              </h3>
+              <button onClick={fetchHistory} className="text-slate-500 hover:text-[#00687a] flex items-center gap-1 text-sm font-medium">
+                <span className="material-symbols-outlined text-sm">refresh</span> Làm mới
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              {isLoading ? (
+                <div className="p-8 text-center text-slate-500">Đang tải dữ liệu...</div>
+              ) : history.length === 0 ? (
+                <div className="p-8 text-center text-slate-500">Chưa có dữ liệu chuyển kho.</div>
+              ) : (
+                <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="bg-slate-50">
-                      <th className="px-6 py-4">SKU / PRODUCT</th>
-                      <th className="px-6 py-4 text-center">QUANTITY</th>
-                      <th className="px-6 py-4">WAREHOUSE TAG</th>
-                      <th className="px-6 py-4">STATUS</th>
-                      <th className="px-6 py-4 text-right">ACTION</th>
+                    <tr className="bg-slate-50 text-slate-500">
+                      <th className="px-6 py-4 font-semibold">MÃ PHIẾU</th>
+                      <th className="px-6 py-4 font-semibold">MẶT HÀNG</th>
+                      <th className="px-6 py-4 font-semibold">TỪ (NGUỒN)</th>
+                      <th className="px-6 py-4 font-semibold">ĐẾN (ĐÍCH)</th>
+                      <th className="px-6 py-4 font-semibold text-center">SỐ LƯỢNG</th>
+                      <th className="px-6 py-4 font-semibold text-center">TRẠNG THÁI</th>
+                      <th className="px-6 py-4 font-semibold">THỜI GIAN</th>
+                      <th className="px-6 py-4 font-semibold">NGƯỜI TẠO</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    <tr className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-slate-100 rounded-md flex items-center justify-center">
-                            <span className="material-symbols-outlined text-slate-500">memory</span>
+                    {history.map(item => (
+                      <tr key={item.transferId} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 font-mono font-medium text-[#00687a]">{item.transferCode}</td>
+                        <td className="px-6 py-4">
+                          <p className="font-semibold text-slate-900">{item.skuName}</p>
+                          <p className="text-xs text-slate-500">{item.skuCode}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-red-400 text-sm">logout</span>
+                            <div>
+                              <p className="font-semibold text-slate-900">{item.fromBinCode}</p>
+                              <p className="text-xs text-slate-500">{item.fromZoneName}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold">NX-740 Processors</p>
-                            <p className="text-xs text-slate-500">SKU: 902-BA-11</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-blue-500 text-sm">login</span>
+                            <div>
+                              <p className="font-semibold text-slate-900">{item.toBinCode}</p>
+                              <p className="text-xs text-slate-500">{item.toZoneName}</p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">450 Units</td>
-                      <td className="px-6 py-4">Zone B-4 / R-12</td>
-                      <td className="px-6 py-4">
-                        <div className="inline-flex items-center gap-1 bg-[#ecf8ff] text-[#2563eb] px-2 py-1 rounded text-xs font-bold">STAGED</div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="material-symbols-outlined text-slate-500 hover:text-red-600">delete</button>
-                      </td>
-                    </tr>
-
-                    <tr className="hover:bg-slate-50 transition-colors bg-slate-50/20">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-slate-100 rounded-md flex items-center justify-center">
-                            <span className="material-symbols-outlined text-slate-500">battery_charging_full</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold">Lithium Cell Packs</p>
-                            <p className="text-xs text-slate-500">SKU: BATT-442-X</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">12 Pallets</td>
-                      <td className="px-6 py-4">Hazmat Area C</td>
-                      <td className="px-6 py-4">
-                        <div className="inline-flex items-center gap-1 bg-[#ecfffb] text-[#00687a] px-2 py-1 rounded text-xs font-bold">LOADED</div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="material-symbols-outlined text-slate-500 hover:text-red-600">delete</button>
-                      </td>
-                    </tr>
-
-                    <tr className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-slate-100 rounded-md flex items-center justify-center">
-                            <span className="material-symbols-outlined text-slate-500">precision_manufacturing</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold">Servo Motors V4</p>
-                            <p className="text-xs text-slate-500">SKU: MTR-99-L</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">85 Units</td>
-                      <td className="px-6 py-4">Zone A-1 / R-02</td>
-                      <td className="px-6 py-4">
-                        <div className="inline-flex items-center gap-1 bg-[#ecf8ff] text-[#2563eb] px-2 py-1 rounded text-xs font-bold">STAGED</div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="material-symbols-outlined text-slate-500 hover:text-red-600">delete</button>
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="inline-flex items-center justify-center bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-bold">
+                            {item.quantity}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
+                            item.status === 'COMPLETED'
+                              ? 'bg-green-100 text-green-700'
+                              : item.status === 'PENDING'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            <span className="material-symbols-outlined text-xs">
+                              {item.status === 'COMPLETED' ? 'check_circle' : item.status === 'PENDING' ? 'schedule' : 'cancel'}
+                            </span>
+                            {item.status === 'COMPLETED' ? 'Hoàn thành' : item.status === 'PENDING' ? 'Đang xử lý' : item.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {new Date(item.createdAt).toLocaleString('vi-VN')}
+                        </td>
+                        <td className="px-6 py-4 text-slate-600">
+                          {item.createdByName || 'N/A'}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="glass-card rounded-xl overflow-hidden shadow-sm border border-primary/20">
-                <div className="h-64 relative bg-slate-50 overflow-hidden">
-                  <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80" className="w-full h-full object-cover grayscale opacity-60" />
-                  <div className="absolute top-4 left-4 bg-[#0f172a]/80 text-white px-3 py-1 rounded-full text-xs">LIVE TRACKING ACTIVE</div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2563eb]/20 to-transparent"></div>
-                </div>
-                <div className="p-4 space-y-3">
-                  <div className="flex justify-between items-end">
-                    <div>
-                      <p className="text-xs text-slate-500">Current Location</p>
-                      <p className="font-semibold">I-94 Eastbound Express</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-slate-500">ETA</p>
-                      <p className="text-lg text-[#2563eb]">15:42</p>
-                    </div>
-                  </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div className="h-full bg-[#2563eb]" style={{ width: `${progress}%` }} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#2563eb] rounded-xl text-white p-6 shadow-xl relative overflow-hidden">
-                <div className="absolute -right-10 -top-10 opacity-20 transform rotate-12">
-                  <span className="material-symbols-outlined text-[140px]">smart_toy</span>
-                </div>
-                <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined">auto_awesome</span>
-                    <h4 className="font-bold uppercase text-xs">AI Optimization Insight</h4>
-                  </div>
-                  <p className="mb-4">"Route adjusted for 12% fuel savings. Recommend accelerating departure by 15 mins to avoid localized congestion near Sector 7."</p>
-                  <button className="w-full bg-white/20 py-2 rounded-lg">Apply Schedule Update</button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <button className="w-full bg-[#2563eb] text-white font-bold h-12 rounded-lg">CONFIRM TRANSFER LOAD</button>
-                <button className="w-full border-2 border-slate-200 text-slate-700 h-12 rounded-lg">DOWNLOAD MANIFEST (PDF)</button>
-              </div>
+              )}
             </div>
           </div>
         </div>

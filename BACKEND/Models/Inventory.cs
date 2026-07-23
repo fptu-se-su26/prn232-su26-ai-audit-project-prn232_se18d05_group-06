@@ -21,8 +21,6 @@ public partial class Inventory
 
     public DateOnly? LastCountDate { get; set; }
 
-    public byte[] RowVersion { get; set; } = null!;
-
     public virtual WarehouseBin Bin { get; set; } = null!;
 
     public virtual Sku Sku { get; set; } = null!;

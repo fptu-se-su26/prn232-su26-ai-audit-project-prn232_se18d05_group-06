@@ -37,10 +37,15 @@ namespace BACKEND.Controllers
         }
 
         [HttpPost("ocr")]
-        public async Task<ActionResult<ApiResponse>> Ocr([FromForm] IFormFile file, [FromForm] int warehouseId, [FromForm] int customerId)
+        [Consumes("multipart/form-data")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<ActionResult<ApiResponse>> Ocr([FromForm] OcrUploadDto request)
         {
+            if (request == null || request.File == null || request.File.Length == 0)
+                return BadRequest(new ApiResponse { Success = false, Message = "File không hợp lệ." });
+
             var userId = 1; // Giả lập
-            var result = await _inboundReceivingService.CreateInboundFromOcrAsync(file, warehouseId, customerId, userId);
+            var result = await _inboundReceivingService.CreateInboundFromOcrAsync(request.File, request.WarehouseId, request.CustomerId, userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -267,14 +272,10 @@ namespace BACKEND.Controllers
         }
 
         [HttpPost("lines/{lineId}/photos")]
-        public async Task<ActionResult<CargoPhotoDto>> UploadPhoto(
-            int lineId,
-            [FromForm] UploadPhotoDto request)
+        [Consumes("multipart/form-data")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<ActionResult<CargoPhotoDto>> UploadPhoto(int lineId, [FromForm] CargoPhotoUploadDto request)
         {
-            var file = request.File;
-            var photoAngle = request.PhotoAngle;
-            var isDamaged = request.IsDamaged;
-            var takenBy = request.TakenBy;
             try
             {
                 var line = await _context.InboundOrderLines.FirstOrDefaultAsync(l => l.LineId == lineId);
@@ -283,6 +284,7 @@ namespace BACKEND.Controllers
                     return NotFound($"Inbound line {lineId} not found.");
                 }
 
+                var file = request?.File;
                 if (file == null || file.Length == 0)
                 {
                     return BadRequest("File is required.");
@@ -308,9 +310,9 @@ namespace BACKEND.Controllers
                 {
                     LineId = lineId,
                     PhotoUrl = photoUrl,
-                    PhotoAngle = photoAngle,
-                    IsDamaged = isDamaged,
-                    TakenBy = takenBy,
+                    PhotoAngle = request?.PhotoAngle,
+                    IsDamaged = request?.IsDamaged ?? false,
+                    TakenBy = request?.TakenBy,
                     TakenAt = DateTime.Now
                 };
 

@@ -1573,6 +1573,62 @@ namespace BACKEND.Migrations
                     b.ToTable("OperatingExpenses", (string)null);
                 });
 
+            modelBuilder.Entity("BACKEND.Models.OperatingExpense", b =>
+                {
+                    b.Property<int>("ExpenseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ExpenseID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExpenseId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ExpenseCategory")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ExpenseCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<DateOnly>("ExpenseDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("APPROVED");
+
+                    b.HasKey("ExpenseId")
+                        .HasName("PK_OperatingExpenses");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex(new[] { "ExpenseCode" }, "UQ_OperatingExpenses_ExpenseCode")
+                        .IsUnique();
+
+                    b.ToTable("OperatingExpenses");
+                });
+
             modelBuilder.Entity("BACKEND.Models.OrderLine", b =>
                 {
                     b.Property<int>("LineId")
@@ -3725,6 +3781,160 @@ namespace BACKEND.Migrations
                     b.ToTable("WarehouseBins", (string)null);
                 });
 
+            modelBuilder.Entity("BACKEND.Models.WarehouseLayoutMap", b =>
+                {
+                    b.Property<int>("MapId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("MapID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MapId"));
+
+                    b.Property<string>("BackgroundImageUrl")
+                        .HasMaxLength(500)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("BackgroundImageURL");
+
+                    b.Property<int>("CanvasHeight")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CanvasWidth")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("MapName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal?>("ScaleMeterPerPixel")
+                        .HasColumnType("decimal(10, 4)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("int")
+                        .HasColumnName("WarehouseID");
+
+                    b.HasKey("MapId")
+                        .HasName("PK__WarehouseLayoutMaps");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.ToTable("WarehouseLayoutMaps", (string)null);
+                });
+
+            modelBuilder.Entity("BACKEND.Models.WarehouseLayoutObject", b =>
+                {
+                    b.Property<int>("ObjectId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ObjectID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ObjectId"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("FillColor")
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<decimal>("Height")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool?>("IsLocked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Label")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("MapId")
+                        .HasColumnType("int")
+                        .HasColumnName("MapID");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<int?>("RefId")
+                        .HasColumnType("int")
+                        .HasColumnName("RefID");
+
+                    b.Property<string>("RefType")
+                        .HasMaxLength(30)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<decimal?>("RotationDeg")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(8, 2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<string>("StrokeColor")
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<decimal>("Width")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<decimal>("X")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<decimal>("Y")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<int?>("ZIndex")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("ObjectId")
+                        .HasName("PK__WarehouseLayoutObjects");
+
+                    b.HasIndex("MapId");
+
+                    b.ToTable("WarehouseLayoutObjects", (string)null);
+                });
+
             modelBuilder.Entity("BACKEND.Models.WarehouseShelf", b =>
                 {
                     b.Property<int>("ShelfId")
@@ -4699,6 +4909,35 @@ namespace BACKEND.Migrations
                     b.Navigation("Shelf");
                 });
 
+            modelBuilder.Entity("BACKEND.Models.WarehouseLayoutMap", b =>
+                {
+                    b.HasOne("BACKEND.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .HasConstraintName("FK__WarehouseLayoutMaps__Users");
+
+                    b.HasOne("BACKEND.Models.Warehouse", "Warehouse")
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .IsRequired()
+                        .HasConstraintName("FK__WarehouseLayoutMaps__Warehouses");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("BACKEND.Models.WarehouseLayoutObject", b =>
+                {
+                    b.HasOne("BACKEND.Models.WarehouseLayoutMap", "Map")
+                        .WithMany("WarehouseLayoutObjects")
+                        .HasForeignKey("MapId")
+                        .IsRequired()
+                        .HasConstraintName("FK__WarehouseLayoutObjects__Maps");
+
+                    b.Navigation("Map");
+                });
+
             modelBuilder.Entity("BACKEND.Models.WarehouseShelf", b =>
                 {
                     b.HasOne("BACKEND.Models.WarehouseZone", "Zone")
@@ -4969,6 +5208,11 @@ namespace BACKEND.Migrations
                     b.Navigation("StockWriteOffs");
 
                     b.Navigation("StocktakeLines");
+                });
+
+            modelBuilder.Entity("BACKEND.Models.WarehouseLayoutMap", b =>
+                {
+                    b.Navigation("WarehouseLayoutObjects");
                 });
 
             modelBuilder.Entity("BACKEND.Models.WarehouseShelf", b =>

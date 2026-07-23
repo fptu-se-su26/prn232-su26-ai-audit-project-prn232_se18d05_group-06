@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import AdminSidebar from '@components/AdminSidebar';
 
 const kpiCards = [
@@ -79,7 +80,21 @@ const AdminDashboard: React.FC = () => {
           <div>
             <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Operations Center</h2>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Link
+              to="/admin/bi-dashboard"
+              className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-label-md text-label-md shadow-md hover:shadow-lg hover:from-indigo-700 hover:to-blue-700 transition-all"
+            >
+              <span className="material-symbols-outlined text-base" data-icon="insights">insights</span>
+              <span>BI Dashboard</span>
+            </Link>
+            <Link
+              to="/admin/bi-dashboard"
+              className="md:hidden w-10 h-10 rounded-full flex items-center justify-center text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 transition-colors"
+              aria-label="BI Dashboard"
+            >
+              <span className="material-symbols-outlined" data-icon="insights">insights</span>
+            </Link>
             <div className="relative focus-within:ring-2 focus-within:ring-primary/50 rounded-full transition-all">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
               <input className="pl-10 pr-4 py-2 bg-surface-variant/50 border-none rounded-full font-body-sm w-64 focus:bg-surface focus:ring-0" placeholder="Search orders, fleets..." type="text" />
