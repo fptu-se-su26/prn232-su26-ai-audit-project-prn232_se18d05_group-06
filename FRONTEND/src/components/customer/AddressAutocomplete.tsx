@@ -55,7 +55,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             }
             setIsLoading(true);
             try {
-                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200/api';
+                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5184/api';
                 const response = await fetch(`${API_URL}/locations/suggestions?keyword=${encodeURIComponent(value)}`);
                 const data = await response.json();
                 if (data.success) {
@@ -90,7 +90,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         } else {
             // Need to fetch details (Google mode)
             try {
-                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200/api';
+                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5184/api';
                 const response = await fetch(`${API_URL}/locations/place-detail?placeId=${suggestion.placeId}`);
                 const data = await response.json();
                 if (data.success && data.data) {

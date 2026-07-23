@@ -154,12 +154,20 @@ namespace BACKEND.Controllers
 
         // POST: api/gate/scan
         [HttpPost("scan")]
-        public async Task<ActionResult> ScanLicensePlate(Microsoft.AspNetCore.Http.IFormFile imageFile, [FromForm] string eventType = "")
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> ScanLicensePlate([FromForm] LicensePlateScanUploadDto request)
         {
-            if (imageFile == null || imageFile.Length == 0)
+
+            
+
+            if (request == null || request.ImageFile == null || request.ImageFile.Length == 0)
+
             {
                 return BadRequest("No image provided.");
             }
+
+            var imageFile = request.ImageFile;
+            var eventType = request.EventType ?? "";
 
             try
             {

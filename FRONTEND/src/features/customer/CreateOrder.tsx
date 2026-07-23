@@ -96,7 +96,7 @@ const CreateOrder: React.FC = () => {
         QuotedPrice: price
       };
 
-      const response = await fetch('http://localhost:5200/api/customer/orders', {
+      const response = await fetch('http://localhost:5184/api/customer/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ const CreateOrder: React.FC = () => {
       let paymentError = '';
 
       try {
-        const payResponse = await fetch('http://localhost:5200/api/payments/payos/create-link', {
+        const payResponse = await fetch('http://localhost:5184/api/payments/payos/create-link', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ const CreateOrder: React.FC = () => {
     try {
       const token = getAuthToken();
       if (!token) return;
-      const res = await fetch('http://localhost:5200/api/customer/orders/quote', {
+      const res = await fetch('http://localhost:5184/api/customer/orders/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ PickupLat: pLat, PickupLng: pLng, DeliveryLat: dLat, DeliveryLng: dLng, WeightKg: w, Cbm: v, ServiceType: serviceType })
@@ -244,7 +244,7 @@ const CreateOrder: React.FC = () => {
         handleAuthRequired('Vui lòng đăng nhập trước khi quét hóa đơn.');
         return;
       }
-      const res = await fetch('http://localhost:5200/api/customer/orders/scan-invoice', {
+      const res = await fetch('http://localhost:5184/api/customer/orders/scan-invoice', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData

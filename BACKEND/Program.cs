@@ -112,7 +112,10 @@ builder.Services.AddHttpClient();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.OperationFilter<BACKEND.Swagger.FormFileOperationFilter>();
+});
 
 var app = builder.Build();
 
@@ -150,7 +153,12 @@ if (app.Environment.IsDevelopment())
     app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 }
 
-app.UseHttpsRedirection();
+// Disable HTTPS redirect during development to avoid ERR_FAILED on HTTP requests
+// from the Vite dev server (http://localhost:3000). Production should re-enable this.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseStaticFiles();
