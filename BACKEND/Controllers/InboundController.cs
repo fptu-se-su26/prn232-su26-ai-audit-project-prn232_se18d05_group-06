@@ -36,11 +36,18 @@ namespace BACKEND.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        public class OcrRequestDto
+        {
+            public IFormFile File { get; set; }
+            public int WarehouseId { get; set; }
+            public int CustomerId { get; set; }
+        }
+
         [HttpPost("ocr")]
-        public async Task<ActionResult<ApiResponse>> Ocr([FromForm] IFormFile file, [FromForm] int warehouseId, [FromForm] int customerId)
+        public async Task<ActionResult<ApiResponse>> Ocr([FromForm] OcrRequestDto request)
         {
             var userId = 1; // Giả lập
-            var result = await _inboundReceivingService.CreateInboundFromOcrAsync(file, warehouseId, customerId, userId);
+            var result = await _inboundReceivingService.CreateInboundFromOcrAsync(request.File, request.WarehouseId, request.CustomerId, userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 

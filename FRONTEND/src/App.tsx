@@ -44,6 +44,7 @@ import WarehouseInventory from './features/warehouse/Inventory';
 import WarehouseImport from './features/warehouse/ImportGoods';
 import WarehouseExport from './features/warehouse/ExportGoods';
 import WarehouseStockAlerts from './features/warehouse/StockAlerts';
+import DeadStockDashboard from './features/admin/DeadStockDashboard';
 import WarehouseInventoryAudit from './features/warehouse/InventoryAudit';
 import WarehouseReports from './features/warehouse/Reports';
 import WarehouseNotifications from './features/warehouse/Notifications';
@@ -133,6 +134,7 @@ const App: React.FC = () => {
         <Route path="/admin/tier-management" element={<RoleGuard allow={ADMIN_ROLES}><TierManagementPage /></RoleGuard>} />
         <Route path="/admin/vouchers" element={<RoleGuard allow={ADMIN_ROLES}><VoucherCenter /></RoleGuard>} />
         <Route path="/admin/warehouses" element={<RoleGuard allow={WAREHOUSE_ROLES}><AdminWarehouses /></RoleGuard>} />
+        <Route path="/admin/dead-stock-dashboard" element={<RoleGuard allow={ADMIN_ROLES}><DeadStockDashboard /></RoleGuard>} />
 
         {/* Warehouse Management (Admin + Warehouse roles only) */}
         <Route path={ROUTE_PATHS.WAREHOUSE_DASHBOARD} element={<RoleGuard allow={WAREHOUSE_ROLES}><WarehouseDashboard /></RoleGuard>} />

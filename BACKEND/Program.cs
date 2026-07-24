@@ -74,6 +74,8 @@ builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<IBlacklistValidationService, BlacklistValidationService>();
 builder.Services.AddScoped<IS3StorageService, S3StorageService>();
 builder.Services.AddScoped<IStockAlertService, StockAlertService>();
+builder.Services.AddScoped<IInventoryReportService, InventoryReportService>();
+builder.Services.AddScoped<IStockTransferService, StockTransferService>();
 builder.Services.AddScoped<IOverstayAlertService, OverstayAlertService>();
 builder.Services.AddScoped<IFinancialForecastService, FinancialForecastService>();
 builder.Services.AddScoped<IFinanceReportService, FinanceReportService>();
@@ -100,6 +102,7 @@ builder.Services.AddScoped<INotificationConfigService, NotificationConfigService
 
 builder.Services.AddHttpClient();
 // Background workers
+builder.Services.AddHostedService<DeadStockScanWorker>();
 // builder.Services.AddHostedService<VehicleCleanupWorker>();
 // builder.Services.AddHostedService<StockAlertWorker>();
 // builder.Services.AddHostedService<MaintenanceAlertWorker>();

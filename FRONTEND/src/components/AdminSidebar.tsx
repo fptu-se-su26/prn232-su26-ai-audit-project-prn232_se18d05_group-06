@@ -14,6 +14,7 @@ const menuItems: MenuItem[] = [
   { label: 'Role & Permission', icon: 'admin_panel_settings', path: '/admin/role-permission', group: 'system' },
   { label: 'Orders', icon: 'inventory_2', path: '/admin/orders', group: 'operations' },
   { label: 'Warehouses', icon: 'warehouse', path: '/admin/warehouses', group: 'operations' },
+  { label: 'Stock Alerts', icon: 'notification_important', path: '/warehouse/stock-alerts', group: 'operations' },
   { label: 'Fleet Map', icon: 'map', path: '/admin/fleet-map', group: 'operations' },
   { label: 'Finance', icon: 'payments', path: '/admin/finance', group: 'operations' },
   { label: 'BI Analytics', icon: 'analytics', path: '/admin/analytics', group: 'intelligence' },

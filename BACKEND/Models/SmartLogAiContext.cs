@@ -715,9 +715,6 @@ public partial class SmartLogAiContext : DbContext
             entity.Property(e => e.BinId).HasColumnName("BinID");
             entity.Property(e => e.InboundDate).HasDefaultValueSql("(CONVERT([date],getdate()))");
             entity.Property(e => e.Skuid).HasColumnName("SKUID");
-            entity.Property(e => e.RowVersion)
-                .IsRowVersion()
-                .IsConcurrencyToken();
 
             entity.HasOne(d => d.Bin).WithMany(p => p.Inventories)
                 .HasForeignKey(d => d.BinId)
